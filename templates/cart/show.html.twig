@@ -97,7 +97,10 @@
 
                                         <!-- Price -->
                                         <div class="text-right ml-4">
-                                            <div class="text-2xl font-bold text-primary-600 mb-1">
+                                            <div class="text-2xl font-bold text-primary-600 mb-1" 
+                                                 id="item-total-{{ item.variant.id }}"
+                                                 data-unit-price="{{ item.variant.priceAmount }}"
+                                                 data-currency="{{ item.variant.currency|escape }}">
                                                 {{ (item.itemTotal / 100)|number_format(2, '.', ',') }} {{ item.variant.currency|escape }}
                                             </div>
                                             <div class="text-sm text-gray-500">
@@ -122,15 +125,15 @@
                     
                     <div class="space-y-4 mb-6">
                         <div class="flex justify-between text-gray-600">
-                            <span>Items ({{ totals.totalQuantity }}):</span>
-                            <span class="font-medium">{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
+                            <span id="summary-items-label">Items ({{ totals.totalQuantity }}):</span>
+                            <span class="font-medium" id="summary-items-total">{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
                         </div>
                     </div>
 
                     <div class="border-t-2 border-gray-200 pt-4 mb-6">
                         <div class="flex justify-between items-center">
                             <span class="text-lg font-semibold text-gray-900">Subtotal:</span>
-                            <span class="text-2xl font-bold text-primary-600">{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
+                            <span class="text-2xl font-bold text-primary-600" id="summary-subtotal">{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
                         </div>
                     </div>
 
@@ -139,14 +142,38 @@
                         Proceed to Checkout
                     </a>
 
-                    <form method="POST" action="{{ path('cart_clear') }}" class="mt-4">
-                        <button type="submit" 
-                                onclick="return confirm('Are you sure you want to clear your cart? This action cannot be undone.');"
+                    <form method="POST" action="{{ path('cart_clear') }}" id="clearCartForm" class="mt-4">
+                        <button type="button" 
+                                id="clearCartBtn"
                                 class="w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-lg font-medium text-center hover:bg-gray-200 transition-colors">
                             <i class="fas fa-trash-alt mr-2"></i>
                             Clear Cart
                         </button>
                     </form>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const clearCartBtn = document.getElementById('clearCartBtn');
+                            const clearCartForm = document.getElementById('clearCartForm');
+                            
+                            if (clearCartBtn && clearCartForm) {
+                                clearCartBtn.addEventListener('click', function() {
+                                    if (window.showConfirm) {
+                                        window.showConfirm(
+                                            'Clear Cart',
+                                            'Are you sure you want to clear your cart? This action cannot be undone.',
+                                            () => {
+                                                clearCartForm.submit();
+                                            }
+                                        );
+                                    } else {
+                                        if (confirm('Are you sure you want to clear your cart? This action cannot be undone.')) {
+                                            clearCartForm.submit();
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    </script>
 
                     <div class="mt-6 pt-6 border-t border-gray-200">
                         <div class="flex items-center text-sm text-gray-600">
@@ -176,12 +203,42 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Quantity input change detection
+    // Quantity input change detection and price update
     document.querySelectorAll('input[type="number"][data-variant-id]').forEach(input => {
+        const variantId = parseInt(input.dataset.variantId);
         const originalValue = input.value;
         const updateBtn = input.closest('.flex').querySelector('.update-quantity-btn');
+        const priceElement = document.getElementById('item-total-' + variantId);
+        const unitPrice = priceElement ? parseInt(priceElement.dataset.unitPrice) : 0;
+        const currency = priceElement ? priceElement.dataset.currency : 'EUR';
+        
+        // Function to update price display
+        const updatePrice = () => {
+            if (priceElement && unitPrice > 0) {
+                const quantity = parseInt(input.value) || 1;
+                const total = (unitPrice * quantity) / 100;
+                priceElement.textContent = total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' ' + currency;
+            }
+        };
+        
+        input.addEventListener('input', function() {
+            const quantity = parseInt(this.value) || 1;
+            if (quantity >= 1) {
+                updatePrice();
+                if (this.value !== originalValue) {
+                    updateBtn.classList.remove('hidden');
+                } else {
+                    updateBtn.classList.add('hidden');
+                }
+            }
+        });
         
         input.addEventListener('change', function() {
+            const quantity = parseInt(this.value) || 1;
+            if (quantity < 1) {
+                this.value = 1;
+                updatePrice();
+            }
             if (this.value !== originalValue) {
                 updateBtn.classList.remove('hidden');
             } else {
@@ -198,6 +255,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const currentValue = parseInt(input.value);
             if (currentValue > 1) {
                 input.value = currentValue - 1;
+                input.dispatchEvent(new Event('input'));
                 input.dispatchEvent(new Event('change'));
             }
         });
@@ -209,6 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const variantId = parseInt(this.dataset.variantId);
             const input = document.getElementById('quantity-' + variantId);
             input.value = parseInt(input.value) + 1;
+            input.dispatchEvent(new Event('input'));
             input.dispatchEvent(new Event('change'));
         });
     });
@@ -237,15 +296,17 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.remove-item-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const variantId = parseInt(this.dataset.variantId);
+            const button = this;
             
-            if (window.showWarningToast) {
-                // For now, we'll still use confirm but show a toast after
-                if (confirm('Remove this item from cart?')) {
-                    removeCartItem(variantId, this);
-                }
+            if (window.showConfirm) {
+                window.showConfirm(
+                    'Remove Item',
+                    'Are you sure you want to remove this item from your cart?',
+                    () => removeCartItem(variantId, button)
+                );
             } else {
                 if (confirm('Remove this item from cart?')) {
-                    removeCartItem(variantId, this);
+                    removeCartItem(variantId, button);
                 }
             }
         });
@@ -268,10 +329,17 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // Update summary totals if provided
+                if (data.totals) {
+                    updateSummaryTotals(data.totals);
+                }
                 if (window.showSuccessToast) {
                     window.showSuccessToast(data.message || 'Cart updated successfully');
                 }
-                setTimeout(() => location.reload(), 500);
+                // Hide update button
+                button.classList.add('hidden');
+                // Reload after a short delay to ensure UI is updated
+                setTimeout(() => location.reload(), 1000);
             } else {
                 if (window.showErrorToast) {
                     window.showErrorToast(data.message || 'An error occurred');
@@ -334,6 +402,27 @@ document.addEventListener('DOMContentLoaded', function() {
             button.disabled = false;
             button.innerHTML = '<i class="fas fa-trash mr-1"></i>Remove';
         });
+    }
+
+    // Function to update summary totals
+    function updateSummaryTotals(totals) {
+        const itemsLabel = document.getElementById('summary-items-label');
+        const itemsTotal = document.getElementById('summary-items-total');
+        const subtotal = document.getElementById('summary-subtotal');
+        
+        if (itemsLabel && totals.totalQuantity !== undefined) {
+            itemsLabel.textContent = `Items (${totals.totalQuantity}):`;
+        }
+        
+        if (itemsTotal && totals.subtotal !== undefined && totals.currency) {
+            const formatted = (totals.subtotal / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            itemsTotal.textContent = formatted + ' ' + totals.currency;
+        }
+        
+        if (subtotal && totals.subtotal !== undefined && totals.currency) {
+            const formatted = (totals.subtotal / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            subtotal.textContent = formatted + ' ' + totals.currency;
+        }
     }
 });
 </script>
