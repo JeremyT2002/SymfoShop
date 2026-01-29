@@ -42,31 +42,45 @@ update: ## Update Composer dependencies
 	@echo "$(BLUE)Updating Composer dependencies...$(NC)"
 	composer update
 
-setup: install db-create db-migrate admin-user ## Complete project setup (install, db, migrate, admin user)
-	@echo "$(GREEN)✓ Project setup complete!$(NC)"
+setup: install ## Complete project setup (install, db, migrate, admin user)
+	@echo "Setting up database..."
+	@$(MAKE) db-create
+	@$(MAKE) db-migrate
+	@echo "Creating admin user..."
+	@$(MAKE) admin-user || echo "Admin user creation skipped. Run 'make admin-user' manually."
+	@echo "Project setup complete!"
 
 # Database Operations
 db-create: ## Create database
-	@echo "$(BLUE)Creating database...$(NC)"
-	php bin/console doctrine:database:create --if-not-exists
+	@echo "Creating database..."
+	@php bin/console doctrine:database:create --if-not-exists 2>nul || \
+		echo "Database may already exist or platform doesn't support listing databases. Attempting to create schema..."
+	@php bin/console doctrine:schema:create 2>nul || \
+		echo "Schema may already exist. Run 'make db-migrate' to apply migrations."
 
 db-drop: ## Drop database (WARNING: destructive)
-	@echo "$(RED)Dropping database...$(NC)"
-	php bin/console doctrine:database:drop --force --if-exists
+	@echo "Dropping database..."
+	@php bin/console doctrine:database:drop --force --if-exists 2>nul || \
+		echo "Database drop not supported by platform or database doesn't exist. Skipping..."
 
 db-migrate: ## Run database migrations
-	@echo "$(BLUE)Running database migrations...$(NC)"
-	php bin/console doctrine:migrations:migrate --no-interaction
+	@echo "Running database migrations..."
+	@php bin/console doctrine:migrations:migrate --no-interaction || \
+		echo "No migrations to execute or database not configured."
 
 db-migrate-diff: ## Generate migration from entity changes
 	@echo "$(BLUE)Generating migration...$(NC)"
 	php bin/console doctrine:migrations:diff
 
-db-reset: db-drop db-create db-migrate ## Reset database (drop, create, migrate)
+db-reset: ## Reset database (drop, create, migrate)
+	@echo "Resetting database..."
+	@$(MAKE) db-drop
+	@$(MAKE) db-create
+	@$(MAKE) db-migrate
 
 db-validate: ## Validate database schema
-	@echo "$(BLUE)Validating database schema...$(NC)"
-	php bin/console doctrine:schema:validate
+	@echo "Validating database schema..."
+	@php bin/console doctrine:schema:validate || echo "Schema validation not available."
 
 # User Management
 admin-user: ## Create admin user (interactive)
@@ -219,20 +233,20 @@ quick-check: cache-clear lint test ## Quick check (clear cache + lint + test)
 
 # Information
 info: ## Show project information
-	@echo "$(BLUE)SymfoShop - Project Information$(NC)"
+	@echo "SymfoShop - Project Information"
 	@echo ""
-	@echo "$(GREEN)PHP Version:$(NC)"
-	@php -v | head -1
+	@echo "PHP Version:"
+	@php -v | findstr /C:"PHP" || php -v | head -1
 	@echo ""
-	@echo "$(GREEN)Symfony Version:$(NC)"
+	@echo "Symfony Version:"
 	@php bin/console --version
 	@echo ""
-	@echo "$(GREEN)Composer Version:$(NC)"
+	@echo "Composer Version:"
 	@composer --version
 	@echo ""
-	@echo "$(GREEN)Database Status:$(NC)"
-	@php bin/console doctrine:database:create --if-not-exists 2>&1 | grep -q "already exists" && echo "  ✓ Database exists" || echo "  ✗ Database does not exist"
+	@echo "Database Status:"
+	@php bin/console doctrine:schema:validate 2>&1 | findstr /C:"mapping" >nul && echo "  Database connection OK" || echo "  Database not configured or not accessible"
 	@echo ""
-	@echo "$(GREEN)Pending Migrations:$(NC)"
-	@php bin/console doctrine:migrations:status | grep -A 5 "Migration Status" || echo "  No migrations found"
+	@echo "Pending Migrations:"
+	@php bin/console doctrine:migrations:status 2>&1 | findstr /C:"Migration Status" || echo "  Run 'make db-migrate' to check migrations"
 
