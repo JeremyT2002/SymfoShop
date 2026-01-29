@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+        .order-info {
+            background-color: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Order Confirmation</h1>
+    </div>
+    
+    <div class="content">
+        <p>Dear Customer,</p>
+        
+        <p>Thank you for your order! We have received your payment and your order is being processed.</p>
+        
+        <div class="order-info">
+            <h2>Order Details</h2>
+            <p><strong>Order Number:</strong> {{ order.orderNumber }}</p>
+            <p><strong>Invoice Number:</strong> {{ invoice.invoiceNumber }}</p>
+            <p><strong>Order Date:</strong> {{ order.createdAt|date('F j, Y') }}</p>
+            <p><strong>Email:</strong> {{ order.email }}</p>
+        </div>
+        
+        <h3>Order Items</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items %}
+                <tr>
+                    <td>{{ item.nameSnapshot }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ (item.unitPriceAmount / 100)|number_format(2) }} {{ order.currency }}</td>
+                    <td>{{ (item.totalAmount / 100)|number_format(2) }} {{ order.currency }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="order-info">
+            <p><strong>Subtotal:</strong> {{ (order.subtotal / 100)|number_format(2) }} {{ order.currency }}</p>
+            <p><strong>Tax:</strong> {{ (order.taxTotal / 100)|number_format(2) }} {{ order.currency }}</p>
+            <p><strong>Grand Total:</strong> {{ (order.grandTotal / 100)|number_format(2) }} {{ order.currency }}</p>
+        </div>
+        
+        <p>Your invoice is attached to this email for your records.</p>
+        
+        <p>We will notify you once your order has been shipped.</p>
+        
+        <p>If you have any questions, please contact our support team.</p>
+        
+        <p>Best regards,<br>SymfoShop Team</p>
+    </div>
+    
+    <div class="footer">
+        <p>This is an automated email. Please do not reply to this message.</p>
+    </div>
+</body>
+</html>
+

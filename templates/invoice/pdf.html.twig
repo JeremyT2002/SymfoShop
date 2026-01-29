@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: DejaVu Sans, Arial, sans-serif;
+            font-size: 12px;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #4CAF50;
+            margin: 0;
+            font-size: 24px;
+        }
+        .invoice-info {
+            display: table;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        .invoice-info-left, .invoice-info-right {
+            display: table-cell;
+            width: 50%;
+            vertical-align: top;
+        }
+        .invoice-info-right {
+            text-align: right;
+        }
+        .invoice-details {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .invoice-details h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 16px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .totals {
+            margin-top: 20px;
+            float: right;
+            width: 300px;
+        }
+        .totals table {
+            width: 100%;
+        }
+        .totals td {
+            border: none;
+            padding: 5px;
+        }
+        .totals .total-row {
+            font-weight: bold;
+            font-size: 14px;
+            border-top: 2px solid #4CAF50;
+            padding-top: 10px;
+        }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>INVOICE</h1>
+    </div>
+    
+    <div class="invoice-info">
+        <div class="invoice-info-left">
+            <div class="invoice-details">
+                <h2>Bill To:</h2>
+                <p><strong>Email:</strong> {{ order.email }}</p>
+                <p><strong>Order Number:</strong> {{ order.orderNumber }}</p>
+            </div>
+        </div>
+        <div class="invoice-info-right">
+            <div class="invoice-details">
+                <h2>Invoice Details</h2>
+                <p><strong>Invoice Number:</strong> {{ invoice.invoiceNumber }}</p>
+                <p><strong>Invoice Date:</strong> {{ invoice.createdAt|date('F j, Y') }}</p>
+                <p><strong>Order Date:</strong> {{ order.createdAt|date('F j, Y') }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>SKU</th>
+                <th class="text-right">Quantity</th>
+                <th class="text-right">Unit Price</th>
+                <th class="text-right">Tax Rate</th>
+                <th class="text-right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.items %}
+            <tr>
+                <td>{{ item.nameSnapshot }}</td>
+                <td>{{ item.sku }}</td>
+                <td class="text-right">{{ item.quantity }}</td>
+                <td class="text-right">{{ (item.unitPriceAmount / 100)|number_format(2) }} {{ order.currency }}</td>
+                <td class="text-right">{{ (item.taxRate * 100)|number_format(1) }}%</td>
+                <td class="text-right">{{ (item.totalAmount / 100)|number_format(2) }} {{ order.currency }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="totals">
+        <table>
+            <tr>
+                <td>Subtotal:</td>
+                <td class="text-right">{{ (order.subtotal / 100)|number_format(2) }} {{ order.currency }}</td>
+            </tr>
+            <tr>
+                <td>Tax:</td>
+                <td class="text-right">{{ (order.taxTotal / 100)|number_format(2) }} {{ order.currency }}</td>
+            </tr>
+            <tr class="total-row">
+                <td>Total:</td>
+                <td class="text-right">{{ (order.grandTotal / 100)|number_format(2) }} {{ order.currency }}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div style="clear: both;"></div>
+    
+    <div class="footer">
+        <p>This is an official invoice. Please keep this document for your records.</p>
+        <p>Generated on {{ "now"|date('F j, Y \\a\\t g:i A') }}</p>
+    </div>
+</body>
+</html>
+
