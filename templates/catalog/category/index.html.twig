@@ -1,0 +1,31 @@
+{% extends 'catalog/base.html.twig' %}
+
+{% block title %}Categories - SymfoShop{% endblock %}
+{% block meta_description %}Browse our product categories{% endblock %}
+
+{% block body %}
+    <h1>Product Categories</h1>
+    
+    {% if categories|length > 0 %}
+        <div class="product-grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+            {% for category in categories %}
+                <a href="{{ path('catalog_category', {slug: category.slug}) }}" class="product-card">
+                    <div class="product-card-image">
+                        <span>{{ category.name|slice(0, 1)|upper }}</span>
+                    </div>
+                    <div class="product-card-body">
+                        <h2 class="product-card-title">{{ category.name|escape }}</h2>
+                        {% if category.children|length > 0 %}
+                            <p style="color: #666; font-size: 0.9rem;">
+                                {{ category.children|length }} subcategor{{ category.children|length == 1 ? 'y' : 'ies' }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No categories available.</p>
+    {% endif %}
+{% endblock %}
+

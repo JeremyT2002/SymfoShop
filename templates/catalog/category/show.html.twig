@@ -1,0 +1,84 @@
+{% extends 'catalog/base.html.twig' %}
+
+{% block title %}{{ category.name|escape }} - SymfoShop{% endblock %}
+{% block meta_description %}Browse products in {{ category.name|escape }}{% endblock %}
+
+{% block meta_tags %}
+    <meta property="og:title" content="{{ category.name|escape }} - SymfoShop">
+    <meta property="og:description" content="Browse products in {{ category.name|escape }}">
+{% endblock %}
+
+{% block body %}
+    <nav style="margin-bottom: 1rem; color: #666;">
+        <a href="{{ path('catalog_home') }}">Home</a> / 
+        <span>{{ category.name|escape }}</span>
+    </nav>
+
+    <h1>{{ category.name|escape }}</h1>
+    
+    {% if category.parent %}
+        <p style="color: #666; margin-bottom: 1rem;">
+            Parent category: <a href="{{ path('catalog_category', {slug: category.parent.slug}) }}">{{ category.parent.name|escape }}</a>
+        </p>
+    {% endif %}
+
+    {% if products|length > 0 %}
+        <div class="product-grid">
+            {% for product in products %}
+                <a href="{{ path('catalog_product', {slug: product.slug}) }}" class="product-card">
+                    <div class="product-card-image">
+                        {% if product.media|length > 0 %}
+                            {% set firstMedia = product.media|first %}
+                            <img src="{{ firstMedia.path|escape }}" alt="{{ firstMedia.alt|default(product.name)|escape }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <span>No image</span>
+                        {% endif %}
+                    </div>
+                    <div class="product-card-body">
+                        <h2 class="product-card-title">{{ product.name|escape }}</h2>
+                        {% if product.variants|length > 0 %}
+                            {% set minPrice = product.variants|map(v => v.priceAmount)|min %}
+                            {% set maxPrice = product.variants|map(v => v.priceAmount)|max %}
+                            <div class="product-card-price">
+                                {% if minPrice == maxPrice %}
+                                    {{ (minPrice / 100)|number_format(2, '.', ',') }} {{ product.variants.first.currency|escape }}
+                                {% else %}
+                                    From {{ (minPrice / 100)|number_format(2, '.', ',') }} {{ product.variants.first.currency|escape }}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+
+        {% if totalPages > 1 %}
+            <div class="pagination">
+                {% if currentPage > 1 %}
+                    <a href="{{ path('catalog_category', {slug: category.slug, page: currentPage - 1}) }}">Previous</a>
+                {% endif %}
+
+                {% for page in 1..totalPages %}
+                    {% if page == currentPage %}
+                        <span class="current">{{ page }}</span>
+                    {% elseif page == 1 or page == totalPages or (page >= currentPage - 2 and page <= currentPage + 2) %}
+                        <a href="{{ path('catalog_category', {slug: category.slug, page: page}) }}">{{ page }}</a>
+                    {% elseif page == currentPage - 3 or page == currentPage + 3 %}
+                        <span>...</span>
+                    {% endif %}
+                {% endfor %}
+
+                {% if currentPage < totalPages %}
+                    <a href="{{ path('catalog_category', {slug: category.slug, page: currentPage + 1}) }}">Next</a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <p style="text-align: center; color: #666; margin-top: 1rem;">
+            Showing {{ products|length }} of {{ totalProducts }} product{{ totalProducts != 1 ? 's' : '' }}
+        </p>
+    {% else %}
+        <p>No products found in this category.</p>
+    {% endif %}
+{% endblock %}
+

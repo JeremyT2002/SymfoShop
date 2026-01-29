@@ -1,0 +1,179 @@
+{% extends 'catalog/base.html.twig' %}
+
+{% block title %}{{ product.name|escape }} - SymfoShop{% endblock %}
+{% block meta_description %}{{ product.description|default(product.name)|escape|slice(0, 160) }}{% endblock %}
+
+{% block meta_tags %}
+    <meta property="og:title" content="{{ product.name|escape }} - SymfoShop">
+    <meta property="og:description" content="{{ product.description|default(product.name)|escape|slice(0, 160) }}">
+    {% if product.media|length > 0 %}
+        {% set firstMedia = product.media|first %}
+        <meta property="og:image" content="{{ firstMedia.path|escape }}">
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    <nav style="margin-bottom: 1rem; color: #666;">
+        <a href="{{ path('catalog_home') }}">Home</a> / 
+        <span>{{ product.name|escape }}</span>
+    </nav>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin: 2rem 0;">
+        <div>
+            {% if product.media|length > 0 %}
+                {% set firstMedia = product.media|first %}
+                <div style="background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <img src="{{ firstMedia.path|escape }}" 
+                         alt="{{ firstMedia.alt|default(product.name)|escape }}" 
+                         class="main-image"
+                         style="width: 100%; display: block;">
+                </div>
+                {% if product.media|length > 1 %}
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem; margin-top: 1rem;">
+                        {% for media in product.media %}
+                            <img src="{{ media.path|escape }}" 
+                                 alt="{{ media.alt|default(product.name)|escape }}" 
+                                 style="width: 100%; height: 80px; object-fit: cover; border-radius: 4px; cursor: pointer;"
+                                 onclick="document.querySelector('.main-image').src = this.src">
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% else %}
+                <div style="background: #f0f0f0; border-radius: 8px; height: 400px; display: flex; align-items: center; justify-content: center; color: #999;">
+                    No image available
+                </div>
+            {% endif %}
+        </div>
+
+        <div>
+            <h1 style="margin-bottom: 1rem;">{{ product.name|escape }}</h1>
+            
+            {% if product.description %}
+                <div style="margin-bottom: 2rem; line-height: 1.8; color: #666;">
+                    {{ product.description|escape|nl2br }}
+                </div>
+            {% endif %}
+
+            {% if variants|length > 0 %}
+                <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+                    <h2 style="margin-bottom: 1rem; font-size: 1.2rem;">Select Variant</h2>
+                    
+                    <form id="variant-form" style="margin-bottom: 1.5rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <label for="variant-select" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Variant:</label>
+                            <select id="variant-select" name="variant" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                                {% for variant in variants %}
+                                    <option value="{{ variant.id }}" 
+                                            data-price="{{ variant.priceAmount }}" 
+                                            data-currency="{{ variant.currency|escape }}"
+                                            data-sku="{{ variant.sku|escape }}"
+                                            {% if variant == defaultVariant %}selected{% endif %}>
+                                        {% if variant.attributes|length > 0 %}
+                                            {{ variant.attributes|map((v, k) => "#{k}: #{v}")|join(', ')|escape }} - 
+                                        {% endif %}
+                                        SKU: {{ variant.sku|escape }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #2563eb;" id="price-display">
+                                {{ (defaultVariant.priceAmount / 100)|number_format(2, '.', ',') }} {{ defaultVariant.currency|escape }}
+                            </div>
+                            <div style="color: #666; font-size: 0.9rem;" id="sku-display">
+                                SKU: {{ defaultVariant.sku|escape }}
+                            </div>
+                        </div>
+
+                        {% if defaultVariant %}
+                            <button type="button" class="btn add-to-cart-btn" style="width: 100%;" data-variant-id="{{ defaultVariant.id }}">
+                                Add to Cart
+                            </button>
+                        {% endif %}
+                    </form>
+
+                    {% if variants|length > 1 %}
+                        <div style="border-top: 1px solid #e5e5e5; padding-top: 1rem;">
+                            <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Available Variants:</h3>
+                            <ul style="list-style: none; padding: 0;">
+                                {% for variant in variants %}
+                                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0;">
+                                        <strong>{{ (variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ variant.currency|escape }}</strong>
+                                        {% if variant.attributes|length > 0 %}
+                                            - {{ variant.attributes|map((v, k) => "#{k}: #{v}")|join(', ')|escape }}
+                                        {% endif %}
+                                        ({{ variant.sku|escape }})
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div style="background: #fff3cd; padding: 1rem; border-radius: 4px; margin-bottom: 2rem;">
+                    <p>No variants available for this product.</p>
+                </div>
+            {% endif %}
+
+            <div style="background: #f9f9f9; padding: 1rem; border-radius: 4px; font-size: 0.9rem; color: #666;">
+                <p><strong>Status:</strong> {{ product.status.value|escape|capitalize }}</p>
+                <p><strong>Tax Class:</strong> {{ product.taxClass|escape }}</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const variantSelect = document.getElementById('variant-select');
+        const addToCartBtn = document.querySelector('.add-to-cart-btn');
+
+        if (variantSelect) {
+            variantSelect.addEventListener('change', function() {
+                const option = this.options[this.selectedIndex];
+                const price = (parseInt(option.dataset.price) / 100).toFixed(2);
+                const currency = option.dataset.currency;
+                const sku = option.dataset.sku;
+                const variantId = parseInt(option.value);
+                
+                document.getElementById('price-display').textContent = price + ' ' + currency;
+                document.getElementById('sku-display').textContent = 'SKU: ' + sku;
+                if (addToCartBtn) {
+                    addToCartBtn.dataset.variantId = variantId;
+                }
+            });
+        }
+
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', function() {
+                const variantId = parseInt(this.dataset.variantId);
+                const quantity = 1;
+
+                fetch('{{ path('cart_add') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        variantId: variantId,
+                        quantity: quantity
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (confirm('Item added to cart! View cart?')) {
+                            window.location.href = '{{ path('cart_show') }}';
+                        }
+                    } else {
+                        alert(data.message || 'An error occurred');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while adding to cart');
+                });
+            });
+        }
+    </script>
+{% endblock %}
+
