@@ -1,0 +1,195 @@
+{% extends 'catalog/base.html.twig' %}
+
+{% block title %}Shopping Cart - SymfoShop{% endblock %}
+{% block meta_description %}Review your shopping cart{% endblock %}
+
+{% block body %}
+    <h1>Shopping Cart</h1>
+
+    {% if items|length > 0 %}
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin: 2rem 0;">
+            <div>
+                <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1.5rem;">
+                    {% for item in items %}
+                        <div style="display: flex; gap: 1.5rem; padding: 1.5rem 0; {% if not loop.last %}border-bottom: 1px solid #e5e5e5;{% endif %}">
+                            <div style="flex-shrink: 0;">
+                                {% if item.variant.product.media|length > 0 %}
+                                    {% set firstMedia = item.variant.product.media|first %}
+                                    <img src="{{ firstMedia.path|escape }}" 
+                                         alt="{{ firstMedia.alt|default(item.variant.product.name)|escape }}" 
+                                         style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px;">
+                                {% else %}
+                                    <div style="width: 100px; height: 100px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #999;">
+                                        No image
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div style="flex: 1;">
+                                <h3 style="margin-bottom: 0.5rem;">
+                                    <a href="{{ path('catalog_product', {slug: item.variant.product.slug}) }}" style="color: #333; text-decoration: none;">
+                                        {{ item.variant.product.name|escape }}
+                                    </a>
+                                </h3>
+                                <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                    SKU: {{ item.variant.sku|escape }}
+                                </p>
+                                {% if item.variant.attributes|length > 0 %}
+                                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                        {% for key, value in item.variant.attributes %}
+                                            <strong>{{ key|escape }}:</strong> {{ value|escape }}{% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </p>
+                                {% endif %}
+                                <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <label for="quantity-{{ item.variant.id }}" style="font-size: 0.9rem;">Quantity:</label>
+                                        <input type="number" 
+                                               id="quantity-{{ item.variant.id }}" 
+                                               value="{{ item.quantity }}" 
+                                               min="1" 
+                                               data-variant-id="{{ item.variant.id }}"
+                                               style="width: 80px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                        <button type="button" 
+                                                class="update-quantity-btn" 
+                                                data-variant-id="{{ item.variant.id }}"
+                                                style="padding: 0.5rem 1rem; background: #2563eb; color: #fff; border: none; border-radius: 4px; cursor: pointer;">
+                                            Update
+                                        </button>
+                                    </div>
+                                    <button type="button" 
+                                            class="remove-item-btn" 
+                                            data-variant-id="{{ item.variant.id }}"
+                                            style="padding: 0.5rem 1rem; background: #dc2626; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-left: auto;">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                            <div style="text-align: right; flex-shrink: 0;">
+                                <div style="font-size: 1.25rem; font-weight: bold; color: #2563eb;">
+                                    {{ (item.itemTotal / 100)|number_format(2, '.', ',') }} {{ item.variant.currency|escape }}
+                                </div>
+                                <div style="color: #666; font-size: 0.9rem; margin-top: 0.25rem;">
+                                    {{ (item.variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ item.variant.currency|escape }} each
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1.5rem; position: sticky; top: 20px;">
+                    <h2 style="margin-bottom: 1.5rem;">Order Summary</h2>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Items ({{ totals.totalQuantity }}):</span>
+                            <span>{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
+                        </div>
+                    </div>
+
+                    <div style="border-top: 2px solid #e5e5e5; padding-top: 1rem; margin-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: bold; margin-bottom: 1.5rem;">
+                            <span>Subtotal:</span>
+                            <span>{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
+                        </div>
+                    </div>
+
+                    <a href="{{ path('checkout') }}" class="btn" style="width: 100%; margin-bottom: 1rem; display: block; text-align: center; text-decoration: none;">
+                        Proceed to Checkout
+                    </a>
+
+                    <form method="POST" action="{{ path('cart_clear') }}" style="margin: 0;">
+                        <button type="submit" 
+                                onclick="return confirm('Are you sure you want to clear your cart?');"
+                                style="width: 100%; padding: 0.75rem; background: #dc2626; color: #fff; border: none; border-radius: 4px; cursor: pointer;">
+                            Clear Cart
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 4rem 2rem;">
+            <h2 style="margin-bottom: 1rem; color: #666;">Your cart is empty</h2>
+            <p style="margin-bottom: 2rem; color: #666;">Start shopping to add items to your cart.</p>
+            <a href="{{ path('catalog_home') }}" class="btn">Browse Products</a>
+        </div>
+    {% endif %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update quantity
+            document.querySelectorAll('.update-quantity-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const variantId = parseInt(this.dataset.variantId);
+                    const quantityInput = document.getElementById('quantity-' + variantId);
+                    const quantity = parseInt(quantityInput.value);
+
+                    updateCartItem(variantId, quantity);
+                });
+            });
+
+            // Remove item
+            document.querySelectorAll('.remove-item-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const variantId = parseInt(this.dataset.variantId);
+                    
+                    if (confirm('Remove this item from cart?')) {
+                        removeCartItem(variantId);
+                    }
+                });
+            });
+
+            function updateCartItem(variantId, quantity) {
+                fetch('{{ path('cart_update') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        variantId: variantId,
+                        quantity: quantity
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'An error occurred');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating the cart');
+                });
+            }
+
+            function removeCartItem(variantId) {
+                fetch('{{ path('cart_remove') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        variantId: variantId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'An error occurred');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while removing the item');
+                });
+            }
+        });
+    </script>
+{% endblock %}
+
