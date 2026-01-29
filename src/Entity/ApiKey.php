@@ -42,6 +42,9 @@ class ApiKey
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $scopes = null;
 
+    // Temporary property to store plain API key for display (not persisted)
+    private ?string $plainApiKey = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -160,6 +163,17 @@ class ApiKey
         }
 
         return in_array($scope, $this->scopes, true);
+    }
+
+    public function getPlainApiKey(): ?string
+    {
+        return $this->plainApiKey;
+    }
+
+    public function setPlainApiKey(?string $plainApiKey): self
+    {
+        $this->plainApiKey = $plainApiKey;
+        return $this;
     }
 }
 

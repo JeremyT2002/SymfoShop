@@ -11,8 +11,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\JsonField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class ProductVariantCrudController extends AbstractCrudController
@@ -69,10 +69,21 @@ class ProductVariantCrudController extends AbstractCrudController
             ->setRequired(true)
             ->setHelp('Currency code (EUR, USD, etc.)');
 
-        yield JsonField::new('attributes')
+        yield TextareaField::new('attributes')
             ->setColumns('col-md-6')
             ->setRequired(false)
-            ->setHelp('Variant attributes (size, color, etc.) as JSON');
+            ->hideOnIndex()
+            ->setHelp('Variant attributes (size, color, etc.) as JSON')
+            ->formatValue(function ($value) {
+                if (is_array($value)) {
+                    return json_encode($value, JSON_PRETTY_PRINT);
+                }
+                if (is_string($value)) {
+                    return $value;
+                }
+                return '';
+            })
+            ->setFormTypeOption('attr', ['rows' => 4]);
 
         yield DateTimeField::new('createdAt')
             ->setColumns('col-md-6')

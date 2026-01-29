@@ -90,7 +90,8 @@ class UserCrudController extends AbstractCrudController
             });
 
         yield BooleanField::new('isActive', 'Active')
-            ->setColumns('col-md-3');
+            ->setColumns('col-md-3')
+            ->renderAsSwitch(false);
 
         yield DateTimeField::new('createdAt', 'Created At')
             ->setColumns('col-md-4')
