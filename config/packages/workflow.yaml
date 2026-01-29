@@ -1,0 +1,39 @@
+framework:
+    workflows:
+        order:
+            type: state_machine
+            audit_trail:
+                enabled: true
+            marking_store:
+                type: method
+                property: 'status'
+            supports:
+                - App\Entity\Order
+            initial_marking: new
+            places:
+                - new
+                - payment_pending
+                - paid
+                - processing
+                - shipped
+                - completed
+                - cancelled
+            transitions:
+                submit_payment:
+                    from: new
+                    to: payment_pending
+                confirm_payment:
+                    from: payment_pending
+                    to: paid
+                start_processing:
+                    from: paid
+                    to: processing
+                ship:
+                    from: processing
+                    to: shipped
+                complete:
+                    from: shipped
+                    to: completed
+                cancel:
+                    from: [new, payment_pending, paid]
+                    to: cancelled
