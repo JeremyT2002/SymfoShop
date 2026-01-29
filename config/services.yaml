@@ -21,3 +21,38 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # Stripe client
+    Stripe\StripeClient:
+        arguments:
+            - '%env(STRIPE_SECRET_KEY)%'
+
+    # Payment service
+    App\Service\Payment\PaymentService:
+        arguments:
+            $stripeClient: '@Stripe\StripeClient'
+
+    # Webhook controller
+    App\Controller\Webhook\StripeWebhookController:
+        arguments:
+            $stripeWebhookSecret: '%env(default::STRIPE_WEBHOOK_SECRET)%'
+
+    # Invoice services
+    App\Service\Invoice\PdfInvoiceGenerator:
+        arguments:
+            $invoiceStoragePath: '%kernel.project_dir%/var/invoices'
+
+    # Workflow guard events
+    App\Workflow\Order\OrderWorkflowGuard:
+        tags:
+            - { name: 'kernel.event_listener', event: 'workflow.order.guard.submit_payment', method: guardSubmitPayment }
+            - { name: 'kernel.event_listener', event: 'workflow.order.guard.confirm_payment', method: guardConfirmPayment }
+            - { name: 'kernel.event_listener', event: 'workflow.order.guard.start_processing', method: guardStartProcessing }
+            - { name: 'kernel.event_listener', event: 'workflow.order.guard.ship', method: guardShip }
+            - { name: 'kernel.event_listener', event: 'workflow.order.guard.complete', method: guardComplete }
+            - { name: 'kernel.event_listener', event: 'workflow.order.guard.cancel', method: guardCancel }
+
+    # Audit log subscriber
+    App\EventSubscriber\AuditLogSubscriber:
+        tags:
+            - { name: 'doctrine.event_subscriber' }
