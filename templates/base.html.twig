@@ -6,63 +6,396 @@
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
         {% block stylesheets %}
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <script src="https://cdn.tailwindcss.com"></script>
+            <!-- Font Awesome -->
+            <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <!-- Fallback for Font Awesome if CDN fails -->
+            <noscript>
+                <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.2/css/all.css" crossorigin="anonymous">
+            </noscript>
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+            <script>
+                tailwind.config = {
+                    theme: {
+                        extend: {
+                            colors: {
+                                primary: {
+                                    50: '#eff6ff',
+                                    100: '#dbeafe',
+                                    200: '#bfdbfe',
+                                    300: '#93c5fd',
+                                    400: '#60a5fa',
+                                    500: '#3b82f6',
+                                    600: '#2563eb',
+                                    700: '#1d4ed8',
+                                    800: '#1e40af',
+                                    900: '#1e3a8a',
+                                }
+                            },
+                            fontFamily: {
+                                sans: ['Inter', 'system-ui', 'sans-serif'],
+                            },
+                            animation: {
+                                'fade-in': 'fadeIn 0.3s ease-in-out',
+                                'slide-up': 'slideUp 0.3s ease-out',
+                                'bounce-subtle': 'bounceSubtle 0.6s ease-in-out',
+                            },
+                            keyframes: {
+                                fadeIn: {
+                                    '0%': { opacity: '0' },
+                                    '100%': { opacity: '1' },
+                                },
+                                slideUp: {
+                                    '0%': { transform: 'translateY(10px)', opacity: '0' },
+                                    '100%': { transform: 'translateY(0)', opacity: '1' },
+                                },
+                                bounceSubtle: {
+                                    '0%, 100%': { transform: 'translateY(0)' },
+                                    '50%': { transform: 'translateY(-5px)' },
+                                },
+                            },
+                        }
+                    }
+                }
+            </script>
+            <style>
+                body {
+                    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                }
+                .smooth-scroll {
+                    scroll-behavior: smooth;
+                }
+                .glass-effect {
+                    backdrop-filter: blur(10px);
+                    background-color: rgba(255, 255, 255, 0.8);
+                }
+            </style>
         {% endblock %}
 
         {% block javascripts %}
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.3/cdn.min.js" defer></script>
+            <script>
+                // Toast Notification System
+                function toastNotifications() {
+                    return {
+                        toasts: [],
+                        init() {
+                            // Load flash messages from Symfony
+                            {% for flash_message in app.flashes('success') %}
+                                this.show('{{ flash_message|e('js') }}', 'success');
+                            {% endfor %}
+                            {% for flash_message in app.flashes('error') %}
+                                this.show('{{ flash_message|e('js') }}', 'error');
+                            {% endfor %}
+                            {% for flash_message in app.flashes('info') %}
+                                this.show('{{ flash_message|e('js') }}', 'info');
+                            {% endfor %}
+                            {% for flash_message in app.flashes('warning') %}
+                                this.show('{{ flash_message|e('js') }}', 'warning');
+                            {% endfor %}
+                        },
+                        show(message, type = 'info', duration = 5000) {
+                            const id = Date.now() + Math.random();
+                            const toast = {
+                                id,
+                                message,
+                                type,
+                                visible: true
+                            };
+                            this.toasts.push(toast);
+                            
+                            // Auto-remove after duration
+                            if (duration > 0) {
+                                setTimeout(() => {
+                                    this.remove(id);
+                                }, duration);
+                            }
+                            
+                            return id;
+                        },
+                        remove(id) {
+                            const index = this.toasts.findIndex(t => t.id === id);
+                            if (index !== -1) {
+                                this.toasts[index].visible = false;
+                                setTimeout(() => {
+                                    this.toasts = this.toasts.filter(t => t.id !== id);
+                                }, 200); // Wait for transition
+                            }
+                        },
+                        success(message, duration) {
+                            return this.show(message, 'success', duration);
+                        },
+                        error(message, duration) {
+                            return this.show(message, 'error', duration);
+                        },
+                        info(message, duration) {
+                            return this.show(message, 'info', duration);
+                        },
+                        warning(message, duration) {
+                            return this.show(message, 'warning', duration);
+                        }
+                    };
+                }
+
+                // Make toast functions globally available
+                document.addEventListener('alpine:init', () => {
+                    window.showToast = function(message, type = 'info', duration = 5000) {
+                        const toastContainer = document.querySelector('[x-data="toastNotifications()"]');
+                        if (toastContainer && toastContainer._x_dataStack) {
+                            const toastData = toastContainer._x_dataStack[0];
+                            return toastData.show(message, type, duration);
+                        }
+                    };
+                    
+                    window.showSuccessToast = function(message, duration) {
+                        return window.showToast(message, 'success', duration);
+                    };
+                    
+                    window.showErrorToast = function(message, duration) {
+                        return window.showToast(message, 'error', duration);
+                    };
+                    
+                    window.showInfoToast = function(message, duration) {
+                        return window.showToast(message, 'info', duration);
+                    };
+                    
+                    window.showWarningToast = function(message, duration) {
+                        return window.showToast(message, 'warning', duration);
+                    };
+                });
+            </script>
         {% endblock %}
     </head>
-    <body>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" href="/">SymfoShop</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        {% if app.user %}
-                            <li class="nav-item">
-                                <span class="navbar-text me-3">Hello, {{ app.user.email }}</span>
-                            </li>
-                            {% if 'ROLE_ADMIN' in app.user.roles %}
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ path('admin') }}">Admin</a>
-                                </li>
+    <body class="bg-gray-50 antialiased smooth-scroll flex flex-col min-h-screen">
+        <nav class="bg-gradient-to-r from-primary-600 to-primary-700 shadow-xl sticky top-0 z-50" x-data="{ mobileMenuOpen: false }">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- Logo -->
+                    <a href="{{ path('catalog_home') }}" class="flex items-center space-x-3 text-white font-bold text-xl hover:opacity-90 transition-all duration-200 group">
+                        <div class="bg-white/20 p-2 rounded-lg group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-store text-2xl"></i>
+                        </div>
+                        <span class="tracking-tight">SymfoShop</span>
+                    </a>
+
+                    <!-- Desktop Navigation -->
+                    <div class="hidden md:flex items-center space-x-2">
+                        <!-- Home Link -->
+                        <a href="{{ path('catalog_home') }}" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-white hover:bg-white/20 transition-all duration-200 font-medium group">
+                            <i class="fas fa-home group-hover:scale-110 transition-transform"></i>
+                            <span>Home</span>
+                        </a>
+
+                        <!-- Cart Link -->
+                        <a href="{{ path('cart_show') }}" class="relative flex items-center space-x-2 px-4 py-2 rounded-lg text-white hover:bg-white/20 transition-all duration-200 font-medium group">
+                            <i class="fas fa-shopping-cart group-hover:scale-110 transition-transform"></i>
+                            <span>Cart</span>
+                            {% set cartCount = cart_items_count() %}
+                            {% if cartCount > 0 %}
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-bounce-subtle shadow-lg">
+                                    {{ cartCount }}
+                                </span>
                             {% endif %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ path('logout') }}">Logout</a>
-                            </li>
+                        </a>
+
+                        <!-- User Menu -->
+                        {% if app.user %}
+                            <div class="relative" x-data="{ open: false }">
+                                <button @click="open = !open" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-white hover:bg-white/20 transition-all duration-200 font-medium group">
+                                    <i class="fas fa-user-circle text-lg group-hover:scale-110 transition-transform"></i>
+                                    <span class="hidden lg:inline max-w-xs truncate">{{ app.user.email }}</span>
+                                    <i class="fas fa-chevron-down text-xs transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                                </button>
+                                <div x-show="open" 
+                                     @click.away="open = false"
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="transform opacity-0 scale-95 translate-y-1"
+                                     x-transition:enter-end="transform opacity-100 scale-100 translate-y-0"
+                                     x-transition:leave="transition ease-in duration-150"
+                                     x-transition:leave-start="transform opacity-100 scale-100 translate-y-0"
+                                     x-transition:leave-end="transform opacity-0 scale-95 translate-y-1"
+                                     class="absolute right-0 mt-2 w-64 rounded-xl shadow-2xl bg-white ring-1 ring-gray-200 z-50 overflow-hidden">
+                                    <div class="py-2">
+                                        <div class="px-4 py-3 bg-gradient-to-r from-primary-50 to-primary-100 border-b border-primary-200">
+                                            <p class="text-xs text-primary-600 font-medium uppercase tracking-wide mb-1">Logged in as</p>
+                                            <p class="font-semibold text-gray-900 truncate">{{ app.user.email }}</p>
+                                        </div>
+                                        {% if 'ROLE_ADMIN' in app.user.roles %}
+                                            <a href="{{ path('admin') }}" class="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-primary-50 transition-colors group">
+                                                <i class="fas fa-shield-alt text-primary-600 group-hover:scale-110 transition-transform"></i>
+                                                <span class="font-medium">Admin Panel</span>
+                                            </a>
+                                        {% endif %}
+                                        <a href="{{ path('logout') }}" class="flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors group">
+                                            <i class="fas fa-sign-out-alt group-hover:scale-110 transition-transform"></i>
+                                            <span class="font-medium">Logout</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ path('login') }}">Login</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ path('register') }}">Register</a>
-                            </li>
+                            <a href="{{ path('login') }}" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-white hover:bg-white/20 transition-all duration-200 font-medium group">
+                                <i class="fas fa-sign-in-alt group-hover:scale-110 transition-transform"></i>
+                                <span>Login</span>
+                            </a>
+                            <a href="{{ path('register') }}" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-200 font-medium shadow-lg group">
+                                <i class="fas fa-user-plus group-hover:scale-110 transition-transform"></i>
+                                <span>Register</span>
+                            </a>
                         {% endif %}
-                    </ul>
+                    </div>
+
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-white p-2 rounded-md hover:bg-primary-700">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Mobile Navigation -->
+                <div x-show="mobileMenuOpen" 
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="transform opacity-0 scale-95"
+                     x-transition:enter-end="transform opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-75"
+                     x-transition:leave-start="transform opacity-100 scale-100"
+                     x-transition:leave-end="transform opacity-0 scale-95"
+                     class="md:hidden pb-4">
+                    <div class="flex flex-col space-y-1">
+                        <a href="{{ path('catalog_home') }}" class="flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-primary-700">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </a>
+                        <a href="{{ path('cart_show') }}" class="relative flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-primary-700">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Cart</span>
+                            {% set cartCount = cart_items_count() %}
+                            {% if cartCount > 0 %}
+                                <span class="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                    {{ cartCount }}
+                                </span>
+                            {% endif %}
+                        </a>
+                        {% if app.user %}
+                            <div class="px-3 py-2 text-white border-t border-primary-500 mt-2">
+                                <p class="text-xs text-primary-200">Logged in as</p>
+                                <p class="font-semibold">{{ app.user.email }}</p>
+                            </div>
+                            {% if 'ROLE_ADMIN' in app.user.roles %}
+                                <a href="{{ path('admin') }}" class="flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-primary-700">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Admin Panel</span>
+                                </a>
+                            {% endif %}
+                            <a href="{{ path('logout') }}" class="flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-primary-700">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </a>
+                        {% else %}
+                            <a href="{{ path('login') }}" class="flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-primary-700">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <span>Login</span>
+                            </a>
+                            <a href="{{ path('register') }}" class="flex items-center space-x-2 px-3 py-2 rounded-md bg-primary-700 text-white hover:bg-primary-800">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Register</span>
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </nav>
 
-        <div class="container mt-4">
-            {% for flash_message in app.flashes('success') %}
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ flash_message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <!-- Toast Notification Container -->
+        <div x-data="toastNotifications()" x-init="init()" class="fixed top-20 right-4 z-50 space-y-2 w-full max-w-md" style="pointer-events: none;">
+            <template x-for="toast in toasts" :key="toast.id">
+                <div
+                    x-show="toast.visible"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="transform translate-x-full opacity-0"
+                    x-transition:enter-end="transform translate-x-0 opacity-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="transform translate-x-0 opacity-100"
+                    x-transition:leave-end="transform translate-x-full opacity-0"
+                    :class="{
+                        'bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 text-green-800': toast.type === 'success',
+                        'bg-gradient-to-r from-red-50 to-rose-50 border-l-4 border-red-500 text-red-800': toast.type === 'error',
+                        'bg-gradient-to-r from-blue-50 to-cyan-50 border-l-4 border-blue-500 text-blue-800': toast.type === 'info',
+                        'bg-gradient-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-500 text-yellow-800': toast.type === 'warning'
+                    }"
+                    class="rounded-lg shadow-xl px-6 py-4 flex items-center space-x-3"
+                    style="pointer-events: auto;"
+                    role="alert"
+                >
+                    <i :class="{
+                        'fas fa-check-circle text-green-500': toast.type === 'success',
+                        'fas fa-exclamation-circle text-red-500': toast.type === 'error',
+                        'fas fa-info-circle text-blue-500': toast.type === 'info',
+                        'fas fa-exclamation-triangle text-yellow-500': toast.type === 'warning'
+                    }" class="text-xl flex-shrink-0"></i>
+                    <span class="flex-1 font-medium" x-text="toast.message"></span>
+                    <button @click="remove(toast.id)" class="flex-shrink-0 hover:opacity-70 transition-opacity">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-            {% endfor %}
-
-            {% for flash_message in app.flashes('error') %}
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ flash_message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-
-            {% block body %}{% endblock %}
+            </template>
         </div>
+
+        <main class="flex-grow flex flex-col">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+                {% block body %}{% endblock %}
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-gray-300 mt-auto">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div>
+                        <h3 class="text-white font-bold text-lg mb-4 flex items-center">
+                            <i class="fas fa-store mr-2 text-primary-400"></i>
+                            SymfoShop
+                        </h3>
+                        <p class="text-sm text-gray-400">
+                            Your trusted online shopping destination. Quality products, great prices, fast delivery.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-semibold mb-4">Shop</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li><a href="{{ path('catalog_home') }}" class="hover:text-primary-400 transition-colors">Categories</a></li>
+                            <li><a href="{{ path('cart_show') }}" class="hover:text-primary-400 transition-colors">Shopping Cart</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-semibold mb-4">Account</h4>
+                        <ul class="space-y-2 text-sm">
+                            {% if app.user %}
+                                <li><a href="{{ path('logout') }}" class="hover:text-primary-400 transition-colors">Logout</a></li>
+                                {% if 'ROLE_ADMIN' in app.user.roles %}
+                                    <li><a href="{{ path('admin') }}" class="hover:text-primary-400 transition-colors">Admin Panel</a></li>
+                                {% endif %}
+                            {% else %}
+                                <li><a href="{{ path('login') }}" class="hover:text-primary-400 transition-colors">Login</a></li>
+                                <li><a href="{{ path('register') }}" class="hover:text-primary-400 transition-colors">Register</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-semibold mb-4">Support</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li><a href="#" class="hover:text-primary-400 transition-colors">Contact Us</a></li>
+                            <li><a href="#" class="hover:text-primary-400 transition-colors">FAQ</a></li>
+                            <li><a href="#" class="hover:text-primary-400 transition-colors">Shipping Info</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+                    <p>&copy; {{ 'now'|date('Y') }} SymfoShop. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
     </body>
 </html>

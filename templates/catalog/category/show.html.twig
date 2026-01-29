@@ -1,84 +1,107 @@
 {% extends 'catalog/base.html.twig' %}
 
-{% block title %}{{ category.name|escape }} - SymfoShop{% endblock %}
-{% block meta_description %}Browse products in {{ category.name|escape }}{% endblock %}
+{% block page_title %}{{ category.name|escape }} - SymfoShop{% endblock %}
+{% block page_meta_description %}Browse products in {{ category.name|escape }}{% endblock %}
 
 {% block meta_tags %}
     <meta property="og:title" content="{{ category.name|escape }} - SymfoShop">
     <meta property="og:description" content="Browse products in {{ category.name|escape }}">
 {% endblock %}
 
-{% block body %}
-    <nav style="margin-bottom: 1rem; color: #666;">
-        <a href="{{ path('catalog_home') }}">Home</a> / 
-        <span>{{ category.name|escape }}</span>
-    </nav>
+{% block catalog_body %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="text-sm text-gray-600 mb-4" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-2">
+                <li><a href="{{ path('catalog_home') }}" class="hover:text-primary-600"><i class="fas fa-home mr-1"></i>Home</a></li>
+                <li><i class="fas fa-chevron-right text-xs"></i></li>
+                <li class="text-gray-900">{{ category.name|escape }}</li>
+            </ol>
+        </nav>
 
-    <h1>{{ category.name|escape }}</h1>
-    
-    {% if category.parent %}
-        <p style="color: #666; margin-bottom: 1rem;">
-            Parent category: <a href="{{ path('catalog_category', {slug: category.parent.slug}) }}">{{ category.parent.name|escape }}</a>
-        </p>
-    {% endif %}
-
-    {% if products|length > 0 %}
-        <div class="product-grid">
-            {% for product in products %}
-                <a href="{{ path('catalog_product', {slug: product.slug}) }}" class="product-card">
-                    <div class="product-card-image">
-                        {% if product.media|length > 0 %}
-                            {% set firstMedia = product.media|first %}
-                            <img src="{{ firstMedia.path|escape }}" alt="{{ firstMedia.alt|default(product.name)|escape }}" style="width: 100%; height: 100%; object-fit: cover;">
-                        {% else %}
-                            <span>No image</span>
-                        {% endif %}
-                    </div>
-                    <div class="product-card-body">
-                        <h2 class="product-card-title">{{ product.name|escape }}</h2>
-                        {% if product.variants|length > 0 %}
-                            {% set minPrice = product.variants|map(v => v.priceAmount)|min %}
-                            {% set maxPrice = product.variants|map(v => v.priceAmount)|max %}
-                            <div class="product-card-price">
-                                {% if minPrice == maxPrice %}
-                                    {{ (minPrice / 100)|number_format(2, '.', ',') }} {{ product.variants.first.currency|escape }}
-                                {% else %}
-                                    From {{ (minPrice / 100)|number_format(2, '.', ',') }} {{ product.variants.first.currency|escape }}
-                                {% endif %}
-                            </div>
-                        {% endif %}
-                    </div>
-                </a>
-            {% endfor %}
-        </div>
-
-        {% if totalPages > 1 %}
-            <div class="pagination">
-                {% if currentPage > 1 %}
-                    <a href="{{ path('catalog_category', {slug: category.slug, page: currentPage - 1}) }}">Previous</a>
-                {% endif %}
-
-                {% for page in 1..totalPages %}
-                    {% if page == currentPage %}
-                        <span class="current">{{ page }}</span>
-                    {% elseif page == 1 or page == totalPages or (page >= currentPage - 2 and page <= currentPage + 2) %}
-                        <a href="{{ path('catalog_category', {slug: category.slug, page: page}) }}">{{ page }}</a>
-                    {% elseif page == currentPage - 3 or page == currentPage + 3 %}
-                        <span>...</span>
-                    {% endif %}
-                {% endfor %}
-
-                {% if currentPage < totalPages %}
-                    <a href="{{ path('catalog_category', {slug: category.slug, page: currentPage + 1}) }}">Next</a>
-                {% endif %}
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">{{ category.name|escape }}</h1>
+        
+        {% if category.parent %}
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <p class="text-sm text-gray-600">
+                    <i class="fas fa-arrow-up mr-1"></i>
+                    Parent category: <a href="{{ path('catalog_category', {slug: category.parent.slug}) }}" class="text-primary-600 hover:text-primary-700 font-medium">{{ category.parent.name|escape }}</a>
+                </p>
             </div>
         {% endif %}
 
-        <p style="text-align: center; color: #666; margin-top: 1rem;">
-            Showing {{ products|length }} of {{ totalProducts }} product{{ totalProducts != 1 ? 's' : '' }}
-        </p>
-    {% else %}
-        <p>No products found in this category.</p>
-    {% endif %}
+        {% if products|length > 0 %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                {% for product in products %}
+                    <a href="{{ path('catalog_product', {slug: product.slug}) }}" class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-200 group">
+                        <div class="h-48 bg-gray-100 overflow-hidden">
+                            {% if product.media|length > 0 %}
+                                {% set firstMedia = product.media|first %}
+                                <img src="{{ firstMedia.path|escape }}" alt="{{ firstMedia.alt|default(product.name)|escape }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                    <i class="fas fa-image text-4xl"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="p-4">
+                            <h2 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">
+                                {{ product.name|escape }}
+                            </h2>
+                            {% if product.variants|length > 0 %}
+                                {% set prices = product.variants|map(v => v.priceAmount) %}
+                                {% set sortedPrices = prices|sort %}
+                                {% set minPrice = sortedPrices|first %}
+                                {% set maxPrice = sortedPrices|reverse|first %}
+                                <div class="text-xl font-bold text-primary-600">
+                                    {% if minPrice == maxPrice %}
+                                        €{{ (minPrice / 100)|number_format(2, '.', ',') }}
+                                    {% else %}
+                                        From €{{ (minPrice / 100)|number_format(2, '.', ',') }}
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+
+            {% if totalPages > 1 %}
+                <div class="flex justify-center items-center space-x-2 mb-6">
+                    {% if currentPage > 1 %}
+                        <a href="{{ path('catalog_category', {slug: category.slug, page: currentPage - 1}) }}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-chevron-left mr-1"></i>Previous
+                        </a>
+                    {% endif %}
+
+                    {% for page in 1..totalPages %}
+                        {% if page == currentPage %}
+                            <span class="px-4 py-2 bg-primary-600 text-white rounded-md font-medium">{{ page }}</span>
+                        {% elseif page == 1 or page == totalPages or (page >= currentPage - 2 and page <= currentPage + 2) %}
+                            <a href="{{ path('catalog_category', {slug: category.slug, page: page}) }}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                                {{ page }}
+                            </a>
+                        {% elseif page == currentPage - 3 or page == currentPage + 3 %}
+                            <span class="px-2 text-gray-500">...</span>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if currentPage < totalPages %}
+                        <a href="{{ path('catalog_category', {slug: category.slug, page: currentPage + 1}) }}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            Next<i class="fas fa-chevron-right ml-1"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <p class="text-center text-gray-600 text-sm">
+                Showing {{ products|length }} of {{ totalProducts }} product{{ totalProducts != 1 ? 's' : '' }}
+            </p>
+        {% else %}
+            <div class="bg-white rounded-lg shadow-md p-12 text-center">
+                <i class="fas fa-box-open text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-600 text-lg">No products found in this category.</p>
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}
 

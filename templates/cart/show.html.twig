@@ -1,195 +1,340 @@
-{% extends 'catalog/base.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% block title %}Shopping Cart - SymfoShop{% endblock %}
 {% block meta_description %}Review your shopping cart{% endblock %}
 
 {% block body %}
-    <h1>Shopping Cart</h1>
+<div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
+        <p class="text-gray-600">Review your items before checkout</p>
+    </div>
 
     {% if items|length > 0 %}
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin: 2rem 0;">
-            <div>
-                <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1.5rem;">
-                    {% for item in items %}
-                        <div style="display: flex; gap: 1.5rem; padding: 1.5rem 0; {% if not loop.last %}border-bottom: 1px solid #e5e5e5;{% endif %}">
-                            <div style="flex-shrink: 0;">
-                                {% if item.variant.product.media|length > 0 %}
-                                    {% set firstMedia = item.variant.product.media|first %}
-                                    <img src="{{ firstMedia.path|escape }}" 
-                                         alt="{{ firstMedia.alt|default(item.variant.product.name)|escape }}" 
-                                         style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px;">
-                                {% else %}
-                                    <div style="width: 100px; height: 100px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #999;">
-                                        No image
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div style="flex: 1;">
-                                <h3 style="margin-bottom: 0.5rem;">
-                                    <a href="{{ path('catalog_product', {slug: item.variant.product.slug}) }}" style="color: #333; text-decoration: none;">
-                                        {{ item.variant.product.name|escape }}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Cart Items -->
+            <div class="lg:col-span-2 space-y-4">
+                {% for item in items %}
+                    <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden animate-slide-up" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+                        <div class="p-6">
+                            <div class="flex gap-6">
+                                <!-- Product Image -->
+                                <div class="flex-shrink-0">
+                                    <a href="{{ path('catalog_product', {slug: item.variant.product.slug}) }}" class="block group">
+                                        {% if item.variant.product.media|length > 0 %}
+                                            {% set firstMedia = item.variant.product.media|first %}
+                                            <div class="w-32 h-32 rounded-lg overflow-hidden bg-gray-100 group-hover:scale-105 transition-transform duration-200">
+                                                <img src="{{ firstMedia.path|escape }}" 
+                                                     alt="{{ firstMedia.alt|default(item.variant.product.name)|escape }}" 
+                                                     class="w-full h-full object-cover">
+                                            </div>
+                                        {% else %}
+                                            <div class="w-32 h-32 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                                                <i class="fas fa-image text-4xl text-gray-400"></i>
+                                            </div>
+                                        {% endif %}
                                     </a>
-                                </h3>
-                                <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                    SKU: {{ item.variant.sku|escape }}
-                                </p>
-                                {% if item.variant.attributes|length > 0 %}
-                                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                        {% for key, value in item.variant.attributes %}
-                                            <strong>{{ key|escape }}:</strong> {{ value|escape }}{% if not loop.last %}, {% endif %}
-                                        {% endfor %}
-                                    </p>
-                                {% endif %}
-                                <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem;">
-                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                        <label for="quantity-{{ item.variant.id }}" style="font-size: 0.9rem;">Quantity:</label>
-                                        <input type="number" 
-                                               id="quantity-{{ item.variant.id }}" 
-                                               value="{{ item.quantity }}" 
-                                               min="1" 
-                                               data-variant-id="{{ item.variant.id }}"
-                                               style="width: 80px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                                        <button type="button" 
-                                                class="update-quantity-btn" 
-                                                data-variant-id="{{ item.variant.id }}"
-                                                style="padding: 0.5rem 1rem; background: #2563eb; color: #fff; border: none; border-radius: 4px; cursor: pointer;">
-                                            Update
-                                        </button>
+                                </div>
+
+                                <!-- Product Details -->
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex-1">
+                                            <h3 class="text-lg font-semibold text-gray-900 mb-2 group">
+                                                <a href="{{ path('catalog_product', {slug: item.variant.product.slug}) }}" class="hover:text-primary-600 transition-colors">
+                                                    {{ item.variant.product.name|escape }}
+                                                </a>
+                                            </h3>
+                                            
+                                            <div class="space-y-1 text-sm text-gray-600 mb-4">
+                                                <p class="flex items-center">
+                                                    <i class="fas fa-barcode mr-2 text-gray-400"></i>
+                                                    SKU: <span class="font-mono ml-1">{{ item.variant.sku|escape }}</span>
+                                                </p>
+                                                {% if item.variant.attributes|length > 0 %}
+                                                    <div class="flex flex-wrap gap-2 mt-2">
+                                                        {% for key, value in item.variant.attributes %}
+                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                                                                {{ key|escape }}: {{ value|escape }}
+                                                            </span>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+
+                                            <!-- Quantity Controls -->
+                                            <div class="flex items-center gap-4">
+                                                <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                                                    <button type="button" 
+                                                            class="quantity-decrease px-3 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
+                                                            data-variant-id="{{ item.variant.id }}">
+                                                        <i class="fas fa-minus text-xs"></i>
+                                                    </button>
+                                                    <input type="number" 
+                                                           id="quantity-{{ item.variant.id }}" 
+                                                           value="{{ item.quantity }}" 
+                                                           min="1" 
+                                                           data-variant-id="{{ item.variant.id }}"
+                                                           class="w-16 text-center border-0 focus:ring-0 focus:outline-none py-2 text-sm font-medium">
+                                                    <button type="button" 
+                                                            class="quantity-increase px-3 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
+                                                            data-variant-id="{{ item.variant.id }}">
+                                                        <i class="fas fa-plus text-xs"></i>
+                                                    </button>
+                                                </div>
+                                                <button type="button" 
+                                                        class="update-quantity-btn hidden px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
+                                                        data-variant-id="{{ item.variant.id }}">
+                                                    <i class="fas fa-sync-alt mr-1"></i>Update
+                                                </button>
+                                                <button type="button" 
+                                                        class="remove-item-btn ml-auto px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
+                                                        data-variant-id="{{ item.variant.id }}">
+                                                    <i class="fas fa-trash mr-1"></i>Remove
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Price -->
+                                        <div class="text-right ml-4">
+                                            <div class="text-2xl font-bold text-primary-600 mb-1">
+                                                {{ (item.itemTotal / 100)|number_format(2, '.', ',') }} {{ item.variant.currency|escape }}
+                                            </div>
+                                            <div class="text-sm text-gray-500">
+                                                {{ (item.variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ item.variant.currency|escape }} each
+                                            </div>
+                                        </div>
                                     </div>
-                                    <button type="button" 
-                                            class="remove-item-btn" 
-                                            data-variant-id="{{ item.variant.id }}"
-                                            style="padding: 0.5rem 1rem; background: #dc2626; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-left: auto;">
-                                        Remove
-                                    </button>
-                                </div>
-                            </div>
-                            <div style="text-align: right; flex-shrink: 0;">
-                                <div style="font-size: 1.25rem; font-weight: bold; color: #2563eb;">
-                                    {{ (item.itemTotal / 100)|number_format(2, '.', ',') }} {{ item.variant.currency|escape }}
-                                </div>
-                                <div style="color: #666; font-size: 0.9rem; margin-top: 0.25rem;">
-                                    {{ (item.variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ item.variant.currency|escape }} each
                                 </div>
                             </div>
                         </div>
-                    {% endfor %}
-                </div>
+                    </div>
+                {% endfor %}
             </div>
 
-            <div>
-                <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1.5rem; position: sticky; top: 20px;">
-                    <h2 style="margin-bottom: 1.5rem;">Order Summary</h2>
+            <!-- Order Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-lg p-6 sticky top-24">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-receipt mr-2 text-primary-600"></i>
+                        Order Summary
+                    </h2>
                     
-                    <div style="margin-bottom: 1rem;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <div class="space-y-4 mb-6">
+                        <div class="flex justify-between text-gray-600">
                             <span>Items ({{ totals.totalQuantity }}):</span>
-                            <span>{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
+                            <span class="font-medium">{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
                         </div>
                     </div>
 
-                    <div style="border-top: 2px solid #e5e5e5; padding-top: 1rem; margin-top: 1rem;">
-                        <div style="display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: bold; margin-bottom: 1.5rem;">
-                            <span>Subtotal:</span>
-                            <span>{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
+                    <div class="border-t-2 border-gray-200 pt-4 mb-6">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-semibold text-gray-900">Subtotal:</span>
+                            <span class="text-2xl font-bold text-primary-600">{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
                         </div>
                     </div>
 
-                    <a href="{{ path('checkout') }}" class="btn" style="width: 100%; margin-bottom: 1rem; display: block; text-align: center; text-decoration: none;">
+                    <a href="{{ path('checkout') }}" class="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-4 px-6 rounded-lg font-semibold text-center block hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 mb-4">
+                        <i class="fas fa-lock mr-2"></i>
                         Proceed to Checkout
                     </a>
 
-                    <form method="POST" action="{{ path('cart_clear') }}" style="margin: 0;">
+                    <form method="POST" action="{{ path('cart_clear') }}" class="mt-4">
                         <button type="submit" 
-                                onclick="return confirm('Are you sure you want to clear your cart?');"
-                                style="width: 100%; padding: 0.75rem; background: #dc2626; color: #fff; border: none; border-radius: 4px; cursor: pointer;">
+                                onclick="return confirm('Are you sure you want to clear your cart? This action cannot be undone.');"
+                                class="w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-lg font-medium text-center hover:bg-gray-200 transition-colors">
+                            <i class="fas fa-trash-alt mr-2"></i>
                             Clear Cart
                         </button>
                     </form>
+
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-shield-alt text-primary-600 mr-2"></i>
+                            <span>Secure checkout guaranteed</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     {% else %}
-        <div style="text-align: center; padding: 4rem 2rem;">
-            <h2 style="margin-bottom: 1rem; color: #666;">Your cart is empty</h2>
-            <p style="margin-bottom: 2rem; color: #666;">Start shopping to add items to your cart.</p>
-            <a href="{{ path('catalog_home') }}" class="btn">Browse Products</a>
+        <div class="bg-white rounded-xl shadow-md p-16 text-center animate-fade-in">
+            <div class="max-w-md mx-auto">
+                <div class="mb-6">
+                    <i class="fas fa-shopping-cart text-8xl text-gray-300"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-3">Your cart is empty</h2>
+                <p class="text-gray-600 mb-8 text-lg">Start shopping to add items to your cart.</p>
+                <a href="{{ path('catalog_home') }}" class="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Browse Products
+                </a>
+            </div>
         </div>
     {% endif %}
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Update quantity
-            document.querySelectorAll('.update-quantity-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const variantId = parseInt(this.dataset.variantId);
-                    const quantityInput = document.getElementById('quantity-' + variantId);
-                    const quantity = parseInt(quantityInput.value);
-
-                    updateCartItem(variantId, quantity);
-                });
-            });
-
-            // Remove item
-            document.querySelectorAll('.remove-item-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const variantId = parseInt(this.dataset.variantId);
-                    
-                    if (confirm('Remove this item from cart?')) {
-                        removeCartItem(variantId);
-                    }
-                });
-            });
-
-            function updateCartItem(variantId, quantity) {
-                fetch('{{ path('cart_update') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        variantId: variantId,
-                        quantity: quantity
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert(data.message || 'An error occurred');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while updating the cart');
-                });
-            }
-
-            function removeCartItem(variantId) {
-                fetch('{{ path('cart_remove') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        variantId: variantId
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert(data.message || 'An error occurred');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while removing the item');
-                });
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Quantity input change detection
+    document.querySelectorAll('input[type="number"][data-variant-id]').forEach(input => {
+        const originalValue = input.value;
+        const updateBtn = input.closest('.flex').querySelector('.update-quantity-btn');
+        
+        input.addEventListener('change', function() {
+            if (this.value !== originalValue) {
+                updateBtn.classList.remove('hidden');
+            } else {
+                updateBtn.classList.add('hidden');
             }
         });
-    </script>
-{% endblock %}
+    });
 
+    // Quantity decrease
+    document.querySelectorAll('.quantity-decrease').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const variantId = parseInt(this.dataset.variantId);
+            const input = document.getElementById('quantity-' + variantId);
+            const currentValue = parseInt(input.value);
+            if (currentValue > 1) {
+                input.value = currentValue - 1;
+                input.dispatchEvent(new Event('change'));
+            }
+        });
+    });
+
+    // Quantity increase
+    document.querySelectorAll('.quantity-increase').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const variantId = parseInt(this.dataset.variantId);
+            const input = document.getElementById('quantity-' + variantId);
+            input.value = parseInt(input.value) + 1;
+            input.dispatchEvent(new Event('change'));
+        });
+    });
+
+    // Update quantity
+    document.querySelectorAll('.update-quantity-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const variantId = parseInt(this.dataset.variantId);
+            const quantityInput = document.getElementById('quantity-' + variantId);
+            const quantity = parseInt(quantityInput.value);
+            
+            if (quantity < 1) {
+                if (window.showErrorToast) {
+                    window.showErrorToast('Quantity must be at least 1');
+                } else {
+                    alert('Quantity must be at least 1');
+                }
+                return;
+            }
+
+            updateCartItem(variantId, quantity, this);
+        });
+    });
+
+    // Remove item
+    document.querySelectorAll('.remove-item-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const variantId = parseInt(this.dataset.variantId);
+            
+            if (window.showWarningToast) {
+                // For now, we'll still use confirm but show a toast after
+                if (confirm('Remove this item from cart?')) {
+                    removeCartItem(variantId, this);
+                }
+            } else {
+                if (confirm('Remove this item from cart?')) {
+                    removeCartItem(variantId, this);
+                }
+            }
+        });
+    });
+
+    function updateCartItem(variantId, quantity, button) {
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Updating...';
+        
+        fetch('{{ path('cart_update') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                variantId: variantId,
+                quantity: quantity
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (window.showSuccessToast) {
+                    window.showSuccessToast(data.message || 'Cart updated successfully');
+                }
+                setTimeout(() => location.reload(), 500);
+            } else {
+                if (window.showErrorToast) {
+                    window.showErrorToast(data.message || 'An error occurred');
+                } else {
+                    alert(data.message || 'An error occurred');
+                }
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>Update';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (window.showErrorToast) {
+                window.showErrorToast('An error occurred while updating the cart');
+            } else {
+                alert('An error occurred while updating the cart');
+            }
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>Update';
+        });
+    }
+
+    function removeCartItem(variantId, button) {
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Removing...';
+        
+        fetch('{{ path('cart_remove') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                variantId: variantId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (window.showSuccessToast) {
+                    window.showSuccessToast(data.message || 'Item removed from cart');
+                }
+                setTimeout(() => location.reload(), 500);
+            } else {
+                if (window.showErrorToast) {
+                    window.showErrorToast(data.message || 'An error occurred');
+                } else {
+                    alert(data.message || 'An error occurred');
+                }
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-trash mr-1"></i>Remove';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (window.showErrorToast) {
+                window.showErrorToast('An error occurred while removing the item');
+            } else {
+                alert('An error occurred while removing the item');
+            }
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-trash mr-1"></i>Remove';
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -18,6 +18,8 @@ help: ## Show this help message
 	@echo "  db-create             Create database"
 	@echo "  db-migrate            Run database migrations"
 	@echo "  db-reset              Reset database (drop, create, migrate)"
+	@echo "  db-fixtures           Load database fixtures (sample data)"
+	@echo "  db-seed               Reset database and load fixtures"
 	@echo "  admin-user            Create admin user (interactive)"
 	@echo "  cache-clear           Clear Symfony cache"
 	@echo "  server-start          Start Symfony development server"
@@ -205,14 +207,16 @@ clean: ## Clean generated files
 	rm -rf coverage/
 	rm -rf .phpunit.result.cache
 
-# Database Fixtures (if using)
-fixtures: ## Load database fixtures
+# Database Fixtures
+db-fixtures: ## Load database fixtures (sample data)
 	@echo "$(BLUE)Loading fixtures...$(NC)"
-	@if php bin/console | grep -q "doctrine:fixtures:load"; then \
-		php bin/console doctrine:fixtures:load --no-interaction; \
-	else \
-		echo "$(YELLOW)Doctrine Fixtures Bundle not installed.$(NC)"; \
-	fi
+	php bin/console doctrine:fixtures:load --no-interaction
+	@echo "$(GREEN)✓ Fixtures loaded!$(NC)"
+
+db-seed: db-migrate db-fixtures ## Reset database and load fixtures
+	@echo "$(GREEN)✓ Database seeded with sample data!$(NC)"
+
+fixtures: db-fixtures ## Alias for db-fixtures
 
 # Security Check
 security-check: ## Check for known security vulnerabilities

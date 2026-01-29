@@ -161,16 +161,28 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        if (confirm('Item added to cart! View cart?')) {
-                            window.location.href = '{{ path('cart_show') }}';
+                        if (window.showSuccessToast) {
+                            window.showSuccessToast(data.message || 'Item added to cart!');
+                        } else {
+                            if (confirm('Item added to cart! View cart?')) {
+                                window.location.href = '{{ path('cart_show') }}';
+                            }
                         }
                     } else {
-                        alert(data.message || 'An error occurred');
+                        if (window.showErrorToast) {
+                            window.showErrorToast(data.message || 'An error occurred');
+                        } else {
+                            alert(data.message || 'An error occurred');
+                        }
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while adding to cart');
+                    if (window.showErrorToast) {
+                        window.showErrorToast('An error occurred while adding to cart');
+                    } else {
+                        alert('An error occurred while adding to cart');
+                    }
                 });
             });
         }
