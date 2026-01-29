@@ -1,0 +1,63 @@
+{% extends 'catalog/base.html.twig' %}
+
+{% block title %}Payment - SymfoShop{% endblock %}
+{% block meta_description %}Complete your payment{% endblock %}
+
+{% block body %}
+    <div style="max-width: 600px; margin: 2rem auto;">
+        <h1>Complete Payment</h1>
+        
+        <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 2rem; margin: 2rem 0;">
+            <p style="margin-bottom: 1rem;">
+                <strong>Order Number:</strong> {{ order.orderNumber|escape }}
+            </p>
+            <p style="margin-bottom: 1.5rem;">
+                <strong>Total:</strong> {{ (order.grandTotal / 100)|number_format(2, '.', ',') }} {{ order.currency|escape }}
+            </p>
+
+            <div id="payment-element">
+                <!-- Stripe Elements will create form elements here -->
+            </div>
+
+            <button id="submit-payment" class="btn" style="width: 100%; margin-top: 1.5rem;">
+                Pay Now
+            </button>
+
+            <div id="payment-message" style="margin-top: 1rem; display: none;"></div>
+        </div>
+    </div>
+
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        const stripe = Stripe('{{ stripePublishableKey|escape('js') }}');
+        const elements = stripe.elements();
+
+        const paymentElement = elements.create('payment');
+        paymentElement.mount('#payment-element');
+
+        const submitButton = document.getElementById('submit-payment');
+        const paymentMessage = document.getElementById('payment-message');
+
+        submitButton.addEventListener('click', async function() {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Processing...';
+
+            const {error} = await stripe.confirmPayment({
+                elements,
+                clientSecret: '{{ clientSecret|escape('js') }}',
+                confirmParams: {
+                    return_url: '{{ url('checkout_success', {orderNumber: order.orderNumber})|escape('js') }}',
+                },
+            });
+
+            if (error) {
+                paymentMessage.style.display = 'block';
+                paymentMessage.textContent = error.message;
+                paymentMessage.style.color = '#dc2626';
+                submitButton.disabled = false;
+                submitButton.textContent = 'Pay Now';
+            }
+        });
+    </script>
+{% endblock %}
+

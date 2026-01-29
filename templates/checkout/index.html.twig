@@ -1,0 +1,85 @@
+{% extends 'catalog/base.html.twig' %}
+
+{% block title %}Checkout - SymfoShop{% endblock %}
+{% block meta_description %}Complete your order{% endblock %}
+
+{% block body %}
+    <h1>Checkout</h1>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin: 2rem 0;">
+        <div>
+            <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 2rem;">
+                <h2 style="margin-bottom: 1.5rem;">Customer Information</h2>
+                {{ form_start(customerForm, {'attr': {'style': 'display: grid; gap: 1rem;', 'id': 'customer-form', 'method': 'POST', 'action': path('checkout')}}) }}
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        {{ form_row(customerForm.firstName, {'attr': {'style': 'padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;'}}) }}
+                        {{ form_row(customerForm.lastName, {'attr': {'style': 'padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;'}}) }}
+                    </div>
+                    {{ form_row(customerForm.email, {'attr': {'style': 'padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;'}}) }}
+                    {{ form_row(customerForm.phone, {'attr': {'style': 'padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;'}}) }}
+                {{ form_end(customerForm) }}
+            </div>
+
+            <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 2rem;">
+                <h2 style="margin-bottom: 1.5rem;">Shipping Address</h2>
+                {{ form_start(addressForm, {'attr': {'style': 'display: grid; gap: 1rem;', 'id': 'address-form'}}) }}
+                    {{ form_row(addressForm.street, {'attr': {'style': 'padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;'}}) }}
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                        {{ form_row(addressForm.city, {'attr': {'style': 'padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;'}}) }}
+                        {{ form_row(addressForm.postalCode, {'attr': {'style': 'padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;'}}) }}
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        {{ form_row(addressForm.country, {'attr': {'style': 'padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;'}}) }}
+                        {{ form_row(addressForm.state, {'attr': {'style': 'padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;'}}) }}
+                    </div>
+                {{ form_end(addressForm) }}
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1.5rem; position: sticky; top: 20px;">
+                <h2 style="margin-bottom: 1.5rem;">Order Summary</h2>
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Subtotal:</span>
+                        <span>{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Tax:</span>
+                        <span>{{ (totals.taxTotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
+                    </div>
+                </div>
+
+                <div style="border-top: 2px solid #e5e5e5; padding-top: 1rem; margin-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: bold; margin-bottom: 1.5rem;">
+                        <span>Total:</span>
+                        <span>{{ (totals.grandTotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
+                    </div>
+                </div>
+
+                <button type="button" id="place-order-btn" class="btn" style="width: 100%;">
+                    Place Order
+                </button>
+
+                <p style="font-size: 0.85rem; color: #666; margin-top: 1rem; text-align: center;">
+                    By placing your order, you agree to our terms and conditions.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('place-order-btn').addEventListener('click', function() {
+            const customerForm = document.getElementById('customer-form');
+            const addressForm = document.getElementById('address-form');
+            
+            if (customerForm && addressForm) {
+                // Submit customer form which will include address form data via handleRequest
+                customerForm.submit();
+            }
+        });
+    </script>
+{% endblock %}
+

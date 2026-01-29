@@ -1,0 +1,26 @@
+{% extends 'catalog/base.html.twig' %}
+
+{% block title %}Order Confirmation - SymfoShop{% endblock %}
+{% block meta_description %}Your order has been placed successfully{% endblock %}
+
+{% block body %}
+    <div style="max-width: 600px; margin: 4rem auto; text-align: center;">
+        <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 3rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">✓</div>
+            <h1 style="margin-bottom: 1rem; color: #2563eb;">Order Placed Successfully!</h1>
+            <p style="font-size: 1.25rem; color: #666; margin-bottom: 2rem;">
+                Thank you for your order. Your order number is:
+            </p>
+            <div style="background: #f0f0f0; padding: 1rem; border-radius: 4px; margin-bottom: 2rem;">
+                <strong style="font-size: 1.5rem; color: #333;">{{ orderNumber|escape }}</strong>
+            </div>
+            <p style="color: #666; margin-bottom: 2rem;">
+                You will receive an email confirmation shortly with order details.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <a href="{{ path('catalog_home') }}" class="btn">Continue Shopping</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
