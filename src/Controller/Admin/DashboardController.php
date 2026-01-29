@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\ApiKey;
 use App\Entity\AuditLog;
 use App\Entity\Category;
 use App\Entity\Order;
@@ -42,6 +43,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Orders', 'fa fa-shopping-cart', Order::class);
         yield MenuItem::section('System');
         yield MenuItem::linkToCrud('Users', 'fa fa-users', User::class);
+        yield MenuItem::linkToCrud('API Keys', 'fa fa-key', ApiKey::class);
         yield MenuItem::linkToCrud('Audit Logs', 'fa fa-history', AuditLog::class);
     }
 }

@@ -54,6 +54,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $resetTokenExpiresAt = null;
 
+    // Temporary property to store API key during authentication (not persisted)
+    private ?ApiKey $apiKey = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -220,6 +223,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this->resetTokenExpiresAt > new \DateTimeImmutable();
+    }
+
+    public function getApiKey(): ?ApiKey
+    {
+        return $this->apiKey;
+    }
+
+    public function setApiKey(?ApiKey $apiKey): self
+    {
+        $this->apiKey = $apiKey;
+        return $this;
     }
 }
 

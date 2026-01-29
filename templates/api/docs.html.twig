@@ -1,0 +1,201 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}API Documentation - SymfoShop{% endblock %}
+
+{% block body %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">SymfoShop API Documentation</h1>
+        <p class="text-gray-600">RESTful API for accessing SymfoShop e-commerce data</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Authentication</h2>
+        <p class="text-gray-700 mb-4">All API requests require authentication using an API key. You can provide the API key in one of the following ways:</p>
+        
+        <div class="space-y-4">
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-semibold text-gray-900 mb-2">1. Authorization Header (Recommended)</h3>
+                <code class="text-sm text-gray-800">Authorization: Bearer YOUR_API_KEY</code>
+            </div>
+            
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-semibold text-gray-900 mb-2">2. X-API-Key Header</h3>
+                <code class="text-sm text-gray-800">X-API-Key: YOUR_API_KEY</code>
+            </div>
+            
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-semibold text-gray-900 mb-2">3. Query Parameter</h3>
+                <code class="text-sm text-gray-800">?api_key=YOUR_API_KEY</code>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Creating an API Key</h2>
+        <p class="text-gray-700 mb-4">To create an API key, you need to be logged in. Then make a POST request to:</p>
+        
+        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+            <code class="text-sm text-gray-800">POST /api/v1/auth/api-keys</code>
+        </div>
+        
+        <h3 class="font-semibold text-gray-900 mb-2">Request Body:</h3>
+        <pre class="bg-gray-50 p-4 rounded-lg text-sm overflow-x-auto"><code>{
+  "name": "My API Key",
+  "expiresAt": "2025-12-31T23:59:59Z",  // Optional
+  "scopes": ["read:products", "read:orders"]  // Optional
+}</code></pre>
+        
+        <div class="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400">
+            <p class="text-sm text-yellow-800">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                <strong>Important:</strong> The API key is only shown once in the response. Make sure to save it securely!
+            </p>
+        </div>
+    </div>
+
+    <div class="space-y-8">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Products API</h2>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">List Products</h3>
+                <code class="text-sm text-gray-800 bg-gray-50 p-2 rounded">GET /api/v1/products</code>
+                <p class="text-gray-600 mt-2 mb-2">Query Parameters:</p>
+                <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                    <li><code>page</code> - Page number (default: 1)</li>
+                    <li><code>limit</code> - Items per page (default: 20, max: 100)</li>
+                    <li><code>status</code> - Filter by status (active, draft, archived)</li>
+                </ul>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Get Product by Slug</h3>
+                <code class="text-sm text-gray-800 bg-gray-50 p-2 rounded">GET /api/v1/products/{slug}</code>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Categories API</h2>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">List Categories</h3>
+                <code class="text-sm text-gray-800 bg-gray-50 p-2 rounded">GET /api/v1/categories</code>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Get Category by Slug</h3>
+                <code class="text-sm text-gray-800 bg-gray-50 p-2 rounded">GET /api/v1/categories/{slug}</code>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Cart API</h2>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Get Cart</h3>
+                <code class="text-sm text-gray-800 bg-gray-50 p-2 rounded">GET /api/v1/cart</code>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Add Item to Cart</h3>
+                <code class="text-sm text-gray-800 bg-gray-50 p-2 rounded">POST /api/v1/cart/add</code>
+                <pre class="bg-gray-50 p-4 rounded-lg text-sm mt-2 overflow-x-auto"><code>{
+  "variantId": 1,
+  "quantity": 2
+}</code></pre>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Update Cart Item</h3>
+                <code class="text-sm text-gray-800 bg-gray-50 p-2 rounded">PUT /api/v1/cart/update</code>
+                <pre class="bg-gray-50 p-4 rounded-lg text-sm mt-2 overflow-x-auto"><code>{
+  "variantId": 1,
+  "quantity": 3
+}</code></pre>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Remove Item from Cart</h3>
+                <code class="text-sm text-gray-800 bg-gray-50 p-2 rounded">DELETE /api/v1/cart/remove</code>
+                <pre class="bg-gray-50 p-4 rounded-lg text-sm mt-2 overflow-x-auto"><code>{
+  "variantId": 1
+}</code></pre>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Clear Cart</h3>
+                <code class="text-sm text-gray-800 bg-gray-50 p-2 rounded">DELETE /api/v1/cart/clear</code>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Orders API</h2>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">List Orders</h3>
+                <code class="text-sm text-gray-800 bg-gray-50 p-2 rounded">GET /api/v1/orders</code>
+                <p class="text-gray-600 mt-2 mb-2">Query Parameters:</p>
+                <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                    <li><code>page</code> - Page number (default: 1)</li>
+                    <li><code>limit</code> - Items per page (default: 20, max: 100)</li>
+                </ul>
+                <p class="text-gray-600 mt-2">Note: Users can only see their own orders. Admins can see all orders.</p>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Get Order by Order Number</h3>
+                <code class="text-sm text-gray-800 bg-gray-50 p-2 rounded">GET /api/v1/orders/{orderNumber}</code>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">API Keys Management</h2>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">List API Keys</h3>
+                <code class="text-sm text-gray-800 bg-gray-50 p-2 rounded">GET /api/v1/api-keys</code>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Revoke API Key</h3>
+                <code class="text-sm text-gray-800 bg-gray-50 p-2 rounded">DELETE /api/v1/api-keys/{id}</code>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-8 mt-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Response Format</h2>
+        <p class="text-gray-700 mb-4">All API responses follow a consistent JSON format:</p>
+        
+        <div class="space-y-4">
+            <div>
+                <h3 class="font-semibold text-gray-900 mb-2">Success Response</h3>
+                <pre class="bg-gray-50 p-4 rounded-lg text-sm overflow-x-auto"><code>{
+  "data": { ... },
+  "pagination": {  // For list endpoints
+    "page": 1,
+    "limit": 20,
+    "total": 100,
+    "pages": 5
+  }
+}</code></pre>
+            </div>
+            
+            <div>
+                <h3 class="font-semibold text-gray-900 mb-2">Error Response</h3>
+                <pre class="bg-gray-50 p-4 rounded-lg text-sm overflow-x-auto"><code>{
+  "error": "Error message",
+  "message": "Detailed error description"
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-8 mt-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Rate Limiting</h2>
+        <p class="text-gray-700">API requests are currently not rate-limited, but this may be implemented in the future. Please use the API responsibly.</p>
+    </div>
+</div>
+{% endblock %}
+

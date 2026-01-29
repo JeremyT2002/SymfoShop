@@ -41,6 +41,9 @@ class ProductVariant
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $updatedAt;
 
+    #[ORM\OneToOne(targetEntity: StockItem::class, mappedBy: 'variant', cascade: ['persist', 'remove'])]
+    private ?StockItem $stockItem = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
