@@ -1,0 +1,81 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}User: {{ user.email }}{% endblock %}
+
+{% block body %}
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <a href="{{ path('admin_users_index') }}" class="text-gray-600 hover:text-gray-900 mb-2 inline-block">
+                <i class="fas fa-arrow-left"></i> Back to Users
+            </a>
+            <h2 class="text-2xl font-bold text-gray-900">{{ user.email }}</h2>
+        </div>
+        <div class="flex space-x-2">
+            <a href="{{ path('admin_users_edit', {id: user.id}) }}" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            {% if user.id != app.user.id %}
+                <form method="post" action="{{ path('admin_users_delete', {id: user.id}) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ user.id) }}">
+                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Info -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">User Information</h3>
+                <dl class="grid grid-cols-1 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Email</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ user.email }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Roles</dt>
+                        <dd class="mt-1">
+                            <div class="flex flex-wrap gap-2">
+                                {% for role in user.roles %}
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        {{ role }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Status</dt>
+                        <dd class="mt-1">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if user.isActive %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ user.isActive ? 'Active' : 'Inactive' }}
+                            </span>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Metadata</h3>
+                <dl class="space-y-3">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">ID</dt>
+                        <dd class="mt-1 text-sm text-gray-900">#{{ user.id }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Created</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ user.createdAt|date('Y-m-d H:i') }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
