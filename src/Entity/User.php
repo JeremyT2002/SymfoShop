@@ -68,9 +68,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
-    public function getEmail(): string
+    public function getEmail(): ?string
     {
-        return $this->email;
+        try {
+            return $this->email;
+        } catch (\Error $e) {
+            return null;
+        }
     }
 
     public function setEmail(string $email): self
