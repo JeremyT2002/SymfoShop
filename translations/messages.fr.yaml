@@ -1,0 +1,149 @@
+# French translations
+app:
+  name: SymfoShop
+  tagline: Votre destination de shopping en ligne de confiance. Produits de qualité, prix intéressants, livraison rapide.
+  
+nav:
+  home: Accueil
+  cart: Panier
+  login: Connexion
+  register: S'inscrire
+  logout: Déconnexion
+  admin_panel: Panneau d'administration
+  logged_in_as: Connecté en tant que
+  language: Langue
+  
+footer:
+  shop: Boutique
+  account: Compte
+  support: Support
+  categories: Catégories
+  shopping_cart: Panier
+  contact_us: Contactez-nous
+  faq: FAQ
+  shipping_info: Informations de livraison
+  all_rights_reserved: Tous droits réservés
+  
+common:
+  cancel: Annuler
+  confirm: Confirmer
+  save: Enregistrer
+  delete: Supprimer
+  edit: Modifier
+  back: Retour
+  next: Suivant
+  previous: Précédent
+  search: Rechercher
+  filter: Filtrer
+  sort: Trier
+  loading: Chargement...
+  error: Erreur
+  success: Succès
+  warning: Avertissement
+  info: Info
+  
+cart:
+  title: Panier
+  empty: Votre panier est vide
+  add_to_cart: Ajouter au panier
+  remove_item: Retirer l'article
+  remove: Retirer
+  clear_cart: Vider le panier
+  update_quantity: Mettre à jour la quantité
+  update: Mettre à jour
+  quantity: Quantité
+  price: Prix
+  total: Total
+  subtotal: Sous-total
+  checkout: Commander
+  proceed_to_checkout: Passer à la caisse
+  continue_shopping: Continuer les achats
+  item_removed: Article retiré du panier
+  cart_cleared: Panier vidé
+  item_added: Article ajouté au panier
+  review_items: Vérifiez vos articles avant de passer à la caisse
+  order_summary: Résumé de la commande
+  items: Articles
+  each: chacun
+  secure_checkout: Paiement sécurisé garanti
+  start_shopping: Commencez vos achats pour ajouter des articles à votre panier.
+  browse_products: Parcourir les produits
+  clear_cart_confirm: Êtes-vous sûr de vouloir vider votre panier ? Cette action ne peut pas être annulée.
+  remove_item_confirm: Êtes-vous sûr de vouloir retirer cet article de votre panier ?
+  updating: Mise à jour...
+  removing: Suppression...
+  quantity_min_error: La quantité doit être d'au moins 1
+  updated_successfully: Panier mis à jour avec succès
+  error_occurred: Une erreur s'est produite
+  error_updating: Une erreur s'est produite lors de la mise à jour du panier
+  error_removing: Une erreur s'est produite lors de la suppression de l'article
+  
+product:
+  select_variant: Sélectionner une variante
+  variant: Variante
+  sku: SKU
+  in_stock: En stock
+  out_of_stock: Rupture de stock
+  add_to_cart: Ajouter au panier
+  description: Description
+  specifications: Spécifications
+  available_variants: Variantes disponibles
+  no_variants: Aucune variante disponible pour ce produit.
+  no_image: Aucune image disponible
+  status: Statut
+  tax_class: Classe fiscale
+  added_to_cart: Article ajouté au panier !
+  view_cart_question: Voir le panier ?
+  error_adding: Une erreur s'est produite lors de l'ajout au panier
+  
+category:
+  all_categories: Toutes les catégories
+  no_products: Aucun produit trouvé dans cette catégorie
+  view_product: Voir le produit
+  shop_by_category: Acheter par catégorie
+  browse_description: Parcourez notre large sélection de produits organisés par catégorie
+  subcategory: sous-catégorie
+  subcategories: sous-catégories
+  explore: Explorer
+  no_categories_available: Aucune catégorie disponible
+  check_back_soon: Revenez bientôt pour de nouvelles catégories de produits.
+  parent_category: Catégorie parente
+  from: À partir de
+  showing: Affichage
+  of: de
+  product: produit
+  products: produits
+  
+checkout:
+  title: Commander
+  shipping_address: Adresse de livraison
+  payment_method: Mode de paiement
+  order_summary: Résumé de la commande
+  place_order: Passer la commande
+  customer_information: Informations client
+  tax: Taxe
+  terms_agreement: En passant votre commande, vous acceptez nos conditions générales.
+  
+security:
+  login:
+    title: Connectez-vous à votre compte
+    or: Ou
+    create_account: créer un nouveau compte
+    email: E-mail
+    password: Mot de passe
+    remember_me: Se souvenir de moi
+    submit: Se connecter
+    dont_have_account: Vous n'avez pas de compte ?
+    register_here: Inscrivez-vous ici
+    forgot_password: Mot de passe oublié ?
+  register:
+    title: Créez votre compte
+    already_have_account: Vous avez déjà un compte ?
+    sign_in: Se connecter
+    sign_in_here: Connectez-vous ici
+    sign_in_existing: connectez-vous à votre compte existant
+    email: E-mail
+    password: Mot de passe
+    confirm_password: Confirmer le mot de passe
+    submit: S'inscrire
+

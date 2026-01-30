@@ -1,0 +1,149 @@
+# English translations
+app:
+  name: SymfoShop
+  tagline: Your trusted online shopping destination. Quality products, great prices, fast delivery.
+  
+nav:
+  home: Home
+  cart: Cart
+  login: Login
+  register: Register
+  logout: Logout
+  admin_panel: Admin Panel
+  logged_in_as: Logged in as
+  language: Language
+  
+footer:
+  shop: Shop
+  account: Account
+  support: Support
+  categories: Categories
+  shopping_cart: Shopping Cart
+  contact_us: Contact Us
+  faq: FAQ
+  shipping_info: Shipping Info
+  all_rights_reserved: All rights reserved
+  
+common:
+  cancel: Cancel
+  confirm: Confirm
+  save: Save
+  delete: Delete
+  edit: Edit
+  back: Back
+  next: Next
+  previous: Previous
+  search: Search
+  filter: Filter
+  sort: Sort
+  loading: Loading...
+  error: Error
+  success: Success
+  warning: Warning
+  info: Info
+  
+cart:
+  title: Shopping Cart
+  empty: Your cart is empty
+  add_to_cart: Add to Cart
+  remove_item: Remove Item
+  remove: Remove
+  clear_cart: Clear Cart
+  update_quantity: Update Quantity
+  update: Update
+  quantity: Quantity
+  price: Price
+  total: Total
+  subtotal: Subtotal
+  checkout: Checkout
+  proceed_to_checkout: Proceed to Checkout
+  continue_shopping: Continue Shopping
+  item_removed: Item removed from cart
+  cart_cleared: Cart cleared
+  item_added: Item added to cart
+  review_items: Review your items before checkout
+  order_summary: Order Summary
+  items: Items
+  each: each
+  secure_checkout: Secure checkout guaranteed
+  start_shopping: Start shopping to add items to your cart.
+  browse_products: Browse Products
+  clear_cart_confirm: Are you sure you want to clear your cart? This action cannot be undone.
+  remove_item_confirm: Are you sure you want to remove this item from your cart?
+  updating: Updating...
+  removing: Removing...
+  quantity_min_error: Quantity must be at least 1
+  updated_successfully: Cart updated successfully
+  error_occurred: An error occurred
+  error_updating: An error occurred while updating the cart
+  error_removing: An error occurred while removing the item
+  
+product:
+  select_variant: Select Variant
+  variant: Variant
+  sku: SKU
+  in_stock: In Stock
+  out_of_stock: Out of Stock
+  add_to_cart: Add to Cart
+  description: Description
+  specifications: Specifications
+  available_variants: Available Variants
+  no_variants: No variants available for this product.
+  no_image: No image available
+  status: Status
+  tax_class: Tax Class
+  added_to_cart: Item added to cart!
+  view_cart_question: View cart?
+  error_adding: An error occurred while adding to cart
+  
+category:
+  all_categories: All Categories
+  no_products: No products found in this category
+  view_product: View Product
+  shop_by_category: Shop by Category
+  browse_description: Browse our wide selection of products organized by category
+  subcategory: subcategory
+  subcategories: subcategories
+  explore: Explore
+  no_categories_available: No categories available
+  check_back_soon: Check back soon for new product categories.
+  parent_category: Parent category
+  from: From
+  showing: Showing
+  of: of
+  product: product
+  products: products
+  
+checkout:
+  title: Checkout
+  shipping_address: Shipping Address
+  payment_method: Payment Method
+  order_summary: Order Summary
+  place_order: Place Order
+  customer_information: Customer Information
+  tax: Tax
+  terms_agreement: By placing your order, you agree to our terms and conditions.
+  
+security:
+  login:
+    title: Sign in to your account
+    or: Or
+    create_account: create a new account
+    email: Email
+    password: Password
+    remember_me: Remember me
+    submit: Sign in
+    dont_have_account: Don't have an account?
+    register_here: Register here
+    forgot_password: Forgot your password?
+  register:
+    title: Create your account
+    already_have_account: Already have an account?
+    sign_in: Sign in
+    sign_in_here: Sign in here
+    sign_in_existing: sign in to your existing account
+    email: Email
+    password: Password
+    confirm_password: Confirm Password
+    submit: Register
+

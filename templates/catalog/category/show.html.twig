@@ -12,7 +12,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav class="text-sm text-gray-600 mb-4" aria-label="Breadcrumb">
             <ol class="flex items-center space-x-2">
-                <li><a href="{{ path('catalog_home') }}" class="hover:text-primary-600"><i class="fas fa-home mr-1"></i>Home</a></li>
+                <li><a href="{{ path('catalog_home') }}" class="hover:text-primary-600"><i class="fas fa-home mr-1"></i>{{ 'nav.home'|trans }}</a></li>
                 <li><i class="fas fa-chevron-right text-xs"></i></li>
                 <li class="text-gray-900">{{ category.name|escape }}</li>
             </ol>
@@ -24,7 +24,7 @@
             <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <p class="text-sm text-gray-600">
                     <i class="fas fa-arrow-up mr-1"></i>
-                    Parent category: <a href="{{ path('catalog_category', {slug: category.parent.slug}) }}" class="text-primary-600 hover:text-primary-700 font-medium">{{ category.parent.name|escape }}</a>
+                    {{ 'category.parent_category'|trans }}: <a href="{{ path('catalog_category', {slug: category.parent.slug}) }}" class="text-primary-600 hover:text-primary-700 font-medium">{{ category.parent.name|escape }}</a>
                 </p>
             </div>
         {% endif %}
@@ -56,7 +56,7 @@
                                     {% if minPrice == maxPrice %}
                                         €{{ (minPrice / 100)|number_format(2, '.', ',') }}
                                     {% else %}
-                                        From €{{ (minPrice / 100)|number_format(2, '.', ',') }}
+                                        {{ 'category.from'|trans }} €{{ (minPrice / 100)|number_format(2, '.', ',') }}
                                     {% endif %}
                                 </div>
                             {% endif %}
@@ -69,7 +69,7 @@
                 <div class="flex justify-center items-center space-x-2 mb-6">
                     {% if currentPage > 1 %}
                         <a href="{{ path('catalog_category', {slug: category.slug, page: currentPage - 1}) }}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-                            <i class="fas fa-chevron-left mr-1"></i>Previous
+                            <i class="fas fa-chevron-left mr-1"></i>{{ 'common.previous'|trans }}
                         </a>
                     {% endif %}
 
@@ -87,14 +87,14 @@
 
                     {% if currentPage < totalPages %}
                         <a href="{{ path('catalog_category', {slug: category.slug, page: currentPage + 1}) }}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-                            Next<i class="fas fa-chevron-right ml-1"></i>
+                            {{ 'common.next'|trans }}<i class="fas fa-chevron-right ml-1"></i>
                         </a>
                     {% endif %}
                 </div>
             {% endif %}
 
             <p class="text-center text-gray-600 text-sm">
-                Showing {{ products|length }} of {{ totalProducts }} product{{ totalProducts != 1 ? 's' : '' }}
+                {{ 'category.showing'|trans }} {{ products|length }} {{ 'category.of'|trans }} {{ totalProducts }} {{ totalProducts != 1 ? 'category.products'|trans : 'category.product'|trans }}
             </p>
         {% else %}
             <div class="bg-white rounded-lg shadow-md p-12 text-center">

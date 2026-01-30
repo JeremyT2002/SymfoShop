@@ -1,0 +1,149 @@
+# German translations
+app:
+  name: SymfoShop
+  tagline: Ihr vertrauenswürdiges Online-Shopping-Ziel. Qualitätsprodukte, großartige Preise, schnelle Lieferung.
+  
+nav:
+  home: Startseite
+  cart: Warenkorb
+  login: Anmelden
+  register: Registrieren
+  logout: Abmelden
+  admin_panel: Admin-Panel
+  logged_in_as: Angemeldet als
+  language: Sprache
+  
+footer:
+  shop: Shop
+  account: Konto
+  support: Support
+  categories: Kategorien
+  shopping_cart: Warenkorb
+  contact_us: Kontaktieren Sie uns
+  faq: FAQ
+  shipping_info: Versandinformationen
+  all_rights_reserved: Alle Rechte vorbehalten
+  
+common:
+  cancel: Abbrechen
+  confirm: Bestätigen
+  save: Speichern
+  delete: Löschen
+  edit: Bearbeiten
+  back: Zurück
+  next: Weiter
+  previous: Zurück
+  search: Suchen
+  filter: Filtern
+  sort: Sortieren
+  loading: Wird geladen...
+  error: Fehler
+  success: Erfolg
+  warning: Warnung
+  info: Info
+  
+cart:
+  title: Warenkorb
+  empty: Ihr Warenkorb ist leer
+  add_to_cart: In den Warenkorb
+  remove_item: Artikel entfernen
+  remove: Entfernen
+  clear_cart: Warenkorb leeren
+  update_quantity: Menge aktualisieren
+  update: Aktualisieren
+  quantity: Menge
+  price: Preis
+  total: Gesamt
+  subtotal: Zwischensumme
+  checkout: Zur Kasse
+  proceed_to_checkout: Zur Kasse gehen
+  continue_shopping: Weiter einkaufen
+  item_removed: Artikel aus dem Warenkorb entfernt
+  cart_cleared: Warenkorb geleert
+  item_added: Artikel zum Warenkorb hinzugefügt
+  review_items: Überprüfen Sie Ihre Artikel vor dem Checkout
+  order_summary: Bestellübersicht
+  items: Artikel
+  each: pro Stück
+  secure_checkout: Sicherer Checkout garantiert
+  start_shopping: Beginnen Sie mit dem Einkaufen, um Artikel zu Ihrem Warenkorb hinzuzufügen.
+  browse_products: Produkte durchsuchen
+  clear_cart_confirm: Möchten Sie Ihren Warenkorb wirklich leeren? Diese Aktion kann nicht rückgängig gemacht werden.
+  remove_item_confirm: Möchten Sie diesen Artikel wirklich aus Ihrem Warenkorb entfernen?
+  updating: Wird aktualisiert...
+  removing: Wird entfernt...
+  quantity_min_error: Die Menge muss mindestens 1 betragen
+  updated_successfully: Warenkorb erfolgreich aktualisiert
+  error_occurred: Ein Fehler ist aufgetreten
+  error_updating: Beim Aktualisieren des Warenkorbs ist ein Fehler aufgetreten
+  error_removing: Beim Entfernen des Artikels ist ein Fehler aufgetreten
+  
+product:
+  select_variant: Variante auswählen
+  variant: Variante
+  sku: SKU
+  in_stock: Auf Lager
+  out_of_stock: Nicht vorrätig
+  add_to_cart: In den Warenkorb
+  description: Beschreibung
+  specifications: Spezifikationen
+  available_variants: Verfügbare Varianten
+  no_variants: Keine Varianten für dieses Produkt verfügbar.
+  no_image: Kein Bild verfügbar
+  status: Status
+  tax_class: Steuerklasse
+  added_to_cart: Artikel zum Warenkorb hinzugefügt!
+  view_cart_question: Warenkorb ansehen?
+  error_adding: Beim Hinzufügen zum Warenkorb ist ein Fehler aufgetreten
+  
+category:
+  all_categories: Alle Kategorien
+  no_products: Keine Produkte in dieser Kategorie gefunden
+  view_product: Produkt ansehen
+  shop_by_category: Nach Kategorie einkaufen
+  browse_description: Durchsuchen Sie unsere große Auswahl an Produkten, organisiert nach Kategorien
+  subcategory: Unterkategorie
+  subcategories: Unterkategorien
+  explore: Erkunden
+  no_categories_available: Keine Kategorien verfügbar
+  check_back_soon: Schauen Sie bald wieder vorbei für neue Produktkategorien.
+  parent_category: Übergeordnete Kategorie
+  from: Ab
+  showing: Zeige
+  of: von
+  product: Produkt
+  products: Produkte
+  
+checkout:
+  title: Zur Kasse
+  shipping_address: Lieferadresse
+  payment_method: Zahlungsmethode
+  order_summary: Bestellübersicht
+  place_order: Bestellung aufgeben
+  customer_information: Kundeninformationen
+  tax: Steuer
+  terms_agreement: Mit der Bestellung stimmen Sie unseren Allgemeinen Geschäftsbedingungen zu.
+  
+security:
+  login:
+    title: Melden Sie sich in Ihrem Konto an
+    or: Oder
+    create_account: ein neues Konto erstellen
+    email: E-Mail
+    password: Passwort
+    remember_me: Angemeldet bleiben
+    submit: Anmelden
+    dont_have_account: Haben Sie noch kein Konto?
+    register_here: Hier registrieren
+    forgot_password: Passwort vergessen?
+  register:
+    title: Erstellen Sie Ihr Konto
+    already_have_account: Haben Sie bereits ein Konto?
+    sign_in: Anmelden
+    sign_in_here: Hier anmelden
+    sign_in_existing: in Ihr bestehendes Konto anmelden
+    email: E-Mail
+    password: Passwort
+    confirm_password: Passwort bestätigen
+    submit: Registrieren
+

@@ -6,8 +6,8 @@
 {% block body %}
 <div class="max-w-7xl mx-auto">
     <div class="mb-8">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
-        <p class="text-gray-600">Review your items before checkout</p>
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ 'cart.title'|trans }}</h1>
+        <p class="text-gray-600">{{ 'cart.review_items'|trans }}</p>
     </div>
 
     {% if items|length > 0 %}
@@ -85,12 +85,12 @@
                                                 <button type="button" 
                                                         class="update-quantity-btn hidden px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
                                                         data-variant-id="{{ item.variant.id }}">
-                                                    <i class="fas fa-sync-alt mr-1"></i>Update
+                                                    <i class="fas fa-sync-alt mr-1"></i>{{ 'cart.update'|trans }}
                                                 </button>
                                                 <button type="button" 
                                                         class="remove-item-btn ml-auto px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
                                                         data-variant-id="{{ item.variant.id }}">
-                                                    <i class="fas fa-trash mr-1"></i>Remove
+                                                    <i class="fas fa-trash mr-1"></i>{{ 'cart.remove'|trans }}
                                                 </button>
                                             </div>
                                         </div>
@@ -104,7 +104,7 @@
                                                 {{ (item.itemTotal / 100)|number_format(2, '.', ',') }} {{ item.variant.currency|escape }}
                                             </div>
                                             <div class="text-sm text-gray-500">
-                                                {{ (item.variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ item.variant.currency|escape }} each
+                                                {{ (item.variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ item.variant.currency|escape }} {{ 'cart.each'|trans }}
                                             </div>
                                         </div>
                                     </div>
@@ -120,12 +120,12 @@
                 <div class="bg-white rounded-xl shadow-lg p-6 sticky top-24">
                     <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                         <i class="fas fa-receipt mr-2 text-primary-600"></i>
-                        Order Summary
+                        {{ 'cart.order_summary'|trans }}
                     </h2>
                     
                     <div class="space-y-4 mb-6">
                         <div class="flex justify-between text-gray-600">
-                            <span id="summary-items-label">Items ({{ totals.totalQuantity }}):</span>
+                            <span id="summary-items-label">{{ 'cart.items'|trans }} ({{ totals.totalQuantity }}):</span>
                             <span class="font-medium" id="summary-items-total">{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
                         </div>
                     </div>
@@ -137,17 +137,31 @@
                         </div>
                     </div>
 
-                    <a href="{{ path('checkout') }}" class="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-4 px-6 rounded-lg font-semibold text-center block hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 mb-4">
-                        <i class="fas fa-lock mr-2"></i>
-                        Proceed to Checkout
+                    <a href="{{ path('checkout') }}" id="checkout-link" class="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-4 px-6 rounded-lg font-semibold text-center block hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 mb-4">
+                        <i class="fas fa-lock mr-2 checkout-icon"></i>
+                        <span class="checkout-text">{{ 'cart.proceed_to_checkout'|trans }}</span>
                     </a>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const checkoutLink = document.getElementById('checkout-link');
+                            if (checkoutLink) {
+                                checkoutLink.addEventListener('click', function(e) {
+                                    const icon = this.querySelector('.checkout-icon');
+                                    const text = this.querySelector('.checkout-text');
+                                    if (icon) icon.className = 'fas fa-spinner fa-spin mr-2';
+                                    if (text) text.textContent = '{{ 'common.loading'|trans|e('js') }}...';
+                                    this.style.pointerEvents = 'none';
+                                });
+                            }
+                        });
+                    </script>
 
                     <form method="POST" action="{{ path('cart_clear') }}" id="clearCartForm" class="mt-4">
                         <button type="button" 
                                 id="clearCartBtn"
                                 class="w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-lg font-medium text-center hover:bg-gray-200 transition-colors">
                             <i class="fas fa-trash-alt mr-2"></i>
-                            Clear Cart
+                            <span class="clear-cart-text">{{ 'cart.clear_cart'|trans }}</span>
                         </button>
                     </form>
                     <script>
@@ -157,16 +171,23 @@
                             
                             if (clearCartBtn && clearCartForm) {
                                 clearCartBtn.addEventListener('click', function() {
+                                    const button = this;
+                                    const originalText = button.querySelector('.clear-cart-text').textContent;
+                                    
                                     if (window.showConfirm) {
                                         window.showConfirm(
-                                            'Clear Cart',
-                                            'Are you sure you want to clear your cart? This action cannot be undone.',
+                                            '{{ 'cart.clear_cart'|trans|e('js') }}',
+                                            '{{ 'cart.clear_cart_confirm'|trans|e('js') }}',
                                             () => {
+                                                button.disabled = true;
+                                                button.querySelector('.clear-cart-text').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>{{ 'common.loading'|trans|e('js') }}...';
                                                 clearCartForm.submit();
                                             }
                                         );
                                     } else {
-                                        if (confirm('Are you sure you want to clear your cart? This action cannot be undone.')) {
+                                        if (confirm('{{ 'cart.clear_cart_confirm'|trans|e('js') }}')) {
+                                            button.disabled = true;
+                                            button.querySelector('.clear-cart-text').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>{{ 'common.loading'|trans|e('js') }}...';
                                             clearCartForm.submit();
                                         }
                                     }
@@ -178,7 +199,7 @@
                     <div class="mt-6 pt-6 border-t border-gray-200">
                         <div class="flex items-center text-sm text-gray-600">
                             <i class="fas fa-shield-alt text-primary-600 mr-2"></i>
-                            <span>Secure checkout guaranteed</span>
+                            <span>{{ 'cart.secure_checkout'|trans }}</span>
                         </div>
                     </div>
                 </div>
@@ -190,11 +211,11 @@
                 <div class="mb-6">
                     <i class="fas fa-shopping-cart text-8xl text-gray-300"></i>
                 </div>
-                <h2 class="text-3xl font-bold text-gray-900 mb-3">Your cart is empty</h2>
-                <p class="text-gray-600 mb-8 text-lg">Start shopping to add items to your cart.</p>
+                <h2 class="text-3xl font-bold text-gray-900 mb-3">{{ 'cart.empty'|trans }}</h2>
+                <p class="text-gray-600 mb-8 text-lg">{{ 'cart.start_shopping'|trans }}</p>
                 <a href="{{ path('catalog_home') }}" class="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                     <i class="fas fa-arrow-left mr-2"></i>
-                    Browse Products
+                    {{ 'cart.browse_products'|trans }}
                 </a>
             </div>
         </div>
@@ -281,7 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (quantity < 1) {
                 if (window.showErrorToast) {
-                    window.showErrorToast('Quantity must be at least 1');
+                    window.showErrorToast('{{ 'cart.quantity_min_error'|trans|e('js') }}');
                 } else {
                     alert('Quantity must be at least 1');
                 }
@@ -300,8 +321,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (window.showConfirm) {
                 window.showConfirm(
-                    'Remove Item',
-                    'Are you sure you want to remove this item from your cart?',
+                    '{{ 'cart.remove_item'|trans|e('js') }}',
+                    '{{ 'cart.remove_item_confirm'|trans|e('js') }}',
                     () => removeCartItem(variantId, button)
                 );
             } else {
@@ -314,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateCartItem(variantId, quantity, button) {
         button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Updating...';
+                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>{{ 'cart.updating'|trans|e('js') }}';
         
         fetch('{{ path('cart_update') }}', {
             method: 'POST',
@@ -334,7 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     updateSummaryTotals(data.totals);
                 }
                 if (window.showSuccessToast) {
-                    window.showSuccessToast(data.message || 'Cart updated successfully');
+                    window.showSuccessToast(data.message || '{{ 'cart.updated_successfully'|trans|e('js') }}');
                 }
                 // Hide update button
                 button.classList.add('hidden');
@@ -347,24 +368,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert(data.message || 'An error occurred');
                 }
                 button.disabled = false;
-                button.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>Update';
+                button.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>{{ 'cart.update'|trans|e('js') }}';
             }
         })
         .catch(error => {
             console.error('Error:', error);
             if (window.showErrorToast) {
-                window.showErrorToast('An error occurred while updating the cart');
+                    window.showErrorToast('{{ 'cart.error_updating'|trans|e('js') }}');
             } else {
-                alert('An error occurred while updating the cart');
+                alert('{{ 'cart.error_updating'|trans|e('js') }}');
             }
             button.disabled = false;
-            button.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>Update';
+            button.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>{{ 'cart.update'|trans|e('js') }}';
         });
     }
 
     function removeCartItem(variantId, button) {
         button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Removing...';
+                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>{{ 'cart.removing'|trans|e('js') }}';
         
         fetch('{{ path('cart_remove') }}', {
             method: 'POST',
@@ -379,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 if (window.showSuccessToast) {
-                    window.showSuccessToast(data.message || 'Item removed from cart');
+                    window.showSuccessToast(data.message || '{{ 'cart.item_removed'|trans|e('js') }}');
                 }
                 setTimeout(() => location.reload(), 500);
             } else {
@@ -389,13 +410,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert(data.message || 'An error occurred');
                 }
                 button.disabled = false;
-                button.innerHTML = '<i class="fas fa-trash mr-1"></i>Remove';
+                button.innerHTML = '<i class="fas fa-trash mr-1"></i>{{ 'cart.remove'|trans|e('js') }}';
             }
         })
         .catch(error => {
             console.error('Error:', error);
             if (window.showErrorToast) {
-                window.showErrorToast('An error occurred while removing the item');
+                    window.showErrorToast('{{ 'cart.error_removing'|trans|e('js') }}');
             } else {
                 alert('An error occurred while removing the item');
             }
@@ -411,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const subtotal = document.getElementById('summary-subtotal');
         
         if (itemsLabel && totals.totalQuantity !== undefined) {
-            itemsLabel.textContent = `Items (${totals.totalQuantity}):`;
+            itemsLabel.textContent = `{{ 'cart.items'|trans|e('js') }} (${totals.totalQuantity}):`;
         }
         
         if (itemsTotal && totals.subtotal !== undefined && totals.currency) {

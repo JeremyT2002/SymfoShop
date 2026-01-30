@@ -72,6 +72,36 @@
                     backdrop-filter: blur(10px);
                     background-color: rgba(255, 255, 255, 0.8);
                 }
+                .loading-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                    opacity: 0;
+                    visibility: hidden;
+                    transition: opacity 0.3s, visibility 0.3s;
+                }
+                .loading-overlay.active {
+                    opacity: 1;
+                    visibility: visible;
+                }
+                .loading-spinner {
+                    width: 50px;
+                    height: 50px;
+                    border: 4px solid rgba(255, 255, 255, 0.3);
+                    border-top-color: white;
+                    border-radius: 50%;
+                    animation: spin 0.8s linear infinite;
+                }
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
             </style>
         {% endblock %}
 
@@ -214,6 +244,43 @@
                         }
                     };
                 });
+
+                // Global Loading Spinner System
+                window.showLoading = function() {
+                    const overlay = document.getElementById('global-loading-overlay');
+                    if (overlay) {
+                        overlay.classList.add('active');
+                    }
+                };
+
+                window.hideLoading = function() {
+                    const overlay = document.getElementById('global-loading-overlay');
+                    if (overlay) {
+                        overlay.classList.remove('active');
+                    }
+                };
+
+                // Add loading state to all form submissions
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Handle all form submissions
+                    document.querySelectorAll('form').forEach(form => {
+                        form.addEventListener('submit', function(e) {
+                            const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+                            if (submitBtn && !submitBtn.dataset.noLoading) {
+                                const originalText = submitBtn.innerHTML || submitBtn.value;
+                                submitBtn.disabled = true;
+                                
+                                if (submitBtn.tagName === 'BUTTON') {
+                                    submitBtn.dataset.originalHtml = originalText;
+                                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>{{ 'common.loading'|trans|e('js') }}';
+                                } else {
+                                    submitBtn.dataset.originalValue = originalText;
+                                    submitBtn.value = '{{ 'common.loading'|trans|e('js') }}...';
+                                }
+                            }
+                        });
+                    });
+                });
             </script>
         {% endblock %}
     </head>
@@ -231,16 +298,69 @@
 
                     <!-- Desktop Navigation -->
                     <div class="hidden md:flex items-center space-x-2">
+                        <!-- Language Switcher -->
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-white hover:bg-white/20 transition-all duration-200 font-medium group">
+                                {% if app.request.locale == 'de' %}
+                                    <span class="text-lg">🇩🇪</span>
+                                    <span class="hidden lg:inline">DE</span>
+                                {% elseif app.request.locale == 'fr' %}
+                                    <span class="text-lg">🇫🇷</span>
+                                    <span class="hidden lg:inline">FR</span>
+                                {% else %}
+                                    <span class="text-lg">🇬🇧</span>
+                                    <span class="hidden lg:inline">EN</span>
+                                {% endif %}
+                                <i class="fas fa-chevron-down text-xs transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                            </button>
+                            <div x-show="open" 
+                                 @click.away="open = false"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="transform opacity-0 scale-95 translate-y-1"
+                                 x-transition:enter-end="transform opacity-100 scale-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="transform opacity-100 scale-100 translate-y-0"
+                                 x-transition:leave-end="transform opacity-0 scale-95 translate-y-1"
+                                 class="absolute right-0 mt-2 w-48 rounded-xl shadow-2xl bg-white ring-1 ring-gray-200 z-50 overflow-hidden">
+                                <div class="py-1">
+                                    <a href="{{ path('locale_switch', {locale: 'en'}) }}" 
+                                       class="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-primary-50 transition-colors group {% if app.request.locale == 'en' %}bg-primary-50{% endif %}">
+                                        <span class="text-lg">🇬🇧</span>
+                                        <span class="font-medium">English</span>
+                                        {% if app.request.locale == 'en' %}
+                                            <i class="fas fa-check text-primary-600 ml-auto"></i>
+                                        {% endif %}
+                                    </a>
+                                    <a href="{{ path('locale_switch', {locale: 'de'}) }}" 
+                                       class="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-primary-50 transition-colors group {% if app.request.locale == 'de' %}bg-primary-50{% endif %}">
+                                        <span class="text-lg">🇩🇪</span>
+                                        <span class="font-medium">Deutsch</span>
+                                        {% if app.request.locale == 'de' %}
+                                            <i class="fas fa-check text-primary-600 ml-auto"></i>
+                                        {% endif %}
+                                    </a>
+                                    <a href="{{ path('locale_switch', {locale: 'fr'}) }}" 
+                                       class="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-primary-50 transition-colors group {% if app.request.locale == 'fr' %}bg-primary-50{% endif %}">
+                                        <span class="text-lg">🇫🇷</span>
+                                        <span class="font-medium">Français</span>
+                                        {% if app.request.locale == 'fr' %}
+                                            <i class="fas fa-check text-primary-600 ml-auto"></i>
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Home Link -->
                         <a href="{{ path('catalog_home') }}" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-white hover:bg-white/20 transition-all duration-200 font-medium group">
                             <i class="fas fa-home group-hover:scale-110 transition-transform"></i>
-                            <span>Home</span>
+                            <span>{{ 'nav.home'|trans }}</span>
                         </a>
 
                         <!-- Cart Link -->
                         <a href="{{ path('cart_show') }}" class="relative flex items-center space-x-2 px-4 py-2 rounded-lg text-white hover:bg-white/20 transition-all duration-200 font-medium group">
                             <i class="fas fa-shopping-cart group-hover:scale-110 transition-transform"></i>
-                            <span>Cart</span>
+                            <span>{{ 'nav.cart'|trans }}</span>
                             {% set cartCount = cart_items_count() %}
                             {% if cartCount > 0 %}
                                 <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-bounce-subtle shadow-lg">
@@ -268,18 +388,18 @@
                                      class="absolute right-0 mt-2 w-64 rounded-xl shadow-2xl bg-white ring-1 ring-gray-200 z-50 overflow-hidden">
                                     <div class="py-2">
                                         <div class="px-4 py-3 bg-gradient-to-r from-primary-50 to-primary-100 border-b border-primary-200">
-                                            <p class="text-xs text-primary-600 font-medium uppercase tracking-wide mb-1">Logged in as</p>
+                                            <p class="text-xs text-primary-600 font-medium uppercase tracking-wide mb-1">{{ 'nav.logged_in_as'|trans }}</p>
                                             <p class="font-semibold text-gray-900 truncate">{{ app.user.email }}</p>
                                         </div>
                                         {% if 'ROLE_ADMIN' in app.user.roles %}
                                             <a href="{{ path('admin') }}" class="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-primary-50 transition-colors group">
                                                 <i class="fas fa-shield-alt text-primary-600 group-hover:scale-110 transition-transform"></i>
-                                                <span class="font-medium">Admin Panel</span>
+                                                <span class="font-medium">{{ 'nav.admin_panel'|trans }}</span>
                                             </a>
                                         {% endif %}
                                         <a href="{{ path('logout') }}" class="flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors group">
                                             <i class="fas fa-sign-out-alt group-hover:scale-110 transition-transform"></i>
-                                            <span class="font-medium">Logout</span>
+                                            <span class="font-medium">{{ 'nav.logout'|trans }}</span>
                                         </a>
                                     </div>
                                 </div>
@@ -287,11 +407,11 @@
                         {% else %}
                             <a href="{{ path('login') }}" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-white hover:bg-white/20 transition-all duration-200 font-medium group">
                                 <i class="fas fa-sign-in-alt group-hover:scale-110 transition-transform"></i>
-                                <span>Login</span>
+                                <span>{{ 'nav.login'|trans }}</span>
                             </a>
                             <a href="{{ path('register') }}" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-200 font-medium shadow-lg group">
                                 <i class="fas fa-user-plus group-hover:scale-110 transition-transform"></i>
-                                <span>Register</span>
+                                <span>{{ 'nav.register'|trans }}</span>
                             </a>
                         {% endif %}
                     </div>
@@ -312,13 +432,34 @@
                      x-transition:leave-end="transform opacity-0 scale-95"
                      class="md:hidden pb-4">
                     <div class="flex flex-col space-y-1">
+                        <!-- Mobile Language Switcher -->
+                        <div class="px-3 py-2 border-b border-primary-500">
+                            <p class="text-xs text-primary-200 mb-2">{{ 'nav.language'|trans|default('Language') }}</p>
+                            <div class="grid grid-cols-3 gap-2">
+                                <a href="{{ path('locale_switch', {locale: 'en'}) }}" 
+                                   class="flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-primary-700 {% if app.request.locale == 'en' %}bg-primary-800{% endif %}">
+                                    <span>🇬🇧</span>
+                                    <span class="text-sm">EN</span>
+                                </a>
+                                <a href="{{ path('locale_switch', {locale: 'de'}) }}" 
+                                   class="flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-primary-700 {% if app.request.locale == 'de' %}bg-primary-800{% endif %}">
+                                    <span>🇩🇪</span>
+                                    <span class="text-sm">DE</span>
+                                </a>
+                                <a href="{{ path('locale_switch', {locale: 'fr'}) }}" 
+                                   class="flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-primary-700 {% if app.request.locale == 'fr' %}bg-primary-800{% endif %}">
+                                    <span>🇫🇷</span>
+                                    <span class="text-sm">FR</span>
+                                </a>
+                            </div>
+                        </div>
                         <a href="{{ path('catalog_home') }}" class="flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-primary-700">
                             <i class="fas fa-home"></i>
-                            <span>Home</span>
+                            <span>{{ 'nav.home'|trans }}</span>
                         </a>
                         <a href="{{ path('cart_show') }}" class="relative flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-primary-700">
                             <i class="fas fa-shopping-cart"></i>
-                            <span>Cart</span>
+                            <span>{{ 'nav.cart'|trans }}</span>
                             {% set cartCount = cart_items_count() %}
                             {% if cartCount > 0 %}
                                 <span class="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -328,27 +469,27 @@
                         </a>
                         {% if app.user %}
                             <div class="px-3 py-2 text-white border-t border-primary-500 mt-2">
-                                <p class="text-xs text-primary-200">Logged in as</p>
+                                <p class="text-xs text-primary-200">{{ 'nav.logged_in_as'|trans }}</p>
                                 <p class="font-semibold">{{ app.user.email }}</p>
                             </div>
                             {% if 'ROLE_ADMIN' in app.user.roles %}
                                 <a href="{{ path('admin') }}" class="flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-primary-700">
                                     <i class="fas fa-shield-alt"></i>
-                                    <span>Admin Panel</span>
+                                    <span>{{ 'nav.admin_panel'|trans }}</span>
                                 </a>
                             {% endif %}
                             <a href="{{ path('logout') }}" class="flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-primary-700">
                                 <i class="fas fa-sign-out-alt"></i>
-                                <span>Logout</span>
+                                <span>{{ 'nav.logout'|trans }}</span>
                             </a>
                         {% else %}
                             <a href="{{ path('login') }}" class="flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-primary-700">
                                 <i class="fas fa-sign-in-alt"></i>
-                                <span>Login</span>
+                                <span>{{ 'nav.login'|trans }}</span>
                             </a>
                             <a href="{{ path('register') }}" class="flex items-center space-x-2 px-3 py-2 rounded-md bg-primary-700 text-white hover:bg-primary-800">
                                 <i class="fas fa-user-plus"></i>
-                                <span>Register</span>
+                                <span>{{ 'nav.register'|trans }}</span>
                             </a>
                         {% endif %}
                     </div>
@@ -386,14 +527,22 @@
                     <div class="flex justify-end space-x-3">
                         <button @click="cancel()" 
                                 class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
-                            Cancel
+                            {{ 'common.cancel'|trans }}
                         </button>
                         <button @click="confirm()" 
                                 class="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors">
-                            Confirm
+                            {{ 'common.confirm'|trans }}
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Global Loading Overlay -->
+        <div id="global-loading-overlay" class="loading-overlay">
+            <div class="bg-white rounded-lg p-8 shadow-2xl flex flex-col items-center">
+                <div class="loading-spinner mb-4" style="border-top-color: #3b82f6;"></div>
+                <p class="text-gray-700 font-medium">{{ 'common.loading'|trans }}</p>
             </div>
         </div>
 
@@ -434,7 +583,7 @@
 
         <main class="flex-grow flex flex-col">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
-                {% block body %}{% endblock %}
+        {% block body %}{% endblock %}
             </div>
         </main>
 
@@ -445,44 +594,44 @@
                     <div>
                         <h3 class="text-white font-bold text-lg mb-4 flex items-center">
                             <i class="fas fa-store mr-2 text-primary-400"></i>
-                            SymfoShop
+                            {{ 'app.name'|trans }}
                         </h3>
                         <p class="text-sm text-gray-400">
-                            Your trusted online shopping destination. Quality products, great prices, fast delivery.
+                            {{ 'app.tagline'|trans }}
                         </p>
                     </div>
                     <div>
-                        <h4 class="text-white font-semibold mb-4">Shop</h4>
+                        <h4 class="text-white font-semibold mb-4">{{ 'footer.shop'|trans }}</h4>
                         <ul class="space-y-2 text-sm">
-                            <li><a href="{{ path('catalog_home') }}" class="hover:text-primary-400 transition-colors">Categories</a></li>
-                            <li><a href="{{ path('cart_show') }}" class="hover:text-primary-400 transition-colors">Shopping Cart</a></li>
+                            <li><a href="{{ path('catalog_home') }}" class="hover:text-primary-400 transition-colors">{{ 'footer.categories'|trans }}</a></li>
+                            <li><a href="{{ path('cart_show') }}" class="hover:text-primary-400 transition-colors">{{ 'footer.shopping_cart'|trans }}</a></li>
                         </ul>
                     </div>
                     <div>
-                        <h4 class="text-white font-semibold mb-4">Account</h4>
+                        <h4 class="text-white font-semibold mb-4">{{ 'footer.account'|trans }}</h4>
                         <ul class="space-y-2 text-sm">
                             {% if app.user %}
-                                <li><a href="{{ path('logout') }}" class="hover:text-primary-400 transition-colors">Logout</a></li>
+                                <li><a href="{{ path('logout') }}" class="hover:text-primary-400 transition-colors">{{ 'nav.logout'|trans }}</a></li>
                                 {% if 'ROLE_ADMIN' in app.user.roles %}
-                                    <li><a href="{{ path('admin') }}" class="hover:text-primary-400 transition-colors">Admin Panel</a></li>
+                                    <li><a href="{{ path('admin') }}" class="hover:text-primary-400 transition-colors">{{ 'nav.admin_panel'|trans }}</a></li>
                                 {% endif %}
                             {% else %}
-                                <li><a href="{{ path('login') }}" class="hover:text-primary-400 transition-colors">Login</a></li>
-                                <li><a href="{{ path('register') }}" class="hover:text-primary-400 transition-colors">Register</a></li>
+                                <li><a href="{{ path('login') }}" class="hover:text-primary-400 transition-colors">{{ 'nav.login'|trans }}</a></li>
+                                <li><a href="{{ path('register') }}" class="hover:text-primary-400 transition-colors">{{ 'nav.register'|trans }}</a></li>
                             {% endif %}
                         </ul>
                     </div>
                     <div>
-                        <h4 class="text-white font-semibold mb-4">Support</h4>
+                        <h4 class="text-white font-semibold mb-4">{{ 'footer.support'|trans }}</h4>
                         <ul class="space-y-2 text-sm">
-                            <li><a href="#" class="hover:text-primary-400 transition-colors">Contact Us</a></li>
-                            <li><a href="#" class="hover:text-primary-400 transition-colors">FAQ</a></li>
-                            <li><a href="#" class="hover:text-primary-400 transition-colors">Shipping Info</a></li>
+                            <li><a href="#" class="hover:text-primary-400 transition-colors">{{ 'footer.contact_us'|trans }}</a></li>
+                            <li><a href="#" class="hover:text-primary-400 transition-colors">{{ 'footer.faq'|trans }}</a></li>
+                            <li><a href="#" class="hover:text-primary-400 transition-colors">{{ 'footer.shipping_info'|trans }}</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-                    <p>&copy; {{ 'now'|date('Y') }} SymfoShop. All rights reserved.</p>
+                    <p>&copy; {{ 'now'|date('Y') }} {{ 'app.name'|trans }}. {{ 'footer.all_rights_reserved'|trans }}.</p>
                 </div>
             </div>
         </footer>

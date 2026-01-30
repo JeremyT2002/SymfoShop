@@ -4,12 +4,12 @@
 {% block meta_description %}Complete your order{% endblock %}
 
 {% block body %}
-    <h1>Checkout</h1>
+    <h1>{{ 'checkout.title'|trans }}</h1>
 
     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin: 2rem 0;">
         <div>
             <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 2rem;">
-                <h2 style="margin-bottom: 1.5rem;">Customer Information</h2>
+                <h2 style="margin-bottom: 1.5rem;">{{ 'checkout.customer_information'|trans }}</h2>
                 {{ form_start(customerForm, {'attr': {'style': 'display: grid; gap: 1rem;', 'id': 'customer-form', 'method': 'POST', 'action': path('checkout')}}) }}
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         {{ form_row(customerForm.firstName, {'attr': {'style': 'padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;'}}) }}
@@ -21,7 +21,7 @@
             </div>
 
             <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 2rem;">
-                <h2 style="margin-bottom: 1.5rem;">Shipping Address</h2>
+                <h2 style="margin-bottom: 1.5rem;">{{ 'checkout.shipping_address'|trans }}</h2>
                 {{ form_start(addressForm, {'attr': {'style': 'display: grid; gap: 1rem;', 'id': 'address-form'}}) }}
                     {{ form_row(addressForm.street, {'attr': {'style': 'padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;'}}) }}
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
@@ -39,7 +39,7 @@
 
         <div>
             <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1.5rem; position: sticky; top: 20px;">
-                <h2 style="margin-bottom: 1.5rem;">Order Summary</h2>
+                <h2 style="margin-bottom: 1.5rem;">{{ 'checkout.order_summary'|trans }}</h2>
                 
                 <div style="margin-bottom: 1rem;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
@@ -47,7 +47,7 @@
                         <span>{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <span>Tax:</span>
+                        <span>{{ 'checkout.tax'|trans }}:</span>
                         <span>{{ (totals.taxTotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
                     </div>
                 </div>
@@ -60,11 +60,11 @@
                 </div>
 
                 <button type="button" id="place-order-btn" class="btn" style="width: 100%;">
-                    Place Order
+                    {{ 'checkout.place_order'|trans }}
                 </button>
 
                 <p style="font-size: 0.85rem; color: #666; margin-top: 1rem; text-align: center;">
-                    By placing your order, you agree to our terms and conditions.
+                    {{ 'checkout.terms_agreement'|trans }}
                 </p>
             </div>
         </div>
@@ -74,8 +74,19 @@
         document.getElementById('place-order-btn').addEventListener('click', function() {
             const customerForm = document.getElementById('customer-form');
             const addressForm = document.getElementById('address-form');
+            const button = this;
+            const originalText = button.innerHTML;
             
             if (customerForm && addressForm) {
+                // Show loading state
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>{{ 'common.loading'|trans|e('js') }}...';
+                
+                // Show global loading overlay
+                if (window.showLoading) {
+                    window.showLoading();
+                }
+                
                 // Submit customer form which will include address form data via handleRequest
                 customerForm.submit();
             }

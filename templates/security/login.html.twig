@@ -10,12 +10,12 @@
                 <i class="fas fa-user-circle text-primary-600 text-6xl"></i>
             </div>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Sign in to your account
+                {{ 'security.login.title'|trans }}
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600">
-                Or
+                {{ 'security.login.or'|trans }}
                 <a href="{{ path('register') }}" class="font-medium text-primary-600 hover:text-primary-500">
-                    create a new account
+                    {{ 'security.login.create_account'|trans }}
                 </a>
             </p>
         </div>
@@ -74,25 +74,41 @@
             <div>
                 <button 
                     type="submit" 
-                    class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+                    id="login-submit-btn"
+                    class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                        <i class="fas fa-sign-in-alt text-primary-500 group-hover:text-primary-400"></i>
+                        <i class="fas fa-sign-in-alt text-primary-500 group-hover:text-primary-400 login-icon"></i>
                     </span>
-                    Sign in
+                    <span class="login-text">{{ 'security.login.submit'|trans }}</span>
                 </button>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const form = document.querySelector('form');
+                        const submitBtn = document.getElementById('login-submit-btn');
+                        if (form && submitBtn) {
+                            form.addEventListener('submit', function() {
+                                submitBtn.disabled = true;
+                                const icon = submitBtn.querySelector('.login-icon');
+                                const text = submitBtn.querySelector('.login-text');
+                                if (icon) icon.className = 'fas fa-spinner fa-spin text-primary-500';
+                                if (text) text.textContent = '{{ 'common.loading'|trans|e('js') }}...';
+                            });
+                        }
+                    });
+                </script>
             </div>
 
             <div class="text-center space-y-2">
                 <p class="text-sm text-gray-600">
-                    Don't have an account? 
+                    {{ 'security.login.dont_have_account'|trans }} 
                     <a href="{{ path('register') }}" class="font-medium text-primary-600 hover:text-primary-500">
-                        Register here
+                        {{ 'security.login.register_here'|trans }}
                     </a>
                 </p>
                 <p class="text-sm">
                     <a href="{{ path('reset_password_request') }}" class="font-medium text-primary-600 hover:text-primary-500">
-                        <i class="fas fa-question-circle mr-1"></i>Forgot your password?
+                        <i class="fas fa-question-circle mr-1"></i>{{ 'security.login.forgot_password'|trans }}
                     </a>
                 </p>
             </div>
