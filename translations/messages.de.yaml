@@ -9,18 +9,26 @@ nav:
   login: Anmelden
   register: Registrieren
   logout: Abmelden
+  admin: Admin
   admin_panel: Admin-Panel
   logged_in_as: Angemeldet als
   language: Sprache
   
 footer:
+  description: Ihr vertrauenswürdiges Online-Shopping-Ziel. Qualitätsprodukte, großartige Preise, schnelle Lieferung.
   shop: Shop
   account: Konto
   support: Support
   categories: Kategorien
+  cart: Warenkorb
+  login: Anmelden
+  register: Registrieren
+  contact: Kontaktieren Sie uns
+  faq: FAQ
+  shipping: Versandinformationen
+  rights: Alle Rechte vorbehalten
   shopping_cart: Warenkorb
   contact_us: Kontaktieren Sie uns
-  faq: FAQ
   shipping_info: Versandinformationen
   all_rights_reserved: Alle Rechte vorbehalten
   

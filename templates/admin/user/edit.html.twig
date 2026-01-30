@@ -1,0 +1,70 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Edit User: {{ user.email }}{% endblock %}
+
+{% block body %}
+    <div class="mb-6">
+        <a href="{{ path('admin_users_index') }}" class="text-gray-600 hover:text-gray-900 mb-2 inline-block">
+            <i class="fas fa-arrow-left"></i> Back to Users
+        </a>
+        <h2 class="text-2xl font-bold text-gray-900">Edit User</h2>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6 max-w-2xl">
+        <form method="post">
+            <div class="space-y-6">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                        Email <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email" id="email" name="email" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           value="{{ user.email }}">
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                        Password
+                    </label>
+                    <input type="password" id="password" name="password" minlength="6"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <p class="mt-1 text-sm text-gray-500">Leave empty to keep current password</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Roles</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="roles[]" value="ROLE_USER" {% if 'ROLE_USER' in user.roles %}checked{% endif %}
+                                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm text-gray-700">ROLE_USER</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="roles[]" value="ROLE_ADMIN" {% if 'ROLE_ADMIN' in user.roles %}checked{% endif %}
+                                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm text-gray-700">ROLE_ADMIN</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="isActive" value="1" {% if user.isActive %}checked{% endif %}
+                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <span class="ml-2 text-sm text-gray-700">Active</span>
+                    </label>
+                </div>
+                
+                <div class="flex items-center justify-end space-x-4 pt-4 border-t">
+                    <a href="{{ path('admin_users_show', {id: user.id}) }}" class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Update User
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+

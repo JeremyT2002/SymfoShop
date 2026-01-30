@@ -9,18 +9,26 @@ nav:
   login: Connexion
   register: S'inscrire
   logout: Déconnexion
+  admin: Admin
   admin_panel: Panneau d'administration
   logged_in_as: Connecté en tant que
   language: Langue
   
 footer:
+  description: Votre destination de shopping en ligne de confiance. Produits de qualité, prix intéressants, livraison rapide.
   shop: Boutique
   account: Compte
   support: Support
   categories: Catégories
+  cart: Panier
+  login: Connexion
+  register: S'inscrire
+  contact: Contactez-nous
+  faq: FAQ
+  shipping: Informations de livraison
+  rights: Tous droits réservés
   shopping_cart: Panier
   contact_us: Contactez-nous
-  faq: FAQ
   shipping_info: Informations de livraison
   all_rights_reserved: Tous droits réservés
   

@@ -1,0 +1,90 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Categories{% endblock %}
+
+{% block body %}
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">Categories</h2>
+            <p class="text-gray-600 mt-1">Manage your product categories</p>
+        </div>
+        <a href="{{ path('admin_categories_new') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+            <i class="fas fa-plus"></i>
+            <span>New Category</span>
+        </a>
+    </div>
+    
+    <!-- Categories Tree -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Children</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% if categories|length > 0 %}
+                    {% for category in categories %}
+                        <tr class="hover:bg-gray-50 {% if category.parent %}bg-gray-50{% endif %}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                #{{ category.id }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900 {% if category.parent %}pl-4{% endif %}">
+                                    {% if category.parent %}<i class="fas fa-level-up-alt text-gray-400 mr-2"></i>{% endif %}
+                                    {{ category.name }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ category.slug }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {% if category.parent %}
+                                    <a href="{{ path('admin_categories_show', {id: category.parent.id}) }}" class="text-blue-600 hover:text-blue-900">
+                                        {{ category.parent.name }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ category.children|length }} subcategor{{ category.children|length == 1 ? 'y' : 'ies' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                <a href="{{ path('admin_categories_show', {id: category.id}) }}" class="text-blue-600 hover:text-blue-900">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ path('admin_categories_edit', {id: category.id}) }}" class="text-yellow-600 hover:text-yellow-900">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form method="post" action="{{ path('admin_categories_delete', {id: category.id}) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this category?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_category_' ~ category.id) }}">
+                                    <button type="submit" class="text-red-600 hover:text-red-900">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-tags text-4xl mb-4 text-gray-300"></i>
+                            <p class="text-lg font-medium">No categories found</p>
+                            <p class="text-sm mt-2">Get started by creating your first category.</p>
+                            <a href="{{ path('admin_categories_new') }}" class="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                Create Category
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+

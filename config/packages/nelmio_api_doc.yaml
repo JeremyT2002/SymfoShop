@@ -1,0 +1,26 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: SymfoShop API
+            description: RESTful API for SymfoShop e-commerce platform
+            version: 1.0.0
+        components:
+            securitySchemes:
+                BearerAuth:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: API Key
+                    description: API Key authentication via Authorization Bearer header
+        security:
+            - BearerAuth: []
+    areas:
+        default:
+            path_patterns:
+                - ^/api
+            name_patterns:
+                - ^api_
+            host_patterns:
+                - ^api\.
+                - ^localhost$
+            with_attribute: true
+
