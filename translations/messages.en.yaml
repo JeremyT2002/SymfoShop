@@ -9,18 +9,26 @@ nav:
   login: Login
   register: Register
   logout: Logout
+  admin: Admin
   admin_panel: Admin Panel
   logged_in_as: Logged in as
   language: Language
   
 footer:
+  description: Your trusted online shopping destination. Quality products, great prices, fast delivery.
   shop: Shop
   account: Account
   support: Support
   categories: Categories
+  cart: Cart
+  login: Login
+  register: Register
+  contact: Contact Us
+  faq: FAQ
+  shipping: Shipping Info
+  rights: All rights reserved
   shopping_cart: Shopping Cart
   contact_us: Contact Us
-  faq: FAQ
   shipping_info: Shipping Info
   all_rights_reserved: All rights reserved
   

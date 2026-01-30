@@ -1,16 +1,198 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
-
-        {% block javascripts %}
-        {% endblock %}
-    </head>
-    <body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SymfoShop{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}SymfoShop - Your online shopping destination{% endblock %}">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    
+    {% block stylesheets %}{% endblock %}
+</head>
+<body class="bg-gray-50 antialiased smooth-scroll flex flex-col min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="{{ path('catalog_home') }}" class="flex items-center space-x-2 text-white font-bold text-xl hover:text-blue-100 transition-colors">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>SymfoShop</span>
+                    </a>
+                    
+                    <div class="hidden md:flex items-center space-x-4">
+                        <a href="{{ path('catalog_home') }}" class="text-white hover:text-blue-100 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-home mr-1"></i>{{ 'nav.home'|trans }}
+                        </a>
+                        <a href="{{ path('catalog_home') }}" class="text-white hover:text-blue-100 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-shopping-cart mr-1"></i>{{ 'nav.cart'|trans }}
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- Language Switcher -->
+                    <div class="hidden md:block relative">
+                        <select id="language-switcher" 
+                                class="bg-blue-700 text-white border border-blue-600 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            <option value="en" {% if app.request.locale == 'en' %}selected{% endif %}>🇬🇧 EN</option>
+                            <option value="de" {% if app.request.locale == 'de' %}selected{% endif %}>🇩🇪 DE</option>
+                            <option value="fr" {% if app.request.locale == 'fr' %}selected{% endif %}>🇫🇷 FR</option>
+                        </select>
+                    </div>
+                    
+                    {% if app.user %}
+                        <a href="{{ path('admin') }}" class="text-white hover:text-blue-100 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-user mr-1"></i>{{ 'nav.admin'|trans }}
+                        </a>
+                        <a href="{{ path('logout') }}" class="text-white hover:text-blue-100 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-sign-out-alt mr-1"></i>{{ 'nav.logout'|trans }}
+                        </a>
+                    {% else %}
+                        <a href="{{ path('login') }}" class="text-white hover:text-blue-100 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-sign-in-alt mr-1"></i>{{ 'nav.login'|trans }}
+                        </a>
+                        <a href="{{ path('register') }}" class="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-user-plus mr-1"></i>{{ 'nav.register'|trans }}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Flash Messages -->
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                <div class="p-4 rounded-lg {% if label == 'success' %}bg-green-50 text-green-800 border border-green-200{% elseif label == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas {% if label == 'success' %}fa-check-circle{% elseif label == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col">
         {% block body %}{% endblock %}
-    </body>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-shopping-bag text-2xl"></i>
+                        <span class="text-xl font-bold">SymfoShop</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">{{ 'footer.description'|trans }}</p>
+                </div>
+                
+                <div>
+                    <h3 class="font-semibold mb-4">{{ 'footer.shop'|trans }}</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="{{ path('catalog_home') }}" class="hover:text-white transition-colors">{{ 'footer.categories'|trans }}</a></li>
+                        <li><a href="{{ path('cart_show') }}" class="hover:text-white transition-colors">{{ 'footer.cart'|trans }}</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-semibold mb-4">{{ 'footer.account'|trans }}</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="{{ path('login') }}" class="hover:text-white transition-colors">{{ 'footer.login'|trans }}</a></li>
+                        <li><a href="{{ path('register') }}" class="hover:text-white transition-colors">{{ 'footer.register'|trans }}</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-semibold mb-4">{{ 'footer.support'|trans }}</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">{{ 'footer.contact'|trans }}</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">{{ 'footer.faq'|trans }}</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">{{ 'footer.shipping'|trans }}</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+                <p>&copy; {{ 'now'|date('Y') }} SymfoShop. {{ 'footer.rights'|trans }}</p>
+            </div>
+        </div>
+    </footer>
+    
+    {% block javascripts %}
+    <script>
+        // Language switcher
+        document.getElementById('language-switcher')?.addEventListener('change', function() {
+            const locale = this.value;
+            const currentPath = window.location.pathname;
+            const baseUrl = '{{ app.request.getBaseURL() }}';
+            
+            // Remove current locale from path if present
+            let path = currentPath.replace(/^\/(en|de|fr)(\/|$)/, '/');
+            if (!path.startsWith('/')) {
+                path = '/' + path;
+            }
+            
+            // Build new URL with selected locale
+            const newUrl = baseUrl + '/' + locale + path;
+            window.location.href = newUrl;
+        });
+    </script>
+    {% endblock %}
+</body>
 </html>
