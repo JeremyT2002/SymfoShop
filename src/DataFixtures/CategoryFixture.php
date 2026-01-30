@@ -33,12 +33,10 @@ class CategoryFixture extends Fixture
         // Subcategories for Electronics
         $smartphones = $this->createCategory('Smartphones', 'smartphones', $electronics);
         $laptops = $this->createCategory('Laptops', 'laptops', $electronics);
-        $tablets = $this->createCategory('Tablets', 'tablets', $electronics);
         $headphones = $this->createCategory('Headphones', 'headphones', $electronics);
 
         $manager->persist($smartphones);
         $manager->persist($laptops);
-        $manager->persist($tablets);
         $manager->persist($headphones);
 
         $this->addReference('category_smartphones', $smartphones);
@@ -47,24 +45,19 @@ class CategoryFixture extends Fixture
 
         // Subcategories for Clothing
         $mens = $this->createCategory('Men\'s Clothing', 'mens-clothing', $clothing);
-        $womens = $this->createCategory('Women\'s Clothing', 'womens-clothing', $clothing);
         $shoes = $this->createCategory('Shoes', 'shoes', $clothing);
 
         $manager->persist($mens);
-        $manager->persist($womens);
         $manager->persist($shoes);
 
         $this->addReference('category_mens', $mens);
-        $this->addReference('category_womens', $womens);
         $this->addReference('category_shoes', $shoes);
 
         // Subcategories for Books
         $fiction = $this->createCategory('Fiction', 'fiction', $books);
-        $nonFiction = $this->createCategory('Non-Fiction', 'non-fiction', $books);
         $techBooks = $this->createCategory('Technology', 'technology-books', $books);
 
         $manager->persist($fiction);
-        $manager->persist($nonFiction);
         $manager->persist($techBooks);
 
         $this->addReference('category_fiction', $fiction);

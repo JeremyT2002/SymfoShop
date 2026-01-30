@@ -60,9 +60,13 @@ class Product
         return $this->id;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
-        return $this->name;
+        try {
+            return $this->name;
+        } catch (\Error $e) {
+            return null;
+        }
     }
 
     public function setName(string $name): self
@@ -82,9 +86,13 @@ class Product
         return $this;
     }
 
-    public function getStatus(): ProductStatus
+    public function getStatus(): ?ProductStatus
     {
-        return $this->status;
+        try {
+            return $this->status;
+        } catch (\Error $e) {
+            return null;
+        }
     }
 
     public function setStatus(ProductStatus $status): self
