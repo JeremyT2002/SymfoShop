@@ -3,6 +3,8 @@
 namespace App\Controller\Api;
 
 use App\Service\Cart\CartService;
+use Nelmio\ApiDocBundle\Attribute\Security;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -10,6 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/v1/cart', name: 'api_cart_')]
+#[OA\Tag(name: 'Cart')]
+#[Security(name: 'BearerAuth')]
 class CartApiController extends AbstractController
 {
     public function __construct(
@@ -18,6 +22,21 @@ class CartApiController extends AbstractController
     }
 
     #[Route('', name: 'show', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/v1/cart',
+        summary: 'Get cart',
+        description: 'Get the current shopping cart with all items and totals',
+        tags: ['Cart']
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Cart details',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'data', type: 'object'),
+            ]
+        )
+    )]
     public function show(): JsonResponse
     {
         $items = $this->cartService->getDetailedItems();
@@ -63,6 +82,34 @@ class CartApiController extends AbstractController
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/v1/cart/add',
+        summary: 'Add item to cart',
+        description: 'Add a product variant to the shopping cart',
+        tags: ['Cart']
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'variantId', type: 'integer', description: 'Product variant ID'),
+                new OA\Property(property: 'quantity', type: 'integer', description: 'Quantity to add', default: 1),
+            ],
+            required: ['variantId']
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Item added successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'boolean'),
+                new OA\Property(property: 'message', type: 'string'),
+                new OA\Property(property: 'data', type: 'object'),
+            ]
+        )
+    )]
+    #[OA\Response(response: 400, description: 'Invalid request')]
     public function add(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -93,6 +140,34 @@ class CartApiController extends AbstractController
     }
 
     #[Route('/update', name: 'update', methods: ['PUT', 'PATCH'])]
+    #[OA\Put(
+        path: '/api/v1/cart/update',
+        summary: 'Update cart item',
+        description: 'Update the quantity of an item in the cart. If quantity is 0 or negative, the item will be removed.',
+        tags: ['Cart']
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'variantId', type: 'integer', description: 'Product variant ID'),
+                new OA\Property(property: 'quantity', type: 'integer', description: 'New quantity'),
+            ],
+            required: ['variantId', 'quantity']
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Cart updated successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'boolean'),
+                new OA\Property(property: 'message', type: 'string'),
+                new OA\Property(property: 'data', type: 'object'),
+            ]
+        )
+    )]
+    #[OA\Response(response: 400, description: 'Invalid request')]
     public function update(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -139,6 +214,33 @@ class CartApiController extends AbstractController
     }
 
     #[Route('/remove', name: 'remove', methods: ['DELETE'])]
+    #[OA\Delete(
+        path: '/api/v1/cart/remove',
+        summary: 'Remove item from cart',
+        description: 'Remove a specific item from the shopping cart',
+        tags: ['Cart']
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'variantId', type: 'integer', description: 'Product variant ID to remove'),
+            ],
+            required: ['variantId']
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Item removed successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'boolean'),
+                new OA\Property(property: 'message', type: 'string'),
+                new OA\Property(property: 'data', type: 'object'),
+            ]
+        )
+    )]
+    #[OA\Response(response: 400, description: 'Invalid request')]
     public function remove(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -163,6 +265,23 @@ class CartApiController extends AbstractController
     }
 
     #[Route('/clear', name: 'clear', methods: ['DELETE'])]
+    #[OA\Delete(
+        path: '/api/v1/cart/clear',
+        summary: 'Clear cart',
+        description: 'Remove all items from the shopping cart',
+        tags: ['Cart']
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Cart cleared successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'boolean'),
+                new OA\Property(property: 'message', type: 'string'),
+                new OA\Property(property: 'data', type: 'object'),
+            ]
+        )
+    )]
     public function clear(): JsonResponse
     {
         try {

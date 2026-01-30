@@ -12,6 +12,7 @@
         "doctrine/orm": "^3.6",
         "dompdf/dompdf": "^3.1",
         "easycorp/easyadmin-bundle": "^4.28",
+        "nelmio/api-doc-bundle": "^5.9",
         "stripe/stripe-php": "^19.3",
         "symfony/console": "7.4.*",
         "symfony/dotenv": "7.4.*",

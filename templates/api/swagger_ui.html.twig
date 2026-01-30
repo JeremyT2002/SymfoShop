@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}API Documentation - SymfoShop{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui.css" />
+    <style>
+        .swagger-ui .topbar { display: none; }
+        #swagger-ui { padding: 20px 0; }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">SymfoShop API Documentation</h1>
+        <p class="text-gray-600">Interactive API documentation with Swagger UI</p>
+    </div>
+    <div id="swagger-ui"></div>
+</div>
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            const spec = {{ openApiSpec|raw }};
+            
+            // Configure Swagger UI
+            const ui = SwaggerUIBundle({
+                spec: spec,
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                tryItOutEnabled: true,
+                supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+                persistAuthorization: true,
+                filter: true,
+                docExpansion: 'list',
+                defaultModelsExpandDepth: 1,
+                defaultModelExpandDepth: 1
+            });
+            
+            // Add API key input helper
+            window.ui = ui;
+        };
+    </script>
+{% endblock %}
+{% endblock %}
+

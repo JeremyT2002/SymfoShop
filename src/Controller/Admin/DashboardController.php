@@ -24,6 +24,13 @@ class DashboardController extends AbstractDashboardController
         return $this->render('admin/dashboard.html.twig');
     }
 
+    #[Route('/admin/api-docs', name: 'admin_api_docs')]
+    public function apiDocs(): Response
+    {
+        // Redirect to Swagger UI documentation
+        return $this->redirect('/api/v1/docs');
+    }
+
     public function configureDashboard(): Dashboard
     {
         return Dashboard::new()
@@ -44,6 +51,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::section('System');
         yield MenuItem::linkToCrud('Users', 'fa fa-users', User::class);
         yield MenuItem::linkToCrud('API Keys', 'fa fa-key', ApiKey::class);
+        yield MenuItem::linkToRoute('API Documentation', 'fa fa-book', 'admin_api_docs');
         yield MenuItem::linkToCrud('Audit Logs', 'fa fa-history', AuditLog::class);
     }
 }
