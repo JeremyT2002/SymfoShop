@@ -1,0 +1,93 @@
+{#
+  Button Component
+  ================
+
+  A flexible button component with multiple variants and states.
+
+  Parameters:
+  - variant: primary|secondary|ghost|danger (default: primary)
+  - size: sm|md|lg (default: md)
+  - type: button|submit|reset (default: button)
+  - disabled: boolean (default: false)
+  - loading: boolean (default: false)
+  - fullWidth: boolean (default: false)
+  - href: string (makes it a link instead of button)
+  - icon: string (FontAwesome icon class)
+  - iconPosition: left|right (default: left)
+
+  Usage:
+  {% include 'components/button.html.twig' with {
+    variant: 'primary',
+    size: 'md',
+    content: 'Click me'
+  } %}
+#}
+
+{# Default parameters #}
+{% set variant = variant|default('primary') %}
+{% set size = size|default('md') %}
+{% set type = type|default('button') %}
+{% set disabled = disabled|default(false) %}
+{% set loading = loading|default(false) %}
+{% set fullWidth = fullWidth|default(false) %}
+{% set iconPosition = iconPosition|default('left') %}
+
+{# Base classes #}
+{% set baseClasses = 'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed' %}
+
+{# Variant classes #}
+{% set variantClasses = {
+  'primary': 'bg-primary-600 hover:bg-primary-700 text-white focus:ring-primary-500 shadow-sm hover:shadow-md',
+  'secondary': 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 focus:ring-primary-500 shadow-sm hover:shadow-md',
+  'ghost': 'bg-transparent hover:bg-gray-100 text-gray-700 focus:ring-primary-500',
+  'danger': 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500 shadow-sm hover:shadow-md'
+} %}
+
+{# Size classes #}
+{% set sizeClasses = {
+  'sm': 'px-3 py-1.5 text-sm gap-1.5',
+  'md': 'px-4 py-2.5 text-sm gap-2',
+  'lg': 'px-6 py-3 text-base gap-2.5'
+} %}
+
+{# Combine classes #}
+{% set classes = [
+  baseClasses,
+  variantClasses[variant],
+  sizeClasses[size],
+  fullWidth ? 'w-full' : '',
+  loading ? 'cursor-wait' : ''
+]|join(' ')|trim %}
+
+{# Render as link or button #}
+{% if href is defined %}
+  <a href="{{ href }}" class="{{ classes }}" {% if disabled %}aria-disabled="true"{% endif %}>
+    {% if loading %}
+      <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+      <span class="sr-only">{{ 'Loading...'|trans }}</span>
+    {% elseif icon is defined and iconPosition == 'left' %}
+      <i class="{{ icon }}" aria-hidden="true"></i>
+    {% endif %}
+
+    <span>{{ content|default(block('content')) }}</span>
+
+    {% if icon is defined and iconPosition == 'right' %}
+      <i class="{{ icon }}" aria-hidden="true"></i>
+    {% endif %}
+  </a>
+{% else %}
+  <button type="{{ type }}" class="{{ classes }}" {% if disabled or loading %}disabled{% endif %}>
+    {% if loading %}
+      <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+      <span class="sr-only">{{ 'Loading...'|trans }}</span>
+    {% elseif icon is defined and iconPosition == 'left' %}
+      <i class="{{ icon }}" aria-hidden="true"></i>
+    {% endif %}
+
+    <span>{{ content|default(block('content')) }}</span>
+
+    {% if icon is defined and iconPosition == 'right' %}
+      <i class="{{ icon }}" aria-hidden="true"></i>
+    {% endif %}
+  </button>
+{% endif %}

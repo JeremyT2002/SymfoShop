@@ -1,0 +1,450 @@
+{#
+  Checkout Process Example Page
+  =============================
+
+  Demonstrates a complete checkout flow with:
+  - Multi-step progress indicator
+  - Shipping and billing forms
+  - Payment method selection
+  - Order summary with cart items
+  - Form validation and error handling
+  - Mobile-responsive design
+#}
+
+{% extends 'base-modern.html.twig' %}
+
+{% block title %}Checkout - SymfoShop{% endblock %}
+{% block meta_description %}Complete your purchase securely{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-neutral-50">
+    <!-- Progress Indicator -->
+    <div class="bg-white border-b border-neutral-200">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-center">
+                {% set steps = [
+                    {'name': 'Cart', 'icon': 'fa-shopping-cart', 'active': false, 'completed': true},
+                    {'name': 'Shipping', 'icon': 'fa-truck', 'active': true, 'completed': false},
+                    {'name': 'Payment', 'icon': 'fa-credit-card', 'active': false, 'completed': false},
+                    {'name': 'Review', 'icon': 'fa-check-circle', 'active': false, 'completed': false}
+                ] %}
+                {% for step in steps %}
+                <div class="flex items-center {{ not loop.last ? 'flex-1' : '' }}">
+                    <div class="flex flex-col items-center">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full {{ step.active ? 'bg-primary-600 text-white' : step.completed ? 'bg-green-600 text-white' : 'bg-neutral-200 text-neutral-600' }}">
+                            <i class="fas {{ step.icon }} text-sm"></i>
+                        </div>
+                        <span class="mt-2 text-xs font-medium {{ step.active ? 'text-primary-600' : step.completed ? 'text-green-600' : 'text-neutral-600' }}">
+                            {{ step.name }}
+                        </span>
+                    </div>
+                    {% if not loop.last %}
+                    <div class="flex-1 h-px bg-neutral-300 mx-4 {{ step.completed ? 'bg-green-600' : '' }}"></div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Checkout Form -->
+            <div class="lg:col-span-2">
+                <form class="space-y-8">
+                    <!-- Shipping Information -->
+                    <div class="bg-white rounded-2xl shadow-soft border border-neutral-200 p-6">
+                        <h2 class="text-xl font-semibold text-neutral-900 mb-6 flex items-center">
+                            <i class="fas fa-truck text-primary-600 mr-3"></i>
+                            Shipping Information
+                        </h2>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {% include 'components/form/input.html.twig' with {
+                                label: 'First Name',
+                                name: 'shipping_first_name',
+                                type: 'text',
+                                required: true,
+                                placeholder: 'John',
+                                value: 'John'
+                            } %}
+
+                            {% include 'components/form/input.html.twig' with {
+                                label: 'Last Name',
+                                name: 'shipping_last_name',
+                                type: 'text',
+                                required: true,
+                                placeholder: 'Doe',
+                                value: 'Doe'
+                            } %}
+
+                            {% include 'components/form/input.html.twig' with {
+                                label: 'Email Address',
+                                name: 'shipping_email',
+                                type: 'email',
+                                required: true,
+                                placeholder: 'john.doe@example.com',
+                                value: 'john.doe@example.com'
+                            } %}
+
+                            {% include 'components/form/input.html.twig' with {
+                                label: 'Phone Number',
+                                name: 'shipping_phone',
+                                type: 'tel',
+                                required: true,
+                                placeholder: '+1 (555) 123-4567',
+                                value: '+1 (555) 123-4567'
+                            } %}
+
+                            {% include 'components/form/input.html.twig' with {
+                                label: 'Address Line 1',
+                                name: 'shipping_address_1',
+                                type: 'text',
+                                required: true,
+                                placeholder: '123 Main Street',
+                                value: '123 Main Street'
+                            } %}
+
+                            {% include 'components/form/input.html.twig' with {
+                                label: 'Address Line 2',
+                                name: 'shipping_address_2',
+                                type: 'text',
+                                placeholder: 'Apartment, suite, etc.',
+                                value: 'Apt 4B'
+                            } %}
+
+                            {% include 'components/form/input.html.twig' with {
+                                label: 'City',
+                                name: 'shipping_city',
+                                type: 'text',
+                                required: true,
+                                placeholder: 'New York',
+                                value: 'New York'
+                            } %}
+
+                            <div class="grid grid-cols-2 gap-4">
+                                {% include 'components/form/input.html.twig' with {
+                                    label: 'State',
+                                    name: 'shipping_state',
+                                    type: 'text',
+                                    required: true,
+                                    placeholder: 'NY',
+                                    value: 'NY'
+                                } %}
+
+                                {% include 'components/form/input.html.twig' with {
+                                    label: 'ZIP Code',
+                                    name: 'shipping_zip',
+                                    type: 'text',
+                                    required: true,
+                                    placeholder: '10001',
+                                    value: '10001'
+                                } %}
+                            </div>
+                        </div>
+
+                        <!-- Shipping Options -->
+                        <div class="mt-6">
+                            <h3 class="font-medium text-neutral-900 mb-4">Shipping Method</h3>
+                            <div class="space-y-3">
+                                {% for option in [
+                                    {'name': 'Standard Shipping', 'time': '5-7 business days', 'price': 5.99, 'selected': false},
+                                    {'name': 'Express Shipping', 'time': '2-3 business days', 'price': 12.99, 'selected': true},
+                                    {'name': 'Overnight Shipping', 'time': '1 business day', 'price': 24.99, 'selected': false}
+                                ] %}
+                                <label class="flex items-center p-4 border border-neutral-200 rounded-xl cursor-pointer hover:border-primary-300 hover:bg-primary-50/50 transition-colors">
+                                    <input type="radio" name="shipping_method" value="{{ option.name|lower|replace({' ': '_'}) }}" class="text-primary-600 focus:ring-primary-500" {{ option.selected ? 'checked' }}>
+                                    <div class="ml-3 flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-medium text-neutral-900">{{ option.name }}</span>
+                                            <span class="font-semibold text-neutral-900">${{ option.price }}</span>
+                                        </div>
+                                        <p class="text-sm text-neutral-600 mt-1">{{ option.time }}</p>
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Billing Information -->
+                    <div class="bg-white rounded-2xl shadow-soft border border-neutral-200 p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-semibold text-neutral-900 flex items-center">
+                                <i class="fas fa-credit-card text-primary-600 mr-3"></i>
+                                Billing Information
+                            </h2>
+                            <label class="flex items-center text-sm text-neutral-600">
+                                <input type="checkbox" class="rounded border-neutral-300 text-primary-600 focus:ring-primary-500 mr-2" checked>
+                                Same as shipping address
+                            </label>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {% include 'components/form/input.html.twig' with {
+                                label: 'First Name',
+                                name: 'billing_first_name',
+                                type: 'text',
+                                required: true,
+                                placeholder: 'John',
+                                value: 'John'
+                            } %}
+
+                            {% include 'components/form/input.html.twig' with {
+                                label: 'Last Name',
+                                name: 'billing_last_name',
+                                type: 'text',
+                                required: true,
+                                placeholder: 'Doe',
+                                value: 'Doe'
+                            } %}
+
+                            {% include 'components/form/input.html.twig' with {
+                                label: 'Address Line 1',
+                                name: 'billing_address_1',
+                                type: 'text',
+                                required: true,
+                                placeholder: '123 Main Street',
+                                value: '123 Main Street'
+                            } %}
+
+                            {% include 'components/form/input.html.twig' with {
+                                label: 'Address Line 2',
+                                name: 'billing_address_2',
+                                type: 'text',
+                                placeholder: 'Apartment, suite, etc.',
+                                value: 'Apt 4B'
+                            } %}
+
+                            {% include 'components/form/input.html.twig' with {
+                                label: 'City',
+                                name: 'billing_city',
+                                type: 'text',
+                                required: true,
+                                placeholder: 'New York',
+                                value: 'New York'
+                            } %}
+
+                            <div class="grid grid-cols-2 gap-4">
+                                {% include 'components/form/input.html.twig' with {
+                                    label: 'State',
+                                    name: 'billing_state',
+                                    type: 'text',
+                                    required: true,
+                                    placeholder: 'NY',
+                                    value: 'NY'
+                                } %}
+
+                                {% include 'components/form/input.html.twig' with {
+                                    label: 'ZIP Code',
+                                    name: 'billing_zip',
+                                    type: 'text',
+                                    required: true,
+                                    placeholder: '10001',
+                                    value: '10001'
+                                } %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="bg-white rounded-2xl shadow-soft border border-neutral-200 p-6">
+                        <h2 class="text-xl font-semibold text-neutral-900 mb-6 flex items-center">
+                            <i class="fas fa-credit-card text-primary-600 mr-3"></i>
+                            Payment Method
+                        </h2>
+
+                        <div class="space-y-4">
+                            <!-- Payment Options -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {% for method in [
+                                    {'name': 'Credit Card', 'icon': 'fa-credit-card', 'selected': true},
+                                    {'name': 'PayPal', 'icon': 'fa-paypal', 'selected': false},
+                                    {'name': 'Apple Pay', 'icon': 'fa-apple-pay', 'selected': false}
+                                ] %}
+                                <label class="flex items-center p-4 border border-neutral-200 rounded-xl cursor-pointer hover:border-primary-300 hover:bg-primary-50/50 transition-colors">
+                                    <input type="radio" name="payment_method" value="{{ method.name|lower|replace({' ': '_'}) }}" class="text-primary-600 focus:ring-primary-500" {{ method.selected ? 'checked' }}>
+                                    <div class="ml-3 flex items-center">
+                                        <i class="fab {{ method.icon }} text-xl text-neutral-600 mr-3"></i>
+                                        <span class="font-medium text-neutral-900">{{ method.name }}</span>
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Credit Card Form -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {% include 'components/form/input.html.twig' with {
+                                    label: 'Card Number',
+                                    name: 'card_number',
+                                    type: 'text',
+                                    required: true,
+                                    placeholder: '1234 5678 9012 3456',
+                                    value: '4111 1111 1111 1111',
+                                    icon: 'fa-credit-card'
+                                } %}
+
+                                {% include 'components/form/input.html.twig' with {
+                                    label: 'Cardholder Name',
+                                    name: 'cardholder_name',
+                                    type: 'text',
+                                    required: true,
+                                    placeholder: 'John Doe',
+                                    value: 'John Doe'
+                                } %}
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    {% include 'components/form/input.html.twig' with {
+                                        label: 'Expiry Date',
+                                        name: 'expiry_date',
+                                        type: 'text',
+                                        required: true,
+                                        placeholder: 'MM/YY',
+                                        value: '12/25'
+                                    } %}
+
+                                    {% include 'components/form/input.html.twig' with {
+                                        label: 'CVV',
+                                        name: 'cvv',
+                                        type: 'text',
+                                        required: true,
+                                        placeholder: '123',
+                                        value: '123'
+                                    } %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 pt-6">
+                        <a href="{{ path('cart') }}" class="flex-1 sm:flex-none">
+                            {% include 'components/button.html.twig' with {
+                                variant: 'secondary',
+                                content: 'Back to Cart',
+                                icon: 'fa-arrow-left',
+                                class: 'w-full sm:w-auto'
+                            } %}
+                        </a>
+
+                        {% include 'components/button.html.twig' with {
+                            variant: 'primary',
+                            size: 'lg',
+                            content: 'Continue to Review',
+                            icon: 'fa-arrow-right',
+                            class: 'flex-1 sm:flex-none w-full sm:w-auto',
+                            attributes: 'type="submit"'
+                        } %}
+                    </div>
+                </form>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-soft border border-neutral-200 p-6 sticky top-24">
+                    <h3 class="text-lg font-semibold text-neutral-900 mb-6">Order Summary</h3>
+
+                    <!-- Cart Items -->
+                    <div class="space-y-4 mb-6">
+                        {% for item in [
+                            {'name': 'Wireless Bluetooth Headphones', 'price': 199.99, 'quantity': 1, 'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=80'},
+                            {'name': 'Smart Watch Series 7', 'price': 399.99, 'quantity': 1, 'image': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=80'},
+                            {'name': 'Portable Power Bank', 'price': 79.99, 'quantity': 2, 'image': 'https://images.unsplash.com/photo-1609594040201-1646b22e1c0d?w=80'}
+                        ] %}
+                        <div class="flex items-center gap-4">
+                            <img src="{{ item.image }}" alt="{{ item.name }}" class="w-16 h-16 rounded-lg object-cover">
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-sm font-medium text-neutral-900 truncate">{{ item.name }}</h4>
+                                <p class="text-sm text-neutral-600">Qty: {{ item.quantity }}</p>
+                            </div>
+                            <span class="text-sm font-semibold text-neutral-900">${{ (item.price * item.quantity)|number_format(2) }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Order Totals -->
+                    <div class="border-t border-neutral-200 pt-4 space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-neutral-600">Subtotal</span>
+                            <span class="text-neutral-900">$679.97</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-neutral-600">Shipping</span>
+                            <span class="text-neutral-900">$12.99</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-neutral-600">Tax</span>
+                            <span class="text-neutral-900">$54.40</span>
+                        </div>
+                        <div class="flex justify-between text-base font-semibold pt-2 border-t border-neutral-200">
+                            <span class="text-neutral-900">Total</span>
+                            <span class="text-neutral-900">$747.36</span>
+                        </div>
+                    </div>
+
+                    <!-- Promo Code -->
+                    <div class="mt-6">
+                        <label for="promo-code" class="block text-sm font-medium text-neutral-700 mb-2">Promo Code</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="promo-code" placeholder="Enter code" class="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            {% include 'components/button.html.twig' with {
+                                variant: 'secondary',
+                                size: 'sm',
+                                content: 'Apply',
+                                class: 'px-4'
+                            } %}
+                        </div>
+                    </div>
+
+                    <!-- Security Notice -->
+                    <div class="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                        <div class="flex items-start">
+                            <i class="fas fa-shield-alt text-green-600 mt-0.5 mr-3"></i>
+                            <div>
+                                <h4 class="text-sm font-medium text-green-800">Secure Checkout</h4>
+                                <p class="text-xs text-green-700 mt-1">Your payment information is encrypted and secure. We never store your card details.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation and interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-format card number
+    const cardNumberInput = document.querySelector('[name="card_number"]');
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formattedValue;
+        });
+    }
+
+    // Auto-format expiry date
+    const expiryInput = document.querySelector('[name="expiry_date"]');
+    if (expiryInput) {
+        expiryInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+    }
+
+    // CVV validation
+    const cvvInput = document.querySelector('[name="cvv"]');
+    if (cvvInput) {
+        cvvInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+        });
+    }
+});
+</script>
+{% endblock %}

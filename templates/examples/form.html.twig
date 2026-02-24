@@ -1,0 +1,316 @@
+{#
+  Form Example Page
+  =================
+
+  Demonstrates a comprehensive form layout with:
+  - Various input types and validation states
+  - Form sections and organization
+  - Accessibility features
+  - Responsive design
+  - Loading and success states
+#}
+
+{% extends 'base-modern.html.twig' %}
+
+{% block title %}Add New Product - SymfoShop{% endblock %}
+{% block meta_description %}Add a new product to your store{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-neutral-50">
+    <!-- Page Header -->
+    <div class="bg-white border-b border-neutral-200">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-neutral-900">Add New Product</h1>
+                    <p class="mt-2 text-neutral-600">Create a new product listing for your store.</p>
+                </div>
+                <div class="flex space-x-3">
+                    {% include 'components/button.html.twig' with {
+                        variant: 'ghost',
+                        content: 'Cancel',
+                        href: '#'
+                    } %}
+                    {% include 'components/button.html.twig' with {
+                        variant: 'primary',
+                        content: 'Save Product',
+                        type: 'submit',
+                        form: 'product-form',
+                        icon: 'fa-save'
+                    } %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <form id="product-form" class="space-y-8" novalidate>
+            <!-- Basic Information -->
+            <div class="bg-white rounded-2xl shadow-soft border border-neutral-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-neutral-200">
+                    <h2 class="text-xl font-semibold text-neutral-900">Basic Information</h2>
+                    <p class="text-neutral-600 text-sm mt-1">Essential details about your product.</p>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% include 'components/form/input.html.twig' with {
+                            name: 'name',
+                            label: 'Product Name',
+                            type: 'text',
+                            placeholder: 'Enter product name',
+                            required: true,
+                            value: 'Wireless Bluetooth Headphones'
+                        } %}
+
+                        {% include 'components/form/input.html.twig' with {
+                            name: 'sku',
+                            label: 'SKU',
+                            type: 'text',
+                            placeholder: 'Unique product code',
+                            required: true,
+                            value: 'WBH-001',
+                            help: 'A unique identifier for inventory tracking'
+                        } %}
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-neutral-700 mb-2">
+                            Description
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            rows="4"
+                            class="block w-full rounded-xl border-neutral-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                            placeholder="Describe your product in detail..."
+                            required
+                        >Premium wireless headphones with active noise cancellation, 30-hour battery life, and superior sound quality. Perfect for music lovers and professionals.</textarea>
+                        <p class="mt-2 text-sm text-neutral-500">Provide a detailed description of your product (minimum 50 characters).</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {% include 'components/form/input.html.twig' with {
+                            name: 'price',
+                            label: 'Price (€)',
+                            type: 'number',
+                            placeholder: '0.00',
+                            required: true,
+                            value: '199.99',
+                            icon: 'fa-euro-sign'
+                        } %}
+
+                        {% include 'components/form/input.html.twig' with {
+                            name: 'category',
+                            label: 'Category',
+                            type: 'text',
+                            placeholder: 'Select category',
+                            required: true,
+                            value: 'Electronics'
+                        } %}
+
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-neutral-700">Status</label>
+                            <div class="flex space-x-4">
+                                <label class="flex items-center">
+                                    <input type="radio" name="status" value="active" class="text-primary-600 focus:ring-primary-500" checked>
+                                    <span class="ml-2 text-sm text-neutral-700">Active</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="status" value="draft" class="text-primary-600 focus:ring-primary-500">
+                                    <span class="ml-2 text-sm text-neutral-700">Draft</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory & Variants -->
+            <div class="bg-white rounded-2xl shadow-soft border border-neutral-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-neutral-200">
+                    <h2 class="text-xl font-semibold text-neutral-900">Inventory & Variants</h2>
+                    <p class="text-neutral-600 text-sm mt-1">Manage stock levels and product variations.</p>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% include 'components/form/input.html.twig' with {
+                            name: 'stock_quantity',
+                            label: 'Stock Quantity',
+                            type: 'number',
+                            placeholder: '0',
+                            required: true,
+                            value: '50',
+                            icon: 'fa-boxes'
+                        } %}
+
+                        {% include 'components/form/input.html.twig' with {
+                            name: 'low_stock_threshold',
+                            label: 'Low Stock Alert',
+                            type: 'number',
+                            placeholder: '5',
+                            value: '10',
+                            help: 'Get notified when stock falls below this number'
+                        } %}
+                    </div>
+
+                    <!-- Variants Section -->
+                    <div>
+                        <h3 class="text-lg font-medium text-neutral-900 mb-4">Product Variants</h3>
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-neutral-50 rounded-xl">
+                                {% include 'components/form/input.html.twig' with {
+                                    name: 'variant_color',
+                                    label: 'Color',
+                                    type: 'text',
+                                    placeholder: 'Black',
+                                    value: 'Black'
+                                } %}
+
+                                {% include 'components/form/input.html.twig' with {
+                                    name: 'variant_size',
+                                    label: 'Size',
+                                    type: 'text',
+                                    placeholder: 'One Size',
+                                    value: 'One Size'
+                                } %}
+
+                                {% include 'components/form/input.html.twig' with {
+                                    name: 'variant_stock',
+                                    label: 'Stock',
+                                    type: 'number',
+                                    placeholder: '0',
+                                    value: '50'
+                                } %}
+                            </div>
+                        </div>
+
+                        {% include 'components/button.html.twig' with {
+                            variant: 'ghost',
+                            size: 'sm',
+                            content: 'Add Another Variant',
+                            icon: 'fa-plus'
+                        } %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media & Images -->
+            <div class="bg-white rounded-2xl shadow-soft border border-neutral-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-neutral-200">
+                    <h2 class="text-xl font-semibold text-neutral-900">Media & Images</h2>
+                    <p class="text-neutral-600 text-sm mt-1">Upload product images and media files.</p>
+                </div>
+
+                <div class="p-6">
+                    <div class="border-2 border-dashed border-neutral-300 rounded-xl p-8 text-center">
+                        <div class="space-y-4">
+                            <div class="mx-auto w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-cloud-upload-alt text-neutral-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-lg font-medium text-neutral-900">Drop images here or click to upload</p>
+                                <p class="text-neutral-600">PNG, JPG, GIF up to 10MB each</p>
+                            </div>
+                            {% include 'components/button.html.twig' with {
+                                variant: 'secondary',
+                                content: 'Choose Files',
+                                type: 'button'
+                            } %}
+                        </div>
+                    </div>
+
+                    <!-- Preview area would go here -->
+                    <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="aspect-square bg-neutral-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-image text-neutral-400 text-2xl"></i>
+                        </div>
+                        <div class="aspect-square bg-neutral-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-image text-neutral-400 text-2xl"></i>
+                        </div>
+                        <div class="aspect-square bg-neutral-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-image text-neutral-400 text-2xl"></i>
+                        </div>
+                        <div class="aspect-square bg-neutral-100 rounded-xl flex items-center justify-center border-2 border-dashed border-neutral-300">
+                            <i class="fas fa-plus text-neutral-400 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings & Options -->
+            <div class="bg-white rounded-2xl shadow-soft border border-neutral-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-neutral-200">
+                    <h2 class="text-xl font-semibold text-neutral-900">Settings & Options</h2>
+                    <p class="text-neutral-600 text-sm mt-1">Additional product configuration options.</p>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% include 'components/form/input.html.twig' with {
+                            name: 'weight',
+                            label: 'Weight (kg)',
+                            type: 'number',
+                            step: '0.01',
+                            placeholder: '0.00',
+                            value: '0.3'
+                        } %}
+
+                        {% include 'components/form/input.html.twig' with {
+                            name: 'tax_class',
+                            label: 'Tax Class',
+                            type: 'text',
+                            placeholder: 'standard',
+                            value: 'standard'
+                        } %}
+                    </div>
+
+                    <div class="space-y-4">
+                        <label class="block text-sm font-medium text-neutral-700">Additional Options</label>
+                        <div class="space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="featured" class="rounded border-neutral-300 text-primary-600 focus:ring-primary-500" checked>
+                                <span class="ml-3 text-sm text-neutral-700">Featured product</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="digital" class="rounded border-neutral-300 text-primary-600 focus:ring-primary-500">
+                                <span class="ml-3 text-sm text-neutral-700">Digital product (no shipping required)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="backorders" class="rounded border-neutral-300 text-primary-600 focus:ring-primary-500">
+                                <span class="ml-3 text-sm text-neutral-700">Allow backorders</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex flex-col sm:flex-row sm:justify-end sm:space-x-3 space-y-3 sm:space-y-0 bg-white p-6 rounded-2xl shadow-soft border border-neutral-200">
+                {% include 'components/button.html.twig' with {
+                    variant: 'ghost',
+                    content: 'Save as Draft',
+                    type: 'button'
+                } %}
+
+                {% include 'components/button.html.twig' with {
+                    variant: 'secondary',
+                    content: 'Preview',
+                    type: 'button',
+                    icon: 'fa-eye'
+                } %}
+
+                {% include 'components/button.html.twig' with {
+                    variant: 'primary',
+                    content: 'Publish Product',
+                    type: 'submit',
+                    icon: 'fa-rocket'
+                } %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
