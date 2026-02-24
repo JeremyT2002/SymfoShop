@@ -1,4 +1,4 @@
-.PHONY: help install setup test clean cache-clear db-create db-migrate db-reset fixtures admin-user server-start server-stop lint format check
+.PHONY: help install setup test clean cache-clear db-create db-migrate db-reset fixtures admin-user server-start server-stop lint format check docker-up docker-down docker-build docker-logs docker-exec docker-db-setup docker-db-drop docker-db-reset docker-load-fixture docker-admin-user
 
 # Default target
 .DEFAULT_GOAL := help
@@ -13,19 +13,54 @@ NC := \033[0m # No Color
 help: ## Show this help message
 	@echo "SymfoShop - Available Commands"
 	@echo ""
+	@echo "Installation & Setup:"
 	@echo "  install              Install Composer dependencies"
 	@echo "  setup                Complete project setup (install, db, migrate, admin user)"
+	@echo ""
+	@echo "Database:"
 	@echo "  db-create             Create database"
 	@echo "  db-migrate            Run database migrations"
 	@echo "  db-reset              Reset database (drop, create, migrate)"
 	@echo "  db-fixtures           Load database fixtures (sample data)"
 	@echo "  db-seed               Reset database and load fixtures"
+	@echo ""
+	@echo "User Management:"
 	@echo "  admin-user            Create admin user (interactive)"
+	@echo ""
+	@echo "Cache:"
 	@echo "  cache-clear           Clear Symfony cache"
+	@echo "  cache-warmup          Warm up cache"
+	@echo ""
+	@echo "Server:"
 	@echo "  server-start          Start Symfony development server"
 	@echo "  server-stop           Stop Symfony development server"
+	@echo "  server-log            Show Symfony server logs"
+	@echo ""
+	@echo "Docker:"
+	@echo "  docker-up             Start Docker services"
+	@echo "  docker-down           Stop Docker services"
+	@echo "  docker-build          Build Docker images"
+	@echo "  docker-logs           Show Docker logs"
+	@echo "  docker-exec           Execute command in app container (use CMD=command)"
+	@echo "  docker-db-setup       Setup database and cache in Docker"
+	@echo "  docker-db-drop        Drop database in Docker (WARNING: destructive)"
+	@echo "  docker-db-reset       Reset database in Docker (drop, create, migrate)"
+	@echo "  docker-load-fixture   Load fixtures in Docker"
+	@echo ""
+	@echo "Testing:"
 	@echo "  test                  Run all tests"
+	@echo "  test-unit             Run unit tests only"
+	@echo "  test-integration      Run integration tests only"
+	@echo "  test-coverage         Generate test coverage report"
+	@echo ""
+	@echo "Code Quality:"
 	@echo "  lint                  Run all linting checks"
+	@echo "  lint-container        Lint service container"
+	@echo "  lint-yaml             Lint YAML files"
+	@echo "  lint-twig             Lint Twig templates"
+	@echo "  format                Format code (if using PHP CS Fixer)"
+	@echo ""
+	@echo "Maintenance:"
 	@echo "  check                 Run all checks (lint + test)"
 	@echo "  dev                   Start development environment"
 	@echo "  clean                 Clean generated files"
@@ -110,6 +145,49 @@ server-stop: ## Stop Symfony development server
 server-log: ## Show Symfony server logs
 	symfony server:log
 
+# Docker
+docker-up: ## Start Docker services
+	@echo "$(BLUE)Starting Docker services...$(NC)"
+	docker compose up --build -d
+
+docker-down: ## Stop Docker services
+	@echo "$(BLUE)Stopping Docker services...$(NC)"
+	docker compose down
+
+docker-build: ## Build Docker images
+	@echo "$(BLUE)Building Docker images...$(NC)"
+	docker compose build
+
+docker-logs: ## Show Docker logs
+	docker compose logs -f
+
+docker-exec: ## Execute command in app container
+	docker compose exec app $(CMD)
+
+docker-db-setup: ## Setup database in Docker
+	@echo "$(BLUE)Setting up database in Docker...$(NC)"
+	docker compose exec app php bin/console doctrine:database:create --if-not-exists
+	docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
+	docker compose exec app php bin/console cache:clear
+	docker compose exec app php bin/console cache:warmup
+
+docker-db-drop: ## Drop database in Docker (WARNING: destructive)
+	@echo "$(BLUE)Dropping database in Docker...$(NC)"
+	docker compose exec app php bin/console doctrine:database:drop --force --if-exists
+
+docker-db-reset: ## Reset database in Docker (drop, create, migrate)
+	@echo "$(BLUE)Resetting database in Docker...$(NC)"
+	@$(MAKE) docker-db-drop
+	@$(MAKE) docker-db-setup
+
+docker-load-fixture: ## Load fixtures in Docker
+	@echo "$(BLUE)Loading fixtures in Docker...$(NC)"
+	docker compose exec app php bin/console doctrine:fixtures:load --append --no-interaction
+
+docker-admin-user: ## Create admin user in Docker
+	@echo "$(BLUE)Creating admin user in Docker...$(NC)"
+	docker compose exec app php bin/console app:create-admin-user
+
 # Testing
 test: ## Run all tests
 	@echo "$(BLUE)Running tests...$(NC)"
@@ -167,25 +245,6 @@ messenger-retry: ## Retry failed messages
 cleanup-reservations: ## Clean up expired inventory reservations
 	@echo "$(BLUE)Cleaning up expired reservations...$(NC)"
 	php bin/console app:inventory:cleanup-reservations
-
-# Docker (if using Docker)
-docker-up: ## Start Docker containers
-	@echo "$(BLUE)Starting Docker containers...$(NC)"
-	docker-compose up -d
-
-docker-down: ## Stop Docker containers
-	@echo "$(BLUE)Stopping Docker containers...$(NC)"
-	docker-compose down
-
-docker-build: ## Build Docker containers
-	@echo "$(BLUE)Building Docker containers...$(NC)"
-	docker-compose build
-
-docker-logs: ## Show Docker logs
-	docker-compose logs -f
-
-docker-ps: ## Show running Docker containers
-	docker-compose ps
 
 # Development Workflow
 dev: server-start ## Start development environment
