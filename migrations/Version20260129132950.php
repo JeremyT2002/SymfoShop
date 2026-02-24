@@ -21,25 +21,25 @@ final class Version20260129132950 extends AbstractMigration
     {
         // Create audit_log table
         $this->addSql('CREATE TABLE audit_log (
-            id INT AUTO_INCREMENT NOT NULL,
+            id SERIAL NOT NULL,
             entity_type VARCHAR(100) NOT NULL,
             entity_id INT DEFAULT NULL,
             action VARCHAR(50) NOT NULL,
-            old_value LONGTEXT DEFAULT NULL,
-            new_value LONGTEXT DEFAULT NULL,
+            old_value TEXT DEFAULT NULL,
+            new_value TEXT DEFAULT NULL,
             changed_field VARCHAR(255) DEFAULT NULL,
             user_identifier VARCHAR(255) DEFAULT NULL,
-            created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\',
-            INDEX idx_audit_log_entity (entity_type, entity_id),
-            INDEX idx_audit_log_action (action),
-            INDEX idx_audit_log_created (created_at),
+            created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
             PRIMARY KEY(id)
-        ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        )');
+        $this->addSql('CREATE INDEX idx_audit_log_entity ON audit_log (entity_type, entity_id)');
+        $this->addSql('CREATE INDEX idx_audit_log_action ON audit_log (action)');
+        $this->addSql('CREATE INDEX idx_audit_log_created ON audit_log (created_at)');
 
         // Add shipment tracking fields to order table
-        $this->addSql('ALTER TABLE `order` ADD tracking_number VARCHAR(255) DEFAULT NULL');
-        $this->addSql('ALTER TABLE `order` ADD carrier VARCHAR(100) DEFAULT NULL');
-        $this->addSql('ALTER TABLE `order` ADD shipped_at DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('ALTER TABLE "order" ADD tracking_number VARCHAR(255) DEFAULT NULL');
+        $this->addSql('ALTER TABLE "order" ADD carrier VARCHAR(100) DEFAULT NULL');
+        $this->addSql('ALTER TABLE "order" ADD shipped_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL');
     }
 
     public function down(Schema $schema): void

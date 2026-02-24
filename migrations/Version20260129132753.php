@@ -21,20 +21,20 @@ final class Version20260129132753 extends AbstractMigration
     {
         // Create invoice table
         $this->addSql('CREATE TABLE invoice (
-            id INT AUTO_INCREMENT NOT NULL,
+            id SERIAL NOT NULL,
             order_id INT NOT NULL,
             invoice_number VARCHAR(50) NOT NULL,
             pdf_path VARCHAR(255) DEFAULT NULL,
-            created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\',
-            sent_at DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\',
-            UNIQUE INDEX UNIQ_invoice_invoice_number (invoice_number),
-            INDEX idx_invoice_order (order_id),
-            INDEX idx_invoice_number (invoice_number),
+            created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+            sent_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL,
+            UNIQUE (invoice_number),
             PRIMARY KEY(id)
-        ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        )');
+        $this->addSql('CREATE INDEX idx_invoice_order ON invoice (order_id)');
+        $this->addSql('CREATE INDEX idx_invoice_number ON invoice (invoice_number)');
 
         // Add foreign key
-        $this->addSql('ALTER TABLE invoice ADD CONSTRAINT FK_invoice_order FOREIGN KEY (order_id) REFERENCES `order` (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE invoice ADD CONSTRAINT FK_invoice_order FOREIGN KEY (order_id) REFERENCES "order" (id) ON DELETE CASCADE');
     }
 
     public function down(Schema $schema): void

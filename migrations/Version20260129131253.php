@@ -21,17 +21,17 @@ final class Version20260129131253 extends AbstractMigration
     {
         // Create customer table
         $this->addSql('CREATE TABLE customer (
-            id INT AUTO_INCREMENT NOT NULL,
+            id SERIAL NOT NULL,
             email VARCHAR(255) NOT NULL,
             password VARCHAR(255) DEFAULT NULL,
-            UNIQUE INDEX UNIQ_customer_email (email),
-            INDEX idx_customer_email (email),
+            UNIQUE (email),
             PRIMARY KEY(id)
-        ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        )');
+        $this->addSql('CREATE INDEX idx_customer_email ON customer (email)');
 
         // Create order table
-        $this->addSql('CREATE TABLE `order` (
-            id INT AUTO_INCREMENT NOT NULL,
+        $this->addSql('CREATE TABLE "order" (
+            id SERIAL NOT NULL,
             order_number VARCHAR(50) NOT NULL,
             email VARCHAR(255) NOT NULL,
             currency VARCHAR(3) NOT NULL,
@@ -39,17 +39,17 @@ final class Version20260129131253 extends AbstractMigration
             subtotal INT NOT NULL,
             tax_total INT NOT NULL,
             grand_total INT NOT NULL,
-            created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\',
-            UNIQUE INDEX UNIQ_order_order_number (order_number),
-            INDEX idx_order_order_number (order_number),
-            INDEX idx_order_email (email),
-            INDEX idx_order_status (status),
+            created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+            UNIQUE (order_number),
             PRIMARY KEY(id)
-        ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        )');
+        $this->addSql('CREATE INDEX idx_order_order_number ON "order" (order_number)');
+        $this->addSql('CREATE INDEX idx_order_email ON "order" (email)');
+        $this->addSql('CREATE INDEX idx_order_status ON "order" (status)');
 
         // Create order_item table
         $this->addSql('CREATE TABLE order_item (
-            id INT AUTO_INCREMENT NOT NULL,
+            id SERIAL NOT NULL,
             order_id INT NOT NULL,
             sku VARCHAR(255) NOT NULL,
             name_snapshot VARCHAR(500) NOT NULL,
@@ -57,11 +57,10 @@ final class Version20260129131253 extends AbstractMigration
             unit_price_amount INT NOT NULL,
             tax_rate NUMERIC(5, 4) NOT NULL,
             total_amount INT NOT NULL,
-            INDEX idx_order_item_order (order_id),
             PRIMARY KEY(id)
-        ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
-
-        $this->addSql('ALTER TABLE order_item ADD CONSTRAINT FK_order_item_order FOREIGN KEY (order_id) REFERENCES `order` (id) ON DELETE CASCADE');
+        )');
+        $this->addSql('CREATE INDEX idx_order_item_order ON order_item (order_id)');
+        $this->addSql('ALTER TABLE order_item ADD CONSTRAINT FK_order_item_order FOREIGN KEY (order_id) REFERENCES "order" (id) ON DELETE CASCADE');
     }
 
     public function down(Schema $schema): void
