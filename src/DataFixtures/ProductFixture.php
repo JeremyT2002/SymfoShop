@@ -182,6 +182,7 @@ class ProductFixture extends Fixture implements DependentFixtureInterface
             $stockItem->setVariant($variant);
             $stockItem->setOnHand($variantData['stock'] ?? 0);
             $stockItem->setReserved(0);
+            $stockItem->setVersion(0);
             $variant->setStockItem($stockItem);
 
             $manager->persist($stockItem);
