@@ -156,6 +156,15 @@ checkout:
   customer_information: Customer Information
   tax: Tax
   terms_agreement: By placing your order, you agree to our terms and conditions.
+  complete_payment: Complete Payment
+  order_number: Order number
+  total: Total
+  pay_now: Pay Now
+  dev_simulator: Development payment simulator
+  dev_simulator_hint: Choose an outcome to simulate (no real payment).
+  simulate_success: Simulate success
+  simulate_failure: Simulate failure
+  simulate_pending: Leave pending
   
 security:
   login:

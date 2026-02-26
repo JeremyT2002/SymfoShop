@@ -7,6 +7,7 @@ use App\Repository\OrderRepository;
 use App\Repository\ProcessedWebhookEventRepository;
 use App\Service\Inventory\InventoryService;
 use App\Service\Invoice\InvoiceService;
+use App\Service\Payment\Provider\PaymentResolution;
 use App\Service\Payment\PaymentService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -131,9 +132,22 @@ class StripeWebhookController extends AbstractController implements ServiceSubsc
 
         $order = $payment->getOrder();
 
+        $status = match ($event->type) {
+            'payment_intent.succeeded' => PaymentResolution::STATUS_SUCCEEDED,
+            'payment_intent.payment_failed', 'payment_intent.canceled' => PaymentResolution::STATUS_FAILED,
+            default => null,
+        };
+        if ($status !== null) {
+            $resolution = new PaymentResolution(
+                $paymentIntentId,
+                $status,
+                $order->getId()
+            );
+            $this->paymentService->applyResolution($resolution);
+        }
+
         switch ($event->type) {
             case 'payment_intent.succeeded':
-                $this->paymentService->handlePaymentSuccess($paymentIntentId);
 
                 // Commit inventory (convert reservation to actual stock reduction)
                 try {
@@ -173,8 +187,6 @@ class StripeWebhookController extends AbstractController implements ServiceSubsc
 
             case 'payment_intent.payment_failed':
             case 'payment_intent.canceled':
-                $this->paymentService->handlePaymentFailure($paymentIntentId);
-
                 // Release inventory reservation
                 try {
                     $this->inventoryService->release($order);

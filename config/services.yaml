@@ -22,15 +22,45 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    # Stripe client
+    # Stripe client (optional when using dev provider)
     Stripe\StripeClient:
         arguments:
             - '%env(STRIPE_SECRET_KEY)%'
 
+    # Payment providers (tagged for registry)
+    App\Service\Payment\Provider\StripePaymentProvider:
+        arguments:
+            $webhookSecret: '%env(default::STRIPE_WEBHOOK_SECRET)%'
+        tags:
+            - { name: 'payment.provider' }
+
+    App\Service\Payment\Provider\DevPaymentProvider:
+        tags:
+            - { name: 'payment.provider' }
+
+    App\Service\Payment\Provider\PayPalPaymentProvider:
+        tags:
+            - { name: 'payment.provider' }
+
+    App\Service\Payment\Provider\KlarnaPaymentProvider:
+        tags:
+            - { name: 'payment.provider' }
+
+    App\Controller\Dev\DevPaymentSimulatorController:
+        arguments:
+            $orderWorkflow: '@state_machine.order'
+            $kernelEnvironment: '%kernel.environment%'
+
+    # Payment provider registry
+    App\Service\Payment\PaymentProviderRegistry:
+        arguments:
+            $providerIterable: !tagged_iterator payment.provider
+            $defaultProviderName: '%env(default:dev:PAYMENT_PROVIDER)%'
+
     # Payment service
     App\Service\Payment\PaymentService:
         arguments:
-            $stripeClient: '@Stripe\StripeClient'
+            $registry: '@App\Service\Payment\PaymentProviderRegistry'
 
     # Webhook controller
     App\Controller\Webhook\StripeWebhookController:
@@ -59,3 +89,8 @@ services:
 
     # Alias for Nelmio RenderOpenApi
     Nelmio\ApiDocBundle\Render\RenderOpenApi: '@nelmio_api_doc.render_docs'
+
+    # Product image upload service
+    App\Service\Product\ImageUploadService:
+        arguments:
+            $uploadsDirectory: '%kernel.project_dir%/public/uploads'

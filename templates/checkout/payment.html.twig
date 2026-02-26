@@ -2,36 +2,56 @@
 
 {% block title %}Payment - SymfoShop{% endblock %}
 {% block meta_description %}Complete your payment{% endblock %}
-{% block js_page %}payment{% endblock %}
+{% block js_page %}{% if paymentProvider == 'dev' %}payment-simulator{% else %}payment{% endif %}{% endblock %}
 
 {% block body %}
-    <div style="max-width: 600px; margin: 2rem auto;">
-        <h1>Complete Payment</h1>
-        
-        <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 2rem; margin: 2rem 0;">
-            <p style="margin-bottom: 1rem;">
-                <strong>Order Number:</strong> {{ order.orderNumber|escape }}
+    <div class="max-w-xl mx-auto px-4 py-8">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">{{ 'checkout.complete_payment'|trans }}</h1>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-gray-700 mb-1">
+                <strong>{{ 'checkout.order_number'|trans }}:</strong> {{ order.orderNumber|escape }}
             </p>
-            <p style="margin-bottom: 1.5rem;">
-                <strong>Total:</strong> {{ (order.grandTotal / 100)|number_format(2, '.', ',') }} {{ order.currency|escape }}
+            <p class="text-gray-700 mb-6">
+                <strong>{{ 'checkout.total'|trans }}:</strong> {{ (order.grandTotal / 100)|number_format(2, '.', ',') }} {{ order.currency|escape }}
             </p>
 
-            <div id="payment-element">
-                <!-- Stripe Elements will create form elements here -->
-            </div>
-
-            <button id="submit-payment" class="btn" style="width: 100%; margin-top: 1.5rem;">
-                Pay Now
-            </button>
-
-            <div id="payment-message" style="margin-top: 1rem; display: none;"></div>
+            {% if paymentProvider == 'dev' %}
+                <div class="border border-amber-200 rounded-lg p-4 bg-amber-50" data-js-page="payment-simulator" role="region" aria-label="{{ 'checkout.dev_simulator'|trans }}">
+                    <h2 class="text-lg font-semibold text-amber-900 mb-2">{{ 'checkout.dev_simulator'|trans }}</h2>
+                    <p class="text-sm text-amber-800 mb-4">{{ 'checkout.dev_simulator_hint'|trans }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{{ path('dev_payment_simulate', { referenceId: paymentIntentId, outcome: 'success' }) }}"
+                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium bg-green-600 text-white hover:bg-green-700 transition-colors">
+                            {{ 'checkout.simulate_success'|trans }}
+                        </a>
+                        <a href="{{ path('dev_payment_simulate', { referenceId: paymentIntentId, outcome: 'failure' }) }}"
+                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium bg-red-600 text-white hover:bg-red-700 transition-colors">
+                            {{ 'checkout.simulate_failure'|trans }}
+                        </a>
+                        <a href="{{ path('dev_payment_simulate', { referenceId: paymentIntentId, outcome: 'pending' }) }}"
+                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium bg-gray-600 text-white hover:bg-gray-700 transition-colors">
+                            {{ 'checkout.simulate_pending'|trans }}
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div id="payment-element" class="mb-4">
+                    <!-- Stripe Elements mount here -->
+                </div>
+                <button type="button" id="submit-payment" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50">
+                    {{ 'checkout.pay_now'|trans }}
+                </button>
+                <div id="payment-message" class="mt-4 p-3 rounded hidden" role="alert"></div>
+            {% endif %}
         </div>
     </div>
 
-    <script src="https://js.stripe.com/v3/"></script>
-    <div data-stripe-key="{{ stripePublishableKey|escape }}" 
-         data-client-secret="{{ clientSecret|escape }}" 
-         data-return-url="{{ url('checkout_success', {orderNumber: order.orderNumber})|escape }}"
-         style="display: none;"></div>
+    {% if paymentProvider != 'dev' %}
+        <script src="https://js.stripe.com/v3/"></script>
+        <div data-stripe-key="{{ stripePublishableKey|escape }}"
+             data-client-secret="{{ clientSecret|escape }}"
+             data-return-url="{{ url('checkout_success', {orderNumber: order.orderNumber})|escape }}"
+             class="hidden" aria-hidden="true"></div>
+    {% endif %}
 {% endblock %}
-

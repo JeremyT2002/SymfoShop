@@ -156,7 +156,16 @@ checkout:
   customer_information: Kundeninformationen
   tax: Steuer
   terms_agreement: Mit der Bestellung stimmen Sie unseren Allgemeinen Geschäftsbedingungen zu.
-  
+  complete_payment: Zahlung abschließen
+  order_number: Bestellnummer
+  total: Gesamtbetrag
+  pay_now: Jetzt bezahlen
+  dev_simulator: Entwicklungs-Zahlungssimulator
+  dev_simulator_hint: Wählen Sie ein Ergebnis zur Simulation (keine echte Zahlung).
+  simulate_success: Erfolg simulieren
+  simulate_failure: Fehlschlag simulieren
+  simulate_pending: Ausstehend lassen
+
 security:
   login:
     title: Melden Sie sich in Ihrem Konto an
