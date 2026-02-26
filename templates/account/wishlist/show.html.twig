@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'wishlist.title'|trans }} - SymfoShop{% endblock %}
+{% block meta_description %}{{ 'wishlist.meta_description'|trans }}{% endblock %}
+
+{% block body %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    {# Page Header #}
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ 'wishlist.title'|trans }}</h1>
+        <p class="text-gray-600">{{ 'wishlist.subtitle'|trans({'%count%': wishlistCount}) }}</p>
+    </div>
+    
+    {# Breadcrumbs #}
+    {% include 'components/breadcrumbs.html.twig' with {
+        items: [
+            {label: 'nav.home'|trans, url: path('catalog_home')},
+            {label: 'wishlist.title'|trans, url: null}
+        ]
+    } %}
+    
+    {# Wishlist Content #}
+    {% if products|length > 0 %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
+            {% for product in products %}
+                {% include 'components/product_card.html.twig' with {
+                    product: product,
+                    showQuickView: false
+                } %}
+            {% endfor %}
+        </div>
+    {% else %}
+        {# Empty State #}
+        <div class="bg-white rounded-2xl shadow-lg p-12 text-center mt-8">
+            <div class="max-w-md mx-auto">
+                <i class="fas fa-heart text-gray-300 text-6xl mb-4"></i>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ 'wishlist.empty.title'|trans }}</h2>
+                <p class="text-gray-600 mb-6">{{ 'wishlist.empty.description'|trans }}</p>
+                <a href="{{ path('catalog_home') }}" 
+                   class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                    <i class="fas fa-shopping-bag mr-2"></i>
+                    {{ 'wishlist.empty.browse_products'|trans }}
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

@@ -48,6 +48,17 @@
                 </div>
             </div>
             
+            {# Wishlist Heart Icon #}
+            {% if app.user %}
+                <button type="button"
+                        class="wishlist-toggle absolute top-3 right-3 bg-white bg-opacity-90 hover:bg-opacity-100 p-2.5 rounded-full shadow-lg transition-all duration-200 z-10"
+                        data-product-id="{{ product.id }}"
+                        data-wishlist-url="{{ path('account_wishlist_toggle') }}"
+                        aria-label="{{ 'wishlist.toggle'|trans }}">
+                    <i class="fas fa-heart text-gray-400 wishlist-icon transition-colors duration-200" data-in-wishlist="false"></i>
+                </button>
+            {% endif %}
+            
             {# Status Badge #}
             {% if product.status.value == 'draft' %}
                 <span class="absolute top-3 left-3 bg-yellow-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">

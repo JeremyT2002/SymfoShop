@@ -209,3 +209,16 @@ pagination:
   previous: Précédent
   next: Suivant
 
+wishlist:
+  title: Ma liste de souhaits
+  subtitle: Vous avez %count% article(s) dans votre liste de souhaits
+  meta_description: Afficher et gérer vos produits préférés
+  toggle: Basculer la liste de souhaits
+  added: Produit ajouté à la liste de souhaits
+  removed: Produit retiré de la liste de souhaits
+  error: Une erreur s'est produite
+  empty:
+    title: Votre liste de souhaits est vide
+    description: Commencez à ajouter les produits que vous aimez à votre liste de souhaits pour les enregistrer pour plus tard.
+    browse_products: Parcourir les produits
+
