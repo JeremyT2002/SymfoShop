@@ -22,7 +22,7 @@ class ProductFixture extends Fixture implements DependentFixtureInterface
             'iPhone 15 Pro',
             'The latest iPhone with advanced features, A17 Pro chip, and Pro camera system.',
             'iphone-15-pro',
-            $this->getReference('category_smartphones', Category::class),
+            $this->getReference('category_electronics', Category::class),
             [
                 ['sku' => 'IPH15P-128-BLK', 'price' => 99900, 'attributes' => ['Storage' => '128GB', 'Color' => 'Black'], 'stock' => 50],
                 ['sku' => 'IPH15P-256-BLK', 'price' => 109900, 'attributes' => ['Storage' => '256GB', 'Color' => 'Black'], 'stock' => 30],
@@ -36,7 +36,7 @@ class ProductFixture extends Fixture implements DependentFixtureInterface
             'MacBook Pro 16"',
             'Powerful laptop with M3 Pro chip, perfect for professionals and creatives.',
             'macbook-pro-16',
-            $this->getReference('category_laptops', Category::class),
+            $this->getReference('category_electronics', Category::class),
             [
                 ['sku' => 'MBP16-M3-512', 'price' => 249900, 'attributes' => ['Chip' => 'M3 Pro', 'Storage' => '512GB'], 'stock' => 15],
                 ['sku' => 'MBP16-M3-1TB', 'price' => 279900, 'attributes' => ['Chip' => 'M3 Pro', 'Storage' => '1TB'], 'stock' => 10],
@@ -49,7 +49,7 @@ class ProductFixture extends Fixture implements DependentFixtureInterface
             'Sony WH-1000XM5 Headphones',
             'Industry-leading noise canceling with exceptional sound quality.',
             'sony-wh1000xm5',
-            $this->getReference('category_headphones', Category::class),
+            $this->getReference('category_electronics', Category::class),
             [
                 ['sku' => 'SONY-WH1000XM5-BLK', 'price' => 39900, 'attributes' => ['Color' => 'Black'], 'stock' => 100],
                 ['sku' => 'SONY-WH1000XM5-SLV', 'price' => 39900, 'attributes' => ['Color' => 'Silver'], 'stock' => 80],
@@ -63,7 +63,7 @@ class ProductFixture extends Fixture implements DependentFixtureInterface
             'Classic Cotton T-Shirt',
             'Comfortable 100% cotton t-shirt, perfect for everyday wear.',
             'classic-cotton-tshirt',
-            $this->getReference('category_mens', Category::class),
+            $this->getReference('category_clothing', Category::class),
             [
                 ['sku' => 'TSHIRT-S-BLK', 'price' => 1999, 'attributes' => ['Size' => 'S', 'Color' => 'Black'], 'stock' => 200],
                 ['sku' => 'TSHIRT-M-BLK', 'price' => 1999, 'attributes' => ['Size' => 'M', 'Color' => 'Black'], 'stock' => 250],
@@ -78,7 +78,7 @@ class ProductFixture extends Fixture implements DependentFixtureInterface
             'Running Shoes',
             'Lightweight running shoes with excellent cushioning and support.',
             'running-shoes',
-            $this->getReference('category_shoes', Category::class),
+            $this->getReference('category_clothing', Category::class),
             [
                 ['sku' => 'RUN-SHOE-40-BLK', 'price' => 8999, 'attributes' => ['Size' => '40', 'Color' => 'Black'], 'stock' => 50],
                 ['sku' => 'RUN-SHOE-42-BLK', 'price' => 8999, 'attributes' => ['Size' => '42', 'Color' => 'Black'], 'stock' => 60],
@@ -93,7 +93,7 @@ class ProductFixture extends Fixture implements DependentFixtureInterface
             'The Complete Guide to Symfony',
             'Comprehensive guide to building web applications with Symfony framework.',
             'complete-guide-symfony',
-            $this->getReference('category_technology', Category::class),
+            $this->getReference('category_books', Category::class),
             [
                 ['sku' => 'BOOK-SYMFONY-001', 'price' => 4999, 'attributes' => ['Format' => 'Paperback'], 'stock' => 100],
                 ['sku' => 'BOOK-SYMFONY-002', 'price' => 2999, 'attributes' => ['Format' => 'eBook'], 'stock' => 999],
@@ -106,7 +106,7 @@ class ProductFixture extends Fixture implements DependentFixtureInterface
             'Mystery Novel Collection',
             'A thrilling collection of mystery novels from bestselling authors.',
             'mystery-novel-collection',
-            $this->getReference('category_fiction', Category::class),
+            $this->getReference('category_books', Category::class),
             [
                 ['sku' => 'BOOK-MYSTERY-001', 'price' => 2499, 'attributes' => ['Format' => 'Paperback'], 'stock' => 75],
             ],

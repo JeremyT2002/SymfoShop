@@ -11,12 +11,12 @@ class CategoryFixture extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
-        // Root categories
-        $electronics = $this->createCategory('Electronics', 'electronics', null);
-        $clothing = $this->createCategory('Clothing', 'clothing', null);
-        $books = $this->createCategory('Books', 'books', null);
-        $home = $this->createCategory('Home & Garden', 'home-garden', null);
-        $sports = $this->createCategory('Sports & Outdoors', 'sports-outdoors', null);
+        // Categories
+        $electronics = $this->createCategory('Electronics', 'electronics');
+        $clothing = $this->createCategory('Clothing', 'clothing');
+        $books = $this->createCategory('Books', 'books');
+        $home = $this->createCategory('Home & Garden', 'home-garden');
+        $sports = $this->createCategory('Sports & Outdoors', 'sports-outdoors');
 
         $manager->persist($electronics);
         $manager->persist($clothing);
@@ -30,50 +30,14 @@ class CategoryFixture extends Fixture
         $this->addReference('category_home', $home);
         $this->addReference('category_sports', $sports);
 
-        // Subcategories for Electronics
-        $smartphones = $this->createCategory('Smartphones', 'smartphones', $electronics);
-        $laptops = $this->createCategory('Laptops', 'laptops', $electronics);
-        $headphones = $this->createCategory('Headphones', 'headphones', $electronics);
-
-        $manager->persist($smartphones);
-        $manager->persist($laptops);
-        $manager->persist($headphones);
-
-        $this->addReference('category_smartphones', $smartphones);
-        $this->addReference('category_laptops', $laptops);
-        $this->addReference('category_headphones', $headphones);
-
-        // Subcategories for Clothing
-        $mens = $this->createCategory('Men\'s Clothing', 'mens-clothing', $clothing);
-        $shoes = $this->createCategory('Shoes', 'shoes', $clothing);
-
-        $manager->persist($mens);
-        $manager->persist($shoes);
-
-        $this->addReference('category_mens', $mens);
-        $this->addReference('category_shoes', $shoes);
-
-        // Subcategories for Books
-        $fiction = $this->createCategory('Fiction', 'fiction', $books);
-        $techBooks = $this->createCategory('Technology', 'technology-books', $books);
-
-        $manager->persist($fiction);
-        $manager->persist($techBooks);
-
-        $this->addReference('category_fiction', $fiction);
-        $this->addReference('category_technology', $techBooks);
-
         $manager->flush();
     }
 
-    private function createCategory(string $name, string $slug, ?Category $parent): Category
+    private function createCategory(string $name, string $slug): Category
     {
         $category = new Category();
         $category->setName($name);
         $category->setSlug($slug);
-        if ($parent) {
-            $category->setParent($parent);
-        }
         return $category;
     }
 }
