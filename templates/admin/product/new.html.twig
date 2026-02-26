@@ -11,7 +11,7 @@
     </div>
     
     <div class="bg-white rounded-lg shadow p-6 max-w-2xl">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             <div class="space-y-6">
                 <div>
                     <label for="name" class="flex items-center text-sm font-medium text-gray-700 mb-2">
@@ -69,6 +69,77 @@
                     </p>
                 </div>
                 
+                <div>
+                    <label for="category_id" class="flex items-center text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-folder mr-2 text-gray-500"></i>
+                        Category
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-tags text-gray-400"></i>
+                        </div>
+                        <select id="category_id" name="category_id"
+                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white">
+                            <option value="">-- Select Category --</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if product.category and product.category.id == category.id %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </div>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Optional: Assign this product to a category</p>
+                </div>
+                
+                <div>
+                    <label for="tax_class" class="flex items-center text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-receipt mr-2 text-gray-500"></i>
+                        Tax Class <span class="text-red-500 ml-1">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-percent text-gray-400"></i>
+                        </div>
+                        <select id="tax_class" name="tax_class" required
+                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white">
+                            {% set currentTaxClass = product.taxClass|default('standard') %}
+                            <option value="standard" {% if currentTaxClass == 'standard' %}selected{% endif %}>Standard</option>
+                            <option value="reduced" {% if currentTaxClass == 'reduced' %}selected{% endif %}>Reduced</option>
+                            <option value="zero" {% if currentTaxClass == 'zero' %}selected{% endif %}>Zero</option>
+                            <option value="exempt" {% if currentTaxClass == 'exempt' %}selected{% endif %}>Exempt</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </div>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Select the tax class for this product</p>
+                </div>
+                
+                <div>
+                    <label for="images" class="flex items-center text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-images mr-2 text-gray-500"></i>
+                        Product Images
+                    </label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors">
+                        <div class="space-y-1 text-center">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="images" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                    <span>Upload images</span>
+                                    <input id="images" name="images[]" type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp" class="sr-only">
+                                </label>
+                                <p class="pl-1">or drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">PNG, JPG, GIF, WebP up to 5MB each</p>
+                        </div>
+                    </div>
+                    <div id="image-preview" class="mt-4 grid grid-cols-4 gap-4 hidden"></div>
+                    <p class="mt-1 text-xs text-gray-500">Optional: Upload product images. You can add more images after creating the product.</p>
+                </div>
+                
                 <div class="flex items-center justify-end space-x-4 pt-4 border-t">
                     <a href="{{ path('admin_products_index') }}" class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
                         Cancel
@@ -80,5 +151,30 @@
             </div>
         </form>
     </div>
+    
+    <script>
+        // Image preview functionality
+        document.getElementById('images')?.addEventListener('change', function(e) {
+            const preview = document.getElementById('image-preview');
+            preview.innerHTML = '';
+            preview.classList.remove('hidden');
+            
+            Array.from(e.target.files).forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = 'relative';
+                        div.innerHTML = `
+                            <img src="${e.target.result}" alt="Preview ${index + 1}" class="w-full h-24 object-cover rounded-lg border border-gray-300">
+                            <span class="absolute top-1 right-1 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">${index + 1}</span>
+                        `;
+                        preview.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    </script>
 {% endblock %}
 

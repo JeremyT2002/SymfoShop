@@ -47,12 +47,17 @@ class Product
     #[ORM\OrderBy(['sort' => 'ASC'])]
     private Collection $media;
 
+    #[ORM\ManyToOne(targetEntity: Category::class)]
+    #[ORM\JoinColumn(name: 'category_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?Category $category = null;
+
     public function __construct()
     {
         $this->variants = new ArrayCollection();
         $this->media = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
+        $this->taxClass = 'standard';
     }
 
     public function getId(): ?int
@@ -196,6 +201,17 @@ class Product
                 $media->setProduct(null);
             }
         }
+        return $this;
+    }
+
+    public function getCategory(): ?Category
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?Category $category): self
+    {
+        $this->category = $category;
         return $this;
     }
 }
