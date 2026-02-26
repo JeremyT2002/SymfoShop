@@ -1,0 +1,44 @@
+{#
+  Breadcrumbs Component
+  =====================
+  
+  Displays navigation breadcrumbs.
+  
+  Parameters:
+  - items: array of {label: string, url: string|null}
+  
+  Usage:
+  {% include 'components/breadcrumbs.html.twig' with {
+    items: [
+      {label: 'Home', url: path('catalog_home')},
+      {label: 'Category', url: path('catalog_category', {slug: 'electronics'})},
+      {label: 'Product', url: null}
+    ]
+  } %}
+#}
+
+{% if items is defined and items|length > 0 %}
+    <nav aria-label="Breadcrumb" class="mb-6">
+        <ol class="flex items-center space-x-2 text-sm text-gray-600">
+            {% for item in items %}
+                <li class="flex items-center">
+                    {% if not loop.first %}
+                        <i class="fas fa-chevron-right text-gray-400 mx-2 text-xs" aria-hidden="true"></i>
+                    {% endif %}
+                    
+                    {% if item.url and not loop.last %}
+                        <a href="{{ item.url }}" 
+                           class="hover:text-primary-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded px-1">
+                            {{ item.label|escape }}
+                        </a>
+                    {% else %}
+                        <span class="{% if loop.last %}text-gray-900 font-medium{% endif %}" {% if loop.last %}aria-current="page"{% endif %}>
+                            {{ item.label|escape }}
+                        </span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+    </nav>
+{% endif %}
+

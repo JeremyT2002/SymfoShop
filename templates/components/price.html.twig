@@ -1,0 +1,49 @@
+{#
+  Price Display Component
+  =======================
+  
+  Formats and displays a price with currency.
+  
+  Parameters:
+  - amount: int (price in cents)
+  - currency: string (default: 'EUR')
+  - size: sm|md|lg|xl (default: 'md')
+  - showCurrency: boolean (default: true)
+  - originalAmount: int (for showing discounted price)
+  - class: additional CSS classes
+#}
+
+{% set currency = currency|default('EUR') %}
+{% set size = size|default('md') %}
+{% set showCurrency = showCurrency|default(true) %}
+{% set formattedAmount = (amount / 100)|number_format(2, '.', ',') %}
+
+{% set sizeClasses = {
+    'sm': 'text-sm',
+    'md': 'text-lg',
+    'lg': 'text-2xl',
+    'xl': 'text-3xl'
+} %}
+
+<div class="flex items-baseline gap-2 {{ class|default('') }}">
+    {% if originalAmount is defined and originalAmount > amount %}
+        {# Discounted Price #}
+        <div class="flex flex-col">
+            <span class="text-gray-400 line-through text-sm">
+                {{ (originalAmount / 100)|number_format(2, '.', ',') }}{% if showCurrency %} {{ currency|escape }}{% endif %}
+            </span>
+            <span class="{{ sizeClasses[size] }} font-bold text-red-600">
+                {{ formattedAmount }}{% if showCurrency %} {{ currency|escape }}{% endif %}
+            </span>
+        </div>
+        <span class="bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded-full">
+            -{{ (((originalAmount - amount) / originalAmount) * 100)|round }}%
+        </span>
+    {% else %}
+        {# Regular Price #}
+        <span class="{{ sizeClasses[size] }} font-bold text-gray-900">
+            {{ formattedAmount }}{% if showCurrency %} {{ currency|escape }}{% endif %}
+        </span>
+    {% endif %}
+</div>
+

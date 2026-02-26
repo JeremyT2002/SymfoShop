@@ -1,0 +1,91 @@
+{#
+  Pagination Component
+  ====================
+  
+  Displays pagination controls.
+  
+  Parameters:
+  - currentPage: int
+  - totalPages: int
+  - route: string (route name)
+  - routeParams: array (additional route parameters)
+  - maxPages: int (max pages to show, default: 7)
+#}
+
+{% set maxPages = maxPages|default(7) %}
+{% set routeParams = routeParams|default({}) %}
+
+{% if totalPages > 1 %}
+    <nav aria-label="Pagination" class="flex items-center justify-center gap-2 mt-8">
+        {# Previous Button #}
+        {% if currentPage > 1 %}
+            <a href="{{ path(route, routeParams|merge({page: currentPage - 1})) }}" 
+               class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-primary-500 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                <i class="fas fa-chevron-left mr-1"></i>
+                <span class="sr-only sm:not-sr-only">{{ 'pagination.previous'|trans }}</span>
+            </a>
+        {% else %}
+            <span class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                <i class="fas fa-chevron-left mr-1"></i>
+                <span class="sr-only sm:not-sr-only">{{ 'pagination.previous'|trans }}</span>
+            </span>
+        {% endif %}
+        
+        {# Page Numbers #}
+        <div class="flex items-center gap-1">
+            {% set startPage = max(1, currentPage - (maxPages // 2)) %}
+            {% set endPage = min(totalPages, startPage + maxPages - 1) %}
+            {% if endPage - startPage < maxPages - 1 %}
+                {% set startPage = max(1, endPage - maxPages + 1) %}
+            {% endif %}
+            
+            {% if startPage > 1 %}
+                <a href="{{ path(route, routeParams|merge({page: 1})) }}" 
+                   class="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    1
+                </a>
+                {% if startPage > 2 %}
+                    <span class="px-2 text-gray-400">...</span>
+                {% endif %}
+            {% endif %}
+            
+            {% for page in startPage..endPage %}
+                {% if page == currentPage %}
+                    <span class="px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold" aria-current="page">
+                        {{ page }}
+                    </span>
+                {% else %}
+                    <a href="{{ path(route, routeParams|merge({page: page})) }}" 
+                       class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-primary-500 transition-colors">
+                        {{ page }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if endPage < totalPages %}
+                {% if endPage < totalPages - 1 %}
+                    <span class="px-2 text-gray-400">...</span>
+                {% endif %}
+                <a href="{{ path(route, routeParams|merge({page: totalPages})) }}" 
+                   class="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    {{ totalPages }}
+                </a>
+            {% endif %}
+        </div>
+        
+        {# Next Button #}
+        {% if currentPage < totalPages %}
+            <a href="{{ path(route, routeParams|merge({page: currentPage + 1})) }}" 
+               class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-primary-500 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                <span class="sr-only sm:not-sr-only">{{ 'pagination.next'|trans }}</span>
+                <i class="fas fa-chevron-right ml-1"></i>
+            </a>
+        {% else %}
+            <span class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                <span class="sr-only sm:not-sr-only">{{ 'pagination.next'|trans }}</span>
+                <i class="fas fa-chevron-right ml-1"></i>
+            </span>
+        {% endif %}
+    </nav>
+{% endif %}
+
