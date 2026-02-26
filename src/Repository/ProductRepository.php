@@ -2,9 +2,13 @@
 
 namespace App\Repository;
 
+use App\Catalog\CatalogFilters;
+use App\Entity\Category;
 use App\Entity\Product;
 use App\Entity\ProductStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -38,7 +42,7 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find active products (category filtering can be added when Product-Category relationship exists)
+     * Find active products (no category filter)
      */
     public function findActiveProducts(int $offset = 0, int $limit = 12): array
     {
@@ -57,5 +61,211 @@ class ProductRepository extends ServiceEntityRepository
             ->setParameter('status', ProductStatus::ACTIVE)
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    /**
+     * Find products in category with filters and sorting. Paginated.
+     *
+     * @return Product[]
+     */
+    public function findFilteredByCategory(Category $category, CatalogFilters $filters, int $offset = 0, int $limit = 12): array
+    {
+        $qb = $this->createFilteredByCategoryQueryBuilder($category, $filters);
+        $this->applySort($qb, $filters->sort);
+        $qb->setFirstResult($offset)->setMaxResults($limit);
+        return $qb->getQuery()->getResult();
+    }
+
+    public function countFilteredByCategory(Category $category, CatalogFilters $filters): int
+    {
+        $qb = $this->createFilteredByCategoryQueryBuilder($category, $filters);
+        $qb->select('COUNT(DISTINCT p.id)');
+        $qb->resetDQLPart('groupBy');
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    private function createFilteredByCategoryQueryBuilder(Category $category, CatalogFilters $filters): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->where('p.status = :status')
+            ->andWhere('p.category = :category')
+            ->setParameter('status', ProductStatus::ACTIVE)
+            ->setParameter('category', $category);
+
+        $qb->innerJoin('p.variants', 'v');
+
+        if ($filters->minPrice !== null || $filters->maxPrice !== null) {
+            if ($filters->minPrice !== null) {
+                $qb->andWhere('v.priceAmount >= :minPrice')->setParameter('minPrice', $filters->minPrice);
+            }
+            if ($filters->maxPrice !== null) {
+                $qb->andWhere('v.priceAmount <= :maxPrice')->setParameter('maxPrice', $filters->maxPrice);
+            }
+        }
+
+        if ($filters->inStockOnly) {
+            $qb->leftJoin('v.stockItem', 's');
+            $qb->andWhere('s.id IS NOT NULL AND (s.onHand - s.reserved) > 0');
+        }
+
+        $attrProductIds = $this->getProductIdsMatchingAttributeFilter($category->getId(), $filters->attributeFilters);
+        if ($attrProductIds !== []) {
+            $qb->andWhere('p.id IN (:attrProductIds)')->setParameter('attrProductIds', $attrProductIds);
+        } elseif ($filters->attributeFilters !== []) {
+            $qb->andWhere('1 = 0');
+        }
+
+        $qb->groupBy('p.id');
+        return $qb;
+    }
+
+    private function applySort(QueryBuilder $qb, string $sort): void
+    {
+        switch ($sort) {
+            case 'price-asc':
+                $qb->addSelect('MIN(v.priceAmount) AS HIDDEN min_price');
+                $qb->orderBy('min_price', 'ASC');
+                break;
+            case 'price-desc':
+                $qb->addSelect('MAX(v.priceAmount) AS HIDDEN max_price');
+                $qb->orderBy('max_price', 'DESC');
+                break;
+            case 'name-asc':
+                $qb->orderBy('p.name', 'ASC');
+                break;
+            case 'name-desc':
+                $qb->orderBy('p.name', 'DESC');
+                break;
+            default:
+                $qb->orderBy('p.createdAt', 'DESC');
+                break;
+        }
+    }
+
+    /**
+     * Get product IDs that have at least one variant matching all attribute filters.
+     * Uses native SQL for JSON attribute filtering (SQLite json_extract).
+     *
+     * @param array<string, list<string>> $attributeFilters
+     * @return list<int>
+     */
+    private function getProductIdsMatchingAttributeFilter(int $categoryId, array $attributeFilters): array
+    {
+        if ($attributeFilters === []) {
+            return [];
+        }
+
+        $conn = $this->getEntityManager()->getConnection();
+        $platform = $conn->getDatabasePlatform();
+
+        if (!$platform instanceof SqlitePlatform) {
+            return $this->getProductIdsMatchingAttributeFilterGeneric($categoryId, $attributeFilters, $conn);
+        }
+
+        $conditions = [];
+        $params = ['category_id' => $categoryId];
+        $paramIdx = 0;
+        foreach ($attributeFilters as $attrKey => $values) {
+            if ($values === []) {
+                continue;
+            }
+            $placeholders = [];
+            foreach ($values as $v) {
+                $key = 'p' . ($paramIdx++);
+                $params[$key] = $v;
+                $placeholders[] = ':' . $key;
+            }
+            $conditions[] = "json_extract(pv.attributes, '$.$attrKey') IN (" . implode(', ', $placeholders) . ')';
+        }
+        if ($conditions === []) {
+            return [];
+        }
+
+        $sql = "SELECT DISTINCT p.id FROM product p
+                INNER JOIN product_variant pv ON pv.product_id = p.id
+                WHERE p.category_id = :category_id AND p.status = 'active'
+                AND " . implode(' AND ', $conditions);
+        $stmt = $conn->executeQuery($sql, $params);
+        $rows = $stmt->fetchAllAssociative();
+        return array_map('intval', array_column($rows, 'id'));
+    }
+
+    /**
+     * Fallback for non-SQLite: fetch variant attributes in PHP and filter (works on any DB).
+     *
+     * @param array<string, list<string>> $attributeFilters
+     * @return list<int>
+     */
+    private function getProductIdsMatchingAttributeFilterGeneric(int $categoryId, array $attributeFilters, Connection $conn): array
+    {
+        $sql = 'SELECT p.id, pv.attributes FROM product p
+                INNER JOIN product_variant pv ON pv.product_id = p.id
+                WHERE p.category_id = :cid';
+        $stmt = $conn->executeQuery($sql, ['cid' => $categoryId]);
+        $productMatches = [];
+        while ($row = $stmt->fetchAssociative()) {
+            $pid = (int) $row['id'];
+            $attrs = json_decode($row['attributes'] ?? '{}', true);
+            if (!is_array($attrs)) {
+                continue;
+            }
+            $matches = true;
+            foreach ($attributeFilters as $key => $values) {
+                $val = $attrs[$key] ?? null;
+                if (!in_array((string) $val, $values, true)) {
+                    $matches = false;
+                    break;
+                }
+            }
+            if ($matches) {
+                $productMatches[$pid] = true;
+            }
+        }
+        return array_keys($productMatches);
+    }
+
+    /**
+     * Get filter options (price min/max, attribute value counts) for the category.
+     *
+     * @return array{price_min: int, price_max: int, attributes: array<string, array<string, int>>}
+     */
+    public function getFilterOptionsForCategory(Category $category): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $priceSql = "SELECT MIN(pv.price_amount) AS min_p, MAX(pv.price_amount) AS max_p
+                     FROM product p
+                     INNER JOIN product_variant pv ON pv.product_id = p.id
+                     WHERE p.category_id = ? AND p.status = 'active'";
+        $priceRow = $conn->fetchAssociative($priceSql, [$category->getId()]);
+        $priceMin = $priceRow && $priceRow['min_p'] !== null ? (int) $priceRow['min_p'] : 0;
+        $priceMax = $priceRow && $priceRow['max_p'] !== null ? (int) $priceRow['max_p'] : 0;
+
+        $variantsSql = "SELECT pv.attributes FROM product p
+                       INNER JOIN product_variant pv ON pv.product_id = p.id
+                       WHERE p.category_id = ? AND p.status = 'active'";
+        $stmt = $conn->executeQuery($variantsSql, [$category->getId()]);
+        $attributes = [];
+        while ($row = $stmt->fetchAssociative()) {
+            $attrs = json_decode($row['attributes'] ?? '{}', true);
+            if (!is_array($attrs)) {
+                continue;
+            }
+            foreach ($attrs as $key => $value) {
+                if (!is_string($value)) {
+                    continue;
+                }
+                if (!isset($attributes[$key][$value])) {
+                    $attributes[$key][$value] = 0;
+                }
+                $attributes[$key][$value]++;
+            }
+        }
+
+        return [
+            'price_min' => $priceMin,
+            'price_max' => $priceMax,
+            'attributes' => $attributes,
+        ];
     }
 }

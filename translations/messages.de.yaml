@@ -146,7 +146,21 @@ category:
     name_az: "Name: A bis Z"
     name_za: "Name: Z bis A"
   back_to_categories: Zurück zu Kategorien
-  
+  no_products_match: Keine Produkte entsprechen Ihren Filtern
+  try_adjust_filters: Versuchen Sie, die Filter anzupassen oder zu löschen.
+  filters:
+    title: Filter
+    active: Aktiv
+    price: Preis
+    price_range: Preisspanne
+    min_price: Min. Preis
+    max_price: Max. Preis
+    price_unit: (in Cent, z. B. 1000 = 10,00)
+    in_stock: Auf Lager
+    in_stock_only: Nur auf Lager
+    clear_all: Alle löschen
+    apply: Anwenden
+
 checkout:
   title: Zur Kasse
   shipping_address: Lieferadresse
