@@ -31,6 +31,12 @@ footer:
   contact_us: Contactez-nous
   shipping_info: Informations de livraison
   all_rights_reserved: Tous droits réservés
+  wishlist: Liste de souhaits
+  account_settings: Paramètres du compte
+  returns: Retours
+  privacy: Politique de confidentialité
+  terms: Conditions d'utilisation
+  cookies: Politique des cookies
   
 common:
   cancel: Annuler
@@ -90,6 +96,7 @@ product:
   select_variant: Sélectionner une variante
   variant: Variante
   sku: SKU
+  price: Prix
   in_stock: En stock
   out_of_stock: Rupture de stock
   add_to_cart: Ajouter au panier
@@ -98,11 +105,21 @@ product:
   available_variants: Variantes disponibles
   no_variants: Aucune variante disponible pour ce produit.
   no_image: Aucune image disponible
-  status: Statut
   tax_class: Classe fiscale
   added_to_cart: Article ajouté au panier !
   view_cart_question: Voir le panier ?
   error_adding: Une erreur s'est produite lors de l'ajout au panier
+  status:
+    active: En stock
+    draft: Brouillon
+    archived: Archivé
+  variants_available: variantes disponibles
+  variants_count: Variantes
+  all_variants: Toutes les variantes
+  default_variant: Variante par défaut
+  secure_payment: Paiement sécurisé
+  fast_shipping: Livraison rapide
+  details: Détails du produit
   
 category:
   all_categories: Toutes les catégories
@@ -121,6 +138,14 @@ category:
   of: de
   product: produit
   products: produits
+  sort_by: Trier par
+  sort:
+    default: Par défaut
+    price_low: "Prix: Croissant"
+    price_high: "Prix: Décroissant"
+    name_az: "Nom: A à Z"
+    name_za: "Nom: Z à A"
+  back_to_categories: Retour aux catégories
   
 checkout:
   title: Commander
@@ -154,4 +179,33 @@ security:
     password: Mot de passe
     confirm_password: Confirmer le mot de passe
     submit: S'inscrire
+
+home:
+  hero:
+    title: Bienvenue sur SymfoShop
+    subtitle: Découvrez des produits incroyables, achetez en toute confiance et profitez d'une livraison rapide. Votre magasin unique pour tout ce dont vous avez besoin.
+    browse_categories: Parcourir les catégories
+    view_featured: Produits vedettes
+  benefits:
+    fast_shipping: Livraison rapide
+    fast_shipping_desc: Livraison gratuite pour les commandes de plus de 50€
+    secure_payment: Paiement sécurisé
+    secure_payment_desc: Paiement 100% sécurisé
+    easy_returns: Retours faciles
+    easy_returns_desc: Politique de retour de 30 jours
+    support: Support 24/7
+    support_desc: Nous sommes là pour vous aider
+  featured:
+    title: Produits vedettes
+    subtitle: Découvrez notre sélection soigneusement choisie de produits les plus vendus
+    view_all: Voir tous les produits
+  cta:
+    title: Prêt à commencer vos achats ?
+    subtitle: Rejoignez des milliers de clients satisfaits et découvrez des produits incroyables dès aujourd'hui.
+    start_shopping: Commencer les achats
+    create_account: Créer un compte
+
+pagination:
+  previous: Précédent
+  next: Suivant
 
