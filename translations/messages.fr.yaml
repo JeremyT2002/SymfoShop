@@ -146,7 +146,21 @@ category:
     name_az: "Nom: A à Z"
     name_za: "Nom: Z à A"
   back_to_categories: Retour aux catégories
-  
+  no_products_match: Aucun produit ne correspond à vos filtres
+  try_adjust_filters: Essayez d'ajuster ou de réinitialiser les filtres.
+  filters:
+    title: Filtres
+    active: Actifs
+    price: Prix
+    price_range: Fourchette de prix
+    min_price: Prix min
+    max_price: Prix max
+    price_unit: (en centimes, ex. 1000 = 10,00)
+    in_stock: En stock
+    in_stock_only: En stock uniquement
+    clear_all: Tout effacer
+    apply: Appliquer
+
 checkout:
   title: Commander
   shipping_address: Adresse de livraison
@@ -156,7 +170,16 @@ checkout:
   customer_information: Informations client
   tax: Taxe
   terms_agreement: En passant votre commande, vous acceptez nos conditions générales.
-  
+  complete_payment: Finaliser le paiement
+  order_number: Numéro de commande
+  total: Total
+  pay_now: Payer maintenant
+  dev_simulator: Simulateur de paiement (développement)
+  dev_simulator_hint: Choisissez un résultat à simuler (aucun vrai paiement).
+  simulate_success: Simuler succès
+  simulate_failure: Simuler échec
+  simulate_pending: Laisser en attente
+
 security:
   login:
     title: Connectez-vous à votre compte

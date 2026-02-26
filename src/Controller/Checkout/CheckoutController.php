@@ -114,26 +114,20 @@ class CheckoutController extends AbstractController implements ServiceSubscriber
             return $this->redirectToRoute('cart_show');
         }
 
-        // Get payment intent client secret
         $payment = $this->paymentService->getPaymentByIntentId($paymentIntentId);
         if (!$payment || $payment->getOrder()->getId() !== $order->getId()) {
             throw $this->createNotFoundException('Payment not found');
         }
 
-        // Retrieve client secret from Stripe
-        try {
-            $stripeClient = $this->container->get(\Stripe\StripeClient::class);
-            $paymentIntent = $stripeClient->paymentIntents->retrieve($paymentIntentId);
-            $clientSecret = $paymentIntent->client_secret;
-        } catch (\Exception $e) {
-            $this->addFlash('error', 'Error retrieving payment information');
-            return $this->redirectToRoute('cart_show');
-        }
+        $provider = $this->paymentService->getRegistry()->get($payment->getProvider());
+        $clientSecret = $provider->getClientSecretForReference($paymentIntentId);
 
         return $this->render('checkout/payment.html.twig', [
             'order' => $order,
+            'payment' => $payment,
             'paymentIntentId' => $paymentIntentId,
             'clientSecret' => $clientSecret,
+            'paymentProvider' => $payment->getProvider(),
             'stripePublishableKey' => $_ENV['STRIPE_PUBLISHABLE_KEY'] ?? 'pk_test_placeholder',
         ]);
     }

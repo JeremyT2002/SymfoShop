@@ -5,120 +5,110 @@ namespace App\Service\Payment;
 use App\Entity\Order;
 use App\Entity\Payment;
 use App\Repository\PaymentRepository;
+use App\Service\Payment\Provider\PaymentProviderInterface;
+use App\Service\Payment\Provider\PaymentResolution;
 use Doctrine\ORM\EntityManagerInterface;
-use Stripe\Exception\ApiErrorException;
-use Stripe\PaymentIntent;
-use Stripe\StripeClient;
 
 class PaymentService
 {
-    private const PROVIDER_STRIPE = 'stripe';
-
     public function __construct(
-        private readonly StripeClient $stripeClient,
+        private readonly PaymentProviderRegistry $registry,
         private readonly EntityManagerInterface $entityManager,
         private readonly PaymentRepository $paymentRepository
     ) {
     }
 
     /**
-     * Create a Stripe PaymentIntent for an order
+     * Create payment for order using the given provider (or default). Persists Payment and returns intent data.
      *
-     * @return array{paymentIntentId: string, clientSecret: string}
+     * @return array{paymentIntentId: string, clientSecret: string|null}
      */
-    public function createPaymentIntent(Order $order): array
+    public function createPaymentIntent(Order $order, ?string $providerName = null): array
     {
-        // Check if payment already exists for this order
-        $existingPayments = $this->paymentRepository->findBy(['order' => $order]);
-        $existingPayment = !empty($existingPayments) ? $existingPayments[0] : null;
-        if ($existingPayment && $existingPayment->getStatus() !== 'failed') {
-            // Return existing payment intent
-            try {
-                $paymentIntent = $this->stripeClient->paymentIntents->retrieve($existingPayment->getPaymentIntentId());
-                return [
-                    'paymentIntentId' => $paymentIntent->id,
-                    'clientSecret' => $paymentIntent->client_secret,
-                ];
-            } catch (ApiErrorException $e) {
-                // If retrieval fails, create new one
-            }
-        }
+        $provider = $providerName ? $this->registry->get($providerName) : $this->registry->getDefault();
 
-        try {
-            $paymentIntent = $this->stripeClient->paymentIntents->create([
-                'amount' => $order->getGrandTotal(),
-                'currency' => strtolower($order->getCurrency()),
-                'metadata' => [
-                    'order_number' => $order->getOrderNumber(),
-                    'order_id' => $order->getId(),
-                ],
-                'automatic_payment_methods' => [
-                    'enabled' => true,
-                ],
-            ]);
-
-            // Create or update payment record
-            if ($existingPayment) {
-                $payment = $existingPayment;
-            } else {
-                $payment = new Payment();
-                $payment->setOrder($order);
-                $payment->setProvider(self::PROVIDER_STRIPE);
-            }
-
-            $payment->setPaymentIntentId($paymentIntent->id);
-            $payment->setStatus('pending');
-            $payment->setAmount($order->getGrandTotal());
-            $payment->setCurrency($order->getCurrency());
-
-            $this->entityManager->persist($payment);
-            $this->entityManager->flush();
-
+        $existingPayment = $this->paymentRepository->findOneBy(
+            ['order' => $order],
+            ['id' => 'DESC']
+        );
+        if ($existingPayment && $existingPayment->getStatus() !== 'failed' && $existingPayment->getProvider() === $provider->getName()) {
+            $clientSecret = $provider->getClientSecretForReference($existingPayment->getPaymentIntentId());
             return [
-                'paymentIntentId' => $paymentIntent->id,
-                'clientSecret' => $paymentIntent->client_secret,
+                'paymentIntentId' => $existingPayment->getPaymentIntentId(),
+                'clientSecret' => $clientSecret ?? '',
             ];
-        } catch (ApiErrorException $e) {
-            throw new \RuntimeException('Failed to create payment intent: ' . $e->getMessage(), 0, $e);
         }
+
+        $result = $provider->startPayment($order);
+
+        if ($existingPayment) {
+            $payment = $existingPayment;
+        } else {
+            $payment = new Payment();
+            $payment->setOrder($order);
+            $payment->setProvider($result->provider);
+        }
+        $payment->setPaymentIntentId($result->referenceId);
+        $payment->setStatus('pending');
+        $payment->setAmount($order->getGrandTotal());
+        $payment->setCurrency($order->getCurrency());
+
+        $this->entityManager->persist($payment);
+        $this->entityManager->flush();
+
+        return [
+            'paymentIntentId' => $result->referenceId,
+            'clientSecret' => $result->clientSecret ?? $provider->getClientSecretForReference($result->referenceId) ?? '',
+        ];
     }
 
     /**
-     * Handle successful payment webhook
+     * Apply a payment resolution (from webhook or return). Updates Payment and returns the Payment entity.
+     */
+    public function applyResolution(PaymentResolution $resolution): ?Payment
+    {
+        $payment = $this->paymentRepository->findOneByPaymentIntentId($resolution->referenceId);
+        if (!$payment) {
+            return null;
+        }
+        $payment->setStatus($resolution->status);
+        $this->entityManager->flush();
+        return $payment;
+    }
+
+    /**
+     * Handle successful payment (legacy; prefer applyResolution).
      */
     public function handlePaymentSuccess(string $paymentIntentId): void
     {
         $payment = $this->paymentRepository->findOneByPaymentIntentId($paymentIntentId);
-
         if (!$payment) {
             throw new \RuntimeException('Payment not found for payment intent: ' . $paymentIntentId);
         }
-
         $payment->setStatus('succeeded');
         $this->entityManager->flush();
     }
 
     /**
-     * Handle failed payment webhook
+     * Handle failed payment (legacy; prefer applyResolution).
      */
     public function handlePaymentFailure(string $paymentIntentId): void
     {
         $payment = $this->paymentRepository->findOneByPaymentIntentId($paymentIntentId);
-
         if (!$payment) {
             throw new \RuntimeException('Payment not found for payment intent: ' . $paymentIntentId);
         }
-
         $payment->setStatus('failed');
         $this->entityManager->flush();
     }
 
-    /**
-     * Get payment by payment intent ID
-     */
     public function getPaymentByIntentId(string $paymentIntentId): ?Payment
     {
         return $this->paymentRepository->findOneByPaymentIntentId($paymentIntentId);
     }
-}
 
+    public function getRegistry(): PaymentProviderRegistry
+    {
+        return $this->registry;
+    }
+}

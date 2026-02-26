@@ -34,6 +34,10 @@ document.addEventListener('DOMContentLoaded', function() {
         import('./features/payment.js').then(module => {
             if (module.init) module.init();
         });
+    } else if (page === 'category-filters') {
+        import('./features/category-filters.js').then(module => {
+            if (module.init) module.init();
+        });
     }
     
     // Admin password toggle (always available on admin pages)

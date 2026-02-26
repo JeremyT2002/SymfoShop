@@ -146,7 +146,21 @@ category:
     name_az: "Name: A to Z"
     name_za: "Name: Z to A"
   back_to_categories: Back to Categories
-  
+  no_products_match: No products match your filters
+  try_adjust_filters: Try adjusting or clearing filters.
+  filters:
+    title: Filters
+    active: Active
+    price: Price
+    price_range: Price range
+    min_price: Min price
+    max_price: Max price
+    price_unit: (in cents, e.g. 1000 = 10.00)
+    in_stock: In stock
+    in_stock_only: In stock only
+    clear_all: Clear all
+    apply: Apply
+
 checkout:
   title: Checkout
   shipping_address: Shipping Address
@@ -156,6 +170,15 @@ checkout:
   customer_information: Customer Information
   tax: Tax
   terms_agreement: By placing your order, you agree to our terms and conditions.
+  complete_payment: Complete Payment
+  order_number: Order number
+  total: Total
+  pay_now: Pay Now
+  dev_simulator: Development payment simulator
+  dev_simulator_hint: Choose an outcome to simulate (no real payment).
+  simulate_success: Simulate success
+  simulate_failure: Simulate failure
+  simulate_pending: Leave pending
   
 security:
   login:
@@ -239,4 +262,24 @@ coupon:
   usage_limit: This coupon has reached its usage limit
   per_user_limit: You have reached the usage limit for this coupon
   not_active: This coupon is not active
+
+admin:
+  dashboard:
+    title: Dashboard
+    no_widgets: No widgets configured. Use "Customize Dashboard" to add widgets.
+  widgets:
+    kpi_products:
+      title: Total Products
+    kpi_orders:
+      title: Total Orders
+    kpi_users:
+      title: Total Users
+    recent_orders:
+      title: Recent Orders
+      order_number: Order
+      customer: Customer
+      total: Total
+      status: Status
+      actions: Actions
+      empty: No orders found
 

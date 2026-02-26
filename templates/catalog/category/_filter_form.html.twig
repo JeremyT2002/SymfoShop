@@ -1,0 +1,62 @@
+{#
+  Filter form for category listing. GET form; all params preserved for SEO-friendly URLs.
+  Include in sidebar (desktop) and drawer (mobile).
+#}
+<form method="get" action="{{ path('catalog_category', {slug: category.slug}) }}" class="space-y-6" data-js="category-filter-form">
+    <input type="hidden" name="sort" value="{{ filters.sort|e('html_attr') }}">
+
+    {# Price range #}
+    <div>
+        <h3 class="text-sm font-semibold text-gray-900 mb-2">{{ 'category.filters.price_range'|trans }}</h3>
+        <div class="flex items-center gap-2">
+            <label for="filter-min-price" class="sr-only">{{ 'category.filters.min_price'|trans }}</label>
+            <input type="number" id="filter-min-price" name="min_price" min="0" step="100"
+                   value="{{ filters.minPrice ?? filterOptions.price_min }}"
+                   placeholder="{{ filterOptions.price_min }}"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+            <span class="text-gray-500">–</span>
+            <label for="filter-max-price" class="sr-only">{{ 'category.filters.max_price'|trans }}</label>
+            <input type="number" id="filter-max-price" name="max_price" min="0" step="100"
+                   value="{{ filters.maxPrice ?? filterOptions.price_max }}"
+                   placeholder="{{ filterOptions.price_max }}"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+        </div>
+        <p class="mt-1 text-xs text-gray-500">{{ 'category.filters.price_unit'|trans }}</p>
+    </div>
+
+    {# In stock #}
+    <div>
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="in_stock" value="1" {{ filters.inStockOnly ? 'checked' : '' }} class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="text-sm text-gray-700">{{ 'category.filters.in_stock_only'|trans }}</span>
+        </label>
+    </div>
+
+    {# Dynamic attributes (size, color, brand, etc.) #}
+    {% for attrKey, valueCounts in filterOptions.attributes %}
+        {% set currentValues = filters.attributeFilters[attrKey] ?? [] %}
+        <div>
+            <h3 class="text-sm font-semibold text-gray-900 mb-2">{{ attrKey|capitalize }}</h3>
+            <div class="space-y-1.5 max-h-48 overflow-y-auto">
+                {% for value, count in valueCounts|sort %}
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="attr_{{ attrKey }}[]" value="{{ value|e('html_attr') }}"
+                               {{ value in currentValues ? 'checked' : '' }}
+                               class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="text-sm text-gray-700">{{ value|escape }}</span>
+                        <span class="text-xs text-gray-500">({{ count }})</span>
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="flex gap-2 pt-2">
+        <button type="submit" class="flex-1 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
+            {{ 'category.filters.apply'|trans }}
+        </button>
+        <a href="{{ path('catalog_category', {slug: category.slug}) }}" class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+            {{ 'category.filters.clear_all'|trans }}
+        </a>
+    </div>
+</form>
