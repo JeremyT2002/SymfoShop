@@ -31,6 +31,12 @@ footer:
   contact_us: Kontaktieren Sie uns
   shipping_info: Versandinformationen
   all_rights_reserved: Alle Rechte vorbehalten
+  wishlist: Wunschliste
+  account_settings: Kontoeinstellungen
+  returns: Rückgaben
+  privacy: Datenschutzrichtlinie
+  terms: Allgemeine Geschäftsbedingungen
+  cookies: Cookie-Richtlinie
   
 common:
   cancel: Abbrechen
@@ -90,6 +96,7 @@ product:
   select_variant: Variante auswählen
   variant: Variante
   sku: SKU
+  price: Preis
   in_stock: Auf Lager
   out_of_stock: Nicht vorrätig
   add_to_cart: In den Warenkorb
@@ -98,11 +105,21 @@ product:
   available_variants: Verfügbare Varianten
   no_variants: Keine Varianten für dieses Produkt verfügbar.
   no_image: Kein Bild verfügbar
-  status: Status
   tax_class: Steuerklasse
   added_to_cart: Artikel zum Warenkorb hinzugefügt!
   view_cart_question: Warenkorb ansehen?
   error_adding: Beim Hinzufügen zum Warenkorb ist ein Fehler aufgetreten
+  status:
+    active: Auf Lager
+    draft: Entwurf
+    archived: Archiviert
+  variants_available: Varianten verfügbar
+  variants_count: Varianten
+  all_variants: Alle Varianten
+  default_variant: Standardvariante
+  secure_payment: Sichere Zahlung
+  fast_shipping: Schneller Versand
+  details: Produktdetails
   
 category:
   all_categories: Alle Kategorien
@@ -121,6 +138,14 @@ category:
   of: von
   product: Produkt
   products: Produkte
+  sort_by: Sortieren nach
+  sort:
+    default: Standard
+    price_low: "Preis: Niedrig zu Hoch"
+    price_high: "Preis: Hoch zu Niedrig"
+    name_az: "Name: A bis Z"
+    name_za: "Name: Z bis A"
+  back_to_categories: Zurück zu Kategorien
   
 checkout:
   title: Zur Kasse
@@ -154,4 +179,33 @@ security:
     password: Passwort
     confirm_password: Passwort bestätigen
     submit: Registrieren
+
+home:
+  hero:
+    title: Willkommen bei SymfoShop
+    subtitle: Entdecken Sie großartige Produkte, kaufen Sie mit Vertrauen und genießen Sie schnellen Versand. Ihr One-Stop-Shop für alles, was Sie brauchen.
+    browse_categories: Kategorien durchsuchen
+    view_featured: Empfohlene Produkte
+  benefits:
+    fast_shipping: Schneller Versand
+    fast_shipping_desc: Kostenloser Versand bei Bestellungen über 50€
+    secure_payment: Sichere Zahlung
+    secure_payment_desc: 100% sicherer Checkout
+    easy_returns: Einfache Rückgabe
+    easy_returns_desc: 30-tägige Rückgaberecht
+    support: 24/7 Support
+    support_desc: Wir sind für Sie da
+  featured:
+    title: Empfohlene Produkte
+    subtitle: Entdecken Sie unsere handverlesene Auswahl an Bestseller-Produkten
+    view_all: Alle Produkte anzeigen
+  cta:
+    title: Bereit zum Einkaufen?
+    subtitle: Schließen Sie sich Tausenden zufriedener Kunden an und entdecken Sie noch heute großartige Produkte.
+    start_shopping: Einkaufen beginnen
+    create_account: Konto erstellen
+
+pagination:
+  previous: Zurück
+  next: Weiter
 

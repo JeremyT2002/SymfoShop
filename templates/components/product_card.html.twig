@@ -1,0 +1,116 @@
+{#
+  Product Card Component
+  =====================
+  
+  Displays a product in a card format with image, name, price, and add to cart.
+  
+  Parameters:
+  - product: Product entity
+  - variant: ProductVariant entity (default: first variant)
+  - showQuickView: boolean (default: false)
+  - class: additional CSS classes
+#}
+
+{% set variant = variant|default(product.variants|first) %}
+{% set showQuickView = showQuickView|default(false) %}
+{% set image = product.media|first %}
+
+<div class="group relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden {{ class|default('') }}">
+    {# Product Image #}
+    <div class="relative aspect-square bg-gray-100 overflow-hidden">
+        <a href="{{ path('catalog_product', {slug: product.slug}) }}" class="block h-full">
+            {% if image %}
+                <img src="{{ image.path|escape }}" 
+                     alt="{{ image.alt|default(product.name)|escape }}"
+                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+            {% else %}
+                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                    <i class="fas fa-image text-6xl text-gray-400"></i>
+                </div>
+            {% endif %}
+            
+            {# Quick Actions Overlay #}
+            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                <div class="flex gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                    <a href="{{ path('catalog_product', {slug: product.slug}) }}" 
+                       class="bg-white text-gray-900 p-3 rounded-full hover:bg-primary-600 hover:text-white transition-colors shadow-lg"
+                       aria-label="View {{ product.name|escape }}">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    {% if showQuickView %}
+                        <button type="button" 
+                                class="bg-white text-gray-900 p-3 rounded-full hover:bg-primary-600 hover:text-white transition-colors shadow-lg quick-view-btn"
+                                data-product-slug="{{ product.slug }}"
+                                aria-label="Quick view {{ product.name|escape }}">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {# Status Badge #}
+            {% if product.status.value == 'draft' %}
+                <span class="absolute top-3 left-3 bg-yellow-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                    {{ 'product.status.draft'|trans }}
+                </span>
+            {% elseif product.status.value == 'archived' %}
+                <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                    {{ 'product.status.archived'|trans }}
+                </span>
+            {% endif %}
+        </a>
+    </div>
+    
+    {# Product Info #}
+    <div class="p-5">
+        {# Category/Name #}
+        <a href="{{ path('catalog_product', {slug: product.slug}) }}" class="block">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">
+                {{ product.name|escape }}
+            </h3>
+        </a>
+        
+        {# Description (truncated) #}
+        {% if product.description %}
+            <p class="text-sm text-gray-600 mb-4 line-clamp-2">
+                {{ product.description|escape|slice(0, 100) }}{% if product.description|length > 100 %}...{% endif %}
+            </p>
+        {% endif %}
+        
+        {# Variant Info #}
+        {% if variant %}
+            <div class="flex items-center justify-between mb-4">
+                {# Price #}
+                <div>
+                    <div class="text-2xl font-bold text-primary-600">
+                        {{ (variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ variant.currency|escape }}
+                    </div>
+                    {% if product.variants|length > 1 %}
+                        <div class="text-xs text-gray-500 mt-1">
+                            {{ product.variants|length }} {{ 'product.variants_available'|trans }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {# SKU #}
+                <div class="text-xs text-gray-400 font-mono">
+                    {{ variant.sku|escape }}
+                </div>
+            </div>
+            
+            {# Add to Cart Button #}
+            <button type="button" 
+                    class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 group/add-cart"
+                    data-variant-id="{{ variant.id }}"
+                    data-product-slug="{{ product.slug }}">
+                <i class="fas fa-shopping-cart group-hover/add-cart:scale-110 transition-transform"></i>
+                <span>{{ 'product.add_to_cart'|trans }}</span>
+            </button>
+        {% else %}
+            <div class="text-sm text-gray-500 py-3 text-center">
+                {{ 'product.no_variants'|trans }}
+            </div>
+        {% endif %}
+    </div>
+</div>
+

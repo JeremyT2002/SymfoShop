@@ -9,99 +9,99 @@
 {% endblock %}
 
 {% block catalog_body %}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav class="text-sm text-gray-600 mb-4" aria-label="Breadcrumb">
-            <ol class="flex items-center space-x-2">
-                <li><a href="{{ path('catalog_home') }}" class="hover:text-primary-600"><i class="fas fa-home mr-1"></i>{{ 'nav.home'|trans }}</a></li>
-                <li><i class="fas fa-chevron-right text-xs"></i></li>
-                <li class="text-gray-900">{{ category.name|escape }}</li>
-            </ol>
-        </nav>
-
-        <h1 class="text-3xl font-bold text-gray-900 mb-6">{{ category.name|escape }}</h1>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {# Breadcrumbs #}
+        {% include 'components/breadcrumbs.html.twig' with {
+            items: [
+                {label: 'nav.home'|trans, url: path('catalog_home')},
+                {label: category.name|escape, url: null}
+            ]
+        } %}
         
-        {% if category.parent %}
-            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <p class="text-sm text-gray-600">
-                    <i class="fas fa-arrow-up mr-1"></i>
-                    {{ 'category.parent_category'|trans }}: <a href="{{ path('catalog_category', {slug: category.parent.slug}) }}" class="text-primary-600 hover:text-primary-700 font-medium">{{ category.parent.name|escape }}</a>
-                </p>
+        {# Category Header #}
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ category.name|escape }}</h1>
+            
+            {% if category.parent %}
+                <div class="inline-flex items-center px-4 py-2 bg-primary-50 border border-primary-200 rounded-xl text-sm text-primary-700 mb-4">
+                    <i class="fas fa-arrow-up mr-2"></i>
+                    <span>{{ 'category.parent_category'|trans }}:</span>
+                    <a href="{{ path('catalog_category', {slug: category.parent.slug}) }}" 
+                       class="ml-2 font-semibold hover:text-primary-800 transition-colors">
+                        {{ category.parent.name|escape }}
+                    </a>
+                </div>
+            {% endif %}
+            
+            {% if category.children|length > 0 %}
+                <div class="mt-4">
+                    <h2 class="text-sm font-semibold text-gray-700 mb-2">{{ 'category.subcategories'|trans }}</h2>
+                    <div class="flex flex-wrap gap-2">
+                        {% for child in category.children %}
+                            <a href="{{ path('catalog_category', {slug: child.slug}) }}" 
+                               class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-primary-50 hover:border-primary-300 hover:text-primary-700 transition-colors">
+                                {{ child.name|escape }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        {# Filters & Sort Bar #}
+        <div class="bg-white rounded-xl shadow-md p-4 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <span class="text-sm font-medium text-gray-700">{{ 'category.showing'|trans }} {{ products|length }} {{ 'category.of'|trans }} {{ totalProducts }} {{ totalProducts != 1 ? 'category.products'|trans : 'category.product'|trans }}</span>
             </div>
-        {% endif %}
-
+            
+            {# Sort Options (placeholder for future implementation) #}
+            <div class="flex items-center gap-2">
+                <label for="sort-select" class="text-sm text-gray-600">{{ 'category.sort_by'|trans }}:</label>
+                <select id="sort-select" 
+                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white">
+                    <option value="default">{{ 'category.sort.default'|trans }}</option>
+                    <option value="price-asc">{{ 'category.sort.price_low'|trans }}</option>
+                    <option value="price-desc">{{ 'category.sort.price_high'|trans }}</option>
+                    <option value="name-asc">{{ 'category.sort.name_az'|trans }}</option>
+                    <option value="name-desc">{{ 'category.sort.name_za'|trans }}</option>
+                </select>
+            </div>
+        </div>
+        
+        {# Products Grid #}
         {% if products|length > 0 %}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                 {% for product in products %}
-                    <a href="{{ path('catalog_product', {slug: product.slug}) }}" class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-200 group">
-                        <div class="h-48 bg-gray-100 overflow-hidden">
-                            {% if product.media|length > 0 %}
-                                {% set firstMedia = product.media|first %}
-                                <img src="{{ firstMedia.path|escape }}" alt="{{ firstMedia.alt|default(product.name)|escape }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200">
-                            {% else %}
-                                <div class="w-full h-full flex items-center justify-center text-gray-400">
-                                    <i class="fas fa-image text-4xl"></i>
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="p-4">
-                            <h2 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">
-                                {{ product.name|escape }}
-                            </h2>
-                            {% if product.variants|length > 0 %}
-                                {% set prices = product.variants|map(v => v.priceAmount) %}
-                                {% set sortedPrices = prices|sort %}
-                                {% set minPrice = sortedPrices|first %}
-                                {% set maxPrice = sortedPrices|reverse|first %}
-                                <div class="text-xl font-bold text-primary-600">
-                                    {% if minPrice == maxPrice %}
-                                        €{{ (minPrice / 100)|number_format(2, '.', ',') }}
-                                    {% else %}
-                                        {{ 'category.from'|trans }} €{{ (minPrice / 100)|number_format(2, '.', ',') }}
-                                    {% endif %}
-                                </div>
-                            {% endif %}
-                        </div>
-                    </a>
+                    {% include 'components/product_card.html.twig' with {
+                        product: product,
+                        variant: product.variants|first
+                    } %}
                 {% endfor %}
             </div>
-
+            
+            {# Pagination #}
             {% if totalPages > 1 %}
-                <div class="flex justify-center items-center space-x-2 mb-6">
-                    {% if currentPage > 1 %}
-                        <a href="{{ path('catalog_category', {slug: category.slug, page: currentPage - 1}) }}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-                            <i class="fas fa-chevron-left mr-1"></i>{{ 'common.previous'|trans }}
-                        </a>
-                    {% endif %}
-
-                    {% for page in 1..totalPages %}
-                        {% if page == currentPage %}
-                            <span class="px-4 py-2 bg-primary-600 text-white rounded-md font-medium">{{ page }}</span>
-                        {% elseif page == 1 or page == totalPages or (page >= currentPage - 2 and page <= currentPage + 2) %}
-                            <a href="{{ path('catalog_category', {slug: category.slug, page: page}) }}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-                                {{ page }}
-                            </a>
-                        {% elseif page == currentPage - 3 or page == currentPage + 3 %}
-                            <span class="px-2 text-gray-500">...</span>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if currentPage < totalPages %}
-                        <a href="{{ path('catalog_category', {slug: category.slug, page: currentPage + 1}) }}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-                            {{ 'common.next'|trans }}<i class="fas fa-chevron-right ml-1"></i>
-                        </a>
-                    {% endif %}
-                </div>
+                {% include 'components/pagination.html.twig' with {
+                    currentPage: currentPage,
+                    totalPages: totalPages,
+                    route: 'catalog_category',
+                    routeParams: {slug: category.slug}
+                } %}
             {% endif %}
-
-            <p class="text-center text-gray-600 text-sm">
-                {{ 'category.showing'|trans }} {{ products|length }} {{ 'category.of'|trans }} {{ totalProducts }} {{ totalProducts != 1 ? 'category.products'|trans : 'category.product'|trans }}
-            </p>
         {% else %}
-            <div class="bg-white rounded-lg shadow-md p-12 text-center">
-                <i class="fas fa-box-open text-6xl text-gray-300 mb-4"></i>
-                <p class="text-gray-600 text-lg">No products found in this category.</p>
+            {# Empty State #}
+            <div class="bg-white rounded-2xl shadow-lg p-16 text-center">
+                <div class="max-w-md mx-auto">
+                    <i class="fas fa-box-open text-8xl text-gray-300 mb-6"></i>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-3">{{ 'category.no_products'|trans }}</h2>
+                    <p class="text-gray-600 mb-6">{{ 'category.check_back_soon'|trans }}</p>
+                    <a href="{{ path('catalog_home') }}" 
+                       class="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        {{ 'category.back_to_categories'|trans }}
+                    </a>
+                </div>
             </div>
         {% endif %}
     </div>
 {% endblock %}
-
