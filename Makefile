@@ -3,15 +3,30 @@
 # Default target
 .DEFAULT_GOAL := help
 
-# Colors for output
-BLUE := \033[0;34m
-GREEN := \033[0;32m
-YELLOW := \033[0;33m
-RED := \033[0;31m
-NC := \033[0m # No Color
+# Colors for output (Windows/PowerShell compatible)
+# Check if running in PowerShell or Git Bash
+ifeq ($(OS),Windows_NT)
+    # Windows - use simple text or PowerShell colors
+    BLUE := 
+    GREEN := 
+    YELLOW := 
+    RED := 
+    NC := 
+else
+    # Unix/Linux - use ANSI colors
+    BLUE := \033[0;34m
+    GREEN := \033[0;32m
+    YELLOW := \033[0;33m
+    RED := \033[0;31m
+    NC := \033[0m
+endif
 
 help: ## Show this help message
 	@echo "SymfoShop - Available Commands"
+	@echo ""
+	@echo "Windows/PowerShell Users:"
+	@echo "  This Makefile works with Git Bash or WSL. If using native PowerShell,"
+	@echo "  some commands may need adjustment. Most commands work cross-platform."
 	@echo ""
 	@echo "Installation & Setup:"
 	@echo "  install              Install Composer dependencies"
@@ -20,6 +35,8 @@ help: ## Show this help message
 	@echo "Database:"
 	@echo "  db-create             Create database"
 	@echo "  db-migrate            Run database migrations"
+	@echo "  db-migrate-status     Check migration status"
+	@echo "  db-migrate-sync       Sync migration metadata (fixes tracking issues)"
 	@echo "  db-reset              Reset database (drop, create, migrate)"
 	@echo "  db-fixtures           Load database fixtures (sample data)"
 	@echo "  db-seed               Reset database and load fixtures"
@@ -82,8 +99,11 @@ update: ## Update Composer dependencies
 setup: install ## Complete project setup (install, db, migrate, admin user)
 	@echo "Setting up database..."
 	@$(MAKE) db-create
+	@echo "Checking migration status..."
+	@php bin/console doctrine:migrations:status --no-interaction 2>nul || echo "Note: If you see 'table already exists' errors, run 'make db-reset' to start fresh."
 	@$(MAKE) db-migrate
 	@echo "Creating admin user..."
+	@echo "Note: Admin user creation requires interactive input. If this fails, run 'make admin-user' separately."
 	@$(MAKE) admin-user || echo "Admin user creation skipped. Run 'make admin-user' manually."
 	@echo "Project setup complete!"
 
@@ -91,19 +111,20 @@ setup: install ## Complete project setup (install, db, migrate, admin user)
 db-create: ## Create database
 	@echo "Creating database..."
 	@php bin/console doctrine:database:create --if-not-exists 2>nul || \
-		echo "Database may already exist or platform doesn't support listing databases. Attempting to create schema..."
-	@php bin/console doctrine:schema:create 2>nul || \
-		echo "Schema may already exist. Run 'make db-migrate' to apply migrations."
+		echo "Database may already exist or platform doesn't support listing databases."
 
 db-drop: ## Drop database (WARNING: destructive)
 	@echo "Dropping database..."
 	@php bin/console doctrine:database:drop --force --if-exists 2>nul || \
-		echo "Database drop not supported by platform or database doesn't exist. Skipping..."
+		(echo "Attempting to delete SQLite database file..." && \
+		if exist "var\data_dev.db" (del /q "var\data_dev.db" 2>nul) || \
+		if exist "var/data_dev.db" (rm -f "var/data_dev.db" 2>nul) || \
+		echo "Database drop not supported by platform or database doesn't exist. Skipping...")
 
 db-migrate: ## Run database migrations
 	@echo "Running database migrations..."
 	@php bin/console doctrine:migrations:migrate --no-interaction || \
-		echo "No migrations to execute or database not configured."
+		(echo "Migration error detected. If tables already exist, run 'make db-reset' to start fresh, or 'make db-migrate-status' to check status.")
 
 db-migrate-diff: ## Generate migration from entity changes
 	@echo "$(BLUE)Generating migration...$(NC)"
@@ -118,6 +139,14 @@ db-reset: ## Reset database (drop, create, migrate)
 db-validate: ## Validate database schema
 	@echo "Validating database schema..."
 	@php bin/console doctrine:schema:validate || echo "Schema validation not available."
+
+db-migrate-status: ## Check migration status
+	@echo "Checking migration status..."
+	@php bin/console doctrine:migrations:status
+
+db-migrate-sync: ## Sync migration metadata (fixes migration tracking issues)
+	@echo "Syncing migration metadata..."
+	@php bin/console doctrine:migrations:sync-metadata-storage
 
 # User Management
 admin-user: ## Create admin user (interactive)
@@ -140,7 +169,10 @@ server-start: ## Start Symfony development server
 
 server-stop: ## Stop Symfony development server
 	@echo "$(BLUE)Stopping Symfony server...$(NC)"
-	symfony server:stop || pkill -f "php -S localhost:8000"
+	@if exist "symfony.lock" (symfony server:stop) else ( \
+		taskkill /F /IM php.exe /FI "WINDOWTITLE eq *localhost:8000*" 2>nul || \
+		echo "No Symfony server process found to stop." \
+	)
 
 server-log: ## Show Symfony server logs
 	symfony server:log
@@ -222,11 +254,8 @@ lint-twig: ## Lint Twig templates
 
 format: ## Format code (if using PHP CS Fixer)
 	@echo "$(BLUE)Formatting code...$(NC)"
-	@if command -v php-cs-fixer > /dev/null; then \
-		php-cs-fixer fix src/; \
-	else \
-		echo "$(YELLOW)PHP CS Fixer not installed. Install with: composer require --dev friendsofphp/php-cs-fixer$(NC)"; \
-	fi
+	@php bin/php-cs-fixer fix src/ 2>nul || \
+		(echo "$(YELLOW)PHP CS Fixer not installed. Install with: composer require --dev friendsofphp/php-cs-fixer$(NC)")
 
 check: lint test ## Run all checks (lint + test)
 
@@ -257,14 +286,15 @@ dev-stop: server-stop ## Stop development environment
 
 reset: clean cache-clear db-reset ## Full reset (clean, cache, database)
 
-clean: ## Clean generated files
+clean: ## Clean generated files (cross-platform)
 	@echo "$(BLUE)Cleaning generated files...$(NC)"
-	rm -rf var/cache/*
-	rm -rf var/log/*
-	rm -rf var/sessions/*
-	rm -rf var/invoices/*
-	rm -rf coverage/
-	rm -rf .phpunit.result.cache
+	@php bin/console cache:clear --no-warmup 2>nul || echo "Cache cleared"
+	@if exist var\cache (for /d /r var\cache %%d in (*) do @rd /s /q "%%d" 2>nul) & (del /q /s var\cache\*.* 2>nul) || (rm -rf var/cache/* 2>/dev/null || true)
+	@if exist var\log (del /q /s var\log\*.* 2>nul) || (rm -f var/log/* 2>/dev/null || true)
+	@if exist var\sessions (del /q /s var\sessions\*.* 2>nul) || (rm -f var/sessions/* 2>/dev/null || true)
+	@if exist var\invoices (del /q /s var\invoices\*.* 2>nul) || (rm -f var/invoices/* 2>/dev/null || true)
+	@if exist coverage (rd /s /q coverage 2>nul) || (rm -rf coverage 2>/dev/null || true)
+	@if exist .phpunit.result.cache (del /q .phpunit.result.cache 2>nul) || (rm -f .phpunit.result.cache 2>/dev/null || true)
 
 # Database Fixtures
 db-fixtures: ## Load database fixtures (sample data)
@@ -299,7 +329,7 @@ info: ## Show project information
 	@echo "SymfoShop - Project Information"
 	@echo ""
 	@echo "PHP Version:"
-	@php -v | findstr /C:"PHP" || php -v | head -1
+	@php -v | findstr /C:"PHP"
 	@echo ""
 	@echo "Symfony Version:"
 	@php bin/console --version
@@ -310,6 +340,6 @@ info: ## Show project information
 	@echo "Database Status:"
 	@php bin/console doctrine:schema:validate 2>&1 | findstr /C:"mapping" >nul && echo "  Database connection OK" || echo "  Database not configured or not accessible"
 	@echo ""
-	@echo "Pending Migrations:"
-	@php bin/console doctrine:migrations:status 2>&1 | findstr /C:"Migration Status" || echo "  Run 'make db-migrate' to check migrations"
+	@echo "Migration Status:"
+	@php bin/console doctrine:migrations:status 2>&1 | findstr /C:"Migration Status" || echo "  Run 'make db-migrate-status' to check migrations"
 
