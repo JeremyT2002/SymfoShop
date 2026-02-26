@@ -149,7 +149,7 @@ class ProductFixture extends Fixture implements DependentFixtureInterface
         string $name,
         string $description,
         string $slug,
-        $category,
+        ?Category $category,
         array $variants,
         array $imageUrls = []
     ): void {
@@ -159,6 +159,7 @@ class ProductFixture extends Fixture implements DependentFixtureInterface
         $product->setSlug($slug);
         $product->setStatus(ProductStatus::ACTIVE);
         $product->setTaxClass('standard');
+        $product->setCategory($category);
         $product->setCreatedAt(new \DateTimeImmutable());
         $product->setUpdatedAt(new \DateTimeImmutable());
 
