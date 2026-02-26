@@ -12,121 +12,217 @@
     {% endif %}
 {% endblock %}
 
-{% block body %}
-    <nav style="margin-bottom: 1rem; color: #666;">
-        <a href="{{ path('catalog_home') }}">{{ 'nav.home'|trans }}</a> / 
-        <span>{{ product.name|escape }}</span>
-    </nav>
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin: 2rem 0;">
-        <div>
-            {% if product.media|length > 0 %}
-                {% set firstMedia = product.media|first %}
-                <div style="background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <img src="{{ firstMedia.path|escape }}" 
-                         alt="{{ firstMedia.alt|default(product.name)|escape }}" 
-                         class="main-image"
-                         style="width: 100%; display: block;">
-                </div>
-                {% if product.media|length > 1 %}
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem; margin-top: 1rem;">
-                        {% for media in product.media %}
-                            <img src="{{ media.path|escape }}" 
-                                 alt="{{ media.alt|default(product.name)|escape }}" 
-                                 style="width: 100%; height: 80px; object-fit: cover; border-radius: 4px; cursor: pointer;"
-                                 onclick="document.querySelector('.main-image').src = this.src">
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            {% else %}
-                <div style="background: #f0f0f0; border-radius: 8px; height: 400px; display: flex; align-items: center; justify-content: center; color: #999;">
-                    {{ 'product.no_image'|trans }}
-                </div>
-            {% endif %}
-        </div>
-
-        <div>
-            <h1 style="margin-bottom: 1rem;">{{ product.name|escape }}</h1>
-            
-            {% if product.description %}
-                <div style="margin-bottom: 2rem; line-height: 1.8; color: #666;">
-                    {{ product.description|escape|nl2br }}
-                </div>
-            {% endif %}
-
-            {% if variants|length > 0 %}
-                <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
-                    <h2 style="margin-bottom: 1rem; font-size: 1.2rem;">{{ 'product.select_variant'|trans }}</h2>
-                    
-                    <form id="variant-form" style="margin-bottom: 1.5rem;">
-                        <div style="margin-bottom: 1rem;">
-                            <label for="variant-select" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">{{ 'product.variant'|trans }}:</label>
-                            <select id="variant-select" name="variant" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
-                                {% for variant in variants %}
-                                    <option value="{{ variant.id }}" 
-                                            data-price="{{ variant.priceAmount }}" 
-                                            data-currency="{{ variant.currency|escape }}"
-                                            data-sku="{{ variant.sku|escape }}"
-                                            {% if variant == defaultVariant %}selected{% endif %}>
-                                        {% if variant.attributes|length > 0 %}
-                                            {{ variant.attributes|map((v, k) => "#{k}: #{v}")|join(', ')|escape }} - 
-                                        {% endif %}
-                                        SKU: {{ variant.sku|escape }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div style="margin-bottom: 1.5rem;">
-                            <div style="font-size: 2rem; font-weight: bold; color: #2563eb;" id="price-display">
-                                {{ (defaultVariant.priceAmount / 100)|number_format(2, '.', ',') }} {{ defaultVariant.currency|escape }}
-                            </div>
-                            <div style="color: #666; font-size: 0.9rem;" id="sku-display">
-                                SKU: {{ defaultVariant.sku|escape }}
-                            </div>
-                        </div>
-
-                        {% if defaultVariant %}
-                            <button type="button" class="btn add-to-cart-btn" style="width: 100%;" data-variant-id="{{ defaultVariant.id }}">
-                                {{ 'product.add_to_cart'|trans }}
-                            </button>
-                        {% endif %}
-                    </form>
-
-                    {% if variants|length > 1 %}
-                        <div style="border-top: 1px solid #e5e5e5; padding-top: 1rem;">
-                            <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">{{ 'product.available_variants'|trans }}:</h3>
-                            <ul style="list-style: none; padding: 0;">
-                                {% for variant in variants %}
-                                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0;">
-                                        <strong>{{ (variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ variant.currency|escape }}</strong>
-                                        {% if variant.attributes|length > 0 %}
-                                            - {{ variant.attributes|map((v, k) => "#{k}: #{v}")|join(', ')|escape }}
-                                        {% endif %}
-                                        ({{ variant.sku|escape }})
-                                    </li>
-                                {% endfor %}
-                            </ul>
+{% block catalog_body %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {# Breadcrumbs #}
+        {% include 'components/breadcrumbs.html.twig' with {
+            items: [
+                {label: 'nav.home'|trans, url: path('catalog_home')},
+                {label: product.name|escape, url: null}
+            ]
+        } %}
+        
+        {# Product Layout #}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
+            {# Product Images #}
+            <div class="space-y-4">
+                {# Main Image #}
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden aspect-square">
+                    {% if product.media|length > 0 %}
+                        {% set firstMedia = product.media|first %}
+                        <img id="main-product-image" 
+                             src="{{ firstMedia.path|escape }}" 
+                             alt="{{ firstMedia.alt|default(product.name)|escape }}"
+                             class="w-full h-full object-cover cursor-zoom-in"
+                             onclick="openImageModal(this.src)">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                            <i class="fas fa-image text-8xl text-gray-400"></i>
                         </div>
                     {% endif %}
                 </div>
-            {% else %}
-                <div style="background: #fff3cd; padding: 1rem; border-radius: 4px; margin-bottom: 2rem;">
-                    <p>{{ 'product.no_variants'|trans }}</p>
+                
+                {# Thumbnail Gallery #}
+                {% if product.media|length > 1 %}
+                    <div class="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                        {% for media in product.media %}
+                            <button type="button"
+                                    class="aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 {% if loop.first %}border-primary-600 ring-2 ring-primary-200{% else %}border-gray-200 hover:border-primary-400{% endif %}"
+                                    onclick="changeMainImage('{{ media.path|escape }}', this)">
+                                <img src="{{ media.path|escape }}" 
+                                     alt="{{ media.alt|default(product.name)|escape }}"
+                                     class="w-full h-full object-cover">
+                            </button>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            {# Product Info #}
+            <div class="space-y-6">
+                {# Title & Status #}
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-3">{{ product.name|escape }}</h1>
+                    {% if product.status.value == 'active' %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            <i class="fas fa-check-circle mr-1.5"></i>
+                            {{ 'product.status.active'|trans }}
+                        </span>
+                    {% endif %}
                 </div>
-            {% endif %}
-
-            <div style="background: #f9f9f9; padding: 1rem; border-radius: 4px; font-size: 0.9rem; color: #666;">
-                <p><strong>{{ 'product.status'|trans }}:</strong> {{ product.status.value|escape|capitalize }}</p>
-                <p><strong>{{ 'product.tax_class'|trans }}:</strong> {{ product.taxClass|escape }}</p>
+                
+                {# Price & Variant Selection #}
+                {% if variants|length > 0 %}
+                    <div class="bg-white rounded-2xl shadow-lg p-6 space-y-6">
+                        {# Variant Selector #}
+                        {% if variants|length > 1 %}
+                            <div>
+                                <label for="variant-select" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    {{ 'product.select_variant'|trans }}
+                                </label>
+                                <select id="variant-select" 
+                                        name="variant"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 bg-white transition-colors">
+                                    {% for variant in variants %}
+                                        <option value="{{ variant.id }}" 
+                                                data-price="{{ variant.priceAmount }}" 
+                                                data-currency="{{ variant.currency|escape }}"
+                                                data-sku="{{ variant.sku|escape }}"
+                                                {% if variant == defaultVariant %}selected{% endif %}>
+                                            {% if variant.attributes|length > 0 %}
+                                                {{ variant.attributes|map((v, k) => "#{k}: #{v}")|join(', ')|escape }} - 
+                                            {% endif %}
+                                            {{ (variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ variant.currency|escape }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        {% endif %}
+                        
+                        {# Price Display #}
+                        <div class="border-t border-gray-200 pt-6">
+                            <div class="mb-2">
+                                <div class="text-4xl font-bold text-primary-600" id="price-display">
+                                    {{ (defaultVariant.priceAmount / 100)|number_format(2, '.', ',') }} {{ defaultVariant.currency|escape }}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500 font-mono" id="sku-display">
+                                SKU: {{ defaultVariant.sku|escape }}
+                            </div>
+                        </div>
+                        
+                        {# Add to Cart #}
+                        <div class="space-y-3">
+                            <button type="button" 
+                                    id="add-to-cart-btn"
+                                    class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                                    data-variant-id="{{ defaultVariant.id }}">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>{{ 'product.add_to_cart'|trans }}</span>
+                            </button>
+                            
+                            <div class="flex items-center justify-center gap-6 text-sm text-gray-600">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-shield-alt text-primary-600"></i>
+                                    <span>{{ 'product.secure_payment'|trans }}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-truck text-primary-600"></i>
+                                    <span>{{ 'product.fast_shipping'|trans }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                        <p class="text-yellow-800">{{ 'product.no_variants'|trans }}</p>
+                    </div>
+                {% endif %}
+                
+                {# Description #}
+                {% if product.description %}
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4">{{ 'product.description'|trans }}</h2>
+                        <div class="prose prose-gray max-w-none text-gray-700 leading-relaxed">
+                            {{ product.description|escape|nl2br|raw }}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {# Product Details #}
+                <div class="bg-gray-50 rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ 'product.details'|trans }}</h3>
+                    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <dt class="font-medium text-gray-500">{{ 'product.status'|trans }}</dt>
+                            <dd class="mt-1 text-gray-900 capitalize">{{ product.status.value|escape }}</dd>
+                        </div>
+                        <div>
+                            <dt class="font-medium text-gray-500">{{ 'product.tax_class'|trans }}</dt>
+                            <dd class="mt-1 text-gray-900">{{ product.taxClass|escape }}</dd>
+                        </div>
+                        {% if variants|length > 0 %}
+                            <div>
+                                <dt class="font-medium text-gray-500">{{ 'product.variants_count'|trans }}</dt>
+                                <dd class="mt-1 text-gray-900">{{ variants|length }}</dd>
+                            </div>
+                        {% endif %}
+                    </dl>
+                </div>
             </div>
         </div>
+        
+        {# All Variants Table (if multiple) #}
+        {% if variants|length > 1 %}
+            <div class="bg-white rounded-2xl shadow-lg p-6 mt-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ 'product.all_variants'|trans }}</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">{{ 'product.variant'|trans }}</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">{{ 'product.sku'|trans }}</th>
+                                <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">{{ 'product.price'|trans }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for variant in variants %}
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-3 text-sm text-gray-900">
+                                        {% if variant.attributes|length > 0 %}
+                                            {{ variant.attributes|map((v, k) => "#{k}: #{v}")|join(', ')|escape }}
+                                        {% else %}
+                                            {{ 'product.default_variant'|trans }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-mono text-gray-600">{{ variant.sku|escape }}</td>
+                                    <td class="px-4 py-3 text-sm font-bold text-primary-600 text-right">
+                                        {{ (variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ variant.currency|escape }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
     </div>
-
+    
+    {# Image Modal #}
+    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden items-center justify-center p-4" onclick="closeImageModal()">
+        <button type="button" class="absolute top-4 right-4 text-white hover:text-gray-300 text-3xl" onclick="closeImageModal()" aria-label="Close">
+            <i class="fas fa-times"></i>
+        </button>
+        <img id="modal-image" src="" alt="" class="max-w-full max-h-full object-contain">
+    </div>
+    
     <script>
+        // Variant selection
         const variantSelect = document.getElementById('variant-select');
-        const addToCartBtn = document.querySelector('.add-to-cart-btn');
-
+        const addToCartBtn = document.getElementById('add-to-cart-btn');
+        const priceDisplay = document.querySelector('[data-price-display]');
+        const skuDisplay = document.getElementById('sku-display');
+        
         if (variantSelect) {
             variantSelect.addEventListener('change', function() {
                 const option = this.options[this.selectedIndex];
@@ -135,25 +231,35 @@
                 const sku = option.dataset.sku;
                 const variantId = parseInt(option.value);
                 
-                document.getElementById('price-display').textContent = price + ' ' + currency;
-                document.getElementById('sku-display').textContent = 'SKU: ' + sku;
+                // Update price display
+                const priceDisplay = document.getElementById('price-display');
+                if (priceDisplay) {
+                    priceDisplay.textContent = price + ' ' + currency;
+                }
+                
+                // Update SKU
+                if (skuDisplay) {
+                    skuDisplay.textContent = 'SKU: ' + sku;
+                }
+                
+                // Update add to cart button
                 if (addToCartBtn) {
                     addToCartBtn.dataset.variantId = variantId;
                 }
             });
         }
-
+        
+        // Add to cart
         if (addToCartBtn) {
             addToCartBtn.addEventListener('click', function() {
                 const variantId = parseInt(this.dataset.variantId);
                 const quantity = 1;
                 const button = this;
-                const originalText = button.innerHTML;
+                const originalHTML = button.innerHTML;
                 
-                // Show loading state
                 button.disabled = true;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>{{ 'common.loading'|trans|e('js') }}...';
-
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>{{ 'common.loading'|trans|e('js') }}...</span>';
+                
                 fetch('{{ path('cart_add') }}', {
                     method: 'POST',
                     headers: {
@@ -167,40 +273,100 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        if (window.showSuccessToast) {
-                            window.showSuccessToast(data.message || '{{ 'product.added_to_cart'|trans|e('js') }}');
-                        } else {
-                            if (confirm('{{ 'product.added_to_cart'|trans|e('js') }} {{ 'product.view_cart_question'|trans|e('js') }}')) {
-                                window.location.href = '{{ path('cart_show') }}';
-                            }
-                        }
-                        // Reset button after short delay
+                        // Show success message
+                        showToast('success', data.message || '{{ 'product.added_to_cart'|trans|e('js') }}');
+                        
+                        // Update cart badge if exists
+                        updateCartBadge();
+                        
+                        // Reset button
                         setTimeout(() => {
                             button.disabled = false;
-                            button.innerHTML = originalText;
-                        }, 1000);
+                            button.innerHTML = originalHTML;
+                        }, 1500);
                     } else {
+                        showToast('error', data.message || '{{ 'cart.error_occurred'|trans|e('js') }}');
                         button.disabled = false;
-                        button.innerHTML = originalText;
-                        if (window.showErrorToast) {
-                            window.showErrorToast(data.message || '{{ 'cart.error_occurred'|trans|e('js') }}');
-                        } else {
-                            alert(data.message || '{{ 'cart.error_occurred'|trans|e('js') }}');
-                        }
+                        button.innerHTML = originalHTML;
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
+                    showToast('error', '{{ 'product.error_adding'|trans|e('js') }}');
                     button.disabled = false;
-                    button.innerHTML = originalText;
-                    if (window.showErrorToast) {
-                        window.showErrorToast('{{ 'product.error_adding'|trans|e('js') }}');
-                    } else {
-                        alert('{{ 'product.error_adding'|trans|e('js') }}');
-                    }
+                    button.innerHTML = originalHTML;
                 });
             });
         }
+        
+        // Image gallery
+        function changeMainImage(src, button) {
+            document.getElementById('main-product-image').src = src;
+            
+            // Update active thumbnail
+            document.querySelectorAll('[onclick*="changeMainImage"]').forEach(btn => {
+                btn.classList.remove('border-primary-600', 'ring-2', 'ring-primary-200');
+                btn.classList.add('border-gray-200');
+            });
+            button.classList.add('border-primary-600', 'ring-2', 'ring-primary-200');
+            button.classList.remove('border-gray-200');
+        }
+        
+        // Image modal
+        function openImageModal(src) {
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-image');
+            modalImg.src = src;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeImageModal() {
+            const modal = document.getElementById('image-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+        
+        // Toast notification
+        function showToast(type, message) {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-xl flex items-center gap-3 animate-slide-in-right ${
+                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // Update cart badge
+        function updateCartBadge() {
+            // This would typically fetch from an API endpoint
+            // For now, we'll just reload the page badge on next navigation
+        }
     </script>
+    
+    <style>
+        @keyframes slide-in-right {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .animate-slide-in-right {
+            animation: slide-in-right 0.3s ease-out;
+        }
+    </style>
 {% endblock %}
-
