@@ -9,6 +9,7 @@ use App\Entity\OrderItem;
 use App\Entity\ProductVariant;
 use App\Repository\OrderRepository;
 use App\Service\Cart\CartService;
+use App\Service\Cart\CouponService;
 use App\Service\Inventory\InventoryService;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -18,6 +19,7 @@ class CheckoutService
 
     public function __construct(
         private readonly CartService $cartService,
+        private readonly CouponService $couponService,
         private readonly EntityManagerInterface $entityManager,
         private readonly OrderRepository $orderRepository,
         private readonly InventoryService $inventoryService
@@ -101,7 +103,7 @@ class CheckoutService
     /**
      * Calculate totals for cart items
      *
-     * @return array{subtotal: int, taxTotal: int, grandTotal: int, currency: string}
+     * @return array{subtotal: int, discount: int, taxTotal: int, grandTotal: int, currency: string, couponCode: ?string}
      */
     public function calculateTotals(): array
     {
@@ -111,22 +113,43 @@ class CheckoutService
         if (empty($items)) {
             return [
                 'subtotal' => 0,
+                'discount' => 0,
                 'taxTotal' => 0,
                 'grandTotal' => 0,
                 'currency' => 'EUR',
+                'couponCode' => null,
             ];
         }
 
         $subtotal = $totals['subtotal'];
+        $discount = 0;
+        $couponCode = $totals['couponCode'] ?? null;
+
+        // Calculate discount if coupon is applied
+        if ($couponCode) {
+            $user = null; // Could be injected if needed
+            $validation = $this->couponService->validate($couponCode, $user, $subtotal);
+            if ($validation['valid'] && $validation['coupon']) {
+                $discount = $this->couponService->calculateDiscount($validation['coupon'], $subtotal);
+            } else {
+                // Invalid coupon, clear it
+                $this->cartService->clearCoupon();
+                $couponCode = null;
+            }
+        }
+
+        $subtotalAfterDiscount = $subtotal - $discount;
         $taxRate = (float) self::TAX_RATE;
-        $taxTotal = (int) round($subtotal * $taxRate);
-        $grandTotal = $subtotal + $taxTotal;
+        $taxTotal = (int) round($subtotalAfterDiscount * $taxRate);
+        $grandTotal = $subtotalAfterDiscount + $taxTotal;
 
         return [
             'subtotal' => $subtotal,
+            'discount' => $discount,
             'taxTotal' => $taxTotal,
             'grandTotal' => $grandTotal,
             'currency' => $totals['currency'],
+            'couponCode' => $couponCode,
         ];
     }
 
@@ -151,6 +174,9 @@ class CheckoutService
         $order->setSubtotal($totals['subtotal']);
         $order->setTaxTotal($totals['taxTotal']);
         $order->setGrandTotal($totals['grandTotal']);
+        
+        // Store coupon code if applied (will be added to Order entity in migration)
+        // For now, we'll add it to a notes field or extend Order entity later
 
         // Create order items with price snapshots
         foreach ($items as $item) {

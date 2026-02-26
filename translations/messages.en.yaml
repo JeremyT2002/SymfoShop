@@ -222,3 +222,21 @@ wishlist:
     description: Start adding products you love to your wishlist to save them for later.
     browse_products: Browse Products
 
+coupon:
+  code: Coupon Code
+  enter_code: Enter coupon code
+  apply: Apply
+  applied: Coupon Applied
+  applied_success: Coupon applied successfully
+  removed: Coupon removed
+  remove: Remove Coupon
+  discount: Discount
+  off: off
+  error: An error occurred while applying the coupon
+  code_required: Coupon code is required
+  invalid: Invalid coupon code
+  expired: This coupon has expired
+  usage_limit: This coupon has reached its usage limit
+  per_user_limit: You have reached the usage limit for this coupon
+  not_active: This coupon is not active
+

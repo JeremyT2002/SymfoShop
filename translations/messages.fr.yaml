@@ -222,3 +222,21 @@ wishlist:
     description: Commencez à ajouter les produits que vous aimez à votre liste de souhaits pour les enregistrer pour plus tard.
     browse_products: Parcourir les produits
 
+coupon:
+  code: Code promo
+  enter_code: Entrez le code promo
+  apply: Appliquer
+  applied: Code promo appliqué
+  applied_success: Code promo appliqué avec succès
+  removed: Code promo retiré
+  remove: Retirer le code promo
+  discount: Réduction
+  off: de réduction
+  error: Une erreur s'est produite lors de l'application du code promo
+  code_required: Le code promo est requis
+  invalid: Code promo invalide
+  expired: Ce code promo a expiré
+  usage_limit: Ce code promo a atteint sa limite d'utilisation
+  per_user_limit: Vous avez atteint la limite d'utilisation pour ce code promo
+  not_active: Ce code promo n'est pas actif
+

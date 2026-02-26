@@ -222,3 +222,21 @@ wishlist:
     description: Beginnen Sie, Produkte, die Sie lieben, zu Ihrem Wunschzettel hinzuzufügen, um sie für später zu speichern.
     browse_products: Produkte durchsuchen
 
+coupon:
+  code: Gutscheincode
+  enter_code: Gutscheincode eingeben
+  apply: Anwenden
+  applied: Gutschein angewendet
+  applied_success: Gutschein erfolgreich angewendet
+  removed: Gutschein entfernt
+  remove: Gutschein entfernen
+  discount: Rabatt
+  off: reduziert
+  error: Beim Anwenden des Gutscheins ist ein Fehler aufgetreten
+  code_required: Gutscheincode ist erforderlich
+  invalid: Ungültiger Gutscheincode
+  expired: Dieser Gutschein ist abgelaufen
+  usage_limit: Dieser Gutschein hat sein Nutzungslimit erreicht
+  per_user_limit: Sie haben das Nutzungslimit für diesen Gutschein erreicht
+  not_active: Dieser Gutschein ist nicht aktiv
+

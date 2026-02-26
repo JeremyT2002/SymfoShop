@@ -2,6 +2,7 @@
 
 {% block title %}Checkout - SymfoShop{% endblock %}
 {% block meta_description %}Complete your order{% endblock %}
+{% block js_page %}checkout{% endblock %}
 
 {% block body %}
     <div class="container mx-auto px-4 py-8">
@@ -167,29 +168,5 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('place-order-btn').addEventListener('click', function() {
-            const customerForm = document.getElementById('customer-form');
-            const addressForm = document.getElementById('address-form');
-            const button = this;
-            const textSpan = button.querySelector('.place-order-text');
-            
-            if (customerForm && addressForm) {
-                // Show loading state
-                button.disabled = true;
-                if (textSpan) {
-                    textSpan.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>{{ 'common.loading'|trans|e('js') }}...';
-                }
-                
-                // Show global loading overlay
-                if (window.showLoading) {
-                    window.showLoading();
-                }
-                
-                // Submit customer form which will include address form data via handleRequest
-                customerForm.submit();
-            }
-        });
-    </script>
 {% endblock %}
 

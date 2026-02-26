@@ -2,9 +2,14 @@
 
 {% block title %}Shopping Cart - SymfoShop{% endblock %}
 {% block meta_description %}Review your shopping cart{% endblock %}
+{% block js_page %}cart{% endblock %}
 
 {% block body %}
-<div class="max-w-7xl mx-auto">
+<div class="max-w-7xl mx-auto" 
+     data-cart-update-url="{{ path('cart_update') }}" 
+     data-cart-remove-url="{{ path('cart_remove') }}"
+     data-cart-coupon-apply-url="{{ path('cart_coupon_apply') }}"
+     data-cart-coupon-remove-url="{{ path('cart_coupon_remove') }}">
     <div class="mb-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ 'cart.title'|trans }}</h1>
         <p class="text-gray-600">{{ 'cart.review_items'|trans }}</p>
@@ -67,6 +72,7 @@
                                                 <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                                                     <button type="button" 
                                                             class="quantity-decrease px-3 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
+                                                            data-js="cart-quantity-decrease"
                                                             data-variant-id="{{ item.variant.id }}">
                                                         <i class="fas fa-minus text-xs"></i>
                                                     </button>
@@ -78,17 +84,20 @@
                                                            class="w-16 text-center border-0 focus:ring-0 focus:outline-none py-2 text-sm font-medium">
                                                     <button type="button" 
                                                             class="quantity-increase px-3 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
+                                                            data-js="cart-quantity-increase"
                                                             data-variant-id="{{ item.variant.id }}">
                                                         <i class="fas fa-plus text-xs"></i>
                                                     </button>
                                                 </div>
                                                 <button type="button" 
                                                         class="update-quantity-btn hidden px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
+                                                        data-js="cart-update-quantity"
                                                         data-variant-id="{{ item.variant.id }}">
                                                     <i class="fas fa-sync-alt mr-1"></i>{{ 'cart.update'|trans }}
                                                 </button>
                                                 <button type="button" 
                                                         class="remove-item-btn ml-auto px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
+                                                        data-js="cart-remove-item"
                                                         data-variant-id="{{ item.variant.id }}">
                                                     <i class="fas fa-trash mr-1"></i>{{ 'cart.remove'|trans }}
                                                 </button>
@@ -123,17 +132,75 @@
                         {{ 'cart.order_summary'|trans }}
                     </h2>
                     
+                    {# Coupon Code Input #}
+                    <div class="mb-6 pb-6 border-b border-gray-200">
+                        {% if coupon %}
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-check-circle text-green-600"></i>
+                                        <span class="text-sm font-semibold text-green-800">{{ 'coupon.applied'|trans }}: {{ coupon.code|escape }}</span>
+                                    </div>
+                                    <button type="button" 
+                                            id="remove-coupon-btn"
+                                            data-js="cart-remove-coupon"
+                                            class="text-green-700 hover:text-green-900 text-sm font-medium">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="text-xs text-green-700">
+                                    {% if coupon.type.value == 'percentage' %}
+                                        {{ coupon.value }}% {{ 'coupon.off'|trans }}
+                                    {% else %}
+                                        {{ (coupon.value / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }} {{ 'coupon.off'|trans }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <form id="coupon-form" data-js="cart-coupon-form" class="space-y-2">
+                                <label for="coupon-code" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {{ 'coupon.code'|trans }}
+                                </label>
+                                <div class="flex gap-2">
+                                    <input type="text" 
+                                           id="coupon-code" 
+                                           name="code"
+                                           placeholder="{{ 'coupon.enter_code'|trans }}"
+                                           class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                                           autocomplete="off">
+                                    <button type="submit" 
+                                            id="apply-coupon-btn"
+                                            class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium whitespace-nowrap">
+                                        {{ 'coupon.apply'|trans }}
+                                    </button>
+                                </div>
+                                <div id="coupon-error" class="text-sm text-red-600 hidden"></div>
+                            </form>
+                        {% endif %}
+                    </div>
+                    
                     <div class="space-y-4 mb-6">
                         <div class="flex justify-between text-gray-600">
                             <span id="summary-items-label">{{ 'cart.items'|trans }} ({{ totals.totalQuantity }}):</span>
                             <span class="font-medium" id="summary-items-total">{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
                         </div>
+                        
+                        {# Discount Line #}
+                        {% if totals.discount > 0 %}
+                            <div class="flex justify-between text-green-600" id="discount-line">
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-tag text-sm"></i>
+                                    <span>{{ 'coupon.discount'|trans }} {% if coupon %}({{ coupon.code|escape }}){% endif %}:</span>
+                                </span>
+                                <span class="font-semibold" id="summary-discount">-{{ (totals.discount / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="border-t-2 border-gray-200 pt-4 mb-6">
                         <div class="flex justify-between items-center">
-                            <span class="text-lg font-semibold text-gray-900">Subtotal:</span>
-                            <span class="text-2xl font-bold text-primary-600" id="summary-subtotal">{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
+                            <span class="text-lg font-semibold text-gray-900">{{ 'cart.subtotal'|trans }}:</span>
+                            <span class="text-2xl font-bold text-primary-600" id="summary-subtotal">{{ ((totals.subtotal - totals.discount) / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
                         </div>
                     </div>
 
@@ -141,20 +208,6 @@
                         <i class="fas fa-lock mr-2 checkout-icon"></i>
                         <span class="checkout-text">{{ 'cart.proceed_to_checkout'|trans }}</span>
                     </a>
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const checkoutLink = document.getElementById('checkout-link');
-                            if (checkoutLink) {
-                                checkoutLink.addEventListener('click', function(e) {
-                                    const icon = this.querySelector('.checkout-icon');
-                                    const text = this.querySelector('.checkout-text');
-                                    if (icon) icon.className = 'fas fa-spinner fa-spin mr-2';
-                                    if (text) text.textContent = '{{ 'common.loading'|trans|e('js') }}...';
-                                    this.style.pointerEvents = 'none';
-                                });
-                            }
-                        });
-                    </script>
 
                     <form method="POST" action="{{ path('cart_clear') }}" id="clearCartForm" class="mt-4">
                         <button type="button" 
@@ -164,37 +217,6 @@
                             <span class="clear-cart-text">{{ 'cart.clear_cart'|trans }}</span>
                         </button>
                     </form>
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const clearCartBtn = document.getElementById('clearCartBtn');
-                            const clearCartForm = document.getElementById('clearCartForm');
-                            
-                            if (clearCartBtn && clearCartForm) {
-                                clearCartBtn.addEventListener('click', function() {
-                                    const button = this;
-                                    const originalText = button.querySelector('.clear-cart-text').textContent;
-                                    
-                                    if (window.showConfirm) {
-                                        window.showConfirm(
-                                            '{{ 'cart.clear_cart'|trans|e('js') }}',
-                                            '{{ 'cart.clear_cart_confirm'|trans|e('js') }}',
-                                            () => {
-                                                button.disabled = true;
-                                                button.querySelector('.clear-cart-text').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>{{ 'common.loading'|trans|e('js') }}...';
-                                                clearCartForm.submit();
-                                            }
-                                        );
-                                    } else {
-                                        if (confirm('{{ 'cart.clear_cart_confirm'|trans|e('js') }}')) {
-                                            button.disabled = true;
-                                            button.querySelector('.clear-cart-text').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>{{ 'common.loading'|trans|e('js') }}...';
-                                            clearCartForm.submit();
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                    </script>
 
                     <div class="mt-6 pt-6 border-t border-gray-200">
                         <div class="flex items-center text-sm text-gray-600">
@@ -221,230 +243,4 @@
         </div>
     {% endif %}
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Quantity input change detection and price update
-    document.querySelectorAll('input[type="number"][data-variant-id]').forEach(input => {
-        const variantId = parseInt(input.dataset.variantId);
-        const originalValue = input.value;
-        const updateBtn = input.closest('.flex').querySelector('.update-quantity-btn');
-        const priceElement = document.getElementById('item-total-' + variantId);
-        const unitPrice = priceElement ? parseInt(priceElement.dataset.unitPrice) : 0;
-        const currency = priceElement ? priceElement.dataset.currency : 'EUR';
-        
-        // Function to update price display
-        const updatePrice = () => {
-            if (priceElement && unitPrice > 0) {
-                const quantity = parseInt(input.value) || 1;
-                const total = (unitPrice * quantity) / 100;
-                priceElement.textContent = total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' ' + currency;
-            }
-        };
-        
-        input.addEventListener('input', function() {
-            const quantity = parseInt(this.value) || 1;
-            if (quantity >= 1) {
-                updatePrice();
-                if (this.value !== originalValue) {
-                    updateBtn.classList.remove('hidden');
-                } else {
-                    updateBtn.classList.add('hidden');
-                }
-            }
-        });
-        
-        input.addEventListener('change', function() {
-            const quantity = parseInt(this.value) || 1;
-            if (quantity < 1) {
-                this.value = 1;
-                updatePrice();
-            }
-            if (this.value !== originalValue) {
-                updateBtn.classList.remove('hidden');
-            } else {
-                updateBtn.classList.add('hidden');
-            }
-        });
-    });
-
-    // Quantity decrease
-    document.querySelectorAll('.quantity-decrease').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const variantId = parseInt(this.dataset.variantId);
-            const input = document.getElementById('quantity-' + variantId);
-            const currentValue = parseInt(input.value);
-            if (currentValue > 1) {
-                input.value = currentValue - 1;
-                input.dispatchEvent(new Event('input'));
-                input.dispatchEvent(new Event('change'));
-            }
-        });
-    });
-
-    // Quantity increase
-    document.querySelectorAll('.quantity-increase').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const variantId = parseInt(this.dataset.variantId);
-            const input = document.getElementById('quantity-' + variantId);
-            input.value = parseInt(input.value) + 1;
-            input.dispatchEvent(new Event('input'));
-            input.dispatchEvent(new Event('change'));
-        });
-    });
-
-    // Update quantity
-    document.querySelectorAll('.update-quantity-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const variantId = parseInt(this.dataset.variantId);
-            const quantityInput = document.getElementById('quantity-' + variantId);
-            const quantity = parseInt(quantityInput.value);
-            
-            if (quantity < 1) {
-                if (window.showErrorToast) {
-                    window.showErrorToast('{{ 'cart.quantity_min_error'|trans|e('js') }}');
-                } else {
-                    alert('Quantity must be at least 1');
-                }
-                return;
-            }
-
-            updateCartItem(variantId, quantity, this);
-        });
-    });
-
-    // Remove item
-    document.querySelectorAll('.remove-item-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const variantId = parseInt(this.dataset.variantId);
-            const button = this;
-            
-            if (window.showConfirm) {
-                window.showConfirm(
-                    '{{ 'cart.remove_item'|trans|e('js') }}',
-                    '{{ 'cart.remove_item_confirm'|trans|e('js') }}',
-                    () => removeCartItem(variantId, button)
-                );
-            } else {
-                if (confirm('Remove this item from cart?')) {
-                    removeCartItem(variantId, button);
-                }
-            }
-        });
-    });
-
-    function updateCartItem(variantId, quantity, button) {
-        button.disabled = true;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>{{ 'cart.updating'|trans|e('js') }}';
-        
-        fetch('{{ path('cart_update') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                variantId: variantId,
-                quantity: quantity
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Update summary totals if provided
-                if (data.totals) {
-                    updateSummaryTotals(data.totals);
-                }
-                if (window.showSuccessToast) {
-                    window.showSuccessToast(data.message || '{{ 'cart.updated_successfully'|trans|e('js') }}');
-                }
-                // Hide update button
-                button.classList.add('hidden');
-                // Reload after a short delay to ensure UI is updated
-                setTimeout(() => location.reload(), 1000);
-            } else {
-                if (window.showErrorToast) {
-                    window.showErrorToast(data.message || 'An error occurred');
-                } else {
-                    alert(data.message || 'An error occurred');
-                }
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>{{ 'cart.update'|trans|e('js') }}';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            if (window.showErrorToast) {
-                    window.showErrorToast('{{ 'cart.error_updating'|trans|e('js') }}');
-            } else {
-                alert('{{ 'cart.error_updating'|trans|e('js') }}');
-            }
-            button.disabled = false;
-            button.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>{{ 'cart.update'|trans|e('js') }}';
-        });
-    }
-
-    function removeCartItem(variantId, button) {
-        button.disabled = true;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>{{ 'cart.removing'|trans|e('js') }}';
-        
-        fetch('{{ path('cart_remove') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                variantId: variantId
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                if (window.showSuccessToast) {
-                    window.showSuccessToast(data.message || '{{ 'cart.item_removed'|trans|e('js') }}');
-                }
-                setTimeout(() => location.reload(), 500);
-            } else {
-                if (window.showErrorToast) {
-                    window.showErrorToast(data.message || 'An error occurred');
-                } else {
-                    alert(data.message || 'An error occurred');
-                }
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-trash mr-1"></i>{{ 'cart.remove'|trans|e('js') }}';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            if (window.showErrorToast) {
-                    window.showErrorToast('{{ 'cart.error_removing'|trans|e('js') }}');
-            } else {
-                alert('An error occurred while removing the item');
-            }
-            button.disabled = false;
-            button.innerHTML = '<i class="fas fa-trash mr-1"></i>Remove';
-        });
-    }
-
-    // Function to update summary totals
-    function updateSummaryTotals(totals) {
-        const itemsLabel = document.getElementById('summary-items-label');
-        const itemsTotal = document.getElementById('summary-items-total');
-        const subtotal = document.getElementById('summary-subtotal');
-        
-        if (itemsLabel && totals.totalQuantity !== undefined) {
-            itemsLabel.textContent = `{{ 'cart.items'|trans|e('js') }} (${totals.totalQuantity}):`;
-        }
-        
-        if (itemsTotal && totals.subtotal !== undefined && totals.currency) {
-            const formatted = (totals.subtotal / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            itemsTotal.textContent = formatted + ' ' + totals.currency;
-        }
-        
-        if (subtotal && totals.subtotal !== undefined && totals.currency) {
-            const formatted = (totals.subtotal / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            subtotal.textContent = formatted + ' ' + totals.currency;
-        }
-    }
-});
-</script>
 {% endblock %}

@@ -52,8 +52,8 @@
             {% if app.user %}
                 <button type="button"
                         class="wishlist-toggle absolute top-3 right-3 bg-white bg-opacity-90 hover:bg-opacity-100 p-2.5 rounded-full shadow-lg transition-all duration-200 z-10"
+                        data-js="wishlist-toggle"
                         data-product-id="{{ product.id }}"
-                        data-wishlist-url="{{ path('account_wishlist_toggle') }}"
                         aria-label="{{ 'wishlist.toggle'|trans }}">
                     <i class="fas fa-heart text-gray-400 wishlist-icon transition-colors duration-200" data-in-wishlist="false"></i>
                 </button>
@@ -112,6 +112,7 @@
             {# Add to Cart Button #}
             <button type="button" 
                     class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 group/add-cart"
+                    data-js="add-to-cart"
                     data-variant-id="{{ variant.id }}"
                     data-product-slug="{{ product.slug }}">
                 <i class="fas fa-shopping-cart group-hover/add-cart:scale-110 transition-transform"></i>

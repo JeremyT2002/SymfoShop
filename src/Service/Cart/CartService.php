@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class CartService
 {
     private const SESSION_KEY = 'cart_items';
+    private const SESSION_COUPON_KEY = 'cart_coupon_code';
 
     public function __construct(
         private readonly RequestStack $requestStack,
@@ -103,7 +104,7 @@ class CartService
     /**
      * Get cart totals
      *
-     * @return array{itemsCount: int, totalQuantity: int, subtotal: int, currency: string}
+     * @return array{itemsCount: int, totalQuantity: int, subtotal: int, discount: int, currency: string, couponCode: ?string}
      */
     public function getTotals(): array
     {
@@ -114,7 +115,9 @@ class CartService
                 'itemsCount' => 0,
                 'totalQuantity' => 0,
                 'subtotal' => 0,
+                'discount' => 0,
                 'currency' => 'EUR',
+                'couponCode' => null,
             ];
         }
 
@@ -137,8 +140,38 @@ class CartService
             'itemsCount' => count($detailedItems),
             'totalQuantity' => $totalQuantity,
             'subtotal' => $subtotal,
+            'discount' => 0, // Will be calculated by CouponService if coupon is applied
             'currency' => $currency,
+            'couponCode' => $this->getCouponCode(),
         ];
+    }
+
+    /**
+     * Get applied coupon code from session
+     */
+    public function getCouponCode(): ?string
+    {
+        return $this->getSession()->get(self::SESSION_COUPON_KEY);
+    }
+
+    /**
+     * Set coupon code in session
+     */
+    public function setCouponCode(?string $code): void
+    {
+        if ($code === null || $code === '') {
+            $this->getSession()->remove(self::SESSION_COUPON_KEY);
+        } else {
+            $this->getSession()->set(self::SESSION_COUPON_KEY, strtoupper(trim($code)));
+        }
+    }
+
+    /**
+     * Clear coupon from session
+     */
+    public function clearCoupon(): void
+    {
+        $this->getSession()->remove(self::SESSION_COUPON_KEY);
     }
 
     /**
