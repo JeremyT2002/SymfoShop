@@ -209,3 +209,16 @@ pagination:
   previous: Zurück
   next: Weiter
 
+wishlist:
+  title: Mein Wunschzettel
+  subtitle: Sie haben %count% Artikel in Ihrem Wunschzettel
+  meta_description: Anzeigen und Verwalten Ihrer Lieblingsprodukte
+  toggle: Wunschzettel umschalten
+  added: Produkt zum Wunschzettel hinzugefügt
+  removed: Produkt aus Wunschzettel entfernt
+  error: Ein Fehler ist aufgetreten
+  empty:
+    title: Ihr Wunschzettel ist leer
+    description: Beginnen Sie, Produkte, die Sie lieben, zu Ihrem Wunschzettel hinzuzufügen, um sie für später zu speichern.
+    browse_products: Produkte durchsuchen
+

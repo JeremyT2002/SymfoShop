@@ -209,3 +209,16 @@ pagination:
   previous: Previous
   next: Next
 
+wishlist:
+  title: My Wishlist
+  subtitle: You have %count% item(s) in your wishlist
+  meta_description: View and manage your favorite products
+  toggle: Toggle wishlist
+  added: Product added to wishlist
+  removed: Product removed from wishlist
+  error: An error occurred
+  empty:
+    title: Your wishlist is empty
+    description: Start adding products you love to your wishlist to save them for later.
+    browse_products: Browse Products
+
