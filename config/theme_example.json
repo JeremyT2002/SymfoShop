@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "schemaVersion": "1.0",
+    "name": "Default Theme",
+    "description": "SymfoShop default theme configuration"
+  },
+  "colors": {
+    "primary": {
+      "50": "#eff6ff",
+      "100": "#dbeafe",
+      "200": "#bfdbfe",
+      "300": "#93c5fd",
+      "400": "#60a5fa",
+      "500": "#3b82f6",
+      "600": "#2563eb",
+      "700": "#1d4ed8",
+      "800": "#1e40af",
+      "900": "#1e3a8a"
+    },
+    "accent": "#22c55e",
+    "background": "#f9fafb",
+    "surface": "#ffffff",
+    "text": {
+      "primary": "#111827",
+      "secondary": "#6b7280",
+      "muted": "#9ca3af"
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "sans": ["Inter", "system-ui", "sans-serif"],
+      "heading": ["Inter", "system-ui", "sans-serif"],
+      "mono": ["ui-monospace", "monospace"]
+    },
+    "fontSize": {
+      "xs": "0.75rem",
+      "sm": "0.875rem",
+      "base": "1rem",
+      "lg": "1.125rem",
+      "xl": "1.25rem",
+      "2xl": "1.5rem",
+      "3xl": "1.875rem"
+    },
+    "fontWeight": {
+      "normal": "400",
+      "medium": "500",
+      "semibold": "600",
+      "bold": "700"
+    }
+  },
+  "layout": {
+    "container": {
+      "maxWidth": "1280px",
+      "padding": "1rem"
+    },
+    "header": {
+      "sticky": true,
+      "height": "4rem"
+    },
+    "sidebar": {
+      "width": "16rem",
+      "collapsible": true
+    }
+  },
+  "components": {
+    "button": {
+      "borderRadius": "0.5rem",
+      "padding": "0.5rem 1rem"
+    },
+    "card": {
+      "borderRadius": "0.75rem",
+      "shadow": "sm"
+    },
+    "input": {
+      "borderRadius": "0.5rem",
+      "borderWidth": "1px"
+    }
+  },
+  "customCss": ""
+}
