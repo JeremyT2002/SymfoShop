@@ -1,0 +1,28 @@
+{# Testimonials - settings: title, items (or use defaults) #}
+<section class="bg-white py-16 border-t border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                {{ settings.title|default('What Our Customers Say') }}
+            </h2>
+        </div>
+        {% set items = settings.items|default([
+            { author: 'Sarah M.', text: 'Amazing quality and fast shipping. Will definitely order again!', rating: 5 },
+            { author: 'John D.', text: 'Great selection and competitive prices. Highly recommend.', rating: 5 },
+            { author: 'Emma L.', text: 'Best online shopping experience I\'ve had. Customer service was excellent.', rating: 5 }
+        ]) %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {% for item in items %}
+            <div class="bg-gray-50 rounded-2xl p-6 text-center">
+                <div class="flex justify-center gap-1 text-primary-500 mb-4">
+                    {% for i in 1..(item.rating|default(5)) %}
+                    <i class="fas fa-star"></i>
+                    {% endfor %}
+                </div>
+                <p class="text-gray-700 mb-4">"{{ item.text|default('Great experience!') }}"</p>
+                <p class="font-semibold text-gray-900">{{ item.author|default('Customer') }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>

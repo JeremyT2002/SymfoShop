@@ -1,0 +1,51 @@
+<div class="max-w-2xl space-y-6">
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Site name</label>
+        <input type="text" data-theme-key="brand.siteName" value="{{ config.brand.siteName|default('SymfoShop') }}"
+               class="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
+        <input type="text" data-theme-key="brand.logoUrl" value="{{ config.brand.logoUrl|default('') }}"
+               placeholder="/uploads/theme/logo.png"
+               class="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Logo alt text</label>
+        <input type="text" data-theme-key="brand.logoAlt" value="{{ config.brand.logoAlt|default('Shop Logo') }}"
+               class="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Favicon URL</label>
+        <input type="text" data-theme-key="brand.faviconUrl" value="{{ config.brand.faviconUrl|default('') }}"
+               placeholder="/uploads/theme/favicon.ico"
+               class="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+    </div>
+
+    <h3 class="text-sm font-semibold text-gray-900 pt-4">Primary color</h3>
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+        {% for shade in ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'] %}
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">{{ shade }}</label>
+                <input type="color" data-theme-key="colors.primary.{{ shade }}"
+                       value="{{ config.colors.primary[shade]|default('#3b82f6') }}"
+                       class="block w-full h-10 rounded border border-gray-300 cursor-pointer">
+            </div>
+        {% endfor %}
+    </div>
+
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Accent color</label>
+        <input type="color" data-theme-key="colors.accent" value="{{ config.colors.accent|default('#22c55e') }}"
+               class="block w-20 h-10 rounded border border-gray-300 cursor-pointer">
+    </div>
+
+    <h3 class="text-sm font-semibold text-gray-900 pt-4">Typography</h3>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Font family (sans)</label>
+        <input type="text" data-theme-key="typography.fontFamily.sans"
+               value="{% if config.typography.fontFamily.sans is defined and config.typography.fontFamily.sans is iterable %}{{ config.typography.fontFamily.sans|join(', ') }}{% else %}Inter, system-ui, sans-serif{% endif %}"
+               placeholder="Inter, system-ui, sans-serif"
+               class="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+    </div>
+</div>

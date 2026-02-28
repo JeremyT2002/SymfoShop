@@ -58,6 +58,11 @@ services:
             $orderWorkflow: '@state_machine.order'
             $kernelEnvironment: '%kernel.environment%'
 
+    # Theme resolver (use app cache pool)
+    App\Theme\ThemeResolver:
+        arguments:
+            $cache: '@cache.app'
+
     # Payment provider registry
     App\Service\Payment\PaymentProviderRegistry:
         arguments:

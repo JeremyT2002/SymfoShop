@@ -1,0 +1,37 @@
+<div class="max-w-2xl space-y-6">
+    <p class="text-sm text-gray-600">Reorder sections by dragging. Toggle enabled to show/hide on homepage.</p>
+    <div data-js="section-builder" data-section-types='{{ ["hero","benefits","featured_products","category_grid","testimonials","newsletter","rich_text"]|json_encode }}'>
+        <ul id="section-list" class="space-y-3">
+            {% for section in config.homepage.sections|default([]) %}
+                <li class="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-lg" data-section-id="{{ section.id|default('s-' ~ loop.index) }}">
+                    <span class="cursor-move text-gray-400"><i class="fas fa-grip-vertical"></i></span>
+                    <div class="flex-1">
+                        <span class="font-medium">{{ section.type|default('section') }}</span>
+                        <span class="text-sm text-gray-500 ml-2">({{ section.settings.title|default(section.id) }})</span>
+                    </div>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" class="section-enabled rounded border-gray-300 text-blue-600" {% if section.enabled|default(true) %}checked{% endif %}>
+                        <span class="text-sm">Enabled</span>
+                    </label>
+                    <button type="button" class="section-remove text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                </li>
+            {% else %}
+                <li class="text-sm text-gray-500 py-4">No sections. Add sections below.</li>
+            {% endfor %}
+        </ul>
+        <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Add section</label>
+            <select id="add-section-type" class="rounded-lg border border-gray-300 px-3 py-2">
+                <option value="hero">Hero</option>
+                <option value="benefits">Benefits</option>
+                <option value="featured_products">Featured Products</option>
+                <option value="category_grid">Category Grid</option>
+                <option value="testimonials">Testimonials</option>
+                <option value="newsletter">Newsletter</option>
+                <option value="rich_text">Rich Text</option>
+            </select>
+            <button type="button" id="add-section-btn" class="ml-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">Add</button>
+        </div>
+    </div>
+    <input type="hidden" id="homepage-sections-data" name="homepage_sections" value="{{ config.homepage.sections|default([])|json_encode }}">
+</div>

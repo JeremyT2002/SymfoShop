@@ -1,0 +1,11 @@
+{# Rich text - settings: content, title #}
+<section class="bg-white py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% if settings.title|default('') %}
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ settings.title }}</h2>
+        {% endif %}
+        <div class="prose prose-lg max-w-none text-gray-700">
+            {{ (settings.content|default(''))|raw }}
+        </div>
+    </div>
+</section>

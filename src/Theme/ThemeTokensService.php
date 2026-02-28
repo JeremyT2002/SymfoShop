@@ -43,8 +43,10 @@ class ThemeTokensService
 
         $this->emitColorVariables($tokens['colors'] ?? [], $lines);
         $this->emitTypographyVariables($tokens['typography'] ?? [], $lines);
-        $this->emitSpacingVariables($tokens['spacing'] ?? [], $lines);
-        $this->emitRadiusVariables($tokens['radius'] ?? [], $lines);
+        $spacing = $tokens['spacing'] ?? $tokens['layout']['spacingScale'] ?? [];
+        $radius = $tokens['radius'] ?? $tokens['layout']['radius'] ?? [];
+        $this->emitSpacingVariables(is_array($spacing) ? $spacing : [], $lines);
+        $this->emitRadiusVariables(is_array($radius) ? $radius : [], $lines);
 
         $lines[] = '}';
         return implode("\n", $lines);

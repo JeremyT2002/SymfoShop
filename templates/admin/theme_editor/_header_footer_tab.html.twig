@@ -1,0 +1,45 @@
+<div class="max-w-2xl space-y-6">
+    <h3 class="text-sm font-semibold text-gray-900">Header</h3>
+    <div class="space-y-4">
+        <label class="flex items-center gap-2">
+            <input type="checkbox" data-theme-key="header.sticky" {% if config.header.sticky|default(true) %}checked{% endif %}
+                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            <span class="text-sm text-gray-700">Sticky header</span>
+        </label>
+        <label class="flex items-center gap-2">
+            <input type="checkbox" data-theme-key="header.showCart" {% if config.header.showCart|default(true) %}checked{% endif %}
+                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            <span class="text-sm text-gray-700">Show cart</span>
+        </label>
+        <label class="flex items-center gap-2">
+            <input type="checkbox" data-theme-key="header.showLanguageSwitcher" {% if config.header.showLanguageSwitcher|default(true) %}checked{% endif %}
+                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            <span class="text-sm text-gray-700">Show language switcher</span>
+        </label>
+    </div>
+
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Menu items (JSON)</label>
+        <textarea data-theme-key="header.menuItems" rows="6"
+                  class="block w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">{{ config.header.menuItems|default([])|json_encode(192) }}</textarea>
+        <p class="mt-1 text-xs text-gray-500">Format: [{"label":"Home","url":"/","external":false}]</p>
+    </div>
+
+    <h3 class="text-sm font-semibold text-gray-900 pt-4">Footer</h3>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Copyright</label>
+        <input type="text" data-theme-key="footer.copyright" value="{{ config.footer.copyright|default('© 2025 SymfoShop') }}"
+               class="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Footer columns (JSON)</label>
+        <textarea data-theme-key="footer.columns" rows="8"
+                  class="block w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">{{ config.footer.columns|default([])|json_encode(192) }}</textarea>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Social links (JSON)</label>
+        <textarea data-theme-key="footer.socialLinks" rows="4"
+                  class="block w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">{{ config.footer.socialLinks|default([])|json_encode(192) }}</textarea>
+        <p class="mt-1 text-xs text-gray-500">Format: [{"platform":"facebook","url":"https://..."}]</p>
+    </div>
+</div>
