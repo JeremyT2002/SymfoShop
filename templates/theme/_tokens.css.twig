@@ -1,0 +1,6 @@
+{# Theme tokens as CSS variables - include in <head> before Tailwind #}
+{# Usage: {% include 'theme/_tokens.css.twig' %} #}
+{# With custom tokens: {% include 'theme/_tokens.css.twig' with { custom: theme.config } %} #}
+<style id="theme-tokens">
+{{ theme_css_vars(custom|default(null)) }}
+</style>
