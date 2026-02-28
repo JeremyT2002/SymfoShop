@@ -1,0 +1,152 @@
+{
+  "$schema": "theme-config-v1",
+  "brand": {
+    "logoUrl": "/uploads/theme/logo.png",
+    "logoAlt": "Shop Logo",
+    "faviconUrl": "/uploads/theme/favicon.ico",
+    "siteName": "SymfoShop"
+  },
+  "colors": {
+    "primary": {
+      "50": "#eff6ff",
+      "100": "#dbeafe",
+      "200": "#bfdbfe",
+      "300": "#93c5fd",
+      "400": "#60a5fa",
+      "500": "#3b82f6",
+      "600": "#2563eb",
+      "700": "#1d4ed8",
+      "800": "#1e40af",
+      "900": "#1e3a8a"
+    },
+    "accent": "#22c55e",
+    "background": "#f9fafb",
+    "surface": "#ffffff",
+    "text": {
+      "primary": "#111827",
+      "secondary": "#6b7280",
+      "muted": "#9ca3af"
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "sans": ["Inter", "system-ui", "sans-serif"],
+      "heading": ["Inter", "system-ui", "sans-serif"]
+    },
+    "fontSize": {
+      "base": "1rem",
+      "lg": "1.125rem",
+      "2xl": "1.5rem"
+    }
+  },
+  "layout": {
+    "containerMaxWidth": "1280px",
+    "spacingScale": {
+      "4": "1rem",
+      "8": "2rem"
+    },
+    "radius": {
+      "md": "0.5rem",
+      "lg": "0.75rem"
+    }
+  },
+  "header": {
+    "sticky": true,
+    "menuItems": [
+      { "label": "Home", "url": "/", "external": false },
+      { "label": "Categories", "url": "/", "external": false }
+    ],
+    "showCart": true,
+    "showLanguageSwitcher": true
+  },
+  "footer": {
+    "columns": [
+      {
+        "title": "Shop",
+        "links": [
+          { "label": "Categories", "url": "/" }
+        ]
+      },
+      {
+        "title": "Support",
+        "links": [
+          { "label": "Contact", "url": "/contact" }
+        ]
+      }
+    ],
+    "socialLinks": [
+      { "platform": "facebook", "url": "https://facebook.com" },
+      { "platform": "twitter", "url": "https://twitter.com" }
+    ],
+    "trustBadges": ["secure", "shipping", "returns"],
+    "copyright": "© 2025 SymfoShop"
+  },
+  "homepage": {
+    "sections": [
+      {
+        "type": "hero",
+        "id": "hero-1",
+        "enabled": true,
+        "settings": {
+          "title": "Welcome to SymfoShop",
+          "subtitle": "Discover amazing products.",
+          "ctaUrl": "/",
+          "backgroundImage": null
+        }
+      },
+      {
+        "type": "featured_products",
+        "id": "fp-1",
+        "enabled": true,
+        "settings": {
+          "limit": 8,
+          "title": "Featured Products"
+        }
+      },
+      {
+        "type": "category_grid",
+        "id": "cg-1",
+        "enabled": true,
+        "settings": {
+          "columns": 4
+        }
+      },
+      {
+        "type": "newsletter",
+        "id": "nl-1",
+        "enabled": true,
+        "settings": {
+          "title": "Subscribe to our newsletter"
+        }
+      }
+    ]
+  },
+  "catalog": {
+    "gridColumns": {
+      "mobile": 1,
+      "tablet": 2,
+      "desktop": 4
+    },
+    "showFilters": true,
+    "filterPosition": "sidebar",
+    "badgeStyle": "pill"
+  },
+  "product": {
+    "galleryStyle": "thumbnails",
+    "stickyAddToCart": true,
+    "tabsLayout": "accordion"
+  },
+  "components": {
+    "button": {
+      "variant": "rounded",
+      "size": "md"
+    },
+    "badge": {
+      "style": "pill"
+    },
+    "form": {
+      "inputRadius": "md"
+    }
+  },
+  "customCss": ""
+}

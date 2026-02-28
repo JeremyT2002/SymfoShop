@@ -1,0 +1,32 @@
+<div class="max-w-2xl space-y-6">
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Button variant</label>
+        <select data-theme-key="components.button.variant" class="rounded-lg border border-gray-300 px-3 py-2">
+            <option value="rounded" {% if (config.components.button.variant|default('rounded')) == 'rounded' %}selected{% endif %}>Rounded</option>
+            <option value="square" {% if (config.components.button.variant|default('')) == 'square' %}selected{% endif %}>Square</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Button size</label>
+        <select data-theme-key="components.button.size" class="rounded-lg border border-gray-300 px-3 py-2">
+            <option value="sm" {% if (config.components.button.size|default('')) == 'sm' %}selected{% endif %}>Small</option>
+            <option value="md" {% if (config.components.button.size|default('md')) == 'md' %}selected{% endif %}>Medium</option>
+            <option value="lg" {% if (config.components.button.size|default('')) == 'lg' %}selected{% endif %}>Large</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Badge style</label>
+        <select data-theme-key="components.badge.style" class="rounded-lg border border-gray-300 px-3 py-2">
+            <option value="pill" {% if (config.components.badge.style|default('pill')) == 'pill' %}selected{% endif %}>Pill</option>
+            <option value="square" {% if (config.components.badge.style|default('')) == 'square' %}selected{% endif %}>Square</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Form input radius</label>
+        <select data-theme-key="components.form.inputRadius" class="rounded-lg border border-gray-300 px-3 py-2">
+            <option value="sm" {% if (config.components.form.inputRadius|default('')) == 'sm' %}selected{% endif %}>Small</option>
+            <option value="md" {% if (config.components.form.inputRadius|default('md')) == 'md' %}selected{% endif %}>Medium</option>
+            <option value="lg" {% if (config.components.form.inputRadius|default('')) == 'lg' %}selected{% endif %}>Large</option>
+        </select>
+    </div>
+</div>

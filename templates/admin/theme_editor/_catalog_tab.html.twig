@@ -1,0 +1,44 @@
+<div class="max-w-2xl space-y-6">
+    <h3 class="text-sm font-semibold text-gray-900">Grid columns</h3>
+    <div class="grid grid-cols-3 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mobile</label>
+            <input type="number" data-theme-key="catalog.gridColumns.mobile" min="1" max="2"
+                   value="{{ config.catalog.gridColumns.mobile|default(1) }}"
+                   class="block w-full rounded-lg border border-gray-300 px-3 py-2">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tablet</label>
+            <input type="number" data-theme-key="catalog.gridColumns.tablet" min="1" max="4"
+                   value="{{ config.catalog.gridColumns.tablet|default(2) }}"
+                   class="block w-full rounded-lg border border-gray-300 px-3 py-2">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Desktop</label>
+            <input type="number" data-theme-key="catalog.gridColumns.desktop" min="1" max="6"
+                   value="{{ config.catalog.gridColumns.desktop|default(4) }}"
+                   class="block w-full rounded-lg border border-gray-300 px-3 py-2">
+        </div>
+    </div>
+    <div>
+        <label class="flex items-center gap-2">
+            <input type="checkbox" data-theme-key="catalog.showFilters" {% if config.catalog.showFilters|default(true) %}checked{% endif %}
+                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            <span class="text-sm text-gray-700">Show filters</span>
+        </label>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Filter position</label>
+        <select data-theme-key="catalog.filterPosition" class="rounded-lg border border-gray-300 px-3 py-2">
+            <option value="sidebar" {% if (config.catalog.filterPosition|default('sidebar')) == 'sidebar' %}selected{% endif %}>Sidebar</option>
+            <option value="top" {% if (config.catalog.filterPosition|default('')) == 'top' %}selected{% endif %}>Top</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Badge style</label>
+        <select data-theme-key="catalog.badgeStyle" class="rounded-lg border border-gray-300 px-3 py-2">
+            <option value="pill" {% if (config.catalog.badgeStyle|default('pill')) == 'pill' %}selected{% endif %}>Pill</option>
+            <option value="square" {% if (config.catalog.badgeStyle|default('')) == 'square' %}selected{% endif %}>Square</option>
+        </select>
+    </div>
+</div>

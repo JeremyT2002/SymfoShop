@@ -1,0 +1,14 @@
+{# Example: Using theme tokens with Tailwind classes #}
+{# Tokens are injected as CSS vars; Tailwind uses var(--color-primary-500) etc. #}
+
+<div class="bg-surface text-gray-900 rounded-theme-md p-4 shadow-sm">
+    <h3 class="text-xl font-semibold text-primary-900">
+        Themed component
+    </h3>
+    <p class="mt-2 text-primary-600">
+        Uses theme tokens via Tailwind: primary colors, radius, typography.
+    </p>
+    <button class="mt-4 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-theme-md font-medium transition-colors">
+        Primary action
+    </button>
+</div>

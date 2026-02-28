@@ -93,6 +93,14 @@
                 </div>
                 
                 <div class="pt-4">
+                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Appearance</p>
+                    <a href="{{ path('admin_theme_editor') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_theme' in app.request.get('_route') %}bg-gray-800{% endif %}">
+                        <i class="fas fa-palette w-5"></i>
+                        <span>Theme Editor</span>
+                    </a>
+                </div>
+                
+                <div class="pt-4">
                     <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">System</p>
                     <a href="{{ path('admin_api_docs') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_api_docs' in app.request.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-book w-5"></i>

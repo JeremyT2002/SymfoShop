@@ -1,0 +1,79 @@
+{
+  "colors": {
+    "primary": {
+      "50": "#eff6ff",
+      "100": "#dbeafe",
+      "200": "#bfdbfe",
+      "300": "#93c5fd",
+      "400": "#60a5fa",
+      "500": "#3b82f6",
+      "600": "#2563eb",
+      "700": "#1d4ed8",
+      "800": "#1e40af",
+      "900": "#1e3a8a"
+    },
+    "accent": "#22c55e",
+    "background": "#f9fafb",
+    "surface": "#ffffff",
+    "text": {
+      "primary": "#111827",
+      "secondary": "#6b7280",
+      "muted": "#9ca3af"
+    },
+    "semantic": {
+      "success": "#16a34a",
+      "error": "#dc2626",
+      "warning": "#d97706",
+      "info": "#2563eb"
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "sans": ["Inter", "system-ui", "sans-serif"],
+      "heading": ["Inter", "system-ui", "sans-serif"],
+      "mono": ["ui-monospace", "SFMono-Regular", "monospace"]
+    },
+    "fontSize": {
+      "xs": "0.75rem",
+      "sm": "0.875rem",
+      "base": "1rem",
+      "lg": "1.125rem",
+      "xl": "1.25rem",
+      "2xl": "1.5rem",
+      "3xl": "1.875rem",
+      "4xl": "2.25rem"
+    },
+    "fontWeight": {
+      "normal": "400",
+      "medium": "500",
+      "semibold": "600",
+      "bold": "700"
+    },
+    "lineHeight": {
+      "tight": "1.25",
+      "normal": "1.5",
+      "relaxed": "1.75"
+    }
+  },
+  "spacing": {
+    "0": "0",
+    "1": "0.25rem",
+    "2": "0.5rem",
+    "3": "0.75rem",
+    "4": "1rem",
+    "5": "1.25rem",
+    "6": "1.5rem",
+    "8": "2rem",
+    "10": "2.5rem",
+    "12": "3rem",
+    "16": "4rem"
+  },
+  "radius": {
+    "none": "0",
+    "sm": "0.25rem",
+    "md": "0.5rem",
+    "lg": "0.75rem",
+    "xl": "1rem",
+    "full": "9999px"
+  }
+}

@@ -1,0 +1,8 @@
+<div class="max-w-2xl space-y-6">
+    <p class="text-sm text-gray-600">Add custom CSS. Scoped under .shop-theme. Max 50KB. No @import, url(), expression(), javascript:.</p>
+    <div>
+        <textarea data-theme-key="customCss" rows="15"
+                  class="block w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  placeholder=".shop-theme .my-class { color: red; }">{{ config.customCss|default('') }}</textarea>
+    </div>
+</div>

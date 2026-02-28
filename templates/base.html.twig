@@ -3,8 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SymfoShop{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}SymfoShop - Your online shopping destination{% endblock %}">
+    <title>{% block title %}{{ theme_config().brand.siteName|default('SymfoShop') }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{{ theme_config().brand.siteName|default('SymfoShop') }} - Your online shopping destination{% endblock %}">
+    {% if theme_config().brand.faviconUrl is defined and theme_config().brand.faviconUrl %}
+    <link rel="icon" href="{{ theme_config().brand.faviconUrl }}">
+    {% endif %}
+    
+    <!-- Theme tokens (CSS variables) -->
+    {% include 'theme/_tokens.css.twig' %}
+    {% if theme_config().customCss is defined and theme_config().customCss %}
+    <style id="theme-custom-css">{{ theme_config().customCss|raw }}</style>
+    {% endif %}
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -26,20 +35,27 @@
                 extend: {
                     colors: {
                         primary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a',
-                        }
+                            50: 'var(--color-primary-50)',
+                            100: 'var(--color-primary-100)',
+                            200: 'var(--color-primary-200)',
+                            300: 'var(--color-primary-300)',
+                            400: 'var(--color-primary-400)',
+                            500: 'var(--color-primary-500)',
+                            600: 'var(--color-primary-600)',
+                            700: 'var(--color-primary-700)',
+                            800: 'var(--color-primary-800)',
+                            900: 'var(--color-primary-900)',
+                        },
+                        surface: 'var(--color-surface, #ffffff)',
+                        accent: 'var(--color-accent, #22c55e)',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        sans: ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'theme-sm': 'var(--radius-sm)',
+                        'theme-md': 'var(--radius-md)',
+                        'theme-lg': 'var(--radius-lg)',
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.3s ease-in-out',
@@ -76,12 +92,16 @@
                     <!-- Logo -->
                     <a href="{{ path('catalog_home') }}" 
                        class="flex items-center space-x-2.5 group focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-lg p-1 -ml-1"
-                       aria-label="SymfoShop Home">
+                       aria-label="{{ theme_config().brand.siteName|default('SymfoShop') }} Home">
+                        {% if theme_config().brand.logoUrl is defined and theme_config().brand.logoUrl %}
+                        <img src="{{ theme_config().brand.logoUrl }}" alt="{{ theme_config().brand.logoAlt|default('Logo') }}" class="h-9 lg:h-10 w-auto">
+                        {% else %}
                         <div class="w-9 h-9 lg:w-10 lg:h-10 bg-gradient-to-br from-primary-600 to-primary-700 rounded-xl flex items-center justify-center group-hover:from-primary-700 group-hover:to-primary-800 transition-all duration-200 shadow-md group-hover:shadow-lg">
                             <i class="fas fa-shopping-bag text-white text-sm lg:text-base"></i>
                         </div>
+                        {% endif %}
                         <span class="text-xl lg:text-2xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
-                            SymfoShop
+                            {{ theme_config().brand.siteName|default('SymfoShop') }}
                         </span>
                     </a>
                     
@@ -105,6 +125,7 @@
                 <!-- Right Side Actions -->
                 <div class="flex items-center space-x-2 lg:space-x-4">
                     <!-- Cart Icon -->
+                    {% if theme_config().header.showCart|default(true) %}
                     <a href="{{ path('cart_show') }}" 
                        class="relative flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                        aria-label="{{ 'nav.cart'|trans }}">
@@ -116,6 +137,7 @@
                             </span>
                         {% endif %}
                     </a>
+                    {% endif %}
                     
                     <!-- Language Switcher (Desktop) -->
                     <div class="hidden lg:block relative">
@@ -130,6 +152,7 @@
                             <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
                         </div>
                     </div>
+                    {% endif %}
                     
                     {% if app.user %}
                         <!-- User Menu Dropdown (Desktop) -->
@@ -320,11 +343,32 @@
                 <div>
                     <div class="flex items-center space-x-2 mb-4">
                         <i class="fas fa-shopping-bag text-2xl"></i>
-                        <span class="text-xl font-bold">SymfoShop</span>
+                        <span class="text-xl font-bold">{{ theme_config().brand.siteName|default('SymfoShop') }}</span>
                     </div>
                     <p class="text-gray-400 text-sm">{{ 'footer.description'|trans }}</p>
+                    {% if theme_config().footer.socialLinks is defined and theme_config().footer.socialLinks|length > 0 %}
+                    <div class="flex gap-3 mt-4">
+                        {% for link in theme_config().footer.socialLinks %}
+                        <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors" aria-label="{{ link.platform|default('Social') }}">
+                            <i class="fab fa-{{ link.platform }} text-lg"></i>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
-                
+                {% set footerCols = theme_config().footer.columns|default([]) %}
+                {% if footerCols|length > 0 %}
+                    {% for col in footerCols %}
+                    <div>
+                        <h3 class="font-semibold mb-4">{{ col.title|default('Links') }}</h3>
+                        <ul class="space-y-2 text-sm text-gray-400">
+                            {% for link in col.links|default([]) %}
+                            <li><a href="{{ link.url }}" {% if link.external|default(false) %}target="_blank" rel="noopener noreferrer"{% endif %} class="hover:text-white transition-colors">{{ link.label }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                {% else %}
                 <div>
                     <h3 class="font-semibold mb-4">{{ 'footer.shop'|trans }}</h3>
                     <ul class="space-y-2 text-sm text-gray-400">
@@ -332,7 +376,6 @@
                         <li><a href="{{ path('cart_show') }}" class="hover:text-white transition-colors">{{ 'footer.cart'|trans }}</a></li>
                     </ul>
                 </div>
-                
                 <div>
                     <h3 class="font-semibold mb-4">{{ 'footer.account'|trans }}</h3>
                     <ul class="space-y-2 text-sm text-gray-400">
@@ -340,7 +383,6 @@
                         <li><a href="{{ path('register') }}" class="hover:text-white transition-colors">{{ 'footer.register'|trans }}</a></li>
                     </ul>
                 </div>
-                
                 <div>
                     <h3 class="font-semibold mb-4">{{ 'footer.support'|trans }}</h3>
                     <ul class="space-y-2 text-sm text-gray-400">
@@ -349,10 +391,11 @@
                         <li><a href="#" class="hover:text-white transition-colors">{{ 'footer.shipping'|trans }}</a></li>
                     </ul>
                 </div>
+                {% endif %}
             </div>
             
             <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-                <p>&copy; {{ 'now'|date('Y') }} SymfoShop. {{ 'footer.rights'|trans }}</p>
+                <p>{{ theme_config().footer.copyright|default('© ' ~ 'now'|date('Y') ~ ' SymfoShop. ' ~ ('footer.rights'|trans)) }}</p>
             </div>
         </div>
     </footer>

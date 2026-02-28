@@ -1,0 +1,5 @@
+{# Theme tokens as CSS variables - include in <head> before Tailwind #}
+{# Uses theme_config() from storefront, or defaults #}
+<style id="theme-tokens">
+{{ theme_css_vars(theme_config()|length > 0 ? theme_config() : null) }}
+</style>

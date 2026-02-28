@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Theme Tokens",
+  "description": "Design tokens for SymfoShop theme system - maps to CSS variables and Tailwind",
+  "type": "object",
+  "properties": {
+    "colors": {
+      "type": "object",
+      "description": "Color palette - primary, accent, semantic, neutral",
+      "properties": {
+        "primary": {
+          "type": "object",
+          "description": "Primary brand colors (50-900 scale)",
+          "additionalProperties": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+        },
+        "accent": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "background": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "surface": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "text": {
+          "type": "object",
+          "properties": {
+            "primary": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+            "secondary": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+            "muted": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+          }
+        },
+        "semantic": {
+          "type": "object",
+          "description": "Accessibility-friendly semantic colors",
+          "properties": {
+            "success": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+            "error": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+            "warning": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+            "info": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+          }
+        }
+      }
+    },
+    "typography": {
+      "type": "object",
+      "properties": {
+        "fontFamily": {
+          "type": "object",
+          "properties": {
+            "sans": { "type": "array", "items": { "type": "string" } },
+            "heading": { "type": "array", "items": { "type": "string" } },
+            "mono": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "fontSize": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "fontWeight": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "lineHeight": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "spacing": {
+      "type": "object",
+      "description": "Spacing scale (Tailwind-compatible: 1 = 0.25rem)",
+      "additionalProperties": { "type": "string" }
+    },
+    "radius": {
+      "type": "object",
+      "description": "Border radius scale",
+      "properties": {
+        "none": { "type": "string" },
+        "sm": { "type": "string" },
+        "md": { "type": "string" },
+        "lg": { "type": "string" },
+        "xl": { "type": "string" },
+        "full": { "type": "string" }
+      }
+    }
+  }
+}

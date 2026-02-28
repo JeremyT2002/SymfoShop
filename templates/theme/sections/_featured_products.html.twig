@@ -1,0 +1,33 @@
+{# Featured products - settings: limit, title. Context: featuredProducts #}
+{% if featuredProducts is defined and featuredProducts|length > 0 %}
+<section id="featured" class="bg-gray-50 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                {{ settings.title|default('home.featured.title'|trans)|default('Featured Products') }}
+            </h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                {{ 'home.featured.subtitle'|trans|default('Discover our handpicked selection of best-selling products') }}
+            </p>
+        </div>
+        {% set limit = settings.limit|default(8) %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {% for product in featuredProducts|slice(0, limit) %}
+                {% include 'components/product_card.html.twig' with {
+                    product: product,
+                    variant: product.variants|first
+                } %}
+            {% endfor %}
+        </div>
+        {% if categories is defined and categories|length > 0 %}
+        <div class="text-center">
+            <a href="{{ path('catalog_category', {slug: categories|first.slug}) }}" 
+               class="inline-flex items-center px-8 py-4 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                {{ 'home.featured.view_all'|trans|default('View All Products') }}
+                <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}

@@ -1,0 +1,43 @@
+{# Benefits / Trust signals - static content #}
+<section class="bg-white py-12 border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="flex items-center gap-4 text-center sm:text-left">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-shipping-fast text-2xl text-primary-600"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900">{{ 'home.benefits.fast_shipping'|trans|default('Fast Shipping') }}</h3>
+                    <p class="text-sm text-gray-600">{{ 'home.benefits.fast_shipping_desc'|trans|default('Free shipping on orders over $50') }}</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 text-center sm:text-left">
+                <div class="flex-shrink-0 w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-2xl text-green-600"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900">{{ 'home.benefits.secure_payment'|trans|default('Secure Payment') }}</h3>
+                    <p class="text-sm text-gray-600">{{ 'home.benefits.secure_payment_desc'|trans|default('100% secure checkout') }}</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 text-center sm:text-left">
+                <div class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-undo text-2xl text-blue-600"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900">{{ 'home.benefits.easy_returns'|trans|default('Easy Returns') }}</h3>
+                    <p class="text-sm text-gray-600">{{ 'home.benefits.easy_returns_desc'|trans|default('30-day return policy') }}</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 text-center sm:text-left">
+                <div class="flex-shrink-0 w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-headset text-2xl text-purple-600"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900">{{ 'home.benefits.support'|trans|default('24/7 Support') }}</h3>
+                    <p class="text-sm text-gray-600">{{ 'home.benefits.support_desc'|trans|default('We\'re here to help') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
