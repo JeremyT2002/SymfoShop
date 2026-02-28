@@ -1,119 +1,141 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Login - SymfoShop{% endblock %}
+{% block title %}{{ 'security.login.title'|trans }} - SymfoShop{% endblock %}
 
 {% block body %}
-<div class="flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 min-h-full">
-    <div class="max-w-md w-full space-y-8">
-        <div>
-            <div class="flex justify-center">
-                <i class="fas fa-user-circle text-primary-600 text-6xl"></i>
-            </div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                {{ 'security.login.title'|trans }}
-            </h2>
-            <p class="mt-2 text-center text-sm text-gray-600">
-                {{ 'security.login.or'|trans }}
-                <a href="{{ path('register') }}" class="font-medium text-primary-600 hover:text-primary-500">
-                    {{ 'security.login.create_account'|trans }}
-                </a>
-            </p>
+<div class="min-h-[calc(100vh-4rem)] flex">
+    {# Left panel - brand / decorative #}
+    <div class="hidden lg:flex lg:w-1/2 xl:w-2/5 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute bottom-20 right-20 w-96 h-96 bg-primary-300 rounded-full blur-3xl"></div>
         </div>
-
-        {% if error %}
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <span class="block sm:inline">
-                    <i class="fas fa-exclamation-circle mr-2"></i>
-                    {{ error.messageKey|trans(error.messageData, 'security') }}
-                </span>
-            </div>
-        {% endif %}
-
-        <form class="mt-8 space-y-6" method="post">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-
-            <div class="rounded-md shadow-sm -space-y-px">
-                <div>
-                    <label for="inputEmail" class="sr-only">Email address</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-envelope text-gray-400"></i>
-                        </div>
-                        <input 
-                            id="inputEmail" 
-                            name="_username" 
-                            type="email" 
-                            autocomplete="email" 
-                            required 
-                            autofocus
-                            value="{{ last_username }}"
-                            class="appearance-none rounded-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm" 
-                            placeholder="Email address"
-                        >
-                    </div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+        <div class="relative z-10 flex flex-col justify-center px-12 xl:px-20">
+            <a href="{{ path('catalog_home') }}" class="inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors mb-16">
+                <div class="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+                    <i class="fas fa-shopping-bag text-lg"></i>
                 </div>
-                <div>
-                    <label for="inputPassword" class="sr-only">Password</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-lock text-gray-400"></i>
-                        </div>
-                        <input 
-                            id="inputPassword" 
-                            name="_password" 
-                            type="password" 
-                            autocomplete="current-password" 
-                            required
-                            class="appearance-none rounded-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm" 
-                            placeholder="Password"
-                        >
+                <span class="text-xl font-bold">SymfoShop</span>
+            </a>
+            <h1 class="text-4xl xl:text-5xl font-bold text-white leading-tight">
+                Welcome back
+            </h1>
+            <p class="mt-4 text-lg text-primary-100 max-w-sm">
+                Sign in to manage your orders, wishlist, and account settings.
+            </p>
+            <div class="mt-12 flex gap-6">
+                <div class="flex items-center gap-3 text-white/80">
+                    <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                        <i class="fas fa-truck"></i>
                     </div>
+                    <span class="text-sm font-medium">Fast delivery</span>
+                </div>
+                <div class="flex items-center gap-3 text-white/80">
+                    <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <span class="text-sm font-medium">Secure checkout</span>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div>
-                <button 
-                    type="submit" 
-                    id="login-submit-btn"
-                    class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                        <i class="fas fa-sign-in-alt text-primary-500 group-hover:text-primary-400 login-icon"></i>
-                    </span>
-                    <span class="login-text">{{ 'security.login.submit'|trans }}</span>
-                </button>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const form = document.querySelector('form');
-                        const submitBtn = document.getElementById('login-submit-btn');
-                        if (form && submitBtn) {
-                            form.addEventListener('submit', function() {
-                                submitBtn.disabled = true;
-                                const icon = submitBtn.querySelector('.login-icon');
-                                const text = submitBtn.querySelector('.login-text');
-                                if (icon) icon.className = 'fas fa-spinner fa-spin text-primary-500';
-                                if (text) text.textContent = '{{ 'common.loading'|trans|e('js') }}...';
-                            });
-                        }
-                    });
-                </script>
+    {# Right panel - form #}
+    <div class="flex-1 flex items-center justify-center p-6 sm:p-8 lg:p-12 bg-gray-50">
+        <div class="w-full max-w-md">
+            {# Mobile logo #}
+            <div class="lg:hidden text-center mb-8">
+                <a href="{{ path('catalog_home') }}" class="inline-flex items-center gap-2 text-gray-900 hover:text-primary-600 transition-colors">
+                    <div class="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-shopping-bag text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold">SymfoShop</span>
+                </a>
             </div>
 
-            <div class="text-center space-y-2">
-                <p class="text-sm text-gray-600">
-                    {{ 'security.login.dont_have_account'|trans }} 
-                    <a href="{{ path('register') }}" class="font-medium text-primary-600 hover:text-primary-500">
+            <div class="bg-white rounded-2xl shadow-xl shadow-gray-200/50 p-8 sm:p-10">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900">{{ 'security.login.title'|trans }}</h2>
+                    <p class="mt-2 text-sm text-gray-500">
+                        {{ 'security.login.or'|trans }}
+                        <a href="{{ path('register') }}" class="font-medium text-primary-600 hover:text-primary-500 transition-colors">
+                            {{ 'security.login.create_account'|trans }}
+                        </a>
+                    </p>
+                </div>
+
+                {% if error %}
+                    <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 flex items-start gap-3" role="alert">
+                        <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
+                        <p class="text-sm text-red-700">{{ error.messageKey|trans(error.messageData, 'security') }}</p>
+                    </div>
+                {% endif %}
+
+                <form method="post" class="space-y-5">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                    <div>
+                        <label for="inputEmail" class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <input id="inputEmail" name="_username" type="email" autocomplete="email" required autofocus
+                                value="{{ last_username }}"
+                                class="block w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors"
+                                placeholder="you@example.com">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="inputPassword" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <input id="inputPassword" name="_password" type="password" autocomplete="current-password" required
+                                class="block w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors"
+                                placeholder="••••••••">
+                        </div>
+                        <div class="mt-2 text-right">
+                            <a href="{{ path('reset_password_request') }}" class="text-sm font-medium text-primary-600 hover:text-primary-500 transition-colors">
+                                {{ 'security.login.forgot_password'|trans }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="login-submit-btn"
+                        class="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-primary-600/25 hover:shadow-primary-600/30">
+                        <i class="fas fa-sign-in-alt login-icon"></i>
+                        <span class="login-text">{{ 'security.login.submit'|trans }}</span>
+                    </button>
+                </form>
+
+                <p class="mt-6 text-center text-sm text-gray-500">
+                    {{ 'security.login.dont_have_account'|trans }}
+                    <a href="{{ path('register') }}" class="font-medium text-primary-600 hover:text-primary-500 transition-colors">
                         {{ 'security.login.register_here'|trans }}
                     </a>
                 </p>
-                <p class="text-sm">
-                    <a href="{{ path('reset_password_request') }}" class="font-medium text-primary-600 hover:text-primary-500">
-                        <i class="fas fa-question-circle mr-1"></i>{{ 'security.login.forgot_password'|trans }}
-                    </a>
-                </p>
             </div>
-        </form>
+        </div>
     </div>
 </div>
-{% endblock %}
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const btn = document.getElementById('login-submit-btn');
+    if (form && btn) {
+        form.addEventListener('submit', function() {
+            btn.disabled = true;
+            const icon = btn.querySelector('.login-icon');
+            const text = btn.querySelector('.login-text');
+            if (icon) { icon.className = 'fas fa-spinner fa-spin'; }
+            if (text) { text.textContent = '{{ 'common.loading'|trans|e('js') }}...'; }
+        });
+    }
+});
+</script>
+{% endblock %}

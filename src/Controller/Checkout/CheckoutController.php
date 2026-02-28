@@ -16,32 +16,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Workflow\WorkflowInterface;
-use Symfony\Contracts\Service\ServiceSubscriberInterface;
-use Symfony\Contracts\Service\ServiceSubscriberTrait;
 
-class CheckoutController extends AbstractController implements ServiceSubscriberInterface
+class CheckoutController extends AbstractController
 {
-    use ServiceSubscriberTrait;
-
     public function __construct(
         private readonly CartService $cartService,
         private readonly CheckoutService $checkoutService,
         private readonly PaymentService $paymentService,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
+        private readonly WorkflowInterface $orderWorkflow
     ) {
-    }
-
-    public static function getSubscribedServices(): array
-    {
-        return [
-            'workflow.order' => '?Symfony\Component\Workflow\WorkflowInterface',
-            \Stripe\StripeClient::class => '?Stripe\StripeClient',
-        ];
-    }
-
-    private function getOrderWorkflow(): WorkflowInterface
-    {
-        return $this->container->get('workflow.order');
     }
 
     #[Route('/checkout', name: 'checkout', methods: ['GET', 'POST'])]
@@ -78,8 +62,8 @@ class CheckoutController extends AbstractController implements ServiceSubscriber
                     $paymentIntent = $this->paymentService->createPaymentIntent($order);
 
                     // Transition order to payment_pending
-                    if ($this->getOrderWorkflow()->can($order, 'submit_payment')) {
-                        $this->getOrderWorkflow()->apply($order, 'submit_payment');
+                    if ($this->orderWorkflow->can($order, 'submit_payment')) {
+                        $this->orderWorkflow->apply($order, 'submit_payment');
                         $this->entityManager->flush();
                     }
 
