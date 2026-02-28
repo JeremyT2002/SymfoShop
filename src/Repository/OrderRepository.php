@@ -24,5 +24,61 @@ class OrderRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * Get daily order counts and revenue for the last N days.
+     * @return array{labels: string[], orderCounts: int[], revenue: int[]}
+     */
+    public function getSalesOverTime(int $days = 30): array
+    {
+        $since = (new \DateTimeImmutable())->modify("-{$days} days")->setTime(0, 0, 0);
+        $orders = $this->createQueryBuilder('o')
+            ->select('o.createdAt', 'o.grandTotal')
+            ->where('o.createdAt >= :since')
+            ->setParameter('since', $since)
+            ->getQuery()
+            ->getResult();
+
+        $byDay = [];
+        foreach ($orders as $row) {
+            $day = $row['createdAt']->format('Y-m-d');
+            if (!isset($byDay[$day])) {
+                $byDay[$day] = ['count' => 0, 'revenue' => 0];
+            }
+            $byDay[$day]['count'] += 1;
+            $byDay[$day]['revenue'] += $row['grandTotal'];
+        }
+
+        $labels = [];
+        $orderCounts = [];
+        $revenue = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $day = (new \DateTimeImmutable())->modify("-{$i} days")->format('Y-m-d');
+            $labels[] = (new \DateTimeImmutable($day))->format('M j');
+            $orderCounts[] = $byDay[$day]['count'] ?? 0;
+            $revenue[] = $byDay[$day]['revenue'] ?? 0;
+        }
+
+        return ['labels' => $labels, 'orderCounts' => $orderCounts, 'revenue' => $revenue];
+    }
+
+    /**
+     * Get order counts grouped by status.
+     * @return array<array{status: string, count: int}>
+     */
+    public function getOrdersByStatus(): array
+    {
+        $result = $this->createQueryBuilder('o')
+            ->select('o.status', 'COUNT(o.id) as cnt')
+            ->groupBy('o.status')
+            ->orderBy('cnt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return array_map(fn ($row) => [
+            'status' => $row['status'] ?? 'unknown',
+            'count' => (int) ($row['cnt'] ?? 0),
+        ], $result);
+    }
 }
 

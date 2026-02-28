@@ -1,0 +1,23 @@
+<div id="chart-status-{{ random(10000, 99999) }}" class="chart-container" style="min-height: 220px;"></div>
+<script>
+(function() {
+    const statusData = {{ data|default([])|json_encode|raw }};
+    const el = document.currentScript.previousElementSibling;
+    if (statusData.length === 0) {
+        el.innerHTML = '<p class="text-sm text-gray-500 flex items-center justify-center h-full">No orders yet</p>';
+        return;
+    }
+    const options = {
+        chart: { type: 'donut', height: 220 },
+        series: statusData.map(d => d.count),
+        labels: statusData.map(d => d.status.charAt(0).toUpperCase() + d.status.slice(1)),
+        colors: ['#3b82f6', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'],
+        legend: { position: 'right' },
+        plotOptions: {
+            pie: { donut: { size: '65%' } }
+        }
+    };
+    const chart = new ApexCharts(el, options);
+    chart.render();
+})();
+</script>

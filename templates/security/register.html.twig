@@ -1,153 +1,190 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register - SymfoShop{% endblock %}
+{% block title %}{{ 'security.register.title'|trans }} - SymfoShop{% endblock %}
+
+{% form_theme registrationForm _self %}
+{% block _registration_form_submit_widget %}
+<button type="submit" {{ block('button_attributes') }} class="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-primary-600/25 hover:shadow-primary-600/30" id="register-submit-btn">
+    <i class="fas fa-user-plus"></i>{{ label }}
+</button>
+{% endblock %}
 
 {% block body %}
-<div class="flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 min-h-full">
-    <div class="max-w-md w-full space-y-8">
-        <div>
-            <div class="flex justify-center">
-                <i class="fas fa-user-plus text-primary-600 text-6xl"></i>
-            </div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                {{ 'security.register.title'|trans }}
-            </h2>
-            <p class="mt-2 text-center text-sm text-gray-600">
-                {{ 'security.login.or'|trans }}
-                <a href="{{ path('login') }}" class="font-medium text-primary-600 hover:text-primary-500">
-                    {{ 'security.register.sign_in_existing'|trans }}
-                </a>
-            </p>
+<div class="min-h-[calc(100vh-4rem)] flex">
+    {# Left panel - brand / decorative #}
+    <div class="hidden lg:flex lg:w-1/2 xl:w-2/5 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute bottom-20 right-20 w-96 h-96 bg-primary-300 rounded-full blur-3xl"></div>
         </div>
-
-        {{ form_start(registrationForm, {'attr': {'class': 'mt-8 space-y-6', 'novalidate': 'novalidate'}}) }}
-
-        <div class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-envelope text-gray-400"></i>
-                        </div>
-                        {{ form_widget(registrationForm.email, {'attr': {'class': 'appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm', 'placeholder': 'Email address'}}) }}
-                    </div>
-                    {{ form_errors(registrationForm.email) }}
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+        <div class="relative z-10 flex flex-col justify-center px-12 xl:px-20">
+            <a href="{{ path('catalog_home') }}" class="inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors mb-16">
+                <div class="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+                    <i class="fas fa-shopping-bag text-lg"></i>
                 </div>
-                <div>
-                    {{ form_label(registrationForm.firstName, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-user text-gray-400"></i>
-                        </div>
-                        {{ form_widget(registrationForm.firstName, {'attr': {'class': 'appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm', 'placeholder': 'First name'}}) }}
+                <span class="text-xl font-bold">SymfoShop</span>
+            </a>
+            <h1 class="text-4xl xl:text-5xl font-bold text-white leading-tight">
+                Join SymfoShop
+            </h1>
+            <p class="mt-4 text-lg text-primary-100 max-w-sm">
+                Create an account to save your wishlist, track orders, and enjoy a personalized shopping experience.
+            </p>
+            <div class="mt-12 flex gap-6">
+                <div class="flex items-center gap-3 text-white/80">
+                    <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                        <i class="fas fa-heart"></i>
                     </div>
-                    {{ form_errors(registrationForm.firstName) }}
+                    <span class="text-sm font-medium">Save wishlists</span>
+                </div>
+                <div class="flex items-center gap-3 text-white/80">
+                    <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <span class="text-sm font-medium">Order updates</span>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div>
-                {{ form_label(registrationForm.lastName, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-user text-gray-400"></i>
+    {# Right panel - form #}
+    <div class="flex-1 flex items-center justify-center p-6 sm:p-8 lg:p-12 bg-gray-50 overflow-y-auto">
+        <div class="w-full max-w-md py-8">
+            {# Mobile logo #}
+            <div class="lg:hidden text-center mb-6">
+                <a href="{{ path('catalog_home') }}" class="inline-flex items-center gap-2 text-gray-900 hover:text-primary-600 transition-colors">
+                    <div class="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-shopping-bag text-white"></i>
                     </div>
-                    {{ form_widget(registrationForm.lastName, {'attr': {'class': 'appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm', 'placeholder': 'Last name'}}) }}
-                </div>
-                {{ form_errors(registrationForm.lastName) }}
+                    <span class="text-xl font-bold">SymfoShop</span>
+                </a>
             </div>
 
-            <div>
-                {{ form_label(registrationForm.plainPassword.first, null, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-lock text-gray-400"></i>
-                    </div>
-                    {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'appearance-none relative block w-full pl-10 pr-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm', 'placeholder': 'Enter a secure password', 'id': 'password-first', 'autocomplete': 'new-password'}}) }}
-                    <button type="button" onclick="togglePassword('password-first')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <i class="fas fa-eye text-gray-400 hover:text-gray-600" id="password-first-toggle-icon"></i>
-                    </button>
+            <div class="bg-white rounded-2xl shadow-xl shadow-gray-200/50 p-8 sm:p-10">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900">{{ 'security.register.title'|trans }}</h2>
+                    <p class="mt-2 text-sm text-gray-500">
+                        {{ 'security.login.or'|trans }}
+                        <a href="{{ path('login') }}" class="font-medium text-primary-600 hover:text-primary-500 transition-colors">
+                            {{ 'security.register.sign_in_existing'|trans }}
+                        </a>
+                    </p>
                 </div>
-                <p class="mt-1 text-xs text-gray-500">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    Minimum 6 characters. Use a mix of letters and numbers for better security.
+
+                {{ form_start(registrationForm, {'attr': {'class': 'space-y-5', 'novalidate': 'novalidate'}}) }}
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1.5'}}) }}
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            {{ form_widget(registrationForm.email, {'attr': {'class': 'block w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors', 'placeholder': 'you@example.com'}}) }}
+                        </div>
+                        {{ form_errors(registrationForm.email) }}
+                    </div>
+                    <div>
+                        {{ form_label(registrationForm.firstName, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1.5'}}) }}
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            {{ form_widget(registrationForm.firstName, {'attr': {'class': 'block w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors', 'placeholder': 'First name'}}) }}
+                        </div>
+                        {{ form_errors(registrationForm.firstName) }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ form_label(registrationForm.lastName, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1.5'}}) }}
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        {{ form_widget(registrationForm.lastName, {'attr': {'class': 'block w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors', 'placeholder': 'Last name'}}) }}
+                    </div>
+                    {{ form_errors(registrationForm.lastName) }}
+                </div>
+
+                <div>
+                    {{ form_label(registrationForm.plainPassword.first, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1.5'}}) }}
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'block w-full pl-11 pr-12 py-3 rounded-xl border border-gray-200 bg-gray-50/50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors', 'placeholder': 'Min. 6 characters', 'id': 'password-first', 'autocomplete': 'new-password'}}) }}
+                        <button type="button" onclick="togglePassword('password-first')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-eye" id="password-first-toggle-icon"></i>
+                        </button>
+                    </div>
+                    <p class="mt-1.5 text-xs text-gray-500 flex items-center gap-1">
+                        <i class="fas fa-info-circle"></i> Use letters and numbers for better security
+                    </p>
+                    {{ form_errors(registrationForm.plainPassword.first) }}
+                </div>
+
+                <div>
+                    {{ form_label(registrationForm.plainPassword.second, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1.5'}}) }}
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'block w-full pl-11 pr-12 py-3 rounded-xl border border-gray-200 bg-gray-50/50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors', 'placeholder': 'Confirm password', 'id': 'password-second', 'autocomplete': 'new-password'}}) }}
+                        <button type="button" onclick="togglePassword('password-second')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-eye" id="password-second-toggle-icon"></i>
+                        </button>
+                    </div>
+                    {{ form_errors(registrationForm.plainPassword.second) }}
+                </div>
+
+                <div class="flex items-start gap-3">
+                    {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'mt-1 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500'}}) }}
+                    {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'class': 'text-sm text-gray-600'}}) }}
+                </div>
+                {{ form_errors(registrationForm.agreeTerms) }}
+
+                <div class="pt-2">
+                    {{ form_widget(registrationForm.submit) }}
+                </div>
+
+                {{ form_end(registrationForm) }}
+
+                <p class="mt-6 text-center text-sm text-gray-500">
+                    {{ 'security.register.already_have_account'|trans }}
+                    <a href="{{ path('login') }}" class="font-medium text-primary-600 hover:text-primary-500 transition-colors">
+                        {{ 'security.register.sign_in_here'|trans }}
+                    </a>
                 </p>
-                {{ form_errors(registrationForm.plainPassword.first) }}
             </div>
-
-            <div>
-                {{ form_label(registrationForm.plainPassword.second, null, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-lock text-gray-400"></i>
-                    </div>
-                    {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'appearance-none relative block w-full pl-10 pr-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm', 'placeholder': 'Confirm your password', 'id': 'password-second', 'autocomplete': 'new-password'}}) }}
-                    <button type="button" onclick="togglePassword('password-second')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <i class="fas fa-eye text-gray-400 hover:text-gray-600" id="password-second-toggle-icon"></i>
-                    </button>
-                </div>
-                <p class="mt-1 text-xs text-gray-500">Re-enter your password to confirm</p>
-                {{ form_errors(registrationForm.plainPassword.second) }}
-            </div>
-            
-            <script>
-                function togglePassword(fieldId) {
-                    const field = document.getElementById(fieldId);
-                    const icon = document.getElementById(fieldId + '-toggle-icon');
-                    if (field && icon) {
-                        if (field.type === 'password') {
-                            field.type = 'text';
-                            icon.classList.remove('fa-eye');
-                            icon.classList.add('fa-eye-slash');
-                        } else {
-                            field.type = 'password';
-                            icon.classList.remove('fa-eye-slash');
-                            icon.classList.add('fa-eye');
-                        }
-                    }
-                }
-            </script>
-
-            <div class="flex items-center">
-                {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded'}}) }}
-                {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'class': 'ml-2 block text-sm text-gray-900'}}) }}
-            </div>
-            {{ form_errors(registrationForm.agreeTerms) }}
-        </div>
-
-        <div>
-            {{ form_widget(registrationForm.submit, {'attr': {'class': 'group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed', 'id': 'register-submit-btn'}}) }}
-        </div>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const form = document.querySelector('form');
-                const submitBtn = document.getElementById('register-submit-btn');
-                if (form && submitBtn) {
-                    form.addEventListener('submit', function() {
-                        submitBtn.disabled = true;
-                        const originalText = submitBtn.textContent || submitBtn.value;
-                        submitBtn.dataset.originalText = originalText;
-                        if (submitBtn.tagName === 'BUTTON') {
-                            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>{{ 'common.loading'|trans|e('js') }}...';
-                        } else {
-                            submitBtn.value = '{{ 'common.loading'|trans|e('js') }}...';
-                        }
-                    });
-                }
-            });
-        </script>
-
-        {{ form_end(registrationForm) }}
-
-        <div class="text-center">
-            <p class="text-sm text-gray-600">
-                {{ 'security.register.already_have_account'|trans }} 
-                <a href="{{ path('login') }}" class="font-medium text-primary-600 hover:text-primary-500">
-                    {{ 'security.register.sign_in_here'|trans }}
-                </a>
-            </p>
         </div>
     </div>
 </div>
-{% endblock %}
 
+<script>
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const icon = document.getElementById(fieldId + '-toggle-icon');
+    if (field && icon) {
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            field.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const btn = document.getElementById('register-submit-btn');
+    if (form && btn) {
+        form.addEventListener('submit', function() {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>{{ 'common.loading'|trans|e('js') }}...';
+        });
+    }
+});
+</script>
+{% endblock %}

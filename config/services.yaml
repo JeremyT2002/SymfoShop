@@ -7,6 +7,9 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    payment_default_provider: 'dev'
+    # Placeholder when STRIPE_SECRET_KEY is not set (e.g. using PAYMENT_PROVIDER=dev). Set STRIPE_SECRET_KEY in .env.local for real Stripe.
+    stripe_secret_key_default: 'sk_test_placeholder'
 
 services:
     # default configuration for services in *this* file
@@ -22,10 +25,10 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    # Stripe client (optional when using dev provider)
+    # Stripe client (optional when using dev provider; set STRIPE_SECRET_KEY in .env.local for Stripe)
     Stripe\StripeClient:
         arguments:
-            - '%env(STRIPE_SECRET_KEY)%'
+            - '%env(default:stripe_secret_key_default:STRIPE_SECRET_KEY)%'
 
     # Payment providers (tagged for registry)
     App\Service\Payment\Provider\StripePaymentProvider:
@@ -46,6 +49,10 @@ services:
         tags:
             - { name: 'payment.provider' }
 
+    App\Controller\Checkout\CheckoutController:
+        arguments:
+            $orderWorkflow: '@state_machine.order'
+
     App\Controller\Dev\DevPaymentSimulatorController:
         arguments:
             $orderWorkflow: '@state_machine.order'
@@ -55,7 +62,7 @@ services:
     App\Service\Payment\PaymentProviderRegistry:
         arguments:
             $providerIterable: !tagged_iterator payment.provider
-            $defaultProviderName: '%env(default:dev:PAYMENT_PROVIDER)%'
+            $defaultProviderName: '%env(default:payment_default_provider:PAYMENT_PROVIDER)%'
 
     # Payment service
     App\Service\Payment\PaymentService:
