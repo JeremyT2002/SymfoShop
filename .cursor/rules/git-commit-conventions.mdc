@@ -1,0 +1,26 @@
+---
+description: How to commit changes — messages, scope, and files to avoid
+alwaysApply: true
+---
+
+# Git commits
+
+When the user asks to **commit** changes (e.g. „commite“, „commit bitte“, „alles committen“):
+
+1. **Working directory:** Run git commands from the **repository root**; use `git status` (and `git diff` when useful) before staging.
+2. **Stage only what belongs in the commit:** Prefer `git add <paths>` for the files that implement the task. Use `git add -A` only if the user asked to commit **everything** or the change set is clearly intentional.
+3. **Do not commit by default:**
+   - Secrets and local env: `.env`, `.env.local`, `.env.*.local`, keys, tokens, real DSNs
+   - Scratch / one-off artifacts: temp PR body files, debug scripts, accidental `var/` or cache outputs unless they are meant to be tracked
+   - If the user insists on committing `.env`, warn once that it may expose secrets; otherwise skip those paths.
+4. **Commit message format (Conventional Commits):**
+   ```
+   type(scope): short imperative summary
+   ```
+   Types: `feat`, `fix`, `ci`, `docs`, `chore`, `refactor`, `test`, `i18n`, etc. Scope optional (e.g. `fix(i18n):`, `ci:`).
+5. **Message language:** Use **English** for the subject line unless the user explicitly wants German (or another language).
+6. **Quality:** One clear idea per commit when possible; subject ~72 characters; optional body with blank line after subject for **why** or breaking notes — full sentences, no vague messages like „updates“ or „fix“.
+7. **Push:** Run `git push` only when the user asks to push or publish; otherwise stop after `git commit`.
+8. **Verification:** If the change is risky (config, migrations, payment, security), run **PHPUnit** or the relevant check before committing when feasible; mention if tests were not run.
+
+If there is nothing to commit or only unwanted files changed, say so instead of forcing an empty commit.
