@@ -40,7 +40,9 @@ footer:
   privacy: Privacy Policy
   terms: Terms of Service
   cookies: Cookie Policy
-  
+  imprint: Legal notice
+  legal_column: Legal
+
 common:
   cancel: Cancel
   confirm: Confirm
@@ -236,6 +238,84 @@ payment:
       payment_not_found: Payment session not found.
       capture_failed: PayPal could not capture the payment.
       cancelled: You cancelled PayPal checkout.
+
+cookie_banner:
+  title: Cookies and privacy
+  text: We use cookies that are necessary for the shop to work (e.g. cart, login, checkout session). Optional analytics or marketing cookies are not loaded by default. You can accept all or keep only essential cookies.
+  accept_all: Accept all
+  essential_only: Essential only
+  learn_more: Cookie policy
+  aria_label: Cookie consent
+
+legal:
+  disclaimer: These pages are sample templates only and do not constitute legal advice. Replace all placeholders and have qualified counsel review texts for your business and jurisdiction.
+  privacy:
+    meta_title: Privacy Policy
+    meta_description: How SymfoShop processes personal data in this demo store.
+    heading: Privacy Policy
+    p1: This statement describes how we process personal data when you use this online shop. Adapt it to your actual processing activities, hosting, and payment providers.
+    h_controller: Data controller
+    p_controller: '[Company / name], [street], [postal code] [city], [country]. Email: [contact@example.com]'
+    h_data: Categories of data
+    p_data: We may process account data (e.g. email, name), order and billing data, technical data (e.g. IP address, browser) when you use the site, and messages you send to support.
+    h_checkout: Checkout and orders
+    p_checkout: To fulfil orders we process the data you provide at checkout (delivery address, contact details) and order contents. This data is stored in our systems for order handling and legal retention periods.
+    h_payments: Payments
+    p_payments: Payments are handled by the payment provider you select (e.g. Stripe or PayPal). That provider processes payment data under its own terms and privacy policy. We do not store full card numbers on our servers.
+    h_rights: Your rights
+    p_rights: Depending on applicable law (e.g. GDPR), you may have rights to access, rectification, erasure, restriction, portability, and objection. Contact us using the details above. You may also lodge a complaint with a supervisory authority.
+    h_contact: Contact
+    p_contact: For privacy-related requests, contact us at the email address listed under “Data controller”.
+  cookies:
+    meta_title: Cookie Policy
+    meta_description: Information about cookies used in this shop.
+    heading: Cookie Policy
+    p1: This site uses cookies and similar storage in the browser. Below is an overview for this demo installation.
+    h_essential: Essential cookies
+    p_essential: These are required for core features such as session management (login, CSRF protection), shopping cart, and language or display preferences. They are set without optional consent where legally permitted.
+    h_optional: Optional cookies
+    p_optional: Non-essential cookies (e.g. analytics or marketing) are not enabled in the default SymfoShop setup. If you add such tools, list them here and obtain consent where required.
+    h_manage: Your choice
+    p_manage: Use the banner on first visit to choose “Accept all” or “Essential only”. You can change your mind by clearing site data in your browser and reloading the page; the banner will appear again until you save a choice.
+  returns:
+    meta_title: Returns and refunds
+    meta_description: Return period, conditions, and process for this shop.
+    heading: Returns and refunds
+    p1: The following rules are sample terms. Align them with your statutory rights (e.g. consumer withdrawal in the EU) and your logistics.
+    h_period: Return period
+    p_period: Consumers may withdraw from the contract within 14 days of receiving the goods in many jurisdictions unless an exception applies. You may offer a longer voluntary return window (e.g. 30 days) — state the exact period here.
+    h_condition: Condition of goods
+    p_condition: Items should be returned unused and, where applicable, in original packaging with all accessories. Perishable or personalised goods may be excluded as permitted by law.
+    h_process: How to return
+    p_process: Contact us with your order number. We will provide a return address or label where applicable. Do not send returns without prior notice if your process requires an RMA.
+    h_refund: Refunds
+    p_refund: After we receive and inspect the return, we refund the purchase price using the same payment method where possible, within a reasonable period. Shipping costs may follow statutory rules.
+  terms:
+    meta_title: Terms of Service
+    meta_description: General terms for using this shop.
+    heading: Terms of Service
+    p1: These general terms govern the use of this website and purchases made here. Replace placeholders with your legal entity and governing law.
+    h_contract: Conclusion of contract
+    p_contract: Display of products is not a binding offer. A contract is formed when we accept your order, typically by order confirmation email or by starting fulfilment.
+    h_prices: Prices and shipping
+    p_prices: Prices include applicable taxes where stated. Shipping options and costs are shown at checkout. We may correct obvious errors before acceptance.
+    h_liability: Liability
+    p_liability: We are liable without limitation for intent and gross negligence and for injury to life, body, or health. Otherwise our liability follows applicable statutory law. No guarantee is assumed for third-party content or links.
+    h_law: Applicable law
+    p_law: '[Specify country] law applies, excluding conflict-of-law rules where consumers retain mandatory protections of their country of residence.'
+  imprint:
+    meta_title: Legal notice / Imprint
+    meta_description: Operator information and legal disclosures.
+    heading: Legal notice (Imprint)
+    p1: Information required for business sites in many jurisdictions (especially Germany/EU). Replace every placeholder.
+    h_operator: Operator of this site
+    p_operator: "[Company / trader name]\n[Street and number]\n[Postal code] [City]\n[Country]"
+    h_contact: Contact
+    p_contact: 'Phone: [optional], Email: [contact@example.com]'
+    h_register: Register and VAT
+    p_register: '[Commercial register / VAT ID / regulatory body — if applicable, otherwise: Not applicable for this demo.]'
+    h_dispute: Online dispute resolution
+    p_dispute: The European Commission provides a platform for online dispute resolution (ODR). We are not obliged or willing to participate in consumer arbitration proceedings before a consumer arbitration board unless required by law.
 
 security:
   login:

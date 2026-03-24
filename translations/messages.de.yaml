@@ -40,7 +40,9 @@ footer:
   privacy: Datenschutzrichtlinie
   terms: Allgemeine Geschäftsbedingungen
   cookies: Cookie-Richtlinie
-  
+  imprint: Impressum
+  legal_column: Rechtliches
+
 common:
   cancel: Abbrechen
   confirm: Bestätigen
@@ -236,6 +238,84 @@ payment:
       payment_not_found: Zahlungssitzung nicht gefunden.
       capture_failed: PayPal konnte die Zahlung nicht einziehen.
       cancelled: Sie haben den PayPal-Checkout abgebrochen.
+
+cookie_banner:
+  title: Cookies und Datenschutz
+  text: Wir verwenden Cookies, die für den Betrieb des Shops nötig sind (z. B. Warenkorb, Anmeldung, Checkout-Sitzung). Optionale Analyse- oder Marketing-Cookies werden standardmäßig nicht geladen. Sie können alle akzeptieren oder nur notwendige Cookies erlauben.
+  accept_all: Alle akzeptieren
+  essential_only: Nur notwendige
+  learn_more: Cookie-Richtlinie
+  aria_label: Cookie-Einwilligung
+
+legal:
+  disclaimer: Diese Seiten sind Mustervorlagen und ersetzen keine Rechtsberatung. Ersetzen Sie alle Platzhalter und lassen Sie die Texte für Ihr Unternehmen und Ihre Rechtsordnung prüfen.
+  privacy:
+    meta_title: Datenschutzerklärung
+    meta_description: Wie dieser Demo-Shop personenbezogene Daten verarbeitet.
+    heading: Datenschutzerklärung
+    p1: Diese Erklärung beschreibt, wie wir personenbezogene Daten verarbeiten, wenn Sie diesen Onlineshop nutzen. Passen Sie sie an Ihre tatsächlichen Verarbeitungen, Hosting und Zahlungsdienstleister an.
+    h_controller: Verantwortlicher
+    p_controller: '[Firma / Name], [Straße], [PLZ] [Ort], [Land]. E-Mail: [kontakt@beispiel.de]'
+    h_data: Datenkategorien
+    p_data: Wir können z. B. Kontodaten (E-Mail, Name), Bestell- und Abrechnungsdaten, technische Daten (IP-Adresse, Browser) bei Nutzung der Website sowie Support-Nachrichten verarbeiten.
+    h_checkout: Bestellung und Checkout
+    p_checkout: Zur Vertragsabwicklung verarbeiten wir die beim Checkout angegebenen Daten (Lieferadresse, Kontaktdaten) und Bestellinhalte. Die Daten werden zur Auftragsabwicklung und gemäß gesetzlicher Aufbewahrungsfristen gespeichert.
+    h_payments: Zahlungen
+    p_payments: Zahlungen erfolgen über den von Ihnen gewählten Zahlungsdienstleister (z. B. Stripe oder PayPal). Dieser verarbeitet Zahlungsdaten nach eigenen Bedingungen und Datenschutzhinweisen. Wir speichern keine vollständigen Kartennummern auf unseren Servern.
+    h_rights: Ihre Rechte
+    p_rights: Soweit die DSGVO gilt, haben Sie u. a. Rechte auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Kontaktieren Sie uns über die angegebenen Daten. Sie können sich bei einer Aufsichtsbehörde beschweren.
+    h_contact: Kontakt
+    p_contact: Für datenschutzbezogene Anfragen erreichen Sie uns unter der unter „Verantwortlicher“ genannten E-Mail-Adresse.
+  cookies:
+    meta_title: Cookie-Richtlinie
+    meta_description: Informationen zu Cookies in diesem Shop.
+    heading: Cookie-Richtlinie
+    p1: Diese Website verwendet Cookies und ähnliche lokale Speicherung. Nachfolgend eine Übersicht für diese Demo-Installation.
+    h_essential: Notwendige Cookies
+    p_essential: Diese sind für Kernfunktionen erforderlich, z. B. Sitzungsverwaltung (Login, CSRF-Schutz), Warenkorb sowie Sprach- oder Anzeigeeinstellungen. Sie werden gesetzt, soweit rechtlich zulässig ohne zusätzliche Einwilligung.
+    h_optional: Optionale Cookies
+    p_optional: Nicht notwendige Cookies (z. B. Analyse oder Marketing) sind in der Standard-SymfoShop-Installation nicht aktiv. Wenn Sie solche Tools ergänzen, listen Sie sie hier auf und holen Sie die Einwilligung ein, wo erforderlich.
+    h_manage: Ihre Auswahl
+    p_manage: Beim ersten Besuch können Sie im Banner „Alle akzeptieren“ oder „Nur notwendige“ wählen. Sie können Ihre Entscheidung ändern, indem Sie Website-Daten im Browser löschen und die Seite neu laden; das Banner erscheint erneut, bis Sie eine Auswahl speichern.
+  returns:
+    meta_title: Rückgabe und Erstattung
+    meta_description: Rückgabefrist, Zustand und Ablauf in diesem Shop.
+    heading: Rückgabe und Erstattung
+    p1: Die folgenden Regeln sind Mustertexte. Passen Sie sie an gesetzliche Verbraucherrechte (z. B. Widerruf in der EU) und Ihre Logistik an.
+    h_period: Rückgabefrist
+    p_period: Verbraucher können in vielen Rechtsordnungen innerhalb von 14 Tagen nach Erhalt der Ware vom Vertrag zurücktreten, sofern keine Ausnahme greift. Sie können freiwillig eine längere Frist anbieten (z. B. 30 Tage) — tragen Sie die genaue Frist hier ein.
+    h_condition: Zustand der Ware
+    p_condition: Artikel sollten unbenutzt und, soweit möglich, in Originalverpackung mit allem Zubehör zurückgesendet werden. Verderbliche oder personalisierte Waren können nach Maßgabe des Gesetzes ausgeschlossen sein.
+    h_process: Ablauf der Rücksendung
+    p_process: Kontaktieren Sie uns mit Ihrer Bestellnummer. Wir teilen die Rücksendeadresse oder stellen ein Label bereit, falls vorgesehen. Senden Sie keine Rücksendungen ohne vorherige Absprache, wenn Ihr Prozess eine RMA erfordert.
+    h_refund: Erstattungen
+    p_refund: Nach Eingang und Prüfung der Rücksendung erstatten wir den Kaufpreis möglichst über dieselbe Zahlungsmethode innerhalb einer angemessenen Frist. Versandkosten richten sich nach gesetzlichen Vorgaben.
+  terms:
+    meta_title: Allgemeine Geschäftsbedingungen
+    meta_description: Nutzungs- und Kaufbedingungen dieses Shops.
+    heading: Allgemeine Geschäftsbedingungen
+    p1: Diese AGB regeln die Nutzung dieser Website und Käufe hier. Ersetzen Sie Platzhalter durch Ihre juristische Person und das anwendbare Recht.
+    h_contract: Vertragsschluss
+    p_contract: Die Darstellung von Produkten ist kein bindendes Angebot. Ein Vertrag kommt zustande, wenn wir Ihre Bestellung annehmen, typischerweise per Bestätigungs-E-Mail oder mit Beginn der Erfüllung.
+    h_prices: Preise und Versand
+    p_prices: Preise verstehen sich inklusive anfallender Steuern, sofern angegeben. Versandoptionen und -kosten werden im Checkout angezeigt. Offensichtliche Irrtümer können wir vor Annahme berichtigen.
+    h_liability: Haftung
+    p_liability: Für Vorsatz und grobe Fahrlässigkeit sowie bei Verletzung von Leben, Körper oder Gesundheit haften wir unbeschränkt. Im Übrigen gilt die gesetzliche Haftung. Für Inhalte und Links Dritter übernehmen wir keine Gewähr.
+    h_law: Anwendbares Recht
+    p_law: 'Es gilt das Recht von [Land], unter Ausschluss des Kollisionsrechts, soweit dem zwingende Verbraucherschutzvorschriften des Wohnsitzlandes des Verbrauchers entgegenstehen.'
+  imprint:
+    meta_title: Impressum
+    meta_description: Anbieterkennzeichnung und Pflichtangaben.
+    heading: Impressum
+    p1: Angaben für geschäftliche Websites in vielen Rechtsordnungen (insbesondere Deutschland/EU). Ersetzen Sie jeden Platzhalter.
+    h_operator: Anbieter dieser Website
+    p_operator: "[Firma / Name des Anbieters]\n[Straße und Hausnummer]\n[PLZ] [Ort]\n[Land]"
+    h_contact: Kontakt
+    p_contact: 'Telefon: [optional], E-Mail: [kontakt@beispiel.de]'
+    h_register: Register und USt-IdNr.
+    p_register: '[Handelsregister / USt-IdNr. / Aufsichtsbehörde — falls zutreffend, sonst: Für diese Demo nicht zutreffend.]'
+    h_dispute: Streitbeilegung
+    p_dispute: Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit. Zur Teilnahme an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle sind wir nicht verpflichtet und nicht bereit, sofern nicht gesetzlich anders vorgeschrieben.
 
 security:
   login:

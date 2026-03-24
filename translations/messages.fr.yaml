@@ -40,7 +40,9 @@ footer:
   privacy: Politique de confidentialité
   terms: Conditions d'utilisation
   cookies: Politique des cookies
-  
+  imprint: Mentions légales
+  legal_column: Informations légales
+
 common:
   cancel: Annuler
   confirm: Confirmer
@@ -236,6 +238,84 @@ payment:
       payment_not_found: Session de paiement introuvable.
       capture_failed: PayPal n'a pas pu encaisser le paiement.
       cancelled: Vous avez annulé le paiement PayPal.
+
+cookie_banner:
+  title: Cookies et confidentialité
+  text: Nous utilisons des cookies nécessaires au fonctionnement de la boutique (panier, connexion, session de commande). Les cookies analytiques ou marketing optionnels ne sont pas chargés par défaut. Vous pouvez tout accepter ou limiter aux cookies essentiels.
+  accept_all: Tout accepter
+  essential_only: Essentiels uniquement
+  learn_more: Politique des cookies
+  aria_label: Consentement aux cookies
+
+legal:
+  disclaimer: Ces pages sont des modèles d'exemple et ne constituent pas un conseil juridique. Remplacez tous les champs entre crochets et faites valider les textes par un professionnel du droit adapté à votre activité.
+  privacy:
+    meta_title: Politique de confidentialité
+    meta_description: Traitement des données personnelles dans cette boutique de démonstration.
+    heading: Politique de confidentialité
+    p1: Ce document décrit comment nous traitons les données personnelles lorsque vous utilisez cette boutique en ligne. Adaptez-le à vos traitements réels, hébergement et prestataires de paiement.
+    h_controller: Responsable du traitement
+    p_controller: "[Société / nom], [adresse], [code postal] [ville], [pays]. E-mail : [contact@exemple.fr]"
+    h_data: Catégories de données
+    p_data: Nous pouvons traiter des données de compte (e-mail, nom), des données de commande et de facturation, des données techniques (adresse IP, navigateur) lors de la visite, et les messages que vous nous envoyez.
+    h_checkout: Commande et paiement
+    p_checkout: Pour exécuter les commandes, nous traitons les données fournies au paiement (adresse de livraison, coordonnées) et le contenu de la commande. Ces données sont conservées pour la gestion des commandes et les obligations légales de conservation.
+    h_payments: Paiements
+    p_payments: Les paiements sont traités par le prestataire que vous choisissez (par ex. Stripe ou PayPal), selon ses propres conditions et politique de confidentialité. Nous ne stockons pas les numéros de carte complets sur nos serveurs.
+    h_rights: Vos droits
+    p_rights: Selon le droit applicable (par ex. RGPD), vous pouvez disposer de droits d'accès, de rectification, d'effacement, de limitation, de portabilité et d'opposition. Contactez-nous aux coordonnées indiquées. Vous pouvez introduire une réclamation auprès d'une autorité de contrôle.
+    h_contact: Contact
+    p_contact: Pour toute question relative à la protection des données, écrivez-nous à l'adresse indiquée sous « Responsable du traitement ».
+  cookies:
+    meta_title: Politique des cookies
+    meta_description: Informations sur les cookies utilisés dans cette boutique.
+    heading: Politique des cookies
+    p1: Ce site utilise des cookies et un stockage local similaire. Voici un aperçu pour cette installation de démonstration.
+    h_essential: Cookies essentiels
+    p_essential: Ils sont nécessaires aux fonctions de base (session, connexion, protection CSRF, panier, langue ou affichage). Ils peuvent être déposés sans consentement supplémentaire lorsque la loi le permet.
+    h_optional: Cookies optionnels
+    p_optional: Les cookies non essentiels (analyse, publicité) ne sont pas activés par défaut dans SymfoShop. Si vous en ajoutez, listez-les ici et recueillez le consentement lorsque c'est requis.
+    h_manage: Votre choix
+    p_manage: Lors de la première visite, utilisez la bannière pour choisir « Tout accepter » ou « Essentiels uniquement ». Vous pouvez effacer les données du site dans votre navigateur puis recharger ; la bannière réapparaîtra jusqu'à un nouveau choix.
+  returns:
+    meta_title: Retours et remboursements
+    meta_description: Délai, état des produits et procédure de retour.
+    heading: Retours et remboursements
+    p1: Les règles ci-dessous sont un modèle. Adaptez-les aux droits des consommateurs (par ex. droit de rétractation dans l'UE) et à votre logistique.
+    h_period: Délai de retour
+    p_period: Les consommateurs peuvent souvent se rétracter dans les 14 jours suivant la réception, sauf exceptions. Vous pouvez offrir un délai plus long (par ex. 30 jours) — indiquez-le précisément ici.
+    h_condition: État des articles
+    p_condition: Les articles doivent être retournés non utilisés et, si possible, dans leur emballage d'origine avec les accessoires. Les produits périssables ou personnalisés peuvent être exclus selon la loi.
+    h_process: Procédure
+    p_process: Contactez-nous avec votre numéro de commande. Nous communiquons l'adresse de retour ou un étiquetage si prévu. N'envoyez pas de retour sans accord si votre processus exige un numéro RMA.
+    h_refund: Remboursements
+    p_refund: Après réception et contrôle, nous remboursons le prix d'achat sur le même moyen de paiement si possible, dans un délai raisonnable. Les frais de port suivent les règles légales.
+  terms:
+    meta_title: Conditions d'utilisation
+    meta_description: Conditions générales d'utilisation et de vente.
+    heading: Conditions d'utilisation
+    p1: Ces conditions régissent l'utilisation du site et les achats. Remplacez les mentions entre crochets par votre entité juridique et le droit applicable.
+    h_contract: Formation du contrat
+    p_contract: La présentation des produits ne constitue pas une offre ferme. Le contrat est formé lorsque nous acceptons votre commande, en général par e-mail de confirmation ou en commençant l'exécution.
+    h_prices: Prix et livraison
+    p_prices: Les prix incluent les taxes applicables lorsque c'est indiqué. Les options et frais de livraison figurent au paiement. Nous pouvons corriger les erreurs manifestes avant acceptation.
+    h_liability: Responsabilité
+    p_liability: Notre responsabilité est illimitée en cas d'intention, de faute lourde ou de dommages corporels. Sinon, elle est limitée comme le prévoit la loi. Aucune garantie n'est donnée pour les contenus ou liens tiers.
+    h_law: Droit applicable
+    p_law: "Le droit de [pays] s'applique, sans prejudice des dispositions impératives protectrices des consommateurs de leur pays de résidence."
+  imprint:
+    meta_title: Mentions légales
+    meta_description: Informations sur l'éditeur du site.
+    heading: Mentions légales
+    p1: Informations souvent exigées pour les sites professionnels (notamment UE). Remplacez chaque placeholder.
+    h_operator: Éditeur du site
+    p_operator: "[Raison sociale]\n[Adresse]\n[Code postal] [Ville]\n[Pays]"
+    h_contact: Contact
+    p_contact: "Téléphone : [facultatif], E-mail : [contact@exemple.fr]"
+    h_register: Registre et TVA
+    p_register: "[RCS / TVA intracommunautaire / autorité de tutelle — si applicable, sinon : Non applicable pour cette démo.]"
+    h_dispute: Règlement des litiges
+    p_dispute: La Commission européenne propose une plateforme de règlement en ligne des litiges. Nous ne sommes pas tenus ni disposés à participer à une procédure devant une médiation de la consommation, sauf obligation légale.
 
 security:
   login:

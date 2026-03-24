@@ -1,0 +1,18 @@
+{% extends 'legal/_layout.html.twig' %}
+
+{% block title %}{{ 'legal.cookies.meta_title'|trans }} · {{ theme_config().brand.siteName|default('SymfoShop') }}{% endblock %}
+{% block meta_description %}{{ 'legal.cookies.meta_description'|trans }}{% endblock %}
+
+{% block legal_heading %}{{ 'legal.cookies.heading'|trans }}{% endblock %}
+
+{% block legal_content %}
+    <div class="space-y-6 text-gray-700 dark:text-gray-300 text-base leading-relaxed">
+        <p>{{ 'legal.cookies.p1'|trans }}</p>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 pt-2">{{ 'legal.cookies.h_essential'|trans }}</h2>
+        <p>{{ 'legal.cookies.p_essential'|trans }}</p>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 pt-2">{{ 'legal.cookies.h_optional'|trans }}</h2>
+        <p>{{ 'legal.cookies.p_optional'|trans }}</p>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 pt-2">{{ 'legal.cookies.h_manage'|trans }}</h2>
+        <p>{{ 'legal.cookies.p_manage'|trans }}</p>
+    </div>
+{% endblock %}

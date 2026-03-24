@@ -12,7 +12,7 @@ A production-grade e-commerce shop system built with Symfony 7.4 and PHP 8.2+.
 
 **Core E-Commerce**: Catalog management (products, variants, categories), shopping cart, order management with Symfony Workflow, **Stripe** and **PayPal** (Orders API v2) payment processing, shipping methods and country-based VAT at checkout, inventory management, PDF invoices, audit logging, admin panel, RESTful API with Swagger/OpenAPI docs, multi-language support (EN/DE/FR)
 
-**User Features**: Authentication (registration, login, password reset), role-based access control, wishlist with heart icon toggle, coupon/discount codes
+**User Features**: Authentication (registration, login, password reset), role-based access control, wishlist with heart icon toggle, coupon/discount codes, storefront **legal pages** (privacy, cookies, returns, terms, imprint) and a **cookie consent** banner (localStorage)
 
 **Frontend**: Tailwind CSS design system, Font Awesome icons, Alpine.js notifications, responsive mobile-first design, real-time cart updates, modular ES6 JavaScript architecture
 

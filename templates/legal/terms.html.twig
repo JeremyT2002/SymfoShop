@@ -1,0 +1,20 @@
+{% extends 'legal/_layout.html.twig' %}
+
+{% block title %}{{ 'legal.terms.meta_title'|trans }} · {{ theme_config().brand.siteName|default('SymfoShop') }}{% endblock %}
+{% block meta_description %}{{ 'legal.terms.meta_description'|trans }}{% endblock %}
+
+{% block legal_heading %}{{ 'legal.terms.heading'|trans }}{% endblock %}
+
+{% block legal_content %}
+    <div class="space-y-6 text-gray-700 dark:text-gray-300 text-base leading-relaxed">
+        <p>{{ 'legal.terms.p1'|trans }}</p>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 pt-2">{{ 'legal.terms.h_contract'|trans }}</h2>
+        <p>{{ 'legal.terms.p_contract'|trans }}</p>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 pt-2">{{ 'legal.terms.h_prices'|trans }}</h2>
+        <p>{{ 'legal.terms.p_prices'|trans }}</p>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 pt-2">{{ 'legal.terms.h_liability'|trans }}</h2>
+        <p>{{ 'legal.terms.p_liability'|trans }}</p>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 pt-2">{{ 'legal.terms.h_law'|trans }}</h2>
+        <p>{{ 'legal.terms.p_law'|trans }}</p>
+    </div>
+{% endblock %}
