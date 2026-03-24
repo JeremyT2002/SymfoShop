@@ -10,60 +10,35 @@
         <h2 class="text-2xl font-bold text-gray-900">Create New Category</h2>
     </div>
     
-    <div class="bg-white rounded-lg shadow p-6 max-w-2xl">
-        <form method="post">
-            <div class="space-y-6">
-                <div>
-                    <label for="name" class="flex items-center text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-tag mr-2 text-gray-500"></i>
-                        Category Name <span class="text-red-500 ml-1">*</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-folder text-gray-400"></i>
-                        </div>
-                        <input type="text" id="name" name="name" required
-                               placeholder="e.g., Electronics, Clothing, Books"
-                               class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                               value="{{ category.name|default('') }}">
-                    </div>
-                    <p class="mt-1 text-xs text-gray-500">Enter a clear, descriptive name for this category</p>
-                </div>
-                
-                <div>
-                    <label for="parent" class="flex items-center text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-sitemap mr-2 text-gray-500"></i>
-                        Parent Category
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-layer-group text-gray-400"></i>
-                        </div>
-                        <select id="parent" name="parent"
-                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white">
-                            <option value="">None (Root Category)</option>
-                            {% for cat in allCategories %}
-                                <option value="{{ cat.id }}">{{ cat.name }}</option>
-                            {% endfor %}
-                        </select>
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <i class="fas fa-chevron-down text-gray-400"></i>
-                        </div>
-                    </div>
-                    <p class="mt-1 text-xs text-gray-500">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Select a parent category to create a subcategory, or leave empty for a root category
-                    </p>
-                </div>
-                
-                <div class="flex items-center justify-end space-x-4 pt-4 border-t">
-                    <a href="{{ path('admin_categories_index') }}" class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
-                    </a>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                        Create Category
-                    </button>
-                </div>
+    <div class="admin-card admin-form-shell p-6">
+        <form method="post" class="space-y-6">
+            <div class="rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-5">
+                <h3 class="text-base font-semibold text-gray-900">Category setup</h3>
+                <p class="mt-1 text-sm text-gray-600">Create a root category or assign it under an existing parent.</p>
+            </div>
+
+            <div class="admin-form-grid">
+                <section class="admin-form-section">
+                    <label for="name" class="admin-form-label">Category name *</label>
+                    <input type="text" id="name" name="name" required placeholder="e.g., Electronics, Clothing, Books" class="admin-form-input" value="{{ category.name|default('') }}">
+                    <p class="mt-2 text-xs text-gray-500">Use a short and clear label customers immediately understand.</p>
+                </section>
+
+                <section class="admin-form-section">
+                    <label for="parent" class="admin-form-label">Parent category</label>
+                    <select id="parent" name="parent" class="admin-form-input">
+                        <option value="">None (Root Category)</option>
+                        {% for cat in allCategories %}
+                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="mt-2 text-xs text-gray-500">Optional. Choose a parent to create a subcategory.</p>
+                </section>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 border-t border-gray-200 pt-5">
+                <a href="{{ path('admin_categories_index') }}" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</a>
+                <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Create Category</button>
             </div>
         </form>
     </div>
