@@ -31,8 +31,8 @@ class StockItemRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('s')
             ->where('s.variant = :variant')
             ->setParameter('variant', $variant)
-            ->setLockMode(\Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE)
             ->getQuery()
+            ->setLockMode(\Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE)
             ->getOneOrNullResult();
     }
 }

@@ -33,5 +33,33 @@ class InvoiceRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * @return list<Invoice>
+     */
+    public function findByOrderEmail(string $email): array
+    {
+        return $this->createQueryBuilder('i')
+            ->innerJoin('i.order', 'o')
+            ->addSelect('o')
+            ->where('o.email = :email')
+            ->setParameter('email', $email)
+            ->orderBy('i.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findOneForUserByInvoiceNumber(string $invoiceNumber, string $email): ?Invoice
+    {
+        return $this->createQueryBuilder('i')
+            ->innerJoin('i.order', 'o')
+            ->addSelect('o')
+            ->where('i.invoiceNumber = :invoiceNumber')
+            ->andWhere('o.email = :email')
+            ->setParameter('invoiceNumber', $invoiceNumber)
+            ->setParameter('email', $email)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
 

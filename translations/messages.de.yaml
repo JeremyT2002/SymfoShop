@@ -9,6 +9,7 @@ nav:
   login: Anmelden
   register: Registrieren
   logout: Abmelden
+  dashboard: Dashboard
   admin: Admin
   admin_panel: Admin-Panel
   logged_in_as: Angemeldet als
@@ -162,14 +163,38 @@ category:
     apply: Anwenden
 
 checkout:
+  page_title: Zur Kasse
+  meta_description: Schließen Sie Ihre Bestellung ab
   title: Zur Kasse
   shipping_address: Lieferadresse
   payment_method: Zahlungsmethode
   order_summary: Bestellübersicht
   place_order: Bestellung aufgeben
   customer_information: Kundeninformationen
+  subtotal: Zwischensumme
   tax: Steuer
   terms_agreement: Mit der Bestellung stimmen Sie unseren Allgemeinen Geschäftsbedingungen zu.
+  phone_hint: "Optional: Für Bestellupdates und Lieferbenachrichtigungen"
+  state_hint: "Optional: Bundesland oder Region"
+  fields:
+    first_name: Vorname
+    last_name: Nachname
+    email: E-Mail
+    phone: Telefon
+    street: Straße
+    city: Stadt
+    postal_code: Postleitzahl
+    country: Land
+    state: Bundesland
+  placeholders:
+    first_name: Max
+    last_name: Mustermann
+    email: deine@email.de
+    phone: +49 123 456789
+    street: Musterstraße 12
+    city: Musterstadt
+    postal_code: 12345
+    state: NRW (optional)
   complete_payment: Zahlung abschließen
   order_number: Bestellnummer
   total: Gesamtbetrag
@@ -179,6 +204,7 @@ checkout:
   simulate_success: Erfolg simulieren
   simulate_failure: Fehlschlag simulieren
   simulate_pending: Ausstehend lassen
+  skip_payment_dev_notice: "Hinweis: CHECKOUT_SKIP_PAYMENT ist aktiv – die Zahlung wurde nur für lokale Tests automatisch als erfolgreich gesetzt."
 
 security:
   login:
@@ -262,4 +288,45 @@ coupon:
   usage_limit: Dieser Gutschein hat sein Nutzungslimit erreicht
   per_user_limit: Sie haben das Nutzungslimit für diesen Gutschein erreicht
   not_active: Dieser Gutschein ist nicht aktiv
+
+account:
+  dashboard:
+    page_title: Mein Konto
+    title: Mein Dashboard
+    subtitle: Verwalte deine Profildaten, Bestellungen und Rechnungen an einem Ort.
+    entries: Einträge
+    profile:
+      title: Persönliche Daten
+      first_name: Vorname
+      last_name: Nachname
+      email: E-Mail
+      phone: Telefon
+      company: Firma
+      address_line_1: Adresse (Zeile 1)
+      address_line_2: Adresse (Zeile 2)
+      postal_code: PLZ
+      city: Stadt
+      state: Bundesland/Region
+      country_code: Land (ISO-Code)
+      save: Profil speichern
+    orders:
+      title: Meine Bestellungen
+      order_number: Bestellnr.
+      date: Datum
+      status: Status
+      total: Summe
+      empty: Noch keine Bestellungen vorhanden.
+    invoices:
+      title: Meine Rechnungen
+      invoice_number: Rechnungsnr.
+      order_number: Bestellnr.
+      date: Datum
+      action: Aktion
+      download_pdf: PDF herunterladen
+      empty: Noch keine Rechnungen verfügbar.
+    flash:
+      invalid_csrf: Ungültiges Formular-Token. Bitte erneut versuchen.
+      invalid_email: Bitte gib eine gültige E-Mail-Adresse ein.
+      email_in_use: Diese E-Mail-Adresse wird bereits verwendet.
+      profile_updated: Deine Profildaten wurden aktualisiert.
 

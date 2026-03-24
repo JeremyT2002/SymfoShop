@@ -9,6 +9,7 @@ nav:
   login: Connexion
   register: S'inscrire
   logout: Déconnexion
+  dashboard: Tableau de bord
   admin: Admin
   admin_panel: Panneau d'administration
   logged_in_as: Connecté en tant que
@@ -162,14 +163,38 @@ category:
     apply: Appliquer
 
 checkout:
+  page_title: Commander
+  meta_description: Finalisez votre commande
   title: Commander
   shipping_address: Adresse de livraison
   payment_method: Mode de paiement
   order_summary: Résumé de la commande
   place_order: Passer la commande
   customer_information: Informations client
+  subtotal: Sous-total
   tax: Taxe
   terms_agreement: En passant votre commande, vous acceptez nos conditions générales.
+  phone_hint: "Optionnel : pour les mises à jour de commande et notifications de livraison"
+  state_hint: "Optionnel : région ou état"
+  fields:
+    first_name: Prénom
+    last_name: Nom
+    email: E-mail
+    phone: Téléphone
+    street: Rue
+    city: Ville
+    postal_code: Code postal
+    country: Pays
+    state: Région
+  placeholders:
+    first_name: Jean
+    last_name: Dupont
+    email: votre@email.fr
+    phone: +33 1 23 45 67 89
+    street: 12 rue Exemple
+    city: Paris
+    postal_code: 75001
+    state: IDF (optionnel)
   complete_payment: Finaliser le paiement
   order_number: Numéro de commande
   total: Total
@@ -179,6 +204,7 @@ checkout:
   simulate_success: Simuler succès
   simulate_failure: Simuler échec
   simulate_pending: Laisser en attente
+  skip_payment_dev_notice: "Remarque : CHECKOUT_SKIP_PAYMENT est activé — le paiement a été marqué comme réussi uniquement pour les tests locaux."
 
 security:
   login:
@@ -262,4 +288,45 @@ coupon:
   usage_limit: Ce code promo a atteint sa limite d'utilisation
   per_user_limit: Vous avez atteint la limite d'utilisation pour ce code promo
   not_active: Ce code promo n'est pas actif
+
+account:
+  dashboard:
+    page_title: Mon compte
+    title: Mon tableau de bord
+    subtitle: Gérez vos informations personnelles, vos commandes et vos factures en un seul endroit.
+    entries: entrées
+    profile:
+      title: Informations personnelles
+      first_name: Prénom
+      last_name: Nom
+      email: E-mail
+      phone: Téléphone
+      company: Société
+      address_line_1: Adresse (ligne 1)
+      address_line_2: Adresse (ligne 2)
+      postal_code: Code postal
+      city: Ville
+      state: Région/État
+      country_code: Pays (code ISO)
+      save: Enregistrer le profil
+    orders:
+      title: Mes commandes
+      order_number: N° commande
+      date: Date
+      status: Statut
+      total: Total
+      empty: Aucune commande pour le moment.
+    invoices:
+      title: Mes factures
+      invoice_number: N° facture
+      order_number: N° commande
+      date: Date
+      action: Action
+      download_pdf: Télécharger le PDF
+      empty: Aucune facture disponible pour le moment.
+    flash:
+      invalid_csrf: Jeton de formulaire invalide. Veuillez réessayer.
+      invalid_email: Veuillez saisir une adresse e-mail valide.
+      email_in_use: Cette adresse e-mail est déjà utilisée.
+      profile_updated: Vos informations de profil ont été mises à jour.
 

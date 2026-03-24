@@ -1,7 +1,7 @@
 {% extends 'catalog/base.html.twig' %}
 
-{% block title %}Checkout - SymfoShop{% endblock %}
-{% block meta_description %}Complete your order{% endblock %}
+{% block title %}{{ 'checkout.page_title'|trans }} - SymfoShop{% endblock %}
+{% block meta_description %}{{ 'checkout.meta_description'|trans }}{% endblock %}
 {% block js_page %}checkout{% endblock %}
 
 {% block body %}
@@ -18,45 +18,45 @@
                     {{ form_start(customerForm, {'attr': {'id': 'customer-form', 'method': 'POST', 'action': path('checkout'), 'class': 'space-y-4'}}) }}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                {{ form_label(customerForm.firstName, null, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
+                                {{ form_label(customerForm.firstName, 'checkout.fields.first_name'|trans, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <i class="fas fa-user text-gray-400"></i>
                                     </div>
-                                    {{ form_widget(customerForm.firstName, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': 'John'}}) }}
+                                    {{ form_widget(customerForm.firstName, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': 'checkout.placeholders.first_name'|trans}}) }}
                                 </div>
                                 {{ form_errors(customerForm.firstName) }}
                             </div>
                             <div>
-                                {{ form_label(customerForm.lastName, null, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
+                                {{ form_label(customerForm.lastName, 'checkout.fields.last_name'|trans, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <i class="fas fa-user text-gray-400"></i>
                                     </div>
-                                    {{ form_widget(customerForm.lastName, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': 'Doe'}}) }}
+                                    {{ form_widget(customerForm.lastName, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': 'checkout.placeholders.last_name'|trans}}) }}
                                 </div>
                                 {{ form_errors(customerForm.lastName) }}
                             </div>
                         </div>
                         <div>
-                            {{ form_label(customerForm.email, null, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
+                            {{ form_label(customerForm.email, 'checkout.fields.email'|trans, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class="fas fa-envelope text-gray-400"></i>
                                 </div>
-                                {{ form_widget(customerForm.email, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': 'your@email.com', 'autocomplete': 'email'}}) }}
+                                {{ form_widget(customerForm.email, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': 'checkout.placeholders.email'|trans, 'autocomplete': 'email'}}) }}
                             </div>
                             {{ form_errors(customerForm.email) }}
                         </div>
                         <div>
-                            {{ form_label(customerForm.phone, null, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
+                            {{ form_label(customerForm.phone, 'checkout.fields.phone'|trans, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class="fas fa-phone text-gray-400"></i>
                                 </div>
-                                {{ form_widget(customerForm.phone, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': '+1 234 567 8900', 'autocomplete': 'tel'}}) }}
+                                {{ form_widget(customerForm.phone, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': 'checkout.placeholders.phone'|trans, 'autocomplete': 'tel'}}) }}
                             </div>
-                            <p class="mt-1 text-xs text-gray-500">Optional: For order updates and delivery notifications</p>
+                            <p class="mt-1 text-xs text-gray-500">{{ 'checkout.phone_hint'|trans }}</p>
                             {{ form_errors(customerForm.phone) }}
                         </div>
                     {{ form_end(customerForm) }}
@@ -69,40 +69,40 @@
                     </h2>
                     {{ form_start(addressForm, {'attr': {'id': 'address-form', 'class': 'space-y-4'}}) }}
                         <div>
-                            {{ form_label(addressForm.street, null, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
+                            {{ form_label(addressForm.street, 'checkout.fields.street'|trans, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class="fas fa-road text-gray-400"></i>
                                 </div>
-                                {{ form_widget(addressForm.street, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': '123 Main Street', 'autocomplete': 'street-address'}}) }}
+                                {{ form_widget(addressForm.street, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': 'checkout.placeholders.street'|trans, 'autocomplete': 'street-address'}}) }}
                             </div>
                             {{ form_errors(addressForm.street) }}
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                {{ form_label(addressForm.city, null, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
+                                {{ form_label(addressForm.city, 'checkout.fields.city'|trans, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <i class="fas fa-city text-gray-400"></i>
                                     </div>
-                                    {{ form_widget(addressForm.city, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': 'New York', 'autocomplete': 'address-level2'}}) }}
+                                    {{ form_widget(addressForm.city, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': 'checkout.placeholders.city'|trans, 'autocomplete': 'address-level2'}}) }}
                                 </div>
                                 {{ form_errors(addressForm.city) }}
                             </div>
                             <div>
-                                {{ form_label(addressForm.postalCode, null, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
+                                {{ form_label(addressForm.postalCode, 'checkout.fields.postal_code'|trans, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <i class="fas fa-mail-bulk text-gray-400"></i>
                                     </div>
-                                    {{ form_widget(addressForm.postalCode, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': '10001', 'autocomplete': 'postal-code'}}) }}
+                                    {{ form_widget(addressForm.postalCode, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': 'checkout.placeholders.postal_code'|trans, 'autocomplete': 'postal-code'}}) }}
                                 </div>
                                 {{ form_errors(addressForm.postalCode) }}
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                {{ form_label(addressForm.country, null, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
+                                {{ form_label(addressForm.country, 'checkout.fields.country'|trans, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <i class="fas fa-globe text-gray-400"></i>
@@ -115,14 +115,14 @@
                                 {{ form_errors(addressForm.country) }}
                             </div>
                             <div>
-                                {{ form_label(addressForm.state, null, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
+                                {{ form_label(addressForm.state, 'checkout.fields.state'|trans, {'label_attr': {'class': 'flex items-center text-sm font-medium text-gray-700 mb-2'}}) }}
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <i class="fas fa-map text-gray-400"></i>
                                     </div>
-                                    {{ form_widget(addressForm.state, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': 'NY (optional)', 'autocomplete': 'address-level1'}}) }}
+                                    {{ form_widget(addressForm.state, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors', 'placeholder': 'checkout.placeholders.state'|trans, 'autocomplete': 'address-level1'}}) }}
                                 </div>
-                                <p class="mt-1 text-xs text-gray-500">Optional: State or province</p>
+                                <p class="mt-1 text-xs text-gray-500">{{ 'checkout.state_hint'|trans }}</p>
                                 {{ form_errors(addressForm.state) }}
                             </div>
                         </div>

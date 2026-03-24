@@ -39,6 +39,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     private ?string $lastName = null;
 
+    #[ORM\Column(type: Types::STRING, length: 50, nullable: true)]
+    private ?string $phone = null;
+
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $company = null;
+
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $addressLine1 = null;
+
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $addressLine2 = null;
+
+    #[ORM\Column(type: Types::STRING, length: 20, nullable: true)]
+    private ?string $postalCode = null;
+
+    #[ORM\Column(type: Types::STRING, length: 120, nullable: true)]
+    private ?string $city = null;
+
+    #[ORM\Column(type: Types::STRING, length: 120, nullable: true)]
+    private ?string $state = null;
+
+    #[ORM\Column(type: Types::STRING, length: 2, nullable: true)]
+    private ?string $countryCode = null;
+
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
     private bool $isActive = true;
 
@@ -163,6 +187,108 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getFullName(): string
     {
         return trim(($this->firstName ?? '') . ' ' . ($this->lastName ?? ''));
+    }
+
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(?string $phone): self
+    {
+        $this->phone = $phone;
+        return $this;
+    }
+
+    public function getCompany(): ?string
+    {
+        return $this->company;
+    }
+
+    public function setCompany(?string $company): self
+    {
+        $this->company = $company;
+        return $this;
+    }
+
+    public function getAddressLine1(): ?string
+    {
+        return $this->addressLine1;
+    }
+
+    public function setAddressLine1(?string $addressLine1): self
+    {
+        $this->addressLine1 = $addressLine1;
+        return $this;
+    }
+
+    public function getAddressLine2(): ?string
+    {
+        return $this->addressLine2;
+    }
+
+    public function setAddressLine2(?string $addressLine2): self
+    {
+        $this->addressLine2 = $addressLine2;
+        return $this;
+    }
+
+    public function getPostalCode(): ?string
+    {
+        return $this->postalCode;
+    }
+
+    public function setPostalCode(?string $postalCode): self
+    {
+        $this->postalCode = $postalCode;
+        return $this;
+    }
+
+    public function getCity(): ?string
+    {
+        return $this->city;
+    }
+
+    public function setCity(?string $city): self
+    {
+        $this->city = $city;
+        return $this;
+    }
+
+    public function getState(): ?string
+    {
+        return $this->state;
+    }
+
+    public function setState(?string $state): self
+    {
+        $this->state = $state;
+        return $this;
+    }
+
+    public function getCountryCode(): ?string
+    {
+        return $this->countryCode;
+    }
+
+    public function setCountryCode(?string $countryCode): self
+    {
+        $this->countryCode = $countryCode ? strtoupper($countryCode) : null;
+        return $this;
+    }
+
+    public function getFormattedAddress(): string
+    {
+        $lines = array_filter([
+            $this->company,
+            $this->addressLine1,
+            $this->addressLine2,
+            trim(($this->postalCode ?? '') . ' ' . ($this->city ?? '')),
+            $this->state,
+            $this->countryCode,
+        ]);
+
+        return implode(', ', $lines);
     }
 
     public function isActive(): bool
