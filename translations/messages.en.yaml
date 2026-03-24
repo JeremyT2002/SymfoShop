@@ -349,4 +349,70 @@ admin:
       status: Status
       actions: Actions
       empty: No orders found
+  orders:
+    page_title: Orders
+    heading: Orders
+    subtitle: Manage customer orders
+    regenerate_all_invoices: Regenerate all invoices
+    regenerate_all_confirm: Regenerate all stored invoice PDFs with the current template and theme? Existing files under var/invoices will be replaced per invoice. Invoice numbers stay the same.
+    search_placeholder: Search by order number or email…
+    all_statuses: All statuses
+    filter: Filter
+    clear: Clear
+    table:
+      order_number: Order #
+      customer: Customer
+      total: Total
+      status: Status
+      date: Date
+      actions: Actions
+    view: View
+    empty: No orders found
+    pagination:
+      showing: Showing page %page% of %total%
+      previous: Previous
+      next: Next
+    status:
+      new: New
+      payment_pending: Payment pending
+      payment_confirmed: Payment confirmed
+      paid: Paid
+      processing: Processing
+      shipped: Shipped
+      completed: Completed
+      cancelled: Cancelled
+    show:
+      page_title: 'Order: %number%'
+      back: Back to orders
+      heading: 'Order %number%'
+      items_title: Order items
+      product: Product
+      sku: SKU
+      quantity: Quantity
+      price: Price
+      items_empty: No items in this order.
+      summary_title: Order summary
+      subtotal: Subtotal
+      tax: Tax
+      grand_total: Grand total
+      info_title: Order information
+      order_number_label: Order number
+      customer_email: Customer email
+      status_label: Status
+      created: Created
+      tracking_number: Tracking number
+      carrier: Carrier
+      invoice_title: Invoice
+      invoice_number: Invoice number
+      invoice_created: Created
+      download_pdf: Download PDF
+      invoice_hint_html: 'To regenerate all invoice PDFs, go to <a href="%url%" class="text-amber-700 hover:underline">Orders</a> and use “Regenerate all invoices”.'
+      update_status_title: Update status
+      update_status_submit: Update status
+    flash:
+      invalid_csrf: Invalid security token. Please try again.
+      regenerate_none: There are no invoices to regenerate.
+      regenerate_success: '%count% invoice PDF(s) regenerated successfully.'
+      regenerate_partial: '%success% invoice PDF(s) regenerated successfully, %failed% failed.'
+      status_updated: Order status updated successfully.
 

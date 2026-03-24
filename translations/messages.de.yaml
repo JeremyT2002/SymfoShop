@@ -330,3 +330,71 @@ account:
       email_in_use: Diese E-Mail-Adresse wird bereits verwendet.
       profile_updated: Deine Profildaten wurden aktualisiert.
 
+admin:
+  orders:
+    page_title: Bestellungen
+    heading: Bestellungen
+    subtitle: Kundenbestellungen verwalten
+    regenerate_all_invoices: Alle Rechnungen neu generieren
+    regenerate_all_confirm: Alle gespeicherten Rechnungs-PDFs mit dem aktuellen Template und Theme neu erzeugen? Bestehende Dateien unter var/invoices werden pro Rechnung ersetzt. Die Rechnungsnummern bleiben gleich.
+    search_placeholder: Suche nach Bestellnummer oder E-Mail …
+    all_statuses: Alle Status
+    filter: Filtern
+    clear: Zurücksetzen
+    table:
+      order_number: Bestellnr.
+      customer: Kunde
+      total: Summe
+      status: Status
+      date: Datum
+      actions: Aktionen
+    view: Ansehen
+    empty: Keine Bestellungen gefunden
+    pagination:
+      showing: Seite %page% von %total%
+      previous: Zurück
+      next: Weiter
+    status:
+      new: Neu
+      payment_pending: Zahlung ausstehend
+      payment_confirmed: Zahlung bestätigt
+      paid: Bezahlt
+      processing: In Bearbeitung
+      shipped: Versendet
+      completed: Abgeschlossen
+      cancelled: Storniert
+    show:
+      page_title: 'Bestellung: %number%'
+      back: Zurück zu Bestellungen
+      heading: 'Bestellung %number%'
+      items_title: Bestellpositionen
+      product: Produkt
+      sku: SKU
+      quantity: Menge
+      price: Preis
+      items_empty: Keine Positionen in dieser Bestellung.
+      summary_title: Bestellübersicht
+      subtotal: Zwischensumme
+      tax: Steuer
+      grand_total: Gesamtsumme
+      info_title: Bestelldaten
+      order_number_label: Bestellnummer
+      customer_email: Kunden-E-Mail
+      status_label: Status
+      created: Erstellt
+      tracking_number: Sendungsnummer
+      carrier: Versanddienst
+      invoice_title: Rechnung
+      invoice_number: Rechnungsnummer
+      invoice_created: Erstellt
+      download_pdf: PDF herunterladen
+      invoice_hint_html: 'Um alle Rechnungs-PDFs neu zu erzeugen, unter <a href="%url%" class="text-amber-700 hover:underline">Bestellungen</a> auf „Alle Rechnungen neu generieren“ klicken.'
+      update_status_title: Status ändern
+      update_status_submit: Status speichern
+    flash:
+      invalid_csrf: Ungültiges Sicherheits-Token. Bitte erneut versuchen.
+      regenerate_none: Es gibt keine Rechnungen zum Neu-Generieren.
+      regenerate_success: '%count% Rechnungs-PDF(s) erfolgreich neu erzeugt.'
+      regenerate_partial: '%success% Rechnungs-PDF(s) erfolgreich neu erzeugt, %failed% fehlgeschlagen.'
+      status_updated: Bestellstatus wurde aktualisiert.
+

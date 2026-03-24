@@ -86,6 +86,10 @@ services:
         arguments:
             $invoiceStoragePath: '%kernel.project_dir%/var/invoices'
 
+    App\Service\Invoice\InvoiceService:
+        arguments:
+            $invoiceStoragePath: '%kernel.project_dir%/var/invoices'
+
     # Workflow guard events
     App\Workflow\Order\OrderWorkflowGuard:
         arguments:

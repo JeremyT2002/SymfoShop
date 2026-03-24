@@ -330,3 +330,71 @@ account:
       email_in_use: Cette adresse e-mail est déjà utilisée.
       profile_updated: Vos informations de profil ont été mises à jour.
 
+admin:
+  orders:
+    page_title: Commandes
+    heading: Commandes
+    subtitle: Gérer les commandes clients
+    regenerate_all_invoices: Régénérer toutes les factures
+    regenerate_all_confirm: Régénérer tous les PDF de factures avec le modèle et le thème actuels ? Les fichiers existants dans var/invoices seront remplacés pour chaque facture. Les numéros de facture restent identiques.
+    search_placeholder: Rechercher par n° de commande ou e-mail…
+    all_statuses: Tous les statuts
+    filter: Filtrer
+    clear: Effacer
+    table:
+      order_number: N° commande
+      customer: Client
+      total: Total
+      status: Statut
+      date: Date
+      actions: Actions
+    view: Voir
+    empty: Aucune commande trouvée
+    pagination:
+      showing: Page %page% sur %total%
+      previous: Précédent
+      next: Suivant
+    status:
+      new: Nouveau
+      payment_pending: Paiement en attente
+      payment_confirmed: Paiement confirmé
+      paid: Payé
+      processing: En traitement
+      shipped: Expédié
+      completed: Terminé
+      cancelled: Annulé
+    show:
+      page_title: 'Commande : %number%'
+      back: Retour aux commandes
+      heading: 'Commande %number%'
+      items_title: Articles de la commande
+      product: Produit
+      sku: SKU
+      quantity: Quantité
+      price: Prix
+      items_empty: Aucun article dans cette commande.
+      summary_title: Récapitulatif
+      subtotal: Sous-total
+      tax: TVA
+      grand_total: Total
+      info_title: Informations commande
+      order_number_label: N° de commande
+      customer_email: E-mail client
+      status_label: Statut
+      created: Créée le
+      tracking_number: N° de suivi
+      carrier: Transporteur
+      invoice_title: Facture
+      invoice_number: N° de facture
+      invoice_created: Créée le
+      download_pdf: Télécharger le PDF
+      invoice_hint_html: 'Pour régénérer tous les PDF de factures, allez dans <a href="%url%" class="text-amber-700 hover:underline">Commandes</a> et utilisez « Régénérer toutes les factures ».'
+      update_status_title: Mettre à jour le statut
+      update_status_submit: Enregistrer le statut
+    flash:
+      invalid_csrf: Jeton de sécurité invalide. Veuillez réessayer.
+      regenerate_none: Aucune facture à régénérer.
+      regenerate_success: '%count% PDF de facture(s) régénéré(s) avec succès.'
+      regenerate_partial: '%success% PDF de facture(s) régénéré(s) avec succès, %failed% échec(s).'
+      status_updated: Statut de la commande mis à jour.
+

@@ -3,19 +3,25 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Order;
+use App\Repository\InvoiceRepository;
 use App\Repository\OrderRepository;
+use App\Service\Invoice\InvoiceService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/admin/orders', name: 'admin_orders_')]
 class OrderController extends AbstractController
 {
     public function __construct(
         private readonly OrderRepository $orderRepository,
-        private readonly EntityManagerInterface $entityManager
+        private readonly InvoiceRepository $invoiceRepository,
+        private readonly InvoiceService $invoiceService,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -60,6 +66,41 @@ class OrderController extends AbstractController
         ]);
     }
 
+    #[Route('/regenerate-all-invoices', name: 'regenerate_all_invoices', methods: ['POST'])]
+    public function regenerateAllInvoices(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('regenerate_all_invoices', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', $this->translator->trans('admin.orders.flash.invalid_csrf'));
+
+            return $this->redirectToRoute('admin_orders_index');
+        }
+
+        $result = $this->invoiceService->regenerateAllInvoicePdfs();
+
+        if ($result['success'] === 0 && $result['failed'] === 0) {
+            $this->addFlash('info', $this->translator->trans('admin.orders.flash.regenerate_none'));
+        } elseif ($result['failed'] === 0) {
+            $this->addFlash(
+                'success',
+                $this->translator->trans('admin.orders.flash.regenerate_success', ['%count%' => (string) $result['success']])
+            );
+        } else {
+            $this->addFlash(
+                'warning',
+                $this->translator->trans('admin.orders.flash.regenerate_partial', [
+                    '%success%' => (string) $result['success'],
+                    '%failed%' => (string) $result['failed'],
+                ])
+            );
+            if ($result['errors'] !== []) {
+                $this->addFlash('error', implode(' | ', array_slice($result['errors'], 0, 5))
+                    . (count($result['errors']) > 5 ? ' …' : ''));
+            }
+        }
+
+        return $this->redirectToRoute('admin_orders_index');
+    }
+
     #[Route('/{id}', name: 'show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(int $id): Response
     {
@@ -68,9 +109,12 @@ class OrderController extends AbstractController
         if (!$order) {
             throw $this->createNotFoundException('Order not found');
         }
-        
+
+        $invoice = $this->invoiceRepository->findOneByOrderId((int) $order->getId());
+
         return $this->render('admin/order/show.html.twig', [
             'order' => $order,
+            'invoice' => $invoice,
         ]);
     }
 
@@ -89,9 +133,9 @@ class OrderController extends AbstractController
             
             $this->entityManager->flush();
             
-            $this->addFlash('success', 'Order status updated successfully.');
+            $this->addFlash('success', $this->translator->trans('admin.orders.flash.status_updated'));
         } else {
-            $this->addFlash('error', 'Invalid CSRF token.');
+            $this->addFlash('error', $this->translator->trans('admin.orders.flash.invalid_csrf'));
         }
         
         return $this->redirectToRoute('admin_orders_show', ['id' => $order->getId()]);
