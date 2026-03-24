@@ -3,6 +3,8 @@
 # Default target
 .DEFAULT_GOAL := help
 
+DOCKER_COMPOSE := docker compose -f docker/compose.yaml -f docker/compose.override.yaml
+
 # Colors for output (Windows/PowerShell compatible)
 # Check if running in PowerShell or Git Bash
 ifeq ($(OS),Windows_NT)
@@ -180,32 +182,32 @@ server-log: ## Show Symfony server logs
 # Docker
 docker-up: ## Start Docker services
 	@echo "$(BLUE)Starting Docker services...$(NC)"
-	docker compose up --build -d
+	$(DOCKER_COMPOSE) up --build -d
 
 docker-down: ## Stop Docker services
 	@echo "$(BLUE)Stopping Docker services...$(NC)"
-	docker compose down
+	$(DOCKER_COMPOSE) down
 
 docker-build: ## Build Docker images
 	@echo "$(BLUE)Building Docker images...$(NC)"
-	docker compose build
+	$(DOCKER_COMPOSE) build
 
 docker-logs: ## Show Docker logs
-	docker compose logs -f
+	$(DOCKER_COMPOSE) logs -f
 
 docker-exec: ## Execute command in app container
-	docker compose exec app $(CMD)
+	$(DOCKER_COMPOSE) exec app $(CMD)
 
 docker-db-setup: ## Setup database in Docker
 	@echo "$(BLUE)Setting up database in Docker...$(NC)"
-	docker compose exec app php bin/console doctrine:database:create --if-not-exists
-	docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
-	docker compose exec app php bin/console cache:clear
-	docker compose exec app php bin/console cache:warmup
+	$(DOCKER_COMPOSE) exec app php bin/console doctrine:database:create --if-not-exists
+	$(DOCKER_COMPOSE) exec app php bin/console doctrine:migrations:migrate --no-interaction
+	$(DOCKER_COMPOSE) exec app php bin/console cache:clear
+	$(DOCKER_COMPOSE) exec app php bin/console cache:warmup
 
 docker-db-drop: ## Drop database in Docker (WARNING: destructive)
 	@echo "$(BLUE)Dropping database in Docker...$(NC)"
-	docker compose exec app php bin/console doctrine:database:drop --force --if-exists
+	$(DOCKER_COMPOSE) exec app php bin/console doctrine:database:drop --force --if-exists
 
 docker-db-reset: ## Reset database in Docker (drop, create, migrate)
 	@echo "$(BLUE)Resetting database in Docker...$(NC)"
@@ -214,11 +216,11 @@ docker-db-reset: ## Reset database in Docker (drop, create, migrate)
 
 docker-load-fixture: ## Load fixtures in Docker
 	@echo "$(BLUE)Loading fixtures in Docker...$(NC)"
-	docker compose exec app php bin/console doctrine:fixtures:load --append --no-interaction
+	$(DOCKER_COMPOSE) exec app php bin/console doctrine:fixtures:load --append --no-interaction
 
 docker-admin-user: ## Create admin user in Docker
 	@echo "$(BLUE)Creating admin user in Docker...$(NC)"
-	docker compose exec app php bin/console app:create-admin-user
+	$(DOCKER_COMPOSE) exec app php bin/console app:create-admin-user
 
 # Testing
 test: ## Run all tests
