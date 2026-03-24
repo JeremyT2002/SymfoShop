@@ -1,0 +1,79 @@
+# Continuous integration: Composer install, Symfony lint, PHPUnit (SQLite test DB).
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Tests & lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: ctype, dom, iconv, intl, mbstring, pdo_sqlite, xml
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Prepare var/ and .env (not in repo)
+        run: |
+          mkdir -p var
+          cat > .env << 'EOF'
+          APP_ENV=dev
+          APP_SECRET=0000000000000000000000000000000000000000000000000000000000000000
+          DATABASE_URL="sqlite:///%kernel.project_dir%/var/data.db"
+          MAILER_DSN=null://null
+          MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0
+          PAYMENT_PROVIDER=dev
+          STRIPE_SECRET_KEY=sk_test_placeholder
+          STRIPE_PUBLISHABLE_KEY=pk_test_placeholder
+          STRIPE_WEBHOOK_SECRET=whsec_placeholder
+          PAYPAL_CLIENT_ID=
+          PAYPAL_CLIENT_SECRET=
+          SENTRY_DSN=
+          EOF
+
+      - name: Validate composer.json
+        run: composer validate --no-check-publish --strict
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Lint YAML (config & translations)
+        run: php bin/console lint:yaml config translations --parse-tags
+
+      - name: Lint translations
+        run: php bin/console lint:translations --no-interaction
+
+      - name: Lint Twig templates
+        run: php bin/console lint:twig templates --no-interaction
+
+      - name: Lint DI container (test env)
+        run: php bin/console lint:container --env=test --no-debug
+
+      - name: Run PHPUnit
+        run: php vendor/bin/phpunit
