@@ -51,18 +51,26 @@ make dev                          # Start dev server
 
 ## ⚙️ Environment Variables
 
-Use `.env` for defaults (or copy from `.env.example`). Use `.env.local` for secrets and local overrides (gitignored).
+Use `.env` for **non-secret defaults** (or copy from `.env.example`). Put **real API keys, webhooks, and production secrets** in **`.env.local`** (gitignored) or in your host’s environment variables — never commit live credentials.
 
-**Common (see `.env.example` for full list):**
+Load order (later wins): `.env` → `.env.local` → `.env.<APP_ENV>` → `.env.<APP_ENV>.local`.
+
+**Common (see `.env.example` for the full list):**
 
 | Variable | Description |
 |----------|-------------|
-| `APP_SECRET` | Set in `.env` or `.env.local` (min 32 chars). |
+| `APP_SECRET` | Random string, min 32 chars (e.g. in `.env.dev` or `.env.local`). |
 | `DATABASE_URL` | SQLite default in `.env`; override for MySQL/PostgreSQL. |
 | `MAILER_DSN` | `null://null` for dev (no sending). |
 | `MESSENGER_TRANSPORT_DSN` | `doctrine://default` for async queues. |
-| `PAYMENT_PROVIDER` | `dev` (simulator, no keys), `stripe`, etc. Default is `dev`. |
-| `STRIPE_*` | Only when `PAYMENT_PROVIDER=stripe`; set in `.env.local`. |
+| `PAYMENT_PROVIDER` | `dev` (simulator), `stripe`, `paypal`, etc. Default is `dev`. |
+| `STRIPE_*` | When using Stripe: `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env.local`. |
+| `PAYPAL_*` | When using PayPal: `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_WEBHOOK_ID` (sandbox first). |
+| `CHECKOUT_SKIP_PAYMENT` | Dev-only shortcut; keep `0` in staging/production. |
+
+### Production logging
+
+With `APP_ENV=prod`, Monolog writes **JSON** to **stderr** (see `config/packages/monolog.yaml`), which suits containers and log aggregators. Do not log payment payloads or tokens. Optional error tracking: install a Sentry bundle and set `SENTRY_DSN` in the host environment (not in committed `.env`).
 
 ## 📚 Usage
 
