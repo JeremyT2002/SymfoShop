@@ -176,6 +176,9 @@ checkout:
   place_order: Place Order
   customer_information: Customer Information
   subtotal: Subtotal
+  shipping_method: Shipping
+  shipping_amount: Shipping
+  shipping_free: Free
   tax: Tax
   terms_agreement: By placing your order, you agree to our terms and conditions.
   phone_hint: "Optional: For order updates and delivery notifications"
@@ -219,6 +222,7 @@ checkout:
   fallback_method_stripe: Stripe
   flash:
     cart_empty: Your cart is empty. Please add items before checkout.
+    shipping_method_unavailable: Selected shipping option is not available.
     payment_method_unavailable: Selected payment method is not available.
     order_not_pending: Order is not in payment pending status.
   not_found:
@@ -238,6 +242,7 @@ security:
     register_here: Register here
     forgot_password: Forgot your password?
   register:
+    rate_limited: Too many registration attempts from your network. Please try again later.
     title: Create your account
     already_have_account: Already have an account?
     sign_in: Sign in
@@ -414,6 +419,36 @@ admin:
       created: Payment method created.
       updated: Payment method updated.
       removed: Payment method removed.
+  shipping_methods:
+    nav: Shipping Methods
+    title: Shipping Methods
+    subtitle: Configure shipping options and amounts (minor units, excl. VAT) shown at checkout.
+    new: New Method
+    new_title: Create Shipping Method
+    edit_title: Edit Shipping Method
+    back: Back to Shipping Methods
+    create_submit: Create Method
+    save_submit: Save
+    confirm_delete: Delete this shipping method?
+    empty: No shipping methods configured yet.
+    table:
+      name: Name
+      code: Code
+      amount_cents: Amount (cents)
+      sort: Sort
+      active: Active
+      actions: Actions
+    form:
+      code: Code
+      name: Display name
+      amount_cents: Price (cents, excl. VAT)
+      sort: Sort order
+      active: Active
+    flash:
+      code_name_required: Code and name are required.
+      created: Shipping method created.
+      updated: Shipping method updated.
+      removed: Shipping method removed.
   widgets:
     kpi_products:
       title: Total Products
@@ -520,6 +555,7 @@ invoice_pdf:
     vat: VAT
     total: Total
   subtotal: Subtotal
+  shipping: Shipping
   tax_included: incl. VAT
   grand_total: Grand total
   thank_you_strong: Thank you for shopping at %shop%.

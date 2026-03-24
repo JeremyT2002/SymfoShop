@@ -9,6 +9,7 @@ use App\Service\Inventory\InventoryService;
 use App\Service\Invoice\InvoiceService;
 use App\Service\Payment\Provider\PaymentResolution;
 use App\Service\Payment\PaymentService;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -38,13 +39,13 @@ class StripeWebhookController extends AbstractController implements ServiceSubsc
     public static function getSubscribedServices(): array
     {
         return [
-            'workflow.order' => '?Symfony\Component\Workflow\WorkflowInterface',
+            'state_machine.order' => '?'.WorkflowInterface::class,
         ];
     }
 
     private function getOrderWorkflow(): WorkflowInterface
     {
-        return $this->container->get('workflow.order');
+        return $this->container->get('state_machine.order');
     }
 
     #[Route('/webhook/stripe', name: 'webhook_stripe', methods: ['POST'])]
@@ -52,6 +53,12 @@ class StripeWebhookController extends AbstractController implements ServiceSubsc
     {
         $payload = $request->getContent();
         $signature = $request->headers->get('Stripe-Signature');
+
+        if ($this->stripeWebhookSecret === null || trim((string) $this->stripeWebhookSecret) === '') {
+            $this->logger->error('Stripe webhook signing secret is not configured (set STRIPE_WEBHOOK_SECRET)');
+
+            return new Response('Webhook signing not configured', Response::HTTP_SERVICE_UNAVAILABLE);
+        }
 
         if (!$signature) {
             $this->logger->warning('Stripe webhook received without signature');
@@ -77,36 +84,75 @@ class StripeWebhookController extends AbstractController implements ServiceSubsc
             return new Response('Webhook processing error', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        // Idempotency check
         $eventId = $event->id;
-        $processedEvent = $this->webhookEventRepository->findOneByEventId($eventId);
+        $existing = $this->webhookEventRepository->findOneByEventId($eventId);
+        if ($existing instanceof ProcessedWebhookEvent) {
+            if ($existing->getStatus() === ProcessedWebhookEvent::STATUS_COMPLETED) {
+                $this->logger->info('Stripe webhook event already completed', ['event_id' => $eventId]);
 
-        if ($processedEvent) {
-            $this->logger->info('Stripe webhook event already processed', ['event_id' => $eventId]);
-            return new Response('Event already processed', Response::HTTP_OK);
+                return new Response('OK', Response::HTTP_OK);
+            }
+
+            // Another worker is still processing this event — ask Stripe to retry shortly.
+            $this->logger->notice('Stripe webhook event still pending (concurrent delivery)', ['event_id' => $eventId]);
+
+            return new Response('Processing', Response::HTTP_SERVICE_UNAVAILABLE, [
+                'Retry-After' => '3',
+            ]);
         }
 
-        // Mark event as processed
-        $processedEvent = new ProcessedWebhookEvent();
-        $processedEvent->setEventId($eventId);
-        $this->entityManager->persist($processedEvent);
-        $this->entityManager->flush();
+        $claim = new ProcessedWebhookEvent();
+        $claim->setEventId($eventId);
+        $claim->setStatus(ProcessedWebhookEvent::STATUS_PENDING);
+        $this->entityManager->persist($claim);
 
-        // Handle event
+        try {
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            if (!$this->isUniqueConstraintViolation($e)) {
+                throw $e;
+            }
+
+            $this->entityManager->clear();
+            $race = $this->webhookEventRepository->findOneByEventId($eventId);
+            if ($race instanceof ProcessedWebhookEvent && $race->getStatus() === ProcessedWebhookEvent::STATUS_COMPLETED) {
+                return new Response('OK', Response::HTTP_OK);
+            }
+
+            return new Response('Processing', Response::HTTP_SERVICE_UNAVAILABLE, [
+                'Retry-After' => '3',
+            ]);
+        }
+
         try {
             $this->handleStripeEvent($event);
-        } catch (\Exception $e) {
+            $claim->setStatus(ProcessedWebhookEvent::STATUS_COMPLETED);
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
             $this->logger->error('Error handling Stripe webhook event', [
                 'event_id' => $eventId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            // Don't remove the processed event record - we want idempotency
+            $this->entityManager->remove($claim);
+            $this->entityManager->flush();
+
             return new Response('Error processing event', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return new Response('OK', Response::HTTP_OK);
+    }
+
+    private function isUniqueConstraintViolation(\Throwable $e): bool
+    {
+        for ($t = $e; $t !== null; $t = $t->getPrevious()) {
+            if ($t instanceof UniqueConstraintViolationException) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function handleStripeEvent(\Stripe\Event $event): void

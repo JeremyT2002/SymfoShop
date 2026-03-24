@@ -6,9 +6,11 @@ use App\Entity\User;
 use App\Form\RegistrationFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 
 class RegistrationController extends AbstractController
@@ -17,7 +19,9 @@ class RegistrationController extends AbstractController
     public function register(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        #[Autowire(service: 'limiter.registration_limiter')]
+        RateLimiterFactory $registrationLimiter,
     ): Response {
         if ($this->getUser()) {
             return $this->redirectToRoute('admin');
@@ -26,6 +30,17 @@ class RegistrationController extends AbstractController
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            $limiter = $registrationLimiter->create($request->getClientIp() ?? 'anonymous');
+            if (!$limiter->consume()->isAccepted()) {
+                $this->addFlash('error', 'security.register.rate_limited');
+
+                return $this->render('security/register.html.twig', [
+                    'registrationForm' => $form,
+                ]);
+            }
+        }
 
         if ($form->isSubmitted() && $form->isValid()) {
             // encode the plain password

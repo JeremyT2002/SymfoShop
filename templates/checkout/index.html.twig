@@ -138,6 +138,30 @@
                     </h2>
                     
                     <div class="space-y-3 mb-4">
+                        {% if shippingMethods is not empty %}
+                            <div>
+                                <span class="block text-sm font-medium text-gray-700 mb-2">{{ 'checkout.shipping_method'|trans }}</span>
+                                <div class="space-y-2">
+                                    {% for method in shippingMethods %}
+                                        <label class="flex items-start gap-2 cursor-pointer text-sm text-gray-800">
+                                            <input type="radio" name="shipping_method" value="{{ method.code }}" form="customer-form"
+                                                   class="mt-1 border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                   {% if selectedShippingMethod == method.code %}checked{% endif %}>
+                                            <span>
+                                                <span class="font-medium">{{ method.name }}</span>
+                                                <span class="text-gray-600">
+                                                    {% if method.amountCents > 0 %}
+                                                        — {{ (method.amountCents / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}
+                                                    {% else %}
+                                                        — {{ 'checkout.shipping_free'|trans }}
+                                                    {% endif %}
+                                                </span>
+                                            </span>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
                         <div>
                             <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-2">
                                 {{ 'checkout.payment_method'|trans }}
@@ -157,6 +181,18 @@
                             <span class="text-gray-600">{{ 'checkout.subtotal'|trans }}:</span>
                             <span class="font-medium">{{ (totals.subtotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>
                         </div>
+                        {% if totals.shippingAmount is defined and (totals.shippingMethodLabel is defined and totals.shippingMethodLabel) %}
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">{{ 'checkout.shipping_amount'|trans }}:</span>
+                                <span class="font-medium">
+                                    {% if totals.shippingAmount > 0 %}
+                                        {{ (totals.shippingAmount / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}
+                                    {% else %}
+                                        {{ 'checkout.shipping_free'|trans }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        {% endif %}
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">{{ 'checkout.tax'|trans }}:</span>
                             <span class="font-medium">{{ (totals.taxTotal / 100)|number_format(2, '.', ',') }} {{ totals.currency|escape }}</span>

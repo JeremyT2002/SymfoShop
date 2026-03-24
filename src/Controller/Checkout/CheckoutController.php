@@ -9,6 +9,7 @@ use App\Entity\User;
 use App\Form\Checkout\AddressType;
 use App\Form\Checkout\CustomerInfoType;
 use App\Repository\PaymentMethodRepository;
+use App\Repository\ShippingMethodRepository;
 use App\Service\Cart\CartService;
 use App\Service\Checkout\CheckoutService;
 use App\Service\Inventory\InventoryService;
@@ -34,6 +35,7 @@ class CheckoutController extends AbstractController
         private readonly InventoryService $inventoryService,
         private readonly InvoiceService $invoiceService,
         private readonly PaymentMethodRepository $paymentMethodRepository,
+        private readonly ShippingMethodRepository $shippingMethodRepository,
         private readonly LoggerInterface $logger,
         private readonly bool $checkoutSkipPayment = false,
         private readonly string $kernelEnvironment = 'prod'
@@ -50,7 +52,6 @@ class CheckoutController extends AbstractController
             return $this->redirectToRoute('cart_show');
         }
 
-        $totals = $this->checkoutService->calculateTotals();
         $activePaymentMethods = $this->paymentMethodRepository->findActiveOrdered();
         $paymentMethodCodes = array_map(
             static fn ($method) => $method->getCode(),
@@ -58,6 +59,14 @@ class CheckoutController extends AbstractController
         );
         $defaultPaymentMethod = $this->paymentMethodRepository->findDefaultActive();
         $selectedPaymentMethod = (string) ($request->request->get('payment_method') ?: ($defaultPaymentMethod?->getCode() ?? ''));
+
+        $shippingMethods = $this->shippingMethodRepository->findActiveOrdered();
+        $shippingCodes = array_map(
+            static fn ($m) => $m->getCode(),
+            $shippingMethods
+        );
+        $defaultShippingMethod = $this->shippingMethodRepository->findFirstActive();
+        $selectedShippingMethod = (string) ($request->request->get('shipping_method') ?: ($defaultShippingMethod?->getCode() ?? ''));
 
         $customerInfo = new CustomerInfoDTO('', '', '');
         $shippingAddress = new AddressDTO('', '', '', '');
@@ -87,14 +96,30 @@ class CheckoutController extends AbstractController
         if ($request->isMethod('POST')) {
             $customerForm->handleRequest($request);
             $addressForm->handleRequest($request);
+        }
 
+        $customerInfo = $customerForm->getData();
+        $shippingAddress = $addressForm->getData();
+        $countryForTax = trim($shippingAddress->country) !== '' ? trim($shippingAddress->country) : null;
+
+        $totals = $this->checkoutService->calculateTotals(
+            $selectedShippingMethod !== '' ? $selectedShippingMethod : null,
+            $countryForTax
+        );
+
+        if ($request->isMethod('POST')) {
             if ($customerForm->isSubmitted() && $customerForm->isValid() &&
                 $addressForm->isSubmitted() && $addressForm->isValid()) {
-                $customerInfo = $customerForm->getData();
-                $shippingAddress = $addressForm->getData();
-
                 try {
-                    $order = $this->checkoutService->createOrder($customerInfo, $shippingAddress);
+                    if ($selectedShippingMethod !== '' && $shippingCodes !== [] && !in_array($selectedShippingMethod, $shippingCodes, true)) {
+                        throw new \RuntimeException('checkout.flash.shipping_method_unavailable');
+                    }
+
+                    $order = $this->checkoutService->createOrder(
+                        $customerInfo,
+                        $shippingAddress,
+                        $selectedShippingMethod !== '' ? $selectedShippingMethod : null
+                    );
                     if ($selectedPaymentMethod !== '' && !in_array($selectedPaymentMethod, $paymentMethodCodes, true)) {
                         throw new \RuntimeException('checkout.flash.payment_method_unavailable');
                     }
@@ -136,6 +161,8 @@ class CheckoutController extends AbstractController
             'totals' => $totals,
             'paymentMethods' => $activePaymentMethods,
             'selectedPaymentMethod' => $selectedPaymentMethod,
+            'shippingMethods' => $shippingMethods,
+            'selectedShippingMethod' => $selectedShippingMethod,
         ]);
     }
 

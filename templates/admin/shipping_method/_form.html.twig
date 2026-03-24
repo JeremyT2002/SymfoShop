@@ -1,0 +1,30 @@
+<form method="post" class="admin-form-shell space-y-6">
+    <div class="admin-form-grid">
+        <div>
+            <label class="admin-form-label" for="code">{{ 'admin.shipping_methods.form.code'|trans }}</label>
+            <input type="text" id="code" name="code" value="{{ method.code|default('') }}" required maxlength="50"
+                   class="admin-form-input font-mono" autocomplete="off"/>
+        </div>
+        <div>
+            <label class="admin-form-label" for="name">{{ 'admin.shipping_methods.form.name'|trans }}</label>
+            <input type="text" id="name" name="name" value="{{ method.name|default('') }}" required maxlength="120"
+                   class="admin-form-input" autocomplete="off"/>
+        </div>
+        <div>
+            <label class="admin-form-label" for="amountCents">{{ 'admin.shipping_methods.form.amount_cents'|trans }}</label>
+            <input type="number" id="amountCents" name="amountCents" value="{{ method.amountCents|default(0) }}" min="0" step="1"
+                   class="admin-form-input" required/>
+        </div>
+        <div>
+            <label class="admin-form-label" for="sortOrder">{{ 'admin.shipping_methods.form.sort'|trans }}</label>
+            <input type="number" id="sortOrder" name="sortOrder" value="{{ method.sortOrder|default(0) }}" class="admin-form-input"/>
+        </div>
+        <div class="flex items-center gap-2 pt-6">
+            <input type="checkbox" id="isActive" name="isActive" value="1" {% if method.isActive|default(true) %}checked{% endif %} class="rounded border-gray-300"/>
+            <label for="isActive" class="text-sm text-gray-700">{{ 'admin.shipping_methods.form.active'|trans }}</label>
+        </div>
+    </div>
+    <div>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">{{ submitLabel }}</button>
+    </div>
+</form>

@@ -93,10 +93,10 @@ class CheckoutIntegrationTest extends KernelTestCase
         $this->assertEquals('EUR', $order->getCurrency());
         $this->assertEquals('new', $order->getStatus());
 
-        // Verify order totals (3 * 1999 = 5997, tax 20% = 1199, total = 7196)
+        // US: 0% VAT; subtotal 3 * 1999 = 5997; standard shipping 0
         $this->assertEquals(5997, $order->getSubtotal());
-        $this->assertEquals(1199, $order->getTaxTotal()); // 5997 * 0.20 = 1199.4, rounded to 1199
-        $this->assertEquals(7196, $order->getGrandTotal());
+        $this->assertEquals(0, $order->getTaxTotal());
+        $this->assertEquals(5997, $order->getGrandTotal());
 
         // Verify order items
         $orderItems = $order->getItems();
@@ -107,7 +107,7 @@ class CheckoutIntegrationTest extends KernelTestCase
         $this->assertEquals($product->getName(), $orderItem->getNameSnapshot());
         $this->assertEquals(3, $orderItem->getQuantity());
         $this->assertEquals(1999, $orderItem->getUnitPriceAmount()); // Frozen price
-        $this->assertEquals('0.2000', $orderItem->getTaxRate());
+        $this->assertEquals('0.0000', $orderItem->getTaxRate());
         $this->assertEquals(5997, $orderItem->getTotalAmount()); // Frozen total
 
         // Verify cart was cleared
@@ -150,10 +150,10 @@ class CheckoutIntegrationTest extends KernelTestCase
         // Verify order has 2 items
         $this->assertCount(2, $order->getItems());
 
-        // Verify totals: (2 * 1000) + (1 * 2000) = 4000, tax = 800, total = 4800
+        // US: 0% VAT; subtotal (2 * 1000) + (1 * 2000) = 4000
         $this->assertEquals(4000, $order->getSubtotal());
-        $this->assertEquals(800, $order->getTaxTotal());
-        $this->assertEquals(4800, $order->getGrandTotal());
+        $this->assertEquals(0, $order->getTaxTotal());
+        $this->assertEquals(4000, $order->getGrandTotal());
     }
 
     public function testOrderPriceSnapshotsAreFrozen(): void

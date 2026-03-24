@@ -41,6 +41,16 @@ class Order
     #[ORM\Column(type: Types::INTEGER)]
     private int $grandTotal;
 
+    /** Shipping in minor units (excl. VAT), before tax */
+    #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
+    private int $shippingAmount = 0;
+
+    #[ORM\Column(type: Types::STRING, length: 50, nullable: true)]
+    private ?string $shippingMethodCode = null;
+
+    #[ORM\Column(type: Types::STRING, length: 120, nullable: true)]
+    private ?string $shippingMethodLabel = null;
+
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
@@ -145,6 +155,43 @@ class Order
     public function setGrandTotal(int $grandTotal): self
     {
         $this->grandTotal = $grandTotal;
+        return $this;
+    }
+
+    public function getShippingAmount(): int
+    {
+        return $this->shippingAmount;
+    }
+
+    public function setShippingAmount(int $shippingAmount): self
+    {
+        $this->shippingAmount = max(0, $shippingAmount);
+        return $this;
+    }
+
+    public function getShippingMethodCode(): ?string
+    {
+        return $this->shippingMethodCode;
+    }
+
+    public function setShippingMethodCode(?string $shippingMethodCode): self
+    {
+        $this->shippingMethodCode = $shippingMethodCode !== null && $shippingMethodCode !== ''
+            ? mb_strtolower(trim($shippingMethodCode))
+            : null;
+        return $this;
+    }
+
+    public function getShippingMethodLabel(): ?string
+    {
+        return $this->shippingMethodLabel;
+    }
+
+    public function setShippingMethodLabel(?string $shippingMethodLabel): self
+    {
+        $this->shippingMethodLabel = $shippingMethodLabel !== null && $shippingMethodLabel !== ''
+            ? trim($shippingMethodLabel)
+            : null;
         return $this;
     }
 

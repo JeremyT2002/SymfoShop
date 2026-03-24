@@ -166,6 +166,10 @@
                         <i class="fas fa-credit-card w-5"></i>
                         <span>{{ 'admin.payment_methods.nav'|trans }}</span>
                     </a>
+                    <a href="{{ path('admin_shipping_methods_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_shipping_methods' in app.request.get('_route') %}bg-gray-800{% endif %}">
+                        <i class="fas fa-truck w-5"></i>
+                        <span>{{ 'admin.shipping_methods.nav'|trans }}</span>
+                    </a>
                 </div>
                 
                 <div class="pt-4">

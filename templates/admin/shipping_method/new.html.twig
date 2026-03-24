@@ -1,0 +1,17 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}{{ 'admin.shipping_methods.new_title'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="mb-6">
+        <a href="{{ path('admin_shipping_methods_index') }}" class="text-gray-600 hover:text-gray-900 mb-2 inline-block">
+            <i class="fas fa-arrow-left"></i> {{ 'admin.shipping_methods.back'|trans }}
+        </a>
+        <h2 class="text-2xl font-bold text-gray-900">{{ 'admin.shipping_methods.new_title'|trans }}</h2>
+    </div>
+
+    {% include 'admin/shipping_method/_form.html.twig' with {
+        method: method,
+        submitLabel: 'admin.shipping_methods.create_submit'|trans
+    } %}
+{% endblock %}
