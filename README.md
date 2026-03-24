@@ -6,243 +6,276 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.0-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)
 ![Alpine.js](https://img.shields.io/badge/Alpine.js-3.13-8BC0D0?style=flat-square&logo=alpine.js&logoColor=white)
 
-A production-grade e-commerce shop system built with Symfony 7.4 and PHP 8.2+.
+Production-oriented e-commerce on **Symfony 7.4** and **PHP 8.2+**: catalog, cart, checkout, payments (Stripe & PayPal), shipping/VAT, invoices, admin, API docs, EN/DE/FR.
 
-## 🚀 Features
+## Contents
 
-**Core E-Commerce**: Catalog management (products, variants, categories), shopping cart, order management with Symfony Workflow, **Stripe** and **PayPal** (Orders API v2) payment processing, shipping methods and country-based VAT at checkout, inventory management, PDF invoices, audit logging, admin panel, RESTful API with Swagger/OpenAPI docs, multi-language support (EN/DE/FR)
+| Section | What you’ll find |
+|--------|-------------------|
+| [Quick start](#quick-start) | Fastest path to a running shop |
+| [Features](#features-at-a-glance) | Capabilities in one screen |
+| [Requirements](#requirements) | Tooling |
+| [Environment](#environment-variables) | Important `.env` keys |
+| [Docker](#docker) / [Local install](#local-installation) | Two setup paths |
+| [Makefile](#makefile-commands) | Common commands |
+| [Payments](#payments) | Stripe & PayPal notes |
+| [Usage](#usage) | Admin, API, i18n, fixtures |
+| [Testing & CI](#testing--ci) | PHPUnit & GitHub Actions |
+| [Architecture](#architecture) | Structure & order flow |
+| [Troubleshooting](#troubleshooting) | When something breaks |
 
-**User Features**: Authentication (registration, login, password reset), role-based access control, wishlist with heart icon toggle, coupon/discount codes, storefront **legal pages** (privacy, cookies, returns, terms, imprint) and a **cookie consent** banner (localStorage)
+---
 
-**Frontend**: Tailwind CSS design system, Font Awesome icons, Alpine.js notifications, responsive mobile-first design, real-time cart updates, modular ES6 JavaScript architecture
+## Quick start
 
-**Developer Tools**: Data fixtures, Makefile commands, PHPUnit tests, linting tools, AI-assisted development ([Cursor](https://cursor.sh/), [Warp](https://www.warp.dev/))
-
-## 📋 Requirements
-
-- PHP 8.2+, Composer, MySQL/MariaDB or SQLite, Symfony CLI (optional)
-
-## 🐳 Docker Setup
+**Docker**
 
 ```bash
 git clone <repository-url> && cd SymfoShop
-make docker-up                    # Start services
-make docker-db-setup              # Setup database
-make docker-load-fixture          # Load sample data (optional)
-make docker-admin-user            # Create admin user
+make docker-up && make docker-db-setup && make docker-admin-user   # optional: make docker-load-fixture
 ```
 
-Access at `http://localhost:8000`
+→ [http://localhost:8000](http://localhost:8000) · Compose files in `docker/`.
 
-**Docker Commands**: `docker-up`, `docker-down`, `docker-build`, `docker-logs`, `docker-db-setup`, `docker-load-fixture`, `docker-admin-user`
-
-Docker configuration files live in `docker/` (`docker/compose.yaml`, `docker/compose.override.yaml`, `docker/Dockerfile`).
-
-## 🛠️ Local Installation
+**Local (no Docker)**
 
 ```bash
 git clone <repository-url> && cd SymfoShop
 composer install
-cp .env.example .env              # Optional: copy template (or use .env.local for overrides)
-make db-seed                      # Create DB, run migrations, load fixtures
-make admin-user                   # Create admin user
-make dev                          # Start dev server
+cp .env.example .env    # then set APP_SECRET, DATABASE_URL, etc.
+make db-seed && make admin-user && make dev
 ```
 
-## ⚙️ Environment Variables
+---
 
-Use `.env` for **non-secret defaults** (or copy from `.env.example`). Put **real API keys, webhooks, and production secrets** in **`.env.local`** (gitignored) or in your host’s environment variables — never commit live credentials.
+## Features at a glance
+
+| Area | Highlights |
+|------|------------|
+| **Store** | Products, variants, categories, cart, coupons, wishlist, legal pages, cookie banner, contact & return forms, sitemap/robots |
+| **Checkout** | Workflow-based orders, shipping methods, country-based VAT, **Stripe** & **PayPal** (Orders API v2) |
+| **Back office** | Products, categories, orders, users, API keys, payment/shipping methods, return requests, theme editor |
+| **Account** | Register/login/reset, dashboard (profile, orders, localized invoice PDFs) |
+| **API** | REST + OpenAPI/Swagger at `/api/v1/docs` (Bearer API keys) |
+| **Tech** | Doctrine, Messenger (async mail), DomPDF invoices, Tailwind + Alpine, modular ES modules under `public/js/` |
+
+---
+
+## Requirements
+
+- PHP 8.2+, Composer  
+- MySQL/MariaDB or SQLite  
+- Symfony CLI (optional)  
+
+---
+
+## Environment variables
+
+Use **`.env`** for defaults; **secrets** in **`.env.local`** or the host environment (never commit live keys).
 
 Load order (later wins): `.env` → `.env.local` → `.env.<APP_ENV>` → `.env.<APP_ENV>.local`.
 
-**Common (see `.env.example` for the full list):**
+| Variable | Purpose |
+|----------|---------|
+| `APP_SECRET` | Random string, ≥ 32 characters |
+| `DEFAULT_URI` | Base URL for CLI/routing (e.g. `http://localhost`) |
+| `DATABASE_URL` | DB connection; SQLite default in template |
+| `MAILER_DSN` | e.g. `null://null` in dev |
+| `MAILER_FROM` | From address for transactional mail |
+| `CONTACT_NOTIFY_EMAIL` | Inbox for contact form (falls back to `MAILER_FROM` if unset) |
+| `MESSENGER_TRANSPORT_DSN` | Async transport (e.g. `doctrine://default`) |
+| `PAYMENT_PROVIDER` | `dev`, `stripe`, `paypal`, … |
+| `STRIPE_*` | `STRIPE_SECRET_KEY`, publishable key, `STRIPE_WEBHOOK_SECRET` when using Stripe |
+| `PAYPAL_*` | `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_WEBHOOK_ID` for PayPal |
+| `CHECKOUT_SKIP_PAYMENT` | Dev-only shortcut; use `0` in staging/production |
+| `SENTRY_DSN` | Optional; used when `APP_ENV=prod` (Sentry bundle) |
 
-| Variable | Description |
-|----------|-------------|
-| `APP_SECRET` | Random string, min 32 chars (e.g. in `.env.dev` or `.env.local`). |
-| `DATABASE_URL` | SQLite default in `.env`; override for MySQL/PostgreSQL. |
-| `MAILER_DSN` | `null://null` for dev (no sending). |
-| `MESSENGER_TRANSPORT_DSN` | `doctrine://default` for async queues. |
-| `PAYMENT_PROVIDER` | `dev` (simulator), `stripe`, `paypal`, etc. Default is `dev`. |
-| `STRIPE_*` | When using Stripe: `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` in `.env.local`. |
-| `PAYPAL_*` | When using PayPal: `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_WEBHOOK_ID` (sandbox first). |
-| `CHECKOUT_SKIP_PAYMENT` | Dev-only shortcut; keep `0` in staging/production. |
+**Production logging:** with `APP_ENV=prod`, Monolog emits **JSON on stderr** (`config/packages/monolog.yaml`) — suitable for containers. Do not log payment payloads or tokens.
 
-### Production logging
+**Built-in security:** login throttling, registration rate limiting (`framework.rate_limiter`), CSRF on session forms; API is stateless with API keys.
 
-With `APP_ENV=prod`, Monolog writes **JSON** to **stderr** (see `config/packages/monolog.yaml`), which suits containers and log aggregators. Do not log payment payloads or tokens. Optional error tracking: install a Sentry bundle and set `SENTRY_DSN` in the host environment (not in committed `.env`).
+---
 
-### Security basics (built-in)
+## Docker
 
-- **Login throttling:** after repeated failed logins, Symfony temporarily blocks further attempts (see `config/packages/security.yaml`).
-- **Registration rate limit:** `/register` POSTs are limited per IP per hour (see `framework.rate_limiter` in `config/packages/framework.yaml`; tests use a high limit).
-- **CSRF:** session-based forms (e.g. login, registration) use Symfony’s form CSRF protection; the REST API uses API keys and is stateless.
+| Make target | Role |
+|-------------|------|
+| `docker-up` / `docker-down` | Start/stop stack |
+| `docker-build` | Build images |
+| `docker-logs` | Logs |
+| `docker-db-setup` | Database setup |
+| `docker-load-fixture` | Sample data (optional) |
+| `docker-admin-user` | Admin user |
 
-### Stripe webhooks (`POST /webhook/stripe`)
+Files: `docker/compose.yaml`, `docker/compose.override.yaml`, `docker/Dockerfile`.
 
-- **Signing secret required:** without `STRIPE_WEBHOOK_SECRET`, the endpoint responds with `503` (configure the secret from [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks)).
-- **Signature verification** uses `\Stripe\Webhook::constructEvent()`; missing or invalid `Stripe-Signature` → `400`.
-- **Idempotency:** each Stripe `event.id` is stored in `processed_webhook_event` with status `pending` → `completed`. Duplicate deliveries return `200` once completed. Concurrent deliveries for the same event may receive `503` with `Retry-After` until the first finishes.
-- **Failures:** if handling throws after the claim is inserted, the claim row is removed so Stripe retries can succeed.
+---
 
-### PayPal Checkout (`PAYMENT_PROVIDER=paypal`)
-
-- **Credentials:** set `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` (sandbox first). Optional `PAYPAL_BASE_URL` (default `https://api-m.sandbox.paypal.com`; live: `https://api-m.paypal.com`).
-- **Flow:** after placing an order, the customer is redirected to PayPal. **Return URL:** `GET /payment/paypal/return` (configured in the Orders API `application_context`). **Cancel:** `GET /payment/paypal/cancel`.
-- **Webhooks:** `POST /webhook/paypal` — set `PAYPAL_WEBHOOK_ID` from the PayPal Developer dashboard and register the same URL. Events are verified with PayPal’s signature API; idempotency uses `processed_webhook_event` (same table as Stripe, distinct event IDs).
-- **Stub mode:** if `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` are unset, behavior matches the old simulator (`paypal_…` reference + dev payment simulator UI).
-
-## 📚 Usage
-
-### Makefile Commands
+## Local installation
 
 ```bash
-# Setup
-make install          # Install dependencies
-make setup            # Complete setup
-make db-seed          # Reset DB + load fixtures
-
-# Database
-make db-create        # Create database
-make db-migrate       # Run migrations
-make db-reset         # Drop, create, migrate
-make db-fixtures      # Load sample data
-
-# Development
-make dev              # Start dev server
-make test             # Run tests
-make lint             # Lint code
-make cache-clear      # Clear cache
-make cleanup-reservations  # Clean expired reservations
+composer install
+cp .env.example .env
+make db-seed
+make admin-user
+make dev
 ```
 
-### Admin Panel
+---
 
-Access at `/admin` (requires `ROLE_ADMIN`). Full CRUD for Products, Categories, Orders, Users, API Keys.
+## Makefile commands
 
-**Default credentials** (after fixtures): `admin@symfoshop.com` / `admin123`
+| Command | Description |
+|---------|-------------|
+| `make install` | Composer install |
+| `make setup` | Full local setup |
+| `make db-seed` | DB + migrations + fixtures |
+| `make db-create` / `make db-migrate` / `make db-reset` | Database lifecycle |
+| `make db-fixtures` | Load fixtures only |
+| `make dev` | Symfony dev server |
+| `make test` | PHPUnit (see [Testing & CI](#testing--ci)) |
+| `make lint` | Lint |
+| `make cache-clear` | Clear cache |
+| `make cleanup-reservations` | Expired stock reservations |
 
-### API Documentation
+---
 
-Interactive Swagger UI at `/api/v1/docs`. RESTful endpoints with Bearer token auth.
+## Payments
 
-**Usage**: Create API key in `/admin/api-keys`, use as `Authorization: Bearer <key>`, access `/api/v1/*`
+### Stripe (`POST /webhook/stripe`)
 
-### Wishlist
+- Requires **`STRIPE_WEBHOOK_SECRET`**; otherwise the endpoint returns **503** (configure in [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks)).
+- Verifies `Stripe-Signature`; idempotency via `processed_webhook_event` (duplicate completed events → 200).
 
-Logged-in users: Click heart icon on products to add/remove. AJAX toggle with toast notifications. View at `/account/wishlist`. Duplicate prevention built-in.
+### PayPal (`PAYMENT_PROVIDER=paypal`)
 
-### Coupon/Discount Codes
+- **Sandbox first:** `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`; optional `PAYPAL_BASE_URL` (live: `https://api-m.paypal.com`).
+- **Return / cancel:** `GET /payment/paypal/return`, `GET /payment/paypal/cancel`.
+- **Webhooks:** `POST /webhook/paypal` — set `PAYPAL_WEBHOOK_ID` in the PayPal developer app.
+- **Unset credentials:** behaves like the dev simulator (no real PayPal API).
 
-**Features**: Percentage and fixed amount discounts, expiration dates, usage limits (total and per-user), validation with error messages, admin CRUD interface.
+---
 
-**Usage**: Apply coupon codes in cart. Discounts are calculated before tax and displayed in order summary. Admin can create/manage coupons at `/admin/coupons`.
+## Usage
 
-### Internationalization
+### Admin
 
-Supports English (en), German (de), French (fr). Language switcher in navbar, persisted in session.
+- URL: **`/admin`** — requires `ROLE_ADMIN`.
+- After fixtures: **`admin@symfoshop.com`** / **`admin123`**.
 
-### Sample Data
+### API
+
+- Docs: **`/api/v1/docs`** (Swagger UI).
+- Create a key under **API Keys** in admin; send **`Authorization: Bearer <key>`** on `/api/v1/*`.
+
+### Storefront extras
+
+- **Wishlist** (logged in): heart on product → `/account/wishlist`.
+- **Coupons:** apply in cart; manage at `/admin/coupons`.
+- **Languages:** EN / DE / FR (switcher in navbar, session).
+
+### Sample data
 
 ```bash
 make db-fixtures
 ```
 
-**Users**: `admin@symfoshop.com`/`admin123`, `john.doe@example.com`/`user123`, `jane.smith@example.com`/`user123`, `bob.wilson@example.com`/`user123`
+**Users:** `admin@symfoshop.com` / `admin123`, `john.doe@example.com` / `user123`, plus other fixture users.  
+**Catalog:** 5 categories, 9 products with variants, stock, media.
 
-**Data**: 5 categories, 9 products with variants/stock/media
-
-### Testing
-
-```bash
-make test             # All tests
-make test-unit        # Unit only
-make test-integration # Integration only
-make test-coverage    # With coverage
-```
-
-### Async Processing
+### Async
 
 ```bash
-php bin/console messenger:consume async  # Process emails/invoices
-make cleanup-reservations                 # Release expired reservations
-php bin/console app:security:cleanup-expired-reset-tokens  # Clean tokens
+php bin/console messenger:consume async
+make cleanup-reservations
+php bin/console app:security:cleanup-expired-reset-tokens
 ```
 
-## 🏗️ Architecture
+---
 
-**DDD Approach**: Clear separation (Domain, Application, Infrastructure, UI), business logic in services, entity-based models
+## Testing & CI
 
-**Key Components**: Doctrine ORM, Symfony Workflow (order states), Symfony Messenger (async), Custom Admin Panel, NelmioApiDocBundle (Swagger), Stripe SDK, DomPDF, Tailwind CSS, Alpine.js
+```bash
+make test              # all tests
+make test-unit
+make test-integration
+make test-coverage
+```
 
-**Order Lifecycle**: `new` → `payment_pending` → `paid` → `processing` → `shipped` → `completed` (or `cancelled` from multiple points)
+**GitHub Actions** (on push/PR to `main` and `dev`): Composer install, `lint:yaml`, `lint:translations`, `lint:twig`, `lint:container` (`test` env), **PHPUnit**. The workflow creates a minimal `.env` (including `DEFAULT_URI`) so `cache:clear` after `composer install` succeeds.
 
-**Payment Flow**: Checkout → Stripe intent → Webhook confirms → Invoice generated → Processing begins
+---
 
-**Inventory**: Stock tracking with `onHand`/`reserved`, expiring reservations, optimistic locking, transactional consistency
+## Architecture
 
-## 📁 Project Structure
+- **Layers:** domain logic in services; thin controllers; Doctrine entities/repositories.
+- **Order states (Workflow):** `new` → `payment_pending` → `paid` → `processing` → `shipped` → `completed` (or `cancelled`).
+- **Inventory:** `onHand` / `reserved`, expiring reservations, optimistic locking.
+- **Stack:** Messenger, Nelmio OpenAPI, Stripe SDK, DomPDF, Tailwind, Alpine.js.
+
+### Repository layout
 
 ```
 SymfoShop/
-├── config/          # Symfony config
-├── migrations/      # DB migrations
-├── public/          # Web root
+├── config/           Symfony config
+├── docker/           Docker Compose & Dockerfile
+├── migrations/
+├── public/           Web root, JS modules
 ├── src/
-│   ├── Command/    # CLI commands
-│   ├── Controller/ # HTTP controllers
-│   ├── Entity/     # Doctrine entities
-│   ├── Repository/ # Repositories
-│   ├── Service/    # Business logic
-│   └── Workflow/   # Workflow guards
-├── templates/      # Twig templates
-└── tests/          # PHPUnit tests
+│   ├── Command/
+│   ├── Controller/
+│   ├── Entity/
+│   ├── Repository/
+│   ├── Service/
+│   └── Workflow/
+├── templates/
+├── tests/
+└── translations/
 ```
 
-## 🎨 Frontend Stack
+---
 
-Tailwind CSS (CDN), Font Awesome 6.5.2, Alpine.js 3.13.3, custom toast/modals/cart components
+## Security
 
-**JavaScript Architecture**: Modular ES6 modules under `public/js/` with page-specific lazy loading.
+Password hashing, CSRF on forms, roles, secure reset tokens, webhook signature checks, parameterized queries via Doctrine.
 
-**Note**: The frontend (templates, JavaScript, and styling) was primarily developed using [Cursor AI](https://cursor.sh/), an AI-powered code editor that assisted in creating the modern, responsive UI components and modular JavaScript architecture.
+---
 
-## 🔒 Security
+## Development guidelines
 
-Password hashing, CSRF protection, role-based access, secure password reset tokens, webhook signature verification, SQL injection prevention (Doctrine ORM)
+- **Style:** PSR-12, typed properties/parameters, fat services / thin controllers.
+- **Tests:** cover business logic and critical workflows; run `make test` before large changes.
+- **Commits:** small, reviewable steps with clear messages.
+- **Cursor:** shared agent rules live under `.cursor/rules/` (PRs via `gh`, commit conventions).
 
-## 📝 Development Guidelines
+---
 
-- **Code Style**: PSR-12, type hints, self-documenting code, thin controllers/fat services
-- **Testing**: Unit tests for business logic, integration tests for workflows, test edge cases
-- **Commits**: Small, reviewable commits with clear messages, one feature per commit
-
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ```bash
-# Database reset
 make db-reset
-# Or: php bin/console doctrine:database:drop --force && doctrine:database:create && doctrine:migrations:migrate
-
-# Cache
 make cache-clear
-
-# Migrations
 php bin/console doctrine:migrations:status
 php bin/console doctrine:migrations:sync-metadata-storage
 ```
 
-## 📄 License
+---
 
-Proprietary
+## License
 
-## 🤝 Contributing
+Proprietary.
 
-1. Follow the **Development Guidelines** above (PSR-12, type hints, thin controllers, business logic in `src/Service`, Symfony conventions).
-2. Write tests for new features.
-3. Update documentation when behavior, APIs, or setup change.
-4. Prefer small, reviewable commits with clear messages.
+---
 
-## 📞 Support
+## Contributing
 
-Refer to Symfony documentation or create an issue in the repository.
+1. Follow the guidelines above and Symfony best practices.  
+2. Add tests for new behavior.  
+3. Update this README when setup, env vars, or APIs change.  
+4. Open a PR (e.g. `gh pr create` from a feature branch).
+
+---
+
+## Support
+
+Symfony docs and project issues in this repository.
