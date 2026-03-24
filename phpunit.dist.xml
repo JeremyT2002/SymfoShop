@@ -18,6 +18,7 @@
         <server name="DATABASE_URL" value="sqlite:///%kernel.project_dir%/var/data_test.db" force="true" />
         <server name="DEFAULT_URI" value="http://localhost" force="true" />
         <server name="CHECKOUT_SKIP_PAYMENT" value="0" force="true" />
+        <server name="STRIPE_WEBHOOK_SECRET" value="whsec_phpunit_symfoshop_test_signing_secret" force="true" />
         <server name="SHELL_VERBOSITY" value="-1" />
     </php>
 

@@ -20,7 +20,6 @@ class StripeWebhookTest extends KernelTestCase
     private EntityManagerInterface $entityManager;
     private PaymentRepository $paymentRepository;
     private ProcessedWebhookEventRepository $webhookEventRepository;
-    private OrderRepository $orderRepository;
     private WorkflowInterface $workflow;
     private PaymentService $paymentService;
 

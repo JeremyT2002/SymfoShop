@@ -11,6 +11,10 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(columns: ['event_id'], name: 'idx_webhook_event_id')]
 class ProcessedWebhookEvent
 {
+    public const STATUS_PENDING = 'pending';
+
+    public const STATUS_COMPLETED = 'completed';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
@@ -21,6 +25,9 @@ class ProcessedWebhookEvent
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $processedAt;
+
+    #[ORM\Column(type: Types::STRING, length: 32, options: ['default' => self::STATUS_COMPLETED])]
+    private string $status = self::STATUS_COMPLETED;
 
     public function __construct()
     {
@@ -51,6 +58,18 @@ class ProcessedWebhookEvent
     public function setProcessedAt(\DateTimeImmutable $processedAt): self
     {
         $this->processedAt = $processedAt;
+        return $this;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): self
+    {
+        $this->status = $status;
+
         return $this;
     }
 }

@@ -78,6 +78,13 @@ With `APP_ENV=prod`, Monolog writes **JSON** to **stderr** (see `config/packages
 - **Registration rate limit:** `/register` POSTs are limited per IP per hour (see `framework.rate_limiter` in `config/packages/framework.yaml`; tests use a high limit).
 - **CSRF:** session-based forms (e.g. login, registration) use Symfony’s form CSRF protection; the REST API uses API keys and is stateless.
 
+### Stripe webhooks (`POST /webhook/stripe`)
+
+- **Signing secret required:** without `STRIPE_WEBHOOK_SECRET`, the endpoint responds with `503` (configure the secret from [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks)).
+- **Signature verification** uses `\Stripe\Webhook::constructEvent()`; missing or invalid `Stripe-Signature` → `400`.
+- **Idempotency:** each Stripe `event.id` is stored in `processed_webhook_event` with status `pending` → `completed`. Duplicate deliveries return `200` once completed. Concurrent deliveries for the same event may receive `503` with `Retry-After` until the first finishes.
+- **Failures:** if handling throws after the claim is inserted, the claim row is removed so Stripe retries can succeed.
+
 ## 📚 Usage
 
 ### Makefile Commands
