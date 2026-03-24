@@ -145,6 +145,71 @@ class CouponServiceTest extends TestCase
         $this->assertEquals(10000, $discount);
     }
 
+    public function testValidatePerUserLimitExceeded(): void
+    {
+        $coupon = $this->createCoupon('LIMIT1', CouponType::PERCENTAGE, 5);
+        $coupon->setPerUserLimit(1);
+        $user = new User();
+        $user->setEmail('c@example.com');
+
+        $this->couponRepository->method('findByCode')->willReturn($coupon);
+        $this->couponRepository->method('countUsages')->willReturn(0);
+        $this->couponRepository->method('countUserUsages')->willReturn(1);
+
+        $result = $this->couponService->validate('LIMIT1', $user, 5000);
+        $this->assertFalse($result['valid']);
+        $this->assertContains('You have reached the usage limit for this coupon', $result['errors']);
+    }
+
+    public function testValidateInvalidPercentageValue(): void
+    {
+        $coupon = $this->createCoupon('BADPCT', CouponType::PERCENTAGE, 101);
+        $this->couponRepository->method('findByCode')->willReturn($coupon);
+        $this->couponRepository->method('countUsages')->willReturn(0);
+
+        $result = $this->couponService->validate('BADPCT', null, 1000);
+        $this->assertFalse($result['valid']);
+        $this->assertContains('Invalid coupon percentage value', $result['errors']);
+    }
+
+    public function testValidateInvalidFixedValue(): void
+    {
+        $coupon = $this->createCoupon('BADFIX', CouponType::FIXED, 0);
+        $this->couponRepository->method('findByCode')->willReturn($coupon);
+        $this->couponRepository->method('countUsages')->willReturn(0);
+
+        $result = $this->couponService->validate('BADFIX', null, 1000);
+        $this->assertFalse($result['valid']);
+        $this->assertContains('Invalid coupon fixed amount', $result['errors']);
+    }
+
+    public function testCanUseDelegatesToValidate(): void
+    {
+        $coupon = $this->createCoupon('OK', CouponType::PERCENTAGE, 10);
+        $this->couponRepository->method('findByCode')->willReturn($coupon);
+        $this->couponRepository->method('countUsages')->willReturn(0);
+
+        $this->assertTrue($this->couponService->canUse($coupon, null));
+    }
+
+    public function testRecordUsageCallsRepositoryWhenUserPresent(): void
+    {
+        $coupon = $this->createCoupon('REC', CouponType::FIXED, 100);
+        $user = new User();
+        $user->setEmail('rec@example.com');
+
+        $this->couponUsageRepository->expects($this->once())->method('incrementUsage')->with($coupon, $user);
+
+        $this->couponService->recordUsage($coupon, $user);
+    }
+
+    public function testRecordUsageSkipsWhenNoUser(): void
+    {
+        $coupon = $this->createCoupon('REC2', CouponType::FIXED, 100);
+        $this->couponUsageRepository->expects($this->never())->method('incrementUsage');
+        $this->couponService->recordUsage($coupon, null);
+    }
+
     private function createCoupon(string $code, CouponType $type, int $value): Coupon
     {
         $coupon = new Coupon();

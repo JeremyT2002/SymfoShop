@@ -8,11 +8,16 @@ use App\Entity\Order;
 use App\Entity\Product;
 use App\Entity\ProductStatus;
 use App\Entity\ProductVariant;
+use App\Entity\StockItem;
 use App\Repository\OrderRepository;
 use App\Service\Cart\CartService;
 use App\Service\Checkout\CheckoutService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 class CheckoutIntegrationTest extends KernelTestCase
 {
@@ -23,12 +28,17 @@ class CheckoutIntegrationTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
-        $container = $kernel->getContainer();
+        self::bootKernel();
+        $container = static::getContainer();
         $this->entityManager = $container->get('doctrine')->getManager();
         $this->cartService = $container->get(CartService::class);
         $this->checkoutService = $container->get(CheckoutService::class);
         $this->orderRepository = $container->get(OrderRepository::class);
+
+        $session = new Session(new MockArraySessionStorage());
+        $request = Request::create('/');
+        $request->setSession($session);
+        $container->get(RequestStack::class)->push($request);
 
         // Clear cart before each test
         $this->cartService->clear();
@@ -43,6 +53,8 @@ class CheckoutIntegrationTest extends KernelTestCase
         $this->entityManager->persist($product);
         $this->entityManager->persist($variant);
         $this->entityManager->flush();
+
+        $this->seedStock($variant);
 
         // Add items to cart
         $this->cartService->add($variant->getId(), 2);
@@ -122,6 +134,9 @@ class CheckoutIntegrationTest extends KernelTestCase
         $this->entityManager->persist($variant2);
         $this->entityManager->flush();
 
+        $this->seedStock($variant1);
+        $this->seedStock($variant2);
+
         // Add multiple items to cart
         $this->cartService->add($variant1->getId(), 2);
         $this->cartService->add($variant2->getId(), 1);
@@ -149,6 +164,8 @@ class CheckoutIntegrationTest extends KernelTestCase
         $this->entityManager->persist($product);
         $this->entityManager->persist($variant);
         $this->entityManager->flush();
+
+        $this->seedStock($variant);
 
         $this->cartService->add($variant->getId(), 1);
 
@@ -187,6 +204,16 @@ class CheckoutIntegrationTest extends KernelTestCase
         $variant->setAttributes([]);
 
         return $variant;
+    }
+
+    private function seedStock(ProductVariant $variant, int $onHand = 100000): void
+    {
+        $stock = new StockItem();
+        $stock->setVariant($variant);
+        $stock->setOnHand($onHand);
+        $stock->setReserved(0);
+        $this->entityManager->persist($stock);
+        $this->entityManager->flush();
     }
 }
 

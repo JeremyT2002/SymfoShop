@@ -1,36 +1,54 @@
 <div class="max-w-2xl space-y-6">
-    <p class="text-sm text-gray-600">Reorder sections by dragging. Toggle enabled to show/hide on homepage.</p>
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <p class="text-sm text-blue-800 flex items-start gap-2">
+            <i class="fas fa-info-circle mt-0.5 flex-shrink-0"></i>
+            <span>Drag to reorder sections. Toggle <strong>Enabled</strong> to show or hide each section on the homepage.</span>
+        </p>
+    </div>
+
     <div data-js="section-builder" data-section-types='{{ ["hero","benefits","featured_products","category_grid","testimonials","newsletter","rich_text"]|json_encode }}'>
         <ul id="section-list" class="space-y-3">
             {% for section in config.homepage.sections|default([]) %}
-                <li class="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-lg" data-section-id="{{ section.id|default('s-' ~ loop.index) }}">
-                    <span class="cursor-move text-gray-400"><i class="fas fa-grip-vertical"></i></span>
-                    <div class="flex-1">
-                        <span class="font-medium">{{ section.type|default('section') }}</span>
-                        <span class="text-sm text-gray-500 ml-2">({{ section.settings.title|default(section.id) }})</span>
+                <li class="section-card flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm" data-section-id="{{ section.id|default('s-' ~ loop.index) }}">
+                    <span class="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 p-1" title="Drag to reorder"><i class="fas fa-grip-vertical"></i></span>
+                    <div class="flex-1 min-w-0">
+                        <span class="font-medium text-gray-900">{{ section.type|default('section')|replace({'_': ' '}) }}</span>
+                        <span class="text-sm text-gray-500 ml-2">— {{ section.settings.title|default(section.id) }}</span>
                     </div>
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" class="section-enabled rounded border-gray-300 text-blue-600" {% if section.enabled|default(true) %}checked{% endif %}>
-                        <span class="text-sm">Enabled</span>
+                    <label class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="checkbox" class="section-enabled rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4" {% if section.enabled|default(true) %}checked{% endif %}>
+                        <span class="text-sm text-gray-600">Enabled</span>
                     </label>
-                    <button type="button" class="section-remove text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                    <button type="button" class="section-remove p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Remove section">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </li>
             {% else %}
-                <li class="text-sm text-gray-500 py-4">No sections. Add sections below.</li>
+                <li class="flex flex-col items-center justify-center py-12 px-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 text-center" data-empty-placeholder>
+                    <i class="fas fa-layer-group text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-sm font-medium text-gray-600">No sections yet</p>
+                    <p class="text-xs text-gray-500 mt-1">Add your first section below</p>
+                </li>
             {% endfor %}
         </ul>
-        <div class="mt-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Add section</label>
-            <select id="add-section-type" class="rounded-lg border border-gray-300 px-3 py-2">
-                <option value="hero">Hero</option>
-                <option value="benefits">Benefits</option>
-                <option value="featured_products">Featured Products</option>
-                <option value="category_grid">Category Grid</option>
-                <option value="testimonials">Testimonials</option>
-                <option value="newsletter">Newsletter</option>
-                <option value="rich_text">Rich Text</option>
-            </select>
-            <button type="button" id="add-section-btn" class="ml-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">Add</button>
+        <div class="mt-6 p-4 bg-white rounded-xl border border-gray-200">
+            <label class="block text-sm font-medium text-gray-700 mb-3">Add section</label>
+            <div class="flex flex-wrap items-center gap-2">
+                <select id="add-section-type" class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+                        style="min-width: 180px;">
+                    <option value="hero">Hero</option>
+                    <option value="benefits">Benefits</option>
+                    <option value="featured_products">Featured Products</option>
+                    <option value="category_grid">Category Grid</option>
+                    <option value="testimonials">Testimonials</option>
+                    <option value="newsletter">Newsletter</option>
+                    <option value="rich_text">Rich Text</option>
+                </select>
+                <button type="button" id="add-section-btn" class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors shadow-sm">
+                    <i class="fas fa-plus"></i>
+                    Add section
+                </button>
+            </div>
         </div>
     </div>
     <input type="hidden" id="homepage-sections-data" name="homepage_sections" value="{{ config.homepage.sections|default([])|json_encode }}">

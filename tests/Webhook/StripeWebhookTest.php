@@ -5,14 +5,14 @@ namespace App\Tests\Webhook;
 use App\Entity\Order;
 use App\Entity\Payment;
 use App\Entity\ProcessedWebhookEvent;
-use App\Repository\OrderRepository;
 use App\Repository\PaymentRepository;
 use App\Repository\ProcessedWebhookEventRepository;
 use App\Service\Payment\PaymentService;
 use Doctrine\ORM\EntityManagerInterface;
-use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\User\InMemoryUser;
 use Symfony\Component\Workflow\WorkflowInterface;
 
 class StripeWebhookTest extends KernelTestCase
@@ -26,28 +26,33 @@ class StripeWebhookTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
-        $container = $kernel->getContainer();
+        self::bootKernel();
+        $container = static::getContainer();
         $this->entityManager = $container->get('doctrine')->getManager();
         $this->paymentRepository = $container->get(PaymentRepository::class);
         $this->webhookEventRepository = $container->get(ProcessedWebhookEventRepository::class);
-        $this->orderRepository = $container->get(OrderRepository::class);
-        $this->workflow = $container->get('workflow.order');
+        $this->workflow = $container->get('state_machine.order');
         $this->paymentService = $container->get(PaymentService::class);
+
+        $token = new UsernamePasswordToken(
+            new InMemoryUser('stripe_webhook_test', '', ['ROLE_ADMIN']),
+            'main',
+            ['ROLE_ADMIN']
+        );
+        $container->get(TokenStorageInterface::class)->setToken($token);
     }
 
     public function testWebhookIdempotency(): void
     {
         $order = $this->createTestOrder();
-        $payment = $this->createTestPayment($order, 'pi_test_123');
+        $this->createTestPayment($order, $this->uniquePaymentIntentId('pi_idem'));
 
-        $eventId = 'evt_test_123';
+        $eventId = 'evt_test_' . bin2hex(random_bytes(6));
         $processedEvent = new ProcessedWebhookEvent();
         $processedEvent->setEventId($eventId);
         $this->entityManager->persist($processedEvent);
         $this->entityManager->flush();
 
-        // Verify event is marked as processed
         $found = $this->webhookEventRepository->findOneByEventId($eventId);
         $this->assertNotNull($found);
         $this->assertEquals($eventId, $found->getEventId());
@@ -59,21 +64,19 @@ class StripeWebhookTest extends KernelTestCase
         $order->setStatus('payment_pending');
         $this->entityManager->flush();
 
-        $payment = $this->createTestPayment($order, 'pi_test_success');
+        $intentId = $this->uniquePaymentIntentId('pi_success');
+        $payment = $this->createTestPayment($order, $intentId);
         $this->assertEquals('pending', $payment->getStatus());
 
-        // Simulate webhook success
-        $this->paymentService->handlePaymentSuccess('pi_test_success');
+        $this->paymentService->handlePaymentSuccess($intentId);
         $this->entityManager->refresh($payment);
 
         $this->assertEquals('succeeded', $payment->getStatus());
 
-        // Verify order can transition to paid
-        if ($this->workflow->can($order, 'confirm_payment')) {
-            $this->workflow->apply($order, 'confirm_payment');
-            $this->entityManager->flush();
-            $this->assertEquals('paid', $order->getStatus());
-        }
+        $this->assertTrue($this->workflow->can($order, 'confirm_payment'));
+        $this->workflow->apply($order, 'confirm_payment');
+        $this->entityManager->flush();
+        $this->assertEquals('paid', $order->getStatus());
     }
 
     public function testPaymentFailureWebhook(): void
@@ -82,60 +85,43 @@ class StripeWebhookTest extends KernelTestCase
         $order->setStatus('payment_pending');
         $this->entityManager->flush();
 
-        $payment = $this->createTestPayment($order, 'pi_test_failure');
+        $intentId = $this->uniquePaymentIntentId('pi_failure');
+        $payment = $this->createTestPayment($order, $intentId);
         $this->assertEquals('pending', $payment->getStatus());
 
-        // Simulate webhook failure
-        $this->paymentService->handlePaymentFailure('pi_test_failure');
+        $this->paymentService->handlePaymentFailure($intentId);
         $this->entityManager->refresh($payment);
 
         $this->assertEquals('failed', $payment->getStatus());
 
-        // Verify order can be cancelled
-        if ($this->workflow->can($order, 'cancel')) {
-            $this->workflow->apply($order, 'cancel');
-            $this->entityManager->flush();
-            $this->assertEquals('cancelled', $order->getStatus());
-        }
+        $this->assertTrue($this->workflow->can($order, 'cancel'));
+        $this->workflow->apply($order, 'cancel');
+        $this->entityManager->flush();
+        $this->assertEquals('cancelled', $order->getStatus());
     }
 
     public function testPaymentIntentCreation(): void
     {
         $order = $this->createTestOrder();
-        $order->setGrandTotal(5000); // €50.00
+        $order->setGrandTotal(5000);
         $order->setCurrency('EUR');
         $this->entityManager->flush();
 
-        // Mock Stripe client
-        $stripeClient = $this->createMock(\Stripe\StripeClient::class);
-        $paymentIntents = $this->createMock(\Stripe\Service\PaymentIntentService::class);
+        $result = $this->paymentService->createPaymentIntent($order, 'dev');
 
-        $paymentIntent = new \stdClass();
-        $paymentIntent->id = 'pi_test_123';
-        $paymentIntent->client_secret = 'pi_test_123_secret_test';
+        $this->assertStringStartsWith('dev_', $result['paymentIntentId']);
+        $this->assertSame('', $result['clientSecret']);
 
-        $paymentIntents->method('create')->willReturn($paymentIntent);
-
-        $stripeClient->paymentIntents = $paymentIntents;
-
-        // Create payment service with mocked client
-        $paymentService = new PaymentService(
-            $stripeClient,
-            $this->entityManager,
-            $this->paymentRepository
-        );
-
-        $result = $paymentService->createPaymentIntent($order);
-
-        $this->assertEquals('pi_test_123', $result['paymentIntentId']);
-        $this->assertEquals('pi_test_123_secret_test', $result['clientSecret']);
-
-        // Verify payment was created
-        $payment = $this->paymentRepository->findOneByPaymentIntentId('pi_test_123');
+        $payment = $this->paymentRepository->findOneByPaymentIntentId($result['paymentIntentId']);
         $this->assertNotNull($payment);
         $this->assertEquals($order->getId(), $payment->getOrder()->getId());
         $this->assertEquals('pending', $payment->getStatus());
         $this->assertEquals(5000, $payment->getAmount());
+    }
+
+    private function uniquePaymentIntentId(string $prefix): string
+    {
+        return $prefix . '_' . bin2hex(random_bytes(8));
     }
 
     private function createTestOrder(): Order
@@ -171,4 +157,3 @@ class StripeWebhookTest extends KernelTestCase
         return $payment;
     }
 }
-

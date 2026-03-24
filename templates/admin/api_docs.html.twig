@@ -1,0 +1,64 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}API Documentation{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui.css" />
+    <style>
+        .swagger-ui .topbar { display: none; }
+        #swagger-ui { padding: 0; }
+        .swagger-ui .scheme-container { box-shadow: none; }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">SymfoShop API Documentation</h2>
+            <p class="text-sm text-gray-600 mt-1">Interactive OpenAPI docs for the public REST API.</p>
+        </div>
+        <a href="{{ path('api_docs') }}" target="_blank"
+           class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+            <i class="fas fa-external-link-alt text-gray-500"></i>
+            Open full page
+        </a>
+    </div>
+
+    <div id="swagger-ui" class="bg-white rounded-xl border border-gray-200 shadow-sm p-4"></div>
+</div>
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            const spec = {{ openApiSpec|raw }};
+
+            window.ui = SwaggerUIBundle({
+                spec: spec,
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "BaseLayout",
+                tryItOutEnabled: true,
+                supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+                persistAuthorization: true,
+                filter: true,
+                docExpansion: 'list',
+                defaultModelsExpandDepth: 1,
+                defaultModelExpandDepth: 1
+            });
+        };
+    </script>
+{% endblock %}
+{% endblock %}
+

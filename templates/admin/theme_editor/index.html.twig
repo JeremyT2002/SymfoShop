@@ -2,89 +2,141 @@
 
 {% block page_title %}Theme Editor{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .theme-editor-tabs { scrollbar-width: thin; }
+        .theme-editor-tabs::-webkit-scrollbar { height: 6px; }
+        .theme-editor-tabs::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+        .theme-editor-tabs::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .theme-tab { transition: all 0.15s ease; }
+        .theme-tab:hover { color: #1e40af; }
+        .section-card { transition: box-shadow 0.2s, border-color 0.2s; }
+        .section-card:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .section-card:has(.section-enabled:not(:checked)) { opacity: 0.7; }
+    </style>
+{% endblock %}
+
 {% block body %}
 <div class="space-y-6" data-js="theme-editor">
-    <div class="flex flex-wrap items-center justify-between gap-4">
-        <div>
-            <h2 class="text-lg font-semibold text-gray-900">Theme: {{ theme.name }}</h2>
-            <p class="text-sm text-gray-500">Status: {{ theme.status }} | Version: {{ theme.version }}</p>
-        </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ path('catalog_home') }}?theme_preview=1" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                <i class="fas fa-external-link-alt"></i> Preview
-            </a>
-            <form method="post" action="{{ path('admin_theme_import') }}" enctype="multipart/form-data" class="inline">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_theme_import') }}">
-                <input type="file" name="config_file" accept=".json" class="text-sm">
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                    <i class="fas fa-upload"></i> Import
-                </button>
-            </form>
-            <form method="get" action="{{ path('admin_theme_export') }}" class="inline">
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                    <i class="fas fa-download"></i> Export
-                </button>
-            </form>
-            <form method="post" action="{{ path('admin_theme_reset') }}" class="inline theme-reset-form" onsubmit="return confirm('Reset theme to default?');">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_theme_reset') }}">
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50">
-                    <i class="fas fa-undo"></i> Reset
-                </button>
-            </form>
-            <form method="post" action="{{ path('admin_theme_save') }}" class="inline theme-save-form">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_theme_save') }}">
-                <input type="hidden" name="config" id="theme-config-input" value="{{ config|json_encode|e('html_attr') }}">
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-                    <i class="fas fa-save"></i> Save draft
-                </button>
-            </form>
-            <form method="post" action="{{ path('admin_theme_publish') }}" class="inline theme-publish-form" onsubmit="return confirm('Publish theme? Storefront will use this configuration.');">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_theme_publish') }}">
-                <input type="hidden" name="config" id="theme-config-publish" value="{{ config|json_encode|e('html_attr') }}">
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
-                    <i class="fas fa-check"></i> Publish
-                </button>
-            </form>
+    {# Sticky toolbar #}
+    <div class="sticky top-0 z-10 -mx-6 -mt-6 px-6 pt-6 pb-4 bg-gray-50 border-b border-gray-200 mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900">Theme: {{ theme.name }}</h2>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ theme.status == 'published' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">
+                            {{ theme.status == 'published' ? 'Published' : 'Draft' }}
+                        </span>
+                        <span class="text-sm text-gray-500">v{{ theme.version }}</span>
+                    </div>
+                </div>
+                <div class="h-8 w-px bg-gray-200 hidden sm:block"></div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ path('catalog_home') }}?theme_preview=1" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm">
+                        <i class="fas fa-external-link-alt text-gray-500"></i>
+                        Preview
+                    </a>
+                    <div class="flex items-center gap-1">
+                        <form method="post" action="{{ path('admin_theme_import') }}" enctype="multipart/form-data" class="inline">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_theme_import') }}">
+                            <label class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors shadow-sm">
+                                <i class="fas fa-upload text-gray-500"></i>
+                                Import
+                                <input type="file" name="config_file" accept=".json" class="sr-only" onchange="this.form.submit()">
+                            </label>
+                        </form>
+                        <form method="get" action="{{ path('admin_theme_export') }}" class="inline">
+                            <button type="submit" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+                                <i class="fas fa-download text-gray-500"></i>
+                                Export
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <form method="post" action="{{ path('admin_theme_reset') }}" class="inline theme-reset-form" onsubmit="return confirm('Reset theme to default? All unsaved changes will be lost.');">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_theme_reset') }}">
+                    <button type="submit" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-red-600 hover:border-red-200 transition-colors">
+                        <i class="fas fa-undo"></i>
+                        Reset
+                    </button>
+                </form>
+                <form method="post" action="{{ path('admin_theme_save') }}" class="inline theme-save-form">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_theme_save') }}">
+                    <input type="hidden" name="config" id="theme-config-input" value="{{ config|json_encode|e('html_attr') }}">
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-md">
+                        <i class="fas fa-save"></i>
+                        Save draft
+                    </button>
+                </form>
+                <form method="post" action="{{ path('admin_theme_publish') }}" class="inline theme-publish-form" onsubmit="return confirm('Publish theme? The storefront will use this configuration immediately.');">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_theme_publish') }}">
+                    <input type="hidden" name="config" id="theme-config-publish" value="{{ config|json_encode|e('html_attr') }}">
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors shadow-md">
+                        <i class="fas fa-check"></i>
+                        Publish
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
-    {# Tabs #}
-    <div class="border-b border-gray-200">
-        <nav class="-mb-px flex gap-6" aria-label="Tabs">
-            <button type="button" data-tab="brand" class="theme-tab py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap border-blue-500 text-blue-600">Brand</button>
-            <button type="button" data-tab="header-footer" class="theme-tab py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Header & Footer</button>
-            <button type="button" data-tab="homepage" class="theme-tab py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Homepage</button>
-            <button type="button" data-tab="catalog" class="theme-tab py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Catalog</button>
-            <button type="button" data-tab="product" class="theme-tab py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Product</button>
-            <button type="button" data-tab="components" class="theme-tab py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Components</button>
-            <button type="button" data-tab="custom-css" class="theme-tab py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Custom CSS</button>
-            <button type="button" data-tab="revisions" class="theme-tab py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Revisions</button>
+    {# Tabs - scrollable on mobile #}
+    <div class="border-b border-gray-200 -mx-6 px-6 overflow-x-auto theme-editor-tabs">
+        <nav class="-mb-px flex gap-1 min-w-max" aria-label="Theme sections">
+            <button type="button" data-tab="brand" class="theme-tab py-4 px-3 border-b-2 font-medium text-sm whitespace-nowrap border-blue-500 text-blue-600">
+                <i class="fas fa-palette mr-2 text-current opacity-80"></i>Brand
+            </button>
+            <button type="button" data-tab="header-footer" class="theme-tab py-4 px-3 border-b-2 font-medium text-sm whitespace-nowrap border-transparent text-gray-500">
+                <i class="fas fa-bars mr-2"></i>Header & Footer
+            </button>
+            <button type="button" data-tab="homepage" class="theme-tab py-4 px-3 border-b-2 font-medium text-sm whitespace-nowrap border-transparent text-gray-500">
+                <i class="fas fa-home mr-2"></i>Homepage
+            </button>
+            <button type="button" data-tab="catalog" class="theme-tab py-4 px-3 border-b-2 font-medium text-sm whitespace-nowrap border-transparent text-gray-500">
+                <i class="fas fa-th-large mr-2"></i>Catalog
+            </button>
+            <button type="button" data-tab="product" class="theme-tab py-4 px-3 border-b-2 font-medium text-sm whitespace-nowrap border-transparent text-gray-500">
+                <i class="fas fa-box mr-2"></i>Product
+            </button>
+            <button type="button" data-tab="components" class="theme-tab py-4 px-3 border-b-2 font-medium text-sm whitespace-nowrap border-transparent text-gray-500">
+                <i class="fas fa-puzzle-piece mr-2"></i>Components
+            </button>
+            <button type="button" data-tab="custom-css" class="theme-tab py-4 px-3 border-b-2 font-medium text-sm whitespace-nowrap border-transparent text-gray-500">
+                <i class="fas fa-code mr-2"></i>Custom CSS
+            </button>
+            <button type="button" data-tab="revisions" class="theme-tab py-4 px-3 border-b-2 font-medium text-sm whitespace-nowrap border-transparent text-gray-500">
+                <i class="fas fa-history mr-2"></i>Revisions
+            </button>
         </nav>
     </div>
 
     {# Tab panels #}
-    <div id="tab-brand" class="theme-tab-panel">
+    <div id="tab-brand" class="theme-tab-panel pt-6">
         {% include 'admin/theme_editor/_brand_tab.html.twig' %}
     </div>
-    <div id="tab-header-footer" class="theme-tab-panel hidden">
+    <div id="tab-header-footer" class="theme-tab-panel hidden pt-6">
         {% include 'admin/theme_editor/_header_footer_tab.html.twig' %}
     </div>
-    <div id="tab-homepage" class="theme-tab-panel hidden">
+    <div id="tab-homepage" class="theme-tab-panel hidden pt-6">
         {% include 'admin/theme_editor/_homepage_tab.html.twig' %}
     </div>
-    <div id="tab-catalog" class="theme-tab-panel hidden">
+    <div id="tab-catalog" class="theme-tab-panel hidden pt-6">
         {% include 'admin/theme_editor/_catalog_tab.html.twig' %}
     </div>
-    <div id="tab-product" class="theme-tab-panel hidden">
+    <div id="tab-product" class="theme-tab-panel hidden pt-6">
         {% include 'admin/theme_editor/_product_tab.html.twig' %}
     </div>
-    <div id="tab-components" class="theme-tab-panel hidden">
+    <div id="tab-components" class="theme-tab-panel hidden pt-6">
         {% include 'admin/theme_editor/_components_tab.html.twig' %}
     </div>
-    <div id="tab-custom-css" class="theme-tab-panel hidden">
+    <div id="tab-custom-css" class="theme-tab-panel hidden pt-6">
         {% include 'admin/theme_editor/_custom_css_tab.html.twig' %}
     </div>
-    <div id="tab-revisions" class="theme-tab-panel hidden">
+    <div id="tab-revisions" class="theme-tab-panel hidden pt-6">
         {% include 'admin/theme_editor/_revisions_tab.html.twig' %}
     </div>
 </div>

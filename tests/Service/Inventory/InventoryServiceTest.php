@@ -7,6 +7,7 @@ use App\Entity\OrderItem;
 use App\Entity\OrderReservation;
 use App\Entity\Product;
 use App\Entity\ProductVariant;
+use App\Entity\ProductStatus;
 use App\Entity\StockItem;
 use App\Repository\OrderReservationRepository;
 use App\Repository\StockItemRepository;
@@ -23,9 +24,10 @@ class InventoryServiceTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
-        $this->entityManager = $kernel->getContainer()->get('doctrine')->getManager();
-        $this->inventoryService = $kernel->getContainer()->get(InventoryService::class);
+        self::bootKernel();
+        $container = static::getContainer();
+        $this->entityManager = $container->get('doctrine')->getManager();
+        $this->inventoryService = $container->get(InventoryService::class);
         $this->stockItemRepository = $this->entityManager->getRepository(StockItem::class);
         $this->reservationRepository = $this->entityManager->getRepository(OrderReservation::class);
 
@@ -226,6 +228,34 @@ class InventoryServiceTest extends KernelTestCase
         $this->assertEquals(30, $stockItem2->getReserved());
     }
 
+    public function testReserveFailsWhenSkuUnknown(): void
+    {
+        $order = new Order();
+        $order->setOrderNumber('ORD-UNK-' . uniqid());
+        $order->setEmail('test@example.com');
+        $order->setCurrency('EUR');
+        $order->setStatus('new');
+        $order->setSubtotal(0);
+        $order->setTaxTotal(0);
+        $order->setGrandTotal(0);
+        $this->entityManager->persist($order);
+
+        $item = new OrderItem();
+        $item->setSku('NO-SUCH-SKU-' . uniqid());
+        $item->setNameSnapshot('Ghost');
+        $item->setQuantity(1);
+        $item->setUnitPriceAmount(100);
+        $item->setTaxRate('0.2000');
+        $item->setTotalAmount(100);
+        $order->addItem($item);
+        $this->entityManager->flush();
+
+        $result = $this->inventoryService->reserve($order);
+
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('Variant not found', $result['errors'][0]);
+    }
+
     public function testReserveWithPartialFailure(): void
     {
         $variant1 = $this->createTestVariant('SKU-001');
@@ -277,15 +307,14 @@ class InventoryServiceTest extends KernelTestCase
     {
         $product = new Product();
         $product->setName('Test Product');
-        $product->setSlug('test-product');
-        $product->setStatus('active');
+        $product->setSlug('test-product-' . uniqid('', true));
+        $product->setStatus(ProductStatus::ACTIVE);
         $product->setTaxClass('standard');
         $this->entityManager->persist($product);
 
         $variant = new ProductVariant();
         $variant->setProduct($product);
         $variant->setSku($sku);
-        $variant->setName('Test Variant');
         $variant->setPriceAmount(1000);
         $variant->setCurrency('EUR');
         $this->entityManager->persist($variant);

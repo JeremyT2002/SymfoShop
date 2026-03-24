@@ -9,6 +9,7 @@ use App\Entity\ProductStatus;
 use App\Entity\ProductVariant;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\InMemoryUser;
 use Symfony\Component\Workflow\WorkflowInterface;
@@ -20,10 +21,17 @@ class OrderWorkflowTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
-        $container = $kernel->getContainer();
+        self::bootKernel();
+        $container = static::getContainer();
         $this->entityManager = $container->get('doctrine')->getManager();
-        $this->workflow = $container->get('workflow.order');
+        $this->workflow = $container->get('state_machine.order');
+
+        $token = new UsernamePasswordToken(
+            new InMemoryUser('workflow_test', '', ['ROLE_ADMIN']),
+            'main',
+            ['ROLE_ADMIN']
+        );
+        $container->get(TokenStorageInterface::class)->setToken($token);
     }
 
     public function testInitialStateIsNew(): void
