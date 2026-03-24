@@ -293,10 +293,25 @@ account:
   dashboard:
     page_title: My Account
     title: My Dashboard
-    subtitle: Manage your profile data, orders, and invoices in one place.
+    subtitle: Manage your profile, orders, and invoices in one place.
+    greeting: Hello, %name%!
+    member_since: Member since %date%
+    stats_region: Account summary
+    stats:
+      orders: Orders
+      invoices: Invoices
+      profile: Profile
+    continue_shopping: Continue shopping
     entries: entries
     profile:
-      title: Personal Data
+      title: Personal data
+      section_contact: Contact
+      section_contact_hint: Name, login email, and how we can reach you.
+      section_address: Address & delivery
+      section_address_hint: Used for shipping labels and invoice details.
+      completion_hint: Your profile is about %percent%% complete. Add your address for faster checkout.
+      complete_badge: Profile complete
+      save_footer: Changes are saved when you click the button below.
       first_name: First Name
       last_name: Last Name
       email: Email
@@ -316,6 +331,7 @@ account:
       status: Status
       total: Total
       empty: No orders yet.
+      empty_hint: After you place an order, it will show up here with status and total.
     invoices:
       title: My Invoices
       invoice_number: Invoice No.
@@ -324,6 +340,7 @@ account:
       action: Action
       download_pdf: Download PDF
       empty: No invoices available yet.
+      empty_hint: PDF invoices appear here once they are issued for your orders.
     flash:
       invalid_csrf: Invalid form token. Please try again.
       invalid_email: Please enter a valid email address.

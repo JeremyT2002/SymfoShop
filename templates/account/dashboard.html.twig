@@ -1,222 +1,369 @@
 {% extends 'catalog/base.html.twig' %}
 
+{% set display_name = app.user.fullName|trim is not empty ? app.user.fullName|trim : app.user.email %}
+{% set profile_checklist = [
+    app.user.firstName,
+    app.user.lastName,
+    app.user.phone,
+    app.user.addressLine1,
+    app.user.postalCode,
+    app.user.city,
+    app.user.countryCode
+] %}
+{% set profile_filled = profile_checklist|filter(v => v)|length %}
+{% set profile_pct = profile_checklist|length > 0 ? (profile_filled * 100 / profile_checklist|length)|round : 0 %}
+
+{% set order_status_classes = {
+    'new': 'bg-slate-100 text-slate-800 ring-slate-600/10',
+    'payment_pending': 'bg-amber-50 text-amber-900 ring-amber-600/15',
+    'paid': 'bg-emerald-50 text-emerald-900 ring-emerald-600/15',
+    'processing': 'bg-indigo-50 text-indigo-900 ring-indigo-600/15',
+    'shipped': 'bg-sky-50 text-sky-900 ring-sky-600/15',
+    'completed': 'bg-emerald-50 text-emerald-900 ring-emerald-600/15',
+    'cancelled': 'bg-red-50 text-red-900 ring-red-600/15',
+} %}
+
 {% block page_title %}{{ 'account.dashboard.page_title'|trans }} - {{ theme_config().brand.siteName|default('SymfoShop') }}{% endblock %}
 
 {% block catalog_body %}
-<section class="bg-gray-50 py-10 lg:py-12">
+<section class="bg-gradient-to-b from-gray-50 to-white py-8 sm:py-10 lg:py-12" aria-labelledby="account-dashboard-heading">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="mb-8">
-            <h1 class="text-3xl lg:text-4xl font-bold text-gray-900">{{ 'account.dashboard.title'|trans }}</h1>
-            <p class="mt-2 text-gray-600">{{ 'account.dashboard.subtitle'|trans }}</p>
+        {# Welcome #}
+        <header class="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 text-white shadow-xl shadow-primary-900/20 mb-8 lg:mb-10">
+            <div class="absolute inset-0 opacity-[0.08] pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+            <div class="relative px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center text-2xl sm:text-3xl font-bold text-white border border-white/20 shadow-inner" aria-hidden="true">
+                        {{ display_name|slice(0, 1)|upper }}
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-white/80">{{ 'account.dashboard.member_since'|trans({'%date%': app.user.createdAt|date('d.m.Y')}) }}</p>
+                        <h1 id="account-dashboard-heading" class="mt-1 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
+                            {{ 'account.dashboard.greeting'|trans({'%name%': display_name}) }}
+                        </h1>
+                        <p class="mt-2 text-sm sm:text-base text-white/85 max-w-xl">{{ 'account.dashboard.subtitle'|trans }}</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3 sm:flex-nowrap sm:flex-col sm:items-stretch min-w-[12rem]">
+                    <a href="{{ path('catalog_home') }}"
+                       class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 px-4 py-2.5 text-sm font-semibold text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-800">
+                        <i class="fas fa-store" aria-hidden="true"></i>
+                        {{ 'account.dashboard.continue_shopping'|trans }}
+                    </a>
+                    <a href="{{ path('account_wishlist_show') }}"
+                       class="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-primary-700 hover:bg-gray-50 px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-800">
+                        <i class="fas fa-heart text-red-500" aria-hidden="true"></i>
+                        {{ 'footer.wishlist'|trans }}
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        {# Quick stats #}
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 lg:mb-10" role="region" aria-label="{{ 'account.dashboard.stats_region'|trans }}">
+            <div class="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-50 text-primary-600">
+                        <i class="fas fa-bag-shopping text-lg" aria-hidden="true"></i>
+                    </span>
+                    <div>
+                        <p class="text-2xl font-bold tabular-nums text-gray-900">{{ orders|length }}</p>
+                        <p class="text-sm font-medium text-gray-500">{{ 'account.dashboard.stats.orders'|trans }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                        <i class="fas fa-file-invoice text-lg" aria-hidden="true"></i>
+                    </span>
+                    <div>
+                        <p class="text-2xl font-bold tabular-nums text-gray-900">{{ invoices|length }}</p>
+                        <p class="text-sm font-medium text-gray-500">{{ 'account.dashboard.stats.invoices'|trans }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                        <i class="fas fa-user-check text-lg" aria-hidden="true"></i>
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-2xl font-bold tabular-nums text-gray-900">{{ profile_pct }}%</p>
+                        <p class="text-sm font-medium text-gray-500">{{ 'account.dashboard.stats.profile'|trans }}</p>
+                        <div class="mt-2 h-1.5 w-full rounded-full bg-gray-100 overflow-hidden" role="progressbar" aria-valuenow="{{ profile_pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ 'account.dashboard.stats.profile'|trans }}">
+                            <div class="h-full rounded-full bg-gradient-to-r from-violet-500 to-primary-500 transition-all duration-500" style="width: {{ profile_pct }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
-            <div class="xl:col-span-1">
-                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-5">{{ 'account.dashboard.profile.title'|trans }}</h2>
-
-                    <form method="post" action="{{ path('account_profile_update') }}" class="space-y-4">
-                        <input type="hidden" name="_token" value="{{ csrf_token('account_profile_update') }}">
-
-                        <div>
-                            <label for="profile-firstName" class="block text-sm font-medium text-gray-700 mb-1.5">{{ 'account.dashboard.profile.first_name'|trans }}</label>
-                            <input id="profile-firstName"
-                                   name="firstName"
-                                   type="text"
-                                   value="{{ app.user.firstName|default('') }}"
-                                   class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                   autocomplete="given-name">
-                        </div>
-
-                        <div>
-                            <label for="profile-lastName" class="block text-sm font-medium text-gray-700 mb-1.5">{{ 'account.dashboard.profile.last_name'|trans }}</label>
-                            <input id="profile-lastName"
-                                   name="lastName"
-                                   type="text"
-                                   value="{{ app.user.lastName|default('') }}"
-                                   class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                   autocomplete="family-name">
-                        </div>
-
-                        <div>
-                            <label for="profile-email" class="block text-sm font-medium text-gray-700 mb-1.5">{{ 'account.dashboard.profile.email'|trans }}</label>
-                            <input id="profile-email"
-                                   name="email"
-                                   type="email"
-                                   required
-                                   value="{{ app.user.email }}"
-                                   class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                   autocomplete="email">
-                        </div>
-
-                        <div>
-                            <label for="profile-phone" class="block text-sm font-medium text-gray-700 mb-1.5">{{ 'account.dashboard.profile.phone'|trans }}</label>
-                            <input id="profile-phone"
-                                   name="phone"
-                                   type="text"
-                                   value="{{ app.user.phone|default('') }}"
-                                   class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                   autocomplete="tel">
-                        </div>
-
-                        <div>
-                            <label for="profile-company" class="block text-sm font-medium text-gray-700 mb-1.5">{{ 'account.dashboard.profile.company'|trans }}</label>
-                            <input id="profile-company"
-                                   name="company"
-                                   type="text"
-                                   value="{{ app.user.company|default('') }}"
-                                   class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                   autocomplete="organization">
-                        </div>
-
-                        <div>
-                            <label for="profile-addressLine1" class="block text-sm font-medium text-gray-700 mb-1.5">{{ 'account.dashboard.profile.address_line_1'|trans }}</label>
-                            <input id="profile-addressLine1"
-                                   name="addressLine1"
-                                   type="text"
-                                   value="{{ app.user.addressLine1|default('') }}"
-                                   class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                   autocomplete="address-line1">
-                        </div>
-
-                        <div>
-                            <label for="profile-addressLine2" class="block text-sm font-medium text-gray-700 mb-1.5">{{ 'account.dashboard.profile.address_line_2'|trans }}</label>
-                            <input id="profile-addressLine2"
-                                   name="addressLine2"
-                                   type="text"
-                                   value="{{ app.user.addressLine2|default('') }}"
-                                   class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                   autocomplete="address-line2">
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label for="profile-postalCode" class="block text-sm font-medium text-gray-700 mb-1.5">{{ 'account.dashboard.profile.postal_code'|trans }}</label>
-                                <input id="profile-postalCode"
-                                       name="postalCode"
-                                       type="text"
-                                       value="{{ app.user.postalCode|default('') }}"
-                                       class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                       autocomplete="postal-code">
-                            </div>
-                            <div>
-                                <label for="profile-city" class="block text-sm font-medium text-gray-700 mb-1.5">{{ 'account.dashboard.profile.city'|trans }}</label>
-                                <input id="profile-city"
-                                       name="city"
-                                       type="text"
-                                       value="{{ app.user.city|default('') }}"
-                                       class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                       autocomplete="address-level2">
+        <div class="space-y-8 lg:space-y-10">
+            {# Persönliche Daten oben, volle Breite #}
+            <div class="w-full">
+                <div class="rounded-2xl border border-gray-200/80 bg-white shadow-sm overflow-hidden">
+                        <div class="px-5 sm:px-6 py-5 border-b border-gray-100 bg-gradient-to-br from-gray-50/90 to-white">
+                            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                                <div class="flex items-start gap-3 min-w-0">
+                                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-700 shadow-sm ring-1 ring-primary-600/10">
+                                        <i class="fas fa-id-card text-lg" aria-hidden="true"></i>
+                                    </span>
+                                    <div class="min-w-0">
+                                        <h2 class="text-lg font-semibold text-gray-900 tracking-tight">
+                                            {{ 'account.dashboard.profile.title'|trans }}
+                                        </h2>
+                                        {% if profile_pct < 100 %}
+                                            <p class="mt-1.5 text-sm text-gray-600 leading-relaxed">{{ 'account.dashboard.profile.completion_hint'|trans({'%percent%': profile_pct}) }}</p>
+                                        {% else %}
+                                            <p class="mt-1.5 text-sm text-emerald-700 font-medium inline-flex items-center gap-1.5">
+                                                <i class="fas fa-circle-check" aria-hidden="true"></i>
+                                                {{ 'account.dashboard.profile.complete_badge'|trans }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if profile_pct < 100 %}
+                                    <div class="shrink-0 flex items-center justify-center sm:justify-end" aria-hidden="true">
+                                        <div class="relative h-14 w-14">
+                                            <svg class="h-14 w-14 -rotate-90 text-gray-200" viewBox="0 0 36 36">
+                                                <circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" stroke-width="3"/>
+                                                <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--color-primary-600, #2563eb)" stroke-width="3"
+                                                        stroke-dasharray="97.4" stroke-dashoffset="{{ 97.4 - (97.4 * profile_pct / 100) }}"
+                                                        stroke-linecap="round" class="transition-[stroke-dashoffset] duration-500"/>
+                                            </svg>
+                                            <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-800 tabular-nums">{{ profile_pct }}%</span>
+                                        </div>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label for="profile-state" class="block text-sm font-medium text-gray-700 mb-1.5">{{ 'account.dashboard.profile.state'|trans }}</label>
-                                <input id="profile-state"
-                                       name="state"
-                                       type="text"
-                                       value="{{ app.user.state|default('') }}"
-                                       class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                       autocomplete="address-level1">
-                            </div>
-                            <div>
-                                <label for="profile-countryCode" class="block text-sm font-medium text-gray-700 mb-1.5">{{ 'account.dashboard.profile.country_code'|trans }}</label>
-                                <input id="profile-countryCode"
-                                       name="countryCode"
-                                       type="text"
-                                       maxlength="2"
-                                       placeholder="DE"
-                                       value="{{ app.user.countryCode|default('') }}"
-                                       class="w-full uppercase rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                       autocomplete="country">
-                            </div>
-                        </div>
+                        {% set input_class = 'w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm transition-colors hover:border-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20' %}
 
-                        <button type="submit"
-                                class="w-full inline-flex items-center justify-center rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 transition-colors">
-                            {{ 'account.dashboard.profile.save'|trans }}
-                        </button>
-                    </form>
+                        <form method="post" action="{{ path('account_profile_update') }}" class="flex flex-col">
+                            <input type="hidden" name="_token" value="{{ csrf_token('account_profile_update') }}">
+
+                            <div class="p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 lg:items-stretch">
+                                {# Contact card #}
+                                <section class="rounded-xl border border-gray-200/70 bg-gray-50/50 p-4 sm:p-5 ring-1 ring-gray-900/[0.02] h-full flex flex-col min-w-0" aria-labelledby="profile-section-contact">
+                                    <div class="flex items-center gap-3 pb-4 mb-1 border-b border-gray-200/80">
+                                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-primary-600 shadow-sm ring-1 ring-gray-200/80">
+                                            <i class="fas fa-address-card text-sm" aria-hidden="true"></i>
+                                        </span>
+                                        <div>
+                                            <h3 id="profile-section-contact" class="text-sm font-semibold text-gray-900">
+                                                {{ 'account.dashboard.profile.section_contact'|trans }}
+                                            </h3>
+                                            <p class="text-xs text-gray-500 mt-0.5">{{ 'account.dashboard.profile.section_contact_hint'|trans }}</p>
+                                        </div>
+                                    </div>
+                                    <fieldset class="m-0 min-w-0 space-y-4 border-0 p-0">
+                                        <legend class="sr-only">{{ 'account.dashboard.profile.section_contact'|trans }}</legend>
+                                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            <div class="sm:col-span-1">
+                                                <label for="profile-firstName" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">{{ 'account.dashboard.profile.first_name'|trans }}</label>
+                                                <input id="profile-firstName" name="firstName" type="text" value="{{ app.user.firstName|default('') }}"
+                                                       class="{{ input_class }}" autocomplete="given-name">
+                                            </div>
+                                            <div class="sm:col-span-1">
+                                                <label for="profile-lastName" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">{{ 'account.dashboard.profile.last_name'|trans }}</label>
+                                                <input id="profile-lastName" name="lastName" type="text" value="{{ app.user.lastName|default('') }}"
+                                                       class="{{ input_class }}" autocomplete="family-name">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="profile-email" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">{{ 'account.dashboard.profile.email'|trans }}</label>
+                                            <div class="relative">
+                                                <span class="pointer-events-none absolute inset-y-0 left-0 flex w-10 items-center justify-center text-gray-400">
+                                                    <i class="fas fa-envelope text-xs" aria-hidden="true"></i>
+                                                </span>
+                                                <input id="profile-email" name="email" type="email" required value="{{ app.user.email }}"
+                                                       class="{{ input_class }} pl-10" autocomplete="email">
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <label for="profile-phone" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">{{ 'account.dashboard.profile.phone'|trans }}</label>
+                                                <div class="relative">
+                                                    <span class="pointer-events-none absolute inset-y-0 left-0 flex w-10 items-center justify-center text-gray-400">
+                                                        <i class="fas fa-phone text-xs" aria-hidden="true"></i>
+                                                    </span>
+                                                    <input id="profile-phone" name="phone" type="tel" value="{{ app.user.phone|default('') }}"
+                                                           class="{{ input_class }} pl-10" autocomplete="tel">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label for="profile-company" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">{{ 'account.dashboard.profile.company'|trans }}</label>
+                                                <div class="relative">
+                                                    <span class="pointer-events-none absolute inset-y-0 left-0 flex w-10 items-center justify-center text-gray-400">
+                                                        <i class="fas fa-building text-xs" aria-hidden="true"></i>
+                                                    </span>
+                                                    <input id="profile-company" name="company" type="text" value="{{ app.user.company|default('') }}"
+                                                           class="{{ input_class }} pl-10" autocomplete="organization">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </section>
+
+                                {# Address card #}
+                                <section class="rounded-xl border border-gray-200/70 bg-gray-50/50 p-4 sm:p-5 ring-1 ring-gray-900/[0.02] h-full flex flex-col min-w-0" aria-labelledby="profile-section-address">
+                                    <div class="flex items-center gap-3 pb-4 mb-1 border-b border-gray-200/80">
+                                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-gray-700 shadow-sm ring-1 ring-gray-200/80">
+                                            <i class="fas fa-location-dot text-sm" aria-hidden="true"></i>
+                                        </span>
+                                        <div>
+                                            <h3 id="profile-section-address" class="text-sm font-semibold text-gray-900">
+                                                {{ 'account.dashboard.profile.section_address'|trans }}
+                                            </h3>
+                                            <p class="text-xs text-gray-500 mt-0.5">{{ 'account.dashboard.profile.section_address_hint'|trans }}</p>
+                                        </div>
+                                    </div>
+                                    <fieldset class="m-0 min-w-0 space-y-4 border-0 p-0">
+                                        <legend class="sr-only">{{ 'account.dashboard.profile.section_address'|trans }}</legend>
+                                        <div>
+                                            <label for="profile-addressLine1" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">{{ 'account.dashboard.profile.address_line_1'|trans }}</label>
+                                            <input id="profile-addressLine1" name="addressLine1" type="text" value="{{ app.user.addressLine1|default('') }}"
+                                                   class="{{ input_class }}" autocomplete="address-line1">
+                                        </div>
+                                        <div>
+                                            <label for="profile-addressLine2" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">{{ 'account.dashboard.profile.address_line_2'|trans }}</label>
+                                            <input id="profile-addressLine2" name="addressLine2" type="text" value="{{ app.user.addressLine2|default('') }}"
+                                                   class="{{ input_class }}" autocomplete="address-line2">
+                                        </div>
+                                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-12">
+                                            <div class="sm:col-span-4">
+                                                <label for="profile-postalCode" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">{{ 'account.dashboard.profile.postal_code'|trans }}</label>
+                                                <input id="profile-postalCode" name="postalCode" type="text" value="{{ app.user.postalCode|default('') }}"
+                                                       class="{{ input_class }}" autocomplete="postal-code">
+                                            </div>
+                                            <div class="sm:col-span-8">
+                                                <label for="profile-city" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">{{ 'account.dashboard.profile.city'|trans }}</label>
+                                                <input id="profile-city" name="city" type="text" value="{{ app.user.city|default('') }}"
+                                                       class="{{ input_class }}" autocomplete="address-level2">
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <label for="profile-state" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">{{ 'account.dashboard.profile.state'|trans }}</label>
+                                                <input id="profile-state" name="state" type="text" value="{{ app.user.state|default('') }}"
+                                                       class="{{ input_class }}" autocomplete="address-level1">
+                                            </div>
+                                            <div>
+                                                <label for="profile-countryCode" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">{{ 'account.dashboard.profile.country_code'|trans }}</label>
+                                                <input id="profile-countryCode" name="countryCode" type="text" maxlength="2" placeholder="DE"
+                                                       value="{{ app.user.countryCode|default('') }}"
+                                                       class="{{ input_class }} uppercase" autocomplete="country">
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </section>
+                            </div>
+
+                            <div class="border-t border-gray-200/80 bg-gray-50/70 px-5 sm:px-6 py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <p class="text-xs text-gray-500 text-center sm:text-left">{{ 'account.dashboard.profile.save_footer'|trans }}</p>
+                                <button type="submit"
+                                        class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-5 py-3 text-sm font-semibold text-white hover:bg-primary-700 shadow-md shadow-primary-600/20 hover:shadow-lg hover:shadow-primary-600/25 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                                    <i class="fas fa-check" aria-hidden="true"></i>
+                                    {{ 'account.dashboard.profile.save'|trans }}
+                                </button>
+                            </div>
+                        </form>
                 </div>
             </div>
 
-            <div class="xl:col-span-2 space-y-6">
-                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                        <h2 class="text-xl font-semibold text-gray-900">{{ 'account.dashboard.orders.title'|trans }}</h2>
-                        <span class="text-sm text-gray-500">{{ orders|length }} {{ 'account.dashboard.entries'|trans }}</span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase">{{ 'account.dashboard.orders.order_number'|trans }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase">{{ 'account.dashboard.orders.date'|trans }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase">{{ 'account.dashboard.orders.status'|trans }}</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase">{{ 'account.dashboard.orders.total'|trans }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100 bg-white">
+            {# Bestellungen & Rechnungen darunter, nebeneinander ab lg #}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
+                <div class="min-w-0 flex flex-col">
+                    <section class="rounded-2xl border border-gray-200/80 bg-white shadow-sm overflow-hidden h-full flex flex-col" aria-labelledby="orders-heading">
+                        <div class="px-5 sm:px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-gray-50/50 shrink-0">
+                            <h2 id="orders-heading" class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <i class="fas fa-receipt text-primary-600" aria-hidden="true"></i>
+                                {{ 'account.dashboard.orders.title'|trans }}
+                            </h2>
+                            <span class="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-600 ring-1 ring-gray-200">
+                                {{ orders|length }} {{ 'account.dashboard.entries'|trans }}
+                            </span>
+                        </div>
+
+                        {% if orders is empty %}
+                            <div class="px-5 sm:px-6 py-12 sm:py-16 text-center flex-1 flex flex-col justify-center">
+                                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 text-gray-400 mb-4">
+                                    <i class="fas fa-cart-shopping text-2xl" aria-hidden="true"></i>
+                                </div>
+                                <p class="text-gray-900 font-medium">{{ 'account.dashboard.orders.empty'|trans }}</p>
+                                <p class="mt-2 text-sm text-gray-500 max-w-sm mx-auto">{{ 'account.dashboard.orders.empty_hint'|trans }}</p>
+                                <a href="{{ path('catalog_home') }}" class="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 transition-colors">
+                                    {{ 'account.dashboard.continue_shopping'|trans }}
+                                </a>
+                            </div>
+                        {% else %}
+                            {# Listenlayout für alle Viewports — vermeidet horizontales Scrollen in schmalen Spalten #}
+                            <ul class="divide-y divide-gray-100 flex-1 min-w-0" role="list">
                                 {% for order in orders %}
-                                    <tr class="hover:bg-gray-50 transition-colors">
-                                        <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ order.orderNumber }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600">{{ order.createdAt|date('d.m.Y H:i') }}</td>
-                                        <td class="px-6 py-4">
-                                            <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">{{ order.status|replace({'_': ' '})|title }}</span>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm font-semibold text-gray-900 text-right">{{ (order.grandTotal / 100)|number_format(2, '.', ',') }} {{ order.currency }}</td>
-                                    </tr>
-                                {% else %}
-                                    <tr>
-                                        <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">{{ 'account.dashboard.orders.empty'|trans }}</td>
-                                    </tr>
+                                    <li class="px-4 sm:px-5 py-4 min-w-0 hover:bg-gray-50/60 transition-colors">
+                                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between min-w-0">
+                                            <div class="min-w-0 flex-1 space-y-2">
+                                                <p class="font-semibold text-gray-900 break-words">{{ order.orderNumber }}</p>
+                                                <p class="text-sm text-gray-500">{{ order.createdAt|date('d.m.Y · H:i') }}</p>
+                                                <span class="inline-flex max-w-full items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset {{ order_status_classes[order.status]|default('bg-gray-100 text-gray-800 ring-gray-600/10') }}">
+                                                    <span class="truncate">{{ ('admin.orders.status.' ~ order.status)|trans }}</span>
+                                                </span>
+                                            </div>
+                                            <p class="text-base sm:text-sm font-bold text-gray-900 tabular-nums shrink-0 sm:pt-0.5 sm:text-right">{{ (order.grandTotal / 100)|number_format(2, '.', ',') }} {{ order.currency }}</p>
+                                        </div>
+                                    </li>
                                 {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                            </ul>
+                        {% endif %}
+                    </section>
                 </div>
 
-                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                        <h2 class="text-xl font-semibold text-gray-900">{{ 'account.dashboard.invoices.title'|trans }}</h2>
-                        <span class="text-sm text-gray-500">{{ invoices|length }} {{ 'account.dashboard.entries'|trans }}</span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase">{{ 'account.dashboard.invoices.invoice_number'|trans }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase">{{ 'account.dashboard.invoices.order_number'|trans }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase">{{ 'account.dashboard.invoices.date'|trans }}</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase">{{ 'account.dashboard.invoices.action'|trans }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100 bg-white">
+                <div class="min-w-0 flex flex-col">
+                    <section class="rounded-2xl border border-gray-200/80 bg-white shadow-sm overflow-hidden h-full flex flex-col" aria-labelledby="invoices-heading">
+                        <div class="px-5 sm:px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-gray-50/50 shrink-0">
+                            <h2 id="invoices-heading" class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <i class="fas fa-file-pdf text-emerald-600" aria-hidden="true"></i>
+                                {{ 'account.dashboard.invoices.title'|trans }}
+                            </h2>
+                            <span class="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-600 ring-1 ring-gray-200">
+                                {{ invoices|length }} {{ 'account.dashboard.entries'|trans }}
+                            </span>
+                        </div>
+
+                        {% if invoices is empty %}
+                            <div class="px-5 sm:px-6 py-12 sm:py-16 text-center flex-1 flex flex-col justify-center">
+                                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 text-gray-400 mb-4">
+                                    <i class="fas fa-file-lines text-2xl" aria-hidden="true"></i>
+                                </div>
+                                <p class="text-gray-900 font-medium">{{ 'account.dashboard.invoices.empty'|trans }}</p>
+                                <p class="mt-2 text-sm text-gray-500 max-w-sm mx-auto">{{ 'account.dashboard.invoices.empty_hint'|trans }}</p>
+                            </div>
+                        {% else %}
+                            <ul class="divide-y divide-gray-100 flex-1 min-w-0" role="list">
                                 {% for invoice in invoices %}
-                                    <tr class="hover:bg-gray-50 transition-colors">
-                                        <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ invoice.invoiceNumber }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600">{{ invoice.order.orderNumber }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600">{{ invoice.createdAt|date('d.m.Y H:i') }}</td>
-                                        <td class="px-6 py-4 text-right">
+                                    <li class="px-4 sm:px-5 py-4 min-w-0 hover:bg-gray-50/60 transition-colors">
+                                        <div class="flex flex-col gap-3 min-w-0">
+                                            <div class="min-w-0 space-y-1">
+                                                <p class="font-semibold text-gray-900 break-words">{{ invoice.invoiceNumber }}</p>
+                                                <p class="text-sm text-gray-500 break-words">{{ 'account.dashboard.invoices.order_number'|trans }}: {{ invoice.order.orderNumber }}</p>
+                                                <p class="text-xs text-gray-400">{{ invoice.createdAt|date('d.m.Y H:i') }}</p>
+                                            </div>
                                             <a href="{{ path('account_invoice_download', {invoiceNumber: invoice.invoiceNumber}) }}"
-                                               class="inline-flex items-center rounded-lg bg-primary-600 px-3 py-2 text-xs font-semibold text-white hover:bg-primary-700 transition-colors">
+                                               class="inline-flex w-full sm:w-auto sm:self-start items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">
+                                                <i class="fas fa-download" aria-hidden="true"></i>
                                                 {{ 'account.dashboard.invoices.download_pdf'|trans }}
                                             </a>
-                                        </td>
-                                    </tr>
-                                {% else %}
-                                    <tr>
-                                        <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">{{ 'account.dashboard.invoices.empty'|trans }}</td>
-                                    </tr>
+                                        </div>
+                                    </li>
                                 {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                            </ul>
+                        {% endif %}
+                    </section>
                 </div>
             </div>
         </div>
     </div>
 </section>
 {% endblock %}
-
