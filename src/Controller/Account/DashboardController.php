@@ -7,6 +7,7 @@ use App\Form\Account\AccountProfileType;
 use App\Repository\InvoiceRepository;
 use App\Repository\OrderRepository;
 use App\Repository\UserRepository;
+use App\Service\Invoice\PdfInvoiceGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -25,7 +26,8 @@ class DashboardController extends AbstractController
         private readonly OrderRepository $orderRepository,
         private readonly InvoiceRepository $invoiceRepository,
         private readonly UserRepository $userRepository,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
+        private readonly PdfInvoiceGenerator $pdfInvoiceGenerator,
     ) {
     }
 
@@ -98,7 +100,7 @@ class DashboardController extends AbstractController
     }
 
     #[Route('/invoice/{invoiceNumber}/download', name: 'invoice_download', methods: ['GET'])]
-    public function downloadInvoice(string $invoiceNumber): Response
+    public function downloadInvoice(string $invoiceNumber, Request $request): Response
     {
         $user = $this->getUser();
         if (!$user instanceof User) {
@@ -114,15 +116,27 @@ class DashboardController extends AbstractController
             throw $this->createNotFoundException('Rechnung nicht gefunden.');
         }
 
-        $pdfPath = $invoice->getPdfPath();
-        if (!$pdfPath || !is_file($pdfPath)) {
-            throw $this->createNotFoundException('Die PDF-Datei konnte nicht gefunden werden.');
+        $supportedLocales = ['en', 'de', 'fr'];
+        $selectedLocale = (string) $request->query->get('lang', $request->getLocale());
+        if (!in_array($selectedLocale, $supportedLocales, true)) {
+            $selectedLocale = $request->getLocale();
+        }
+
+        $selectedLocale = in_array($selectedLocale, $supportedLocales, true) ? $selectedLocale : 'en';
+
+        $previousLocale = $request->getLocale();
+        $request->setLocale($selectedLocale);
+
+        try {
+            $pdfPath = $this->pdfInvoiceGenerator->generate($invoice, $invoice->getOrder());
+        } finally {
+            $request->setLocale($previousLocale);
         }
 
         $response = new BinaryFileResponse($pdfPath);
         $response->setContentDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-            'invoice_' . $invoice->getInvoiceNumber() . '.pdf'
+            'invoice_' . $invoice->getInvoiceNumber() . '_' . $selectedLocale . '.pdf'
         );
 
         return $response;

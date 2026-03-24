@@ -100,9 +100,28 @@
             </div>
         </div>
 
-        <div class="space-y-8 lg:space-y-10">
+        <div class="space-y-8 lg:space-y-10" data-dashboard-tabs data-dashboard-tab-default="profile">
+            <div class="rounded-2xl border border-gray-200/80 bg-white p-2 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" role="tablist" aria-label="{{ 'account.dashboard.tabs.aria_label'|trans }}">
+                    <button type="button" role="tab" aria-selected="true" data-dashboard-tab-button="profile"
+                            class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400">
+                        <i class="fas fa-id-card" aria-hidden="true"></i>
+                        {{ 'account.dashboard.tabs.profile'|trans }}
+                    </button>
+                    <button type="button" role="tab" aria-selected="false" data-dashboard-tab-button="orders"
+                            class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                        <i class="fas fa-receipt" aria-hidden="true"></i>
+                        {{ 'account.dashboard.tabs.orders'|trans }}
+                    </button>
+                    <button type="button" role="tab" aria-selected="false" data-dashboard-tab-button="invoices"
+                            class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                        <i class="fas fa-file-pdf" aria-hidden="true"></i>
+                        {{ 'account.dashboard.tabs.invoices'|trans }}
+                    </button>
+                </div>
+            </div>
             {# Persönliche Daten oben, volle Breite #}
-            <div class="w-full">
+            <div class="w-full" role="tabpanel" data-dashboard-tab-panel="profile">
                 <div class="rounded-2xl border border-gray-200/80 bg-white shadow-sm overflow-hidden">
                         <div class="px-5 sm:px-6 py-5 border-b border-gray-100 bg-gradient-to-br from-gray-50/90 to-white">
                             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -294,8 +313,8 @@
             </div>
 
             {# Bestellungen & Rechnungen darunter, nebeneinander ab lg #}
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
-                <div class="min-w-0 flex flex-col">
+            <div class="space-y-8 lg:space-y-10">
+                <div class="min-w-0" role="tabpanel" data-dashboard-tab-panel="orders" hidden>
                     <section class="rounded-2xl border border-gray-200/80 bg-white shadow-sm overflow-hidden h-full flex flex-col" aria-labelledby="orders-heading">
                         <div class="px-5 sm:px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-gray-50/50 shrink-0">
                             <h2 id="orders-heading" class="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -322,7 +341,7 @@
                             {# Listenlayout für alle Viewports — vermeidet horizontales Scrollen in schmalen Spalten #}
                             <ul class="divide-y divide-gray-100 flex-1 min-w-0" role="list">
                                 {% for order in orders %}
-                                    <li class="px-4 sm:px-5 py-4 min-w-0 hover:bg-gray-50/60 transition-colors">
+                                    <li class="px-4 sm:px-5 py-4 min-w-0 hover:bg-gray-50/60 dark:hover:bg-slate-800/50 transition-colors">
                                         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between min-w-0">
                                             <div class="min-w-0 flex-1 space-y-2">
                                                 <p class="font-semibold text-gray-900 break-words">{{ order.orderNumber }}</p>
@@ -340,7 +359,7 @@
                     </section>
                 </div>
 
-                <div class="min-w-0 flex flex-col">
+                <div class="min-w-0" role="tabpanel" data-dashboard-tab-panel="invoices" hidden>
                     <section class="rounded-2xl border border-gray-200/80 bg-white shadow-sm overflow-hidden h-full flex flex-col" aria-labelledby="invoices-heading">
                         <div class="px-5 sm:px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-gray-50/50 shrink-0">
                             <h2 id="invoices-heading" class="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -370,11 +389,22 @@
                                                 <p class="text-sm text-gray-500 break-words">{{ 'account.dashboard.invoices.order_number'|trans }}: {{ invoice.order.orderNumber }}</p>
                                                 <p class="text-xs text-gray-400">{{ invoice.createdAt|date('d.m.Y H:i') }}</p>
                                             </div>
-                                            <a href="{{ path('account_invoice_download', {invoiceNumber: invoice.invoiceNumber}) }}"
-                                               class="inline-flex w-full sm:w-auto sm:self-start items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">
-                                                <i class="fas fa-download" aria-hidden="true"></i>
-                                                {{ 'account.dashboard.invoices.download_pdf'|trans }}
-                                            </a>
+                                            <form method="get" action="{{ path('account_invoice_download', {invoiceNumber: invoice.invoiceNumber}) }}"
+                                                  class="flex w-full sm:w-auto sm:self-start items-stretch gap-2">
+                                                <label for="invoice-lang-{{ invoice.id }}" class="sr-only">{{ 'account.dashboard.invoices.language'|trans }}</label>
+                                                <select id="invoice-lang-{{ invoice.id }}"
+                                                        name="lang"
+                                                        class="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-emerald-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/30">
+                                                    <option value="de" {% if app.request.locale == 'de' %}selected{% endif %}>{{ 'account.dashboard.invoices.lang_de'|trans }}</option>
+                                                    <option value="en" {% if app.request.locale == 'en' %}selected{% endif %}>{{ 'account.dashboard.invoices.lang_en'|trans }}</option>
+                                                    <option value="fr" {% if app.request.locale == 'fr' %}selected{% endif %}>{{ 'account.dashboard.invoices.lang_fr'|trans }}</option>
+                                                </select>
+                                                <button type="submit"
+                                                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400 transition-colors">
+                                                    <i class="fas fa-download" aria-hidden="true"></i>
+                                                    {{ 'account.dashboard.invoices.download_pdf'|trans }}
+                                                </button>
+                                            </form>
                                         </div>
                                     </li>
                                 {% endfor %}
@@ -386,4 +416,35 @@
         </div>
     </div>
 </section>
+<script>
+    (() => {
+        const root = document.querySelector('[data-dashboard-tabs]');
+        if (!root) return;
+        const buttons = Array.from(root.querySelectorAll('[data-dashboard-tab-button]'));
+        const panels = Array.from(root.querySelectorAll('[data-dashboard-tab-panel]'));
+        const defaultTab = root.getAttribute('data-dashboard-tab-default') || 'profile';
+        const inactiveClasses = ['bg-gray-100', 'text-gray-700', 'hover:bg-gray-200', 'dark:bg-slate-800', 'dark:text-slate-200', 'dark:hover:bg-slate-700'];
+        const activeClasses = ['bg-primary-600', 'text-white', 'hover:bg-primary-700', 'dark:bg-primary-500', 'dark:hover:bg-primary-400'];
+
+        const setActiveTab = (tab) => {
+            buttons.forEach((button) => {
+                const active = button.getAttribute('data-dashboard-tab-button') === tab;
+                button.setAttribute('aria-selected', active ? 'true' : 'false');
+                button.classList.remove(...(active ? inactiveClasses : activeClasses));
+                button.classList.add(...(active ? activeClasses : inactiveClasses));
+            });
+            panels.forEach((panel) => {
+                panel.hidden = panel.getAttribute('data-dashboard-tab-panel') !== tab;
+            });
+        };
+
+        buttons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const tab = button.getAttribute('data-dashboard-tab-button');
+                if (tab) setActiveTab(tab);
+            });
+        });
+        setActiveTab(defaultTab);
+    })();
+</script>
 {% endblock %}

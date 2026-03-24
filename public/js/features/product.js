@@ -7,6 +7,10 @@ import { post, parseJson } from '../core/api.js';
 import { updateCartBadge } from '../components/cart-badge.js';
 import { getByDataJs } from '../core/utils.js';
 
+function getMessage(key, fallback) {
+    return document.body?.dataset?.[key] || fallback;
+}
+
 // Get routes from data attributes
 function getCartAddUrl() {
     return document.body.dataset.cartAddUrl || '/cart/add';
@@ -53,12 +57,12 @@ export function init() {
             const originalHTML = button.innerHTML;
             
             if (!variantId || variantId <= 0) {
-                showToast('error', 'Please select a variant');
+                showToast('error', getMessage('msgError', 'Please select a variant'));
                 return;
             }
             
             button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Loading...</span>';
+            button.innerHTML = `<i class="fas fa-spinner fa-spin"></i><span>${getMessage('msgLoading', 'Loading...')}</span>`;
             
             post(getCartAddUrl(), {
                 variantId: variantId,
@@ -67,7 +71,7 @@ export function init() {
             .then(parseJson)
             .then(data => {
                 if (data.success) {
-                    showToast('success', data.message || 'Item added to cart');
+                    showToast('success', data.message || getMessage('msgCartAdded', 'Item added to cart'));
                     if (data.totals?.totalQuantity !== undefined) {
                         updateCartBadge(data.totals.totalQuantity);
                     }
@@ -76,14 +80,14 @@ export function init() {
                         button.innerHTML = originalHTML;
                     }, 1500);
                 } else {
-                    showToast('error', data.message || 'An error occurred');
+                    showToast('error', data.message || getMessage('msgError', 'An error occurred'));
                     button.disabled = false;
                     button.innerHTML = originalHTML;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showToast('error', 'An error occurred while adding to cart');
+                showToast('error', getMessage('msgCartAddError', 'An error occurred while adding to cart'));
                 button.disabled = false;
                 button.innerHTML = originalHTML;
             });

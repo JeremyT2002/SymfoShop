@@ -1,8 +1,9 @@
 {% extends 'catalog/base.html.twig' %}
 
-{% block title %}Payment - SymfoShop{% endblock %}
-{% block meta_description %}Complete your payment{% endblock %}
-{% block js_page %}{% if paymentProvider == 'dev' %}payment-simulator{% else %}payment{% endif %}{% endblock %}
+{% block title %}{{ 'checkout.payment_page_title'|trans }} - SymfoShop{% endblock %}
+{% block meta_description %}{{ 'checkout.payment_meta_description'|trans }}{% endblock %}
+{% set is_simulated_provider = paymentProvider in ['dev', 'paypal', 'testbank'] %}
+{% block js_page %}{% if is_simulated_provider %}payment-simulator{% else %}payment{% endif %}{% endblock %}
 
 {% block body %}
     <div class="max-w-xl mx-auto px-4 py-8">
@@ -16,7 +17,7 @@
                 <strong>{{ 'checkout.total'|trans }}:</strong> {{ (order.grandTotal / 100)|number_format(2, '.', ',') }} {{ order.currency|escape }}
             </p>
 
-            {% if paymentProvider == 'dev' %}
+            {% if is_simulated_provider %}
                 <div class="border border-amber-200 rounded-lg p-4 bg-amber-50" data-js-page="payment-simulator" role="region" aria-label="{{ 'checkout.dev_simulator'|trans }}">
                     <h2 class="text-lg font-semibold text-amber-900 mb-2">{{ 'checkout.dev_simulator'|trans }}</h2>
                     <p class="text-sm text-amber-800 mb-4">{{ 'checkout.dev_simulator_hint'|trans }}</p>
@@ -47,7 +48,7 @@
         </div>
     </div>
 
-    {% if paymentProvider != 'dev' %}
+    {% if paymentProvider == 'stripe' %}
         <script src="https://js.stripe.com/v3/"></script>
         <div data-stripe-key="{{ stripePublishableKey|escape }}"
              data-client-secret="{{ clientSecret|escape }}"

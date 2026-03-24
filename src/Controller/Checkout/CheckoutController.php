@@ -8,6 +8,7 @@ use App\Entity\Order;
 use App\Entity\User;
 use App\Form\Checkout\AddressType;
 use App\Form\Checkout\CustomerInfoType;
+use App\Repository\PaymentMethodRepository;
 use App\Service\Cart\CartService;
 use App\Service\Checkout\CheckoutService;
 use App\Service\Inventory\InventoryService;
@@ -32,6 +33,7 @@ class CheckoutController extends AbstractController
         private readonly WorkflowInterface $orderWorkflow,
         private readonly InventoryService $inventoryService,
         private readonly InvoiceService $invoiceService,
+        private readonly PaymentMethodRepository $paymentMethodRepository,
         private readonly LoggerInterface $logger,
         private readonly bool $checkoutSkipPayment = false,
         private readonly string $kernelEnvironment = 'prod'
@@ -44,11 +46,18 @@ class CheckoutController extends AbstractController
         // Validate cart has items
         $validation = $this->checkoutService->validateCart();
         if (!$validation['valid']) {
-            $this->addFlash('error', 'Your cart is empty. Please add items before checkout.');
+            $this->addFlash('error', 'checkout.flash.cart_empty');
             return $this->redirectToRoute('cart_show');
         }
 
         $totals = $this->checkoutService->calculateTotals();
+        $activePaymentMethods = $this->paymentMethodRepository->findActiveOrdered();
+        $paymentMethodCodes = array_map(
+            static fn ($method) => $method->getCode(),
+            $activePaymentMethods
+        );
+        $defaultPaymentMethod = $this->paymentMethodRepository->findDefaultActive();
+        $selectedPaymentMethod = (string) ($request->request->get('payment_method') ?: ($defaultPaymentMethod?->getCode() ?? ''));
 
         $customerInfo = new CustomerInfoDTO('', '', '');
         $shippingAddress = new AddressDTO('', '', '', '');
@@ -86,6 +95,9 @@ class CheckoutController extends AbstractController
 
                 try {
                     $order = $this->checkoutService->createOrder($customerInfo, $shippingAddress);
+                    if ($selectedPaymentMethod !== '' && !in_array($selectedPaymentMethod, $paymentMethodCodes, true)) {
+                        throw new \RuntimeException('checkout.flash.payment_method_unavailable');
+                    }
 
                     if ($this->checkoutSkipPayment && \in_array($this->kernelEnvironment, ['dev', 'test'], true)) {
                         $paymentIntent = $this->paymentService->createPaymentIntent($order, 'dev');
@@ -101,7 +113,7 @@ class CheckoutController extends AbstractController
                         ]);
                     }
 
-                    $paymentIntent = $this->paymentService->createPaymentIntent($order);
+                    $paymentIntent = $this->paymentService->createPaymentIntent($order, $selectedPaymentMethod !== '' ? $selectedPaymentMethod : null);
 
                     if ($this->orderWorkflow->can($order, 'submit_payment')) {
                         $this->orderWorkflow->apply($order, 'submit_payment');
@@ -113,7 +125,7 @@ class CheckoutController extends AbstractController
                         'paymentIntentId' => $paymentIntent['paymentIntentId'],
                     ]);
                 } catch (\Exception $e) {
-                    $this->addFlash('error', 'An error occurred while creating your order: ' . $e->getMessage());
+                    $this->addFlash('error', $e->getMessage());
                 }
             }
         }
@@ -122,6 +134,8 @@ class CheckoutController extends AbstractController
             'customerForm' => $customerForm,
             'addressForm' => $addressForm,
             'totals' => $totals,
+            'paymentMethods' => $activePaymentMethods,
+            'selectedPaymentMethod' => $selectedPaymentMethod,
         ]);
     }
 
@@ -131,17 +145,17 @@ class CheckoutController extends AbstractController
         $order = $this->entityManager->getRepository(Order::class)->find($orderId);
 
         if (!$order) {
-            throw $this->createNotFoundException('Order not found');
+            throw $this->createNotFoundException('checkout.not_found.order');
         }
 
         if ($order->getStatus() !== 'payment_pending') {
-            $this->addFlash('error', 'Order is not in payment pending status');
+            $this->addFlash('error', 'checkout.flash.order_not_pending');
             return $this->redirectToRoute('cart_show');
         }
 
         $payment = $this->paymentService->getPaymentByIntentId($paymentIntentId);
         if (!$payment || $payment->getOrder()->getId() !== $order->getId()) {
-            throw $this->createNotFoundException('Payment not found');
+            throw $this->createNotFoundException('checkout.not_found.payment');
         }
 
         $provider = $this->paymentService->getRegistry()->get($payment->getProvider());

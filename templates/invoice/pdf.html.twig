@@ -194,6 +194,19 @@
 </head>
 <body>
 <div class="page">
+    {% set latestPayment = order.payments|last %}
+    {% set paymentProvider = latestPayment ? latestPayment.provider : null %}
+    {% set paymentMethodLabelMap = {
+        'stripe': 'invoice_pdf.payment_method.stripe'|trans,
+        'paypal': 'invoice_pdf.payment_method.paypal'|trans,
+        'testbank': 'invoice_pdf.payment_method.testbank'|trans,
+        'dev': 'invoice_pdf.payment_method.testbank'|trans
+    } %}
+    {% set paymentMethodLabel = paymentProvider and paymentMethodLabelMap[paymentProvider] is defined
+        ? paymentMethodLabelMap[paymentProvider]
+        : (paymentProvider ? paymentProvider|upper : 'invoice_pdf.payment_method.unavailable'|trans)
+    %}
+
     <div class="hero">
         <table class="hero-inner" cellpadding="0" cellspacing="0">
             <tr>
@@ -203,7 +216,7 @@
                     {% endif %}
                 </td>
                 <td style="vertical-align: middle;">
-                    <p class="hero-title">Rechnung</p>
+                    <p class="hero-title">{{ 'invoice_pdf.title'|trans }}</p>
                     <p class="hero-brand">{{ pdf_brand.site_name }}</p>
                     {% if pdf_brand.tagline %}
                         <p class="hero-tagline">{{ pdf_brand.tagline }}</p>
@@ -218,35 +231,36 @@
             <tr>
                 <td>
                     <div class="panel">
-                        <p class="panel-title">Rechnungsempfänger</p>
-                        <p><strong>E-Mail</strong><br>{{ order.email }}</p>
-                        <p><strong>Bestellnummer</strong><br>{{ order.orderNumber }}</p>
+                        <p class="panel-title">{{ 'invoice_pdf.recipient'|trans }}</p>
+                        <p><strong>{{ 'invoice_pdf.email'|trans }}</strong><br>{{ order.email }}</p>
+                        <p><strong>{{ 'invoice_pdf.order_number'|trans }}</strong><br>{{ order.orderNumber }}</p>
                     </div>
                 </td>
                 <td>
                     <div class="panel">
-                        <p class="panel-title">Rechnungsdaten</p>
+                        <p class="panel-title">{{ 'invoice_pdf.invoice_details'|trans }}</p>
                         <p>
                             <span class="invoice-number-badge">{{ invoice.invoiceNumber }}</span>
                         </p>
-                        <p><strong>Rechnungsdatum</strong><br>{{ invoice.createdAt|date('d.m.Y') }}</p>
-                        <p><strong>Bestelldatum</strong><br>{{ order.createdAt|date('d.m.Y') }}</p>
-                        <p><strong>Währung</strong><br>{{ order.currency }}</p>
+                        <p><strong>{{ 'invoice_pdf.invoice_date'|trans }}</strong><br>{{ invoice.createdAt|date('d.m.Y') }}</p>
+                        <p><strong>{{ 'invoice_pdf.order_date'|trans }}</strong><br>{{ order.createdAt|date('d.m.Y') }}</p>
+                        <p><strong>{{ 'invoice_pdf.currency'|trans }}</strong><br>{{ order.currency }}</p>
+                        <p><strong>{{ 'invoice_pdf.payment_method.label'|trans }}</strong><br>{{ paymentMethodLabel }}</p>
                     </div>
                 </td>
             </tr>
         </table>
 
-        <p class="panel-title" style="margin-bottom: 6px;">Positionen</p>
+        <p class="panel-title" style="margin-bottom: 6px;">{{ 'invoice_pdf.items'|trans }}</p>
         <table class="items">
             <thead>
             <tr>
-                <th>Artikel</th>
-                <th>SKU</th>
-                <th class="text-right">Menge</th>
-                <th class="text-right">Einzelpreis</th>
-                <th class="text-right">MwSt.</th>
-                <th class="text-right">Gesamt</th>
+                <th>{{ 'invoice_pdf.table.item'|trans }}</th>
+                <th>{{ 'invoice_pdf.table.sku'|trans }}</th>
+                <th class="text-right">{{ 'invoice_pdf.table.quantity'|trans }}</th>
+                <th class="text-right">{{ 'invoice_pdf.table.unit_price'|trans }}</th>
+                <th class="text-right">{{ 'invoice_pdf.table.vat'|trans }}</th>
+                <th class="text-right">{{ 'invoice_pdf.table.total'|trans }}</th>
             </tr>
             </thead>
             <tbody>
@@ -269,15 +283,15 @@
                 <td class="totals-box">
                     <table class="totals-inner">
                         <tr>
-                            <td>Zwischensumme</td>
+                            <td>{{ 'invoice_pdf.subtotal'|trans }}</td>
                             <td class="text-right">{{ (order.subtotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
                         </tr>
                         <tr>
-                            <td>inkl. MwSt.</td>
+                            <td>{{ 'invoice_pdf.tax_included'|trans }}</td>
                             <td class="text-right">{{ (order.taxTotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
                         </tr>
                         <tr class="grand">
-                            <td>Gesamtbetrag</td>
+                            <td>{{ 'invoice_pdf.grand_total'|trans }}</td>
                             <td class="text-right">{{ (order.grandTotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
                         </tr>
                     </table>
@@ -287,14 +301,14 @@
     </div>
 
     <div class="thankyou">
-        <strong>Vielen Dank für Ihren Einkauf bei {{ pdf_brand.site_name }}.</strong>
-        Bitte bewahren Sie diese Rechnung für Ihre Unterlagen auf. Bei Fragen zur Bestellung wenden Sie sich an unseren Support.
+        <strong>{{ 'invoice_pdf.thank_you_strong'|trans({'%shop%': pdf_brand.site_name}) }}</strong>
+        {{ 'invoice_pdf.thank_you_text'|trans }}
     </div>
 
     <div class="footer">
         <p><strong>{{ pdf_brand.site_name }}</strong></p>
-        <p>Offizielles Rechnungsdokument · erstellt am {{ "now"|date('d.m.Y, H:i') }}&nbsp;Uhr</p>
-        <p>Alle Beträge in {{ order.currency }} · Steuerausweisung erfolgt gemäß den aufgeführten Steuersätzen pro Position.</p>
+        <p>{{ 'invoice_pdf.footer.generated'|trans({'%datetime%': "now"|date('d.m.Y, H:i')}) }}</p>
+        <p>{{ 'invoice_pdf.footer.tax_note'|trans({'%currency%': order.currency}) }}</p>
     </div>
 </div>
 </body>

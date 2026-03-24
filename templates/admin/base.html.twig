@@ -162,6 +162,10 @@
                         <i class="fas fa-gift w-5"></i>
                         <span>Coupons</span>
                     </a>
+                    <a href="{{ path('admin_payment_methods_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_payment_methods' in app.request.get('_route') %}bg-gray-800{% endif %}">
+                        <i class="fas fa-credit-card w-5"></i>
+                        <span>{{ 'admin.payment_methods.nav'|trans }}</span>
+                    </a>
                 </div>
                 
                 <div class="pt-4">
@@ -239,7 +243,7 @@
                         <div class="mb-4 p-4 rounded-lg {% if label == 'success' %}bg-green-50 text-green-800 border border-green-200{% elseif label == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
                             <div class="flex items-center gap-2">
                                 <i class="fas {% if label == 'success' %}fa-check-circle{% elseif label == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
-                                <span>{{ message }}</span>
+                                <span>{{ message|trans }}</span>
                             </div>
                         </div>
                     {% endfor %}
