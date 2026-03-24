@@ -26,6 +26,20 @@ class OrderRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return list<Order>
+     */
+    public function findByCustomerEmail(string $email, int $limit = 20): array
+    {
+        return $this->createQueryBuilder('o')
+            ->where('o.email = :email')
+            ->setParameter('email', $email)
+            ->orderBy('o.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Get daily order counts and revenue for the last N days.
      * @return array{labels: string[], orderCounts: int[], revenue: int[]}
      */

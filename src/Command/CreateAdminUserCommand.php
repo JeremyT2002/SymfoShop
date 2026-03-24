@@ -32,7 +32,8 @@ class CreateAdminUserCommand extends Command
             ->addOption('email', null, InputOption::VALUE_REQUIRED, 'Email address')
             ->addOption('password', null, InputOption::VALUE_REQUIRED, 'Password')
             ->addOption('first-name', null, InputOption::VALUE_OPTIONAL, 'First name')
-            ->addOption('last-name', null, InputOption::VALUE_OPTIONAL, 'Last name');
+            ->addOption('last-name', null, InputOption::VALUE_OPTIONAL, 'Last name')
+            ->addOption('promote', null, InputOption::VALUE_NONE, 'If user exists, add ROLE_ADMIN instead of failing');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -68,26 +69,40 @@ class CreateAdminUserCommand extends Command
             $lastName = $helper->ask($input, $output, $question);
         }
 
-        // Check if user already exists
         $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+
         if ($existingUser) {
-            $io->error('User with email ' . $email . ' already exists!');
-            return Command::FAILURE;
+            if (!$input->getOption('promote')) {
+                $io->error('User with email ' . $email . ' already exists! Use --promote to add ROLE_ADMIN to this user.');
+                return Command::FAILURE;
+            }
+            $user = $existingUser;
+            $roles = $user->getRoles();
+            if (in_array('ROLE_ADMIN', $roles)) {
+                $io->warning('User already has ROLE_ADMIN.');
+            } else {
+                $user->setRoles(array_unique(array_merge($roles, ['ROLE_ADMIN', 'ROLE_USER'])));
+            }
+            if ($password !== null && $password !== '') {
+                $user->setPassword($this->passwordHasher->hashPassword($user, $password));
+            }
+            $this->entityManager->flush();
+            $io->success('User promoted to admin successfully!');
+        } else {
+            // Create user
+            $user = new User();
+            $user->setEmail($email);
+            $user->setPassword($this->passwordHasher->hashPassword($user, $password));
+            $user->setRoles(['ROLE_ADMIN', 'ROLE_USER']);
+            $user->setFirstName($firstName);
+            $user->setLastName($lastName);
+            $user->setIsActive(true);
+
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+            $io->success('Admin user created successfully!');
         }
 
-        // Create user
-        $user = new User();
-        $user->setEmail($email);
-        $user->setPassword($this->passwordHasher->hashPassword($user, $password));
-        $user->setRoles(['ROLE_ADMIN', 'ROLE_USER']);
-        $user->setFirstName($firstName);
-        $user->setLastName($lastName);
-        $user->setIsActive(true);
-
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        $io->success('Admin user created successfully!');
         $io->table(
             ['Property', 'Value'],
             [

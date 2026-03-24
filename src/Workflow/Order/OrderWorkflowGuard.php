@@ -10,7 +10,9 @@ use Symfony\Component\Workflow\TransitionBlocker;
 class OrderWorkflowGuard
 {
     public function __construct(
-        private readonly AuthorizationCheckerInterface $authorizationChecker
+        private readonly AuthorizationCheckerInterface $authorizationChecker,
+        private readonly bool $checkoutSkipPayment = false,
+        private readonly string $environment = 'prod'
     ) {
     }
 
@@ -30,6 +32,10 @@ class OrderWorkflowGuard
 
     public function guardConfirmPayment(GuardEvent $event): void
     {
+        if ($this->checkoutSkipPayment && \in_array($this->environment, ['dev', 'test'], true)) {
+            return;
+        }
+
         if (!$this->authorizationChecker->isGranted('ROLE_ADMIN')) {
             $event->addTransitionBlocker(new TransitionBlocker(
                 'Only admins can confirm payment',

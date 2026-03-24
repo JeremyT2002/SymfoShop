@@ -94,11 +94,13 @@
                        class="flex items-center space-x-2.5 group focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-lg p-1 -ml-1"
                        aria-label="{{ theme_config().brand.siteName|default('SymfoShop') }} Home">
                         {% if theme_config().brand.logoUrl is defined and theme_config().brand.logoUrl %}
-                        <img src="{{ theme_config().brand.logoUrl }}" alt="{{ theme_config().brand.logoAlt|default('Logo') }}" class="h-9 lg:h-10 w-auto">
+                        <img src="{{ theme_config().brand.logoUrl }}" alt="" class="h-9 lg:h-10 w-auto">
                         {% else %}
-                        <div class="w-9 h-9 lg:w-10 lg:h-10 bg-gradient-to-br from-primary-600 to-primary-700 rounded-xl flex items-center justify-center group-hover:from-primary-700 group-hover:to-primary-800 transition-all duration-200 shadow-md group-hover:shadow-lg">
-                            <i class="fas fa-shopping-bag text-white text-sm lg:text-base"></i>
-                        </div>
+                        <svg class="w-9 h-9 lg:w-10 lg:h-10 text-primary-600 group-hover:text-primary-700 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <path d="M16 10a4 4 0 0 1-8 0"/>
+                        </svg>
                         {% endif %}
                         <span class="text-xl lg:text-2xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
                             {{ theme_config().brand.siteName|default('SymfoShop') }}
@@ -140,6 +142,7 @@
                     {% endif %}
                     
                     <!-- Language Switcher (Desktop) -->
+                    {% if theme_config().header.showLanguageSwitcher|default(true) %}
                     <div class="hidden lg:block relative">
                         <select id="language-switcher" 
                                 class="appearance-none bg-gray-50 border border-gray-300 text-gray-700 rounded-lg px-3 py-2 pr-8 text-sm font-medium hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors cursor-pointer"
@@ -166,7 +169,7 @@
                                 <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shadow-sm">
                                     <i class="fas fa-user text-white text-xs"></i>
                                 </div>
-                                <span class="hidden xl:block max-w-[120px] truncate">{{ app.user.email }}</span>
+                                <span class="hidden xl:block max-w-[120px] truncate">{{ app.user.fullName }}</span>
                                 <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
                             </button>
                             
@@ -187,16 +190,23 @@
                                             <p class="text-xs text-gray-500 mt-0.5">{{ app.user.fullName }}</p>
                                         {% endif %}
                                     </div>
+                                    <a href="{{ path('account_dashboard') }}" 
+                                       class="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">
+                                        <i class="fas fa-user-circle w-5 text-center"></i>
+                                        <span>{{ 'nav.dashboard'|trans }}</span>
+                                    </a>
                                     <a href="{{ path('account_wishlist_show') }}" 
                                        class="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">
                                         <i class="fas fa-heart w-5 text-center"></i>
                                         <span>{{ 'footer.wishlist'|trans }}</span>
                                     </a>
+                                    {% if is_granted('ROLE_ADMIN') %}
                                     <a href="{{ path('admin') }}" 
                                        class="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">
                                         <i class="fas fa-cog w-5 text-center"></i>
                                         <span>{{ 'nav.admin'|trans }}</span>
                                     </a>
+                                    {% endif %}
                                     <div class="border-t border-gray-100 my-1"></div>
                                     <a href="{{ path('logout') }}" 
                                        class="flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
@@ -248,6 +258,11 @@
                         <i class="fas fa-heart w-5 text-center"></i>
                         <span>{{ 'footer.wishlist'|trans }}</span>
                     </a>
+                    <a href="{{ path('account_dashboard') }}" 
+                       class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors {% if app.request.get('_route') starts with 'account_' and app.request.get('_route') != 'account_wishlist_show' %}text-primary-600 bg-primary-50{% endif %}">
+                        <i class="fas fa-user-circle w-5 text-center"></i>
+                        <span>{{ 'nav.dashboard'|trans }}</span>
+                    </a>
                     <a href="{{ path('cart_show') }}" 
                        class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors">
                         <i class="fas fa-shopping-cart w-5 text-center"></i>
@@ -259,11 +274,13 @@
                             </span>
                         {% endif %}
                     </a>
+                    {% if is_granted('ROLE_ADMIN') %}
                     <a href="{{ path('admin') }}" 
                        class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors">
                         <i class="fas fa-cog w-5 text-center"></i>
                         <span>{{ 'nav.admin'|trans }}</span>
                     </a>
+                    {% endif %}
                     <div class="border-t border-gray-200 my-2"></div>
                     <div class="px-4 py-2">
                         <p class="text-sm font-semibold text-gray-900">{{ app.user.email }}</p>
@@ -324,7 +341,7 @@
                 <div class="p-4 rounded-lg {% if label == 'success' %}bg-green-50 text-green-800 border border-green-200{% elseif label == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
                     <div class="flex items-center space-x-2">
                         <i class="fas {% if label == 'success' %}fa-check-circle{% elseif label == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
-                        <span>{{ message }}</span>
+                        <span>{{ message|trans }}</span>
                     </div>
                 </div>
             </div>

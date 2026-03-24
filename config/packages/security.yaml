@@ -30,7 +30,8 @@ security:
             form_login:
                 login_path: login
                 check_path: login
-                default_target_path: admin
+                default_target_path: catalog_home
+                always_use_default_target_path: true
                 enable_csrf: true
             logout:
                 path: logout

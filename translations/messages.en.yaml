@@ -9,6 +9,7 @@ nav:
   login: Login
   register: Register
   logout: Logout
+  dashboard: Dashboard
   admin: Admin
   admin_panel: Admin Panel
   logged_in_as: Logged in as
@@ -162,14 +163,38 @@ category:
     apply: Apply
 
 checkout:
+  page_title: Checkout
+  meta_description: Complete your order
   title: Checkout
   shipping_address: Shipping Address
   payment_method: Payment Method
   order_summary: Order Summary
   place_order: Place Order
   customer_information: Customer Information
+  subtotal: Subtotal
   tax: Tax
   terms_agreement: By placing your order, you agree to our terms and conditions.
+  phone_hint: "Optional: For order updates and delivery notifications"
+  state_hint: "Optional: State or province"
+  fields:
+    first_name: First name
+    last_name: Last name
+    email: Email
+    phone: Phone
+    street: Street
+    city: City
+    postal_code: Postal code
+    country: Country
+    state: State
+  placeholders:
+    first_name: John
+    last_name: Doe
+    email: your@email.com
+    phone: +1 234 567 8900
+    street: 123 Main Street
+    city: New York
+    postal_code: 10001
+    state: NY (optional)
   complete_payment: Complete Payment
   order_number: Order number
   total: Total
@@ -179,7 +204,8 @@ checkout:
   simulate_success: Simulate success
   simulate_failure: Simulate failure
   simulate_pending: Leave pending
-  
+  skip_payment_dev_notice: "Note: CHECKOUT_SKIP_PAYMENT is enabled — payment was auto-completed for local testing only."
+
 security:
   login:
     title: Sign in to your account
@@ -262,6 +288,47 @@ coupon:
   usage_limit: This coupon has reached its usage limit
   per_user_limit: You have reached the usage limit for this coupon
   not_active: This coupon is not active
+
+account:
+  dashboard:
+    page_title: My Account
+    title: My Dashboard
+    subtitle: Manage your profile data, orders, and invoices in one place.
+    entries: entries
+    profile:
+      title: Personal Data
+      first_name: First Name
+      last_name: Last Name
+      email: Email
+      phone: Phone
+      company: Company
+      address_line_1: Address (Line 1)
+      address_line_2: Address (Line 2)
+      postal_code: Postal Code
+      city: City
+      state: State/Region
+      country_code: Country (ISO Code)
+      save: Save Profile
+    orders:
+      title: My Orders
+      order_number: Order No.
+      date: Date
+      status: Status
+      total: Total
+      empty: No orders yet.
+    invoices:
+      title: My Invoices
+      invoice_number: Invoice No.
+      order_number: Order No.
+      date: Date
+      action: Action
+      download_pdf: Download PDF
+      empty: No invoices available yet.
+    flash:
+      invalid_csrf: Invalid form token. Please try again.
+      invalid_email: Please enter a valid email address.
+      email_in_use: This email address is already in use.
+      profile_updated: Your profile data has been updated.
 
 admin:
   dashboard:

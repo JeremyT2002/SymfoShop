@@ -52,6 +52,8 @@ services:
     App\Controller\Checkout\CheckoutController:
         arguments:
             $orderWorkflow: '@state_machine.order'
+            $checkoutSkipPayment: '%env(bool:CHECKOUT_SKIP_PAYMENT)%'
+            $kernelEnvironment: '%kernel.environment%'
 
     App\Controller\Dev\DevPaymentSimulatorController:
         arguments:
@@ -86,6 +88,9 @@ services:
 
     # Workflow guard events
     App\Workflow\Order\OrderWorkflowGuard:
+        arguments:
+            $checkoutSkipPayment: '%env(bool:CHECKOUT_SKIP_PAYMENT)%'
+            $environment: '%kernel.environment%'
         tags:
             - { name: 'kernel.event_listener', event: 'workflow.order.guard.submit_payment', method: guardSubmitPayment }
             - { name: 'kernel.event_listener', event: 'workflow.order.guard.confirm_payment', method: guardConfirmPayment }
