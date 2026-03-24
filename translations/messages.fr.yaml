@@ -487,6 +487,9 @@ account:
       profile_updated: Vos informations de profil ont été mises à jour.
 
 admin:
+  dashboard:
+    title: Tableau de bord
+    no_widgets: Aucun widget configuré. Utilisez « Personnaliser le tableau de bord » pour en ajouter.
   payment_methods:
     nav: Moyens de paiement
     title: Moyens de paiement
@@ -552,6 +555,21 @@ admin:
       created: Mode de livraison créé.
       updated: Mode de livraison mis à jour.
       removed: Mode de livraison supprimé.
+  widgets:
+    kpi_products:
+      title: Total produits
+    kpi_orders:
+      title: Total commandes
+    kpi_users:
+      title: Total utilisateurs
+    recent_orders:
+      title: Commandes récentes
+      order_number: Commande
+      customer: Client
+      total: Total
+      status: Statut
+      actions: Actions
+      empty: Aucune commande trouvée
   orders:
     page_title: Commandes
     heading: Commandes
