@@ -5,6 +5,8 @@ app:
   
 nav:
   home: Startseite
+  theme_enable_dark: Dunkles Design aktivieren
+  theme_enable_light: Helles Design aktivieren
   cart: Warenkorb
   login: Anmelden
   register: Registrieren

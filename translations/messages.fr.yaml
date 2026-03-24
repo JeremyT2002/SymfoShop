@@ -5,6 +5,8 @@ app:
   
 nav:
   home: Accueil
+  theme_enable_dark: Activer le mode sombre
+  theme_enable_light: Activer le mode clair
   cart: Panier
   login: Connexion
   register: S'inscrire

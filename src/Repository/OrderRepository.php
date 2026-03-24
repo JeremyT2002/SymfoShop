@@ -28,6 +28,31 @@ class OrderRepository extends ServiceEntityRepository
     /**
      * @return list<Order>
      */
+    public function findForAdminList(
+        ?string $status,
+        ?string $search,
+        int $limit,
+        int $offset
+    ): array {
+        $qb = $this->createAdminListQueryBuilder($status, $search)
+            ->orderBy('o.createdAt', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function countForAdminList(?string $status, ?string $search): int
+    {
+        $qb = $this->createAdminListQueryBuilder($status, $search)
+            ->select('COUNT(o.id)');
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * @return list<Order>
+     */
     public function findByCustomerEmail(string $email, int $limit = 20): array
     {
         return $this->createQueryBuilder('o')
@@ -93,6 +118,24 @@ class OrderRepository extends ServiceEntityRepository
             'status' => $row['status'] ?? 'unknown',
             'count' => (int) ($row['cnt'] ?? 0),
         ], $result);
+    }
+
+    private function createAdminListQueryBuilder(?string $status, ?string $search): \Doctrine\ORM\QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('o');
+
+        if ($status !== null && $status !== '') {
+            $qb->andWhere('o.status = :status')
+                ->setParameter('status', $status);
+        }
+
+        if ($search !== null && trim($search) !== '') {
+            $term = '%' . mb_strtolower(trim($search)) . '%';
+            $qb->andWhere('LOWER(o.orderNumber) LIKE :term OR LOWER(o.email) LIKE :term')
+                ->setParameter('term', $term);
+        }
+
+        return $qb;
     }
 }
 

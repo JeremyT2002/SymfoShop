@@ -5,12 +5,14 @@
 
 import { init as initMobileMenu } from './components/mobile-menu.js';
 import { init as initLanguageSwitcher } from './components/language-switcher.js';
+import { init as initColorSchemeToggle } from './components/color-scheme-toggle.js';
 import { init as initAddToCart } from './global/add-to-cart.js';
 import { init as initWishlist } from './features/wishlist.js';
 
 // Initialize core components (always loaded)
 initMobileMenu();
 initLanguageSwitcher();
+initColorSchemeToggle();
 initAddToCart();
 initWishlist();
 
