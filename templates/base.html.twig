@@ -512,9 +512,10 @@
                             <div>
                                 <h3 class="font-semibold text-white mb-3">{{ 'footer.support'|trans }}</h3>
                                 <ul class="space-y-2.5 text-sm">
-                                    <li><a href="#" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.contact'|trans }}</a></li>
-                                    <li><a href="#" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.faq'|trans }}</a></li>
+                                    <li><a href="{{ path('contact') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.contact'|trans }}</a></li>
+                                    <li><a href="{{ path('legal_faq') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.faq'|trans }}</a></li>
                                     <li><a href="{{ path('legal_returns') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.returns'|trans }}</a></li>
+                                    <li><a href="{{ path('return_request') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.return_request'|trans }}</a></li>
                                 </ul>
                             </div>
                             <div>
@@ -522,6 +523,7 @@
                                 <ul class="space-y-2.5 text-sm">
                                     <li><a href="{{ path('legal_privacy') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.privacy'|trans }}</a></li>
                                     <li><a href="{{ path('legal_cookies') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.cookies'|trans }}</a></li>
+                                    <li><a href="#" data-open-cookie-preferences class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.cookie_settings'|trans }}</a></li>
                                     <li><a href="{{ path('legal_terms') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.terms'|trans }}</a></li>
                                     <li><a href="{{ path('legal_imprint') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.imprint'|trans }}</a></li>
                                 </ul>

@@ -14,9 +14,14 @@ use App\Service\Cart\CartService;
 use App\Service\Cart\CouponService;
 use App\Service\Inventory\InventoryService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class CheckoutService
 {
+    /** @var list<string> */
+    private const ENABLED_LOCALES = ['en', 'de', 'fr'];
+
     public function __construct(
         private readonly CartService $cartService,
         private readonly CouponService $couponService,
@@ -24,6 +29,9 @@ class CheckoutService
         private readonly OrderRepository $orderRepository,
         private readonly InventoryService $inventoryService,
         private readonly ShippingMethodRepository $shippingMethodRepository,
+        private readonly RequestStack $requestStack,
+        #[Autowire('%kernel.default_locale%')]
+        private readonly string $defaultLocale,
     ) {
     }
 
@@ -190,6 +198,12 @@ class CheckoutService
         $order = new Order();
         $order->setOrderNumber($this->generateOrderNumber());
         $order->setEmail($customerInfo->email);
+        $request = $this->requestStack->getMainRequest();
+        $locale = $request?->getLocale() ?? $this->defaultLocale;
+        if (!\in_array($locale, self::ENABLED_LOCALES, true)) {
+            $locale = $this->defaultLocale;
+        }
+        $order->setLocale($locale);
         $order->setCurrency($totals['currency']);
         $order->setStatus('new');
         $order->setSubtotal($totals['subtotal']);

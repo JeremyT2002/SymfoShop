@@ -52,30 +52,30 @@
 </head>
 <body>
     <div class="header">
-        <h1>Order Confirmation</h1>
+        <h1>{{ 'email.order_confirmation.title'|trans }}</h1>
     </div>
-    
+
     <div class="content">
-        <p>Dear Customer,</p>
-        
-        <p>Thank you for your order! We have received your payment and your order is being processed.</p>
-        
+        <p>{{ 'email.order_confirmation.greeting'|trans }}</p>
+
+        <p>{{ 'email.order_confirmation.intro'|trans }}</p>
+
         <div class="order-info">
-            <h2>Order Details</h2>
-            <p><strong>Order Number:</strong> {{ order.orderNumber }}</p>
-            <p><strong>Invoice Number:</strong> {{ invoice.invoiceNumber }}</p>
-            <p><strong>Order Date:</strong> {{ order.createdAt|date('F j, Y') }}</p>
-            <p><strong>Email:</strong> {{ order.email }}</p>
+            <h2>{{ 'email.order_confirmation.details_heading'|trans }}</h2>
+            <p><strong>{{ 'email.order_confirmation.order_number'|trans }}:</strong> {{ order.orderNumber }}</p>
+            <p><strong>{{ 'email.order_confirmation.invoice_number'|trans }}:</strong> {{ invoice.invoiceNumber }}</p>
+            <p><strong>{{ 'email.order_confirmation.order_date'|trans }}:</strong> {{ order.createdAt|date('Y-m-d') }}</p>
+            <p><strong>{{ 'email.order_confirmation.email_label'|trans }}:</strong> {{ order.email }}</p>
         </div>
-        
-        <h3>Order Items</h3>
+
+        <h3>{{ 'email.order_confirmation.items_heading'|trans }}</h3>
         <table>
             <thead>
                 <tr>
-                    <th>Item</th>
-                    <th>Quantity</th>
-                    <th>Unit Price</th>
-                    <th>Total</th>
+                    <th>{{ 'email.order_confirmation.col_item'|trans }}</th>
+                    <th>{{ 'email.order_confirmation.col_qty'|trans }}</th>
+                    <th>{{ 'email.order_confirmation.col_unit'|trans }}</th>
+                    <th>{{ 'email.order_confirmation.col_total'|trans }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -89,25 +89,24 @@
                 {% endfor %}
             </tbody>
         </table>
-        
+
         <div class="order-info">
-            <p><strong>Subtotal:</strong> {{ (order.subtotal / 100)|number_format(2) }} {{ order.currency }}</p>
-            <p><strong>Tax:</strong> {{ (order.taxTotal / 100)|number_format(2) }} {{ order.currency }}</p>
-            <p><strong>Grand Total:</strong> {{ (order.grandTotal / 100)|number_format(2) }} {{ order.currency }}</p>
+            <p><strong>{{ 'email.order_confirmation.subtotal'|trans }}:</strong> {{ (order.subtotal / 100)|number_format(2) }} {{ order.currency }}</p>
+            <p><strong>{{ 'email.order_confirmation.tax'|trans }}:</strong> {{ (order.taxTotal / 100)|number_format(2) }} {{ order.currency }}</p>
+            <p><strong>{{ 'email.order_confirmation.grand_total'|trans }}:</strong> {{ (order.grandTotal / 100)|number_format(2) }} {{ order.currency }}</p>
         </div>
-        
-        <p>Your invoice is attached to this email for your records.</p>
-        
-        <p>We will notify you once your order has been shipped.</p>
-        
-        <p>If you have any questions, please contact our support team.</p>
-        
-        <p>Best regards,<br>SymfoShop Team</p>
+
+        <p>{{ 'email.order_confirmation.invoice_attached'|trans }}</p>
+
+        <p>{{ 'email.order_confirmation.shipping_notice'|trans }}</p>
+
+        <p>{{ 'email.order_confirmation.support'|trans }}</p>
+
+        <p>{{ 'email.order_confirmation.closing'|trans|nl2br }}</p>
     </div>
-    
+
     <div class="footer">
-        <p>This is an automated email. Please do not reply to this message.</p>
+        <p>{{ 'email.order_confirmation.automated'|trans }}</p>
     </div>
 </body>
 </html>
-

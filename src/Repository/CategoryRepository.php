@@ -56,4 +56,18 @@ class CategoryRepository extends ServiceEntityRepository
 
         return $result;
     }
+
+    /**
+     * @return list<string>
+     */
+    public function findAllSlugsOrdered(): array
+    {
+        $rows = $this->createQueryBuilder('c')
+            ->select('c.slug')
+            ->orderBy('c.name', 'ASC')
+            ->getQuery()
+            ->getScalarResult();
+
+        return array_map(static fn (array $r): string => (string) $r['slug'], $rows);
+    }
 }

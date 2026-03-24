@@ -1,0 +1,4 @@
+# Error tracking when SENTRY_DSN is set in the host environment (see .env.example).
+# Empty DSN disables the Sentry client at runtime.
+sentry:
+    dsn: '%env(SENTRY_DSN)%'

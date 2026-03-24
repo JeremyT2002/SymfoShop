@@ -1,0 +1,41 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}{{ 'admin.return_requests.page_title'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="admin-page-header">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">{{ 'admin.return_requests.heading'|trans }}</h2>
+            <p class="text-gray-600 mt-1">{{ 'admin.return_requests.subtitle'|trans }}</p>
+        </div>
+    </div>
+
+    <div class="admin-card admin-table-wrap">
+        <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead>
+                <tr>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'admin.return_requests.col_date'|trans }}</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'admin.return_requests.col_order'|trans }}</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'admin.return_requests.col_email'|trans }}</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'admin.return_requests.col_status'|trans }}</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'admin.return_requests.col_reason'|trans }}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for r in requests %}
+                    <tr class="align-top">
+                        <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ r.createdAt|date('Y-m-d H:i') }}</td>
+                        <td class="px-4 py-3 font-mono text-xs">{{ r.orderNumber }}</td>
+                        <td class="px-4 py-3">{{ r.email }}</td>
+                        <td class="px-4 py-3">{{ r.status }}</td>
+                        <td class="px-4 py-3 text-gray-700 max-w-md">{{ r.reason|length > 200 ? r.reason|slice(0, 200) ~ '…' : r.reason }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">{{ 'admin.return_requests.empty'|trans }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

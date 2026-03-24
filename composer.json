@@ -12,6 +12,7 @@
         "doctrine/orm": "^3.6",
         "dompdf/dompdf": "^3.1",
         "nelmio/api-doc-bundle": "^5.9",
+        "sentry/sentry-symfony": "^5.9",
         "stripe/stripe-php": "^19.3",
         "symfony/asset": "7.4.*",
         "symfony/console": "7.4.*",

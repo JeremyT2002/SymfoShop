@@ -42,6 +42,8 @@ footer:
   cookies: Cookie-Richtlinie
   imprint: Impressum
   legal_column: Rechtliches
+  return_request: Rücksendeanfrage
+  cookie_settings: Cookie-Einstellungen
 
 common:
   cancel: Abbrechen
@@ -276,7 +278,7 @@ legal:
     h_optional: Optionale Cookies
     p_optional: Nicht notwendige Cookies (z. B. Analyse oder Marketing) sind in der Standard-SymfoShop-Installation nicht aktiv. Wenn Sie solche Tools ergänzen, listen Sie sie hier auf und holen Sie die Einwilligung ein, wo erforderlich.
     h_manage: Ihre Auswahl
-    p_manage: Beim ersten Besuch können Sie im Banner „Alle akzeptieren“ oder „Nur notwendige“ wählen. Sie können Ihre Entscheidung ändern, indem Sie Website-Daten im Browser löschen und die Seite neu laden; das Banner erscheint erneut, bis Sie eine Auswahl speichern.
+    p_manage: Beim ersten Besuch können Sie im Banner „Alle akzeptieren“ oder „Nur notwendige“ wählen. Über den Footer-Link „Cookie-Einstellungen“ können Sie die Auswahl später ändern (oder Website-Daten für diese Seite löschen).
   returns:
     meta_title: Rückgabe und Erstattung
     meta_description: Rückgabefrist, Zustand und Ablauf in diesem Shop.
@@ -290,6 +292,22 @@ legal:
     p_process: Kontaktieren Sie uns mit Ihrer Bestellnummer. Wir teilen die Rücksendeadresse oder stellen ein Label bereit, falls vorgesehen. Senden Sie keine Rücksendungen ohne vorherige Absprache, wenn Ihr Prozess eine RMA erfordert.
     h_refund: Erstattungen
     p_refund: Nach Eingang und Prüfung der Rücksendung erstatten wir den Kaufpreis möglichst über dieselbe Zahlungsmethode innerhalb einer angemessenen Frist. Versandkosten richten sich nach gesetzlichen Vorgaben.
+    cta: mit Ihrer Bestellnummer und der bei der Bestellung verwendeten E-Mail-Adresse.
+    cta_link: Rücksendeanfrage stellen
+  faq:
+    meta_title: Häufig gestellte Fragen
+    meta_description: Antworten zu Bestellung, Versand und SymfoShop.
+    heading: FAQ
+    q1: Wie lange dauert die Lieferung?
+    a1: Die Lieferzeit hängt von der gewählten Versandart und Ihrem Standort ab. Vor der Zahlung sehen Sie voraussichtliche Zeiten.
+    q2: Welche Zahlungsarten gibt es?
+    a2: Verfügbare Methoden werden an der Kasse angezeigt (z. B. Karte über Stripe oder PayPal). In der Entwicklung kann ein Test-Anbieter aktiv sein.
+    q3: Kann ich etwas zurückgeben?
+    a3: Ja — siehe unsere Seite zu Rückgaben. Sie können auch eine Rücksendeanfrage mit Bestellnummer und E-Mail senden.
+    q4: Wie erreiche ich den Support?
+    a4: Nutzen Sie das Kontaktformular im Footer. Wir melden uns in der Regel innerhalb weniger Werktage.
+    q5: Sind meine Daten sicher?
+    a5: Diese Demo nutzt gängige Praktiken. Lesen Sie die Datenschutzerklärung und passen Sie sie für den Produktivbetrieb an.
   terms:
     meta_title: Allgemeine Geschäftsbedingungen
     meta_description: Nutzungs- und Kaufbedingungen dieses Shops.
@@ -570,6 +588,17 @@ admin:
       regenerate_success: '%count% Rechnungs-PDF(s) erfolgreich neu erzeugt.'
       regenerate_partial: '%success% Rechnungs-PDF(s) erfolgreich neu erzeugt, %failed% fehlgeschlagen.'
       status_updated: Bestellstatus wurde aktualisiert.
+  return_requests:
+    nav: Rücksendeanfragen
+    page_title: Rücksendeanfragen
+    heading: Rücksendeanfragen
+    subtitle: Vom Kunden eingereichte Rücksendeformulare (neueste zuerst).
+    col_date: Datum
+    col_order: Bestellnr.
+    col_email: E-Mail
+    col_status: Status
+    col_reason: Grund
+    empty: Noch keine Rücksendeanfragen.
 
 invoice_pdf:
   title: Rechnung
@@ -603,4 +632,60 @@ invoice_pdf:
   footer:
     generated: Offizielles Rechnungsdokument · erstellt am %datetime% Uhr
     tax_note: Alle Beträge in %currency% · Steuerausweisung erfolgt gemäß den aufgeführten Steuersätzen pro Position.
+
+email:
+  order_confirmation:
+    subject: 'Bestellbestätigung - %order_number%'
+    attachment_prefix: rechnung
+    title: Bestellbestätigung
+    greeting: Sehr geehrte Kundin, sehr geehrter Kunde,
+    intro: Vielen Dank für Ihre Bestellung! Wir haben Ihre Zahlung erhalten und bearbeiten Ihre Bestellung.
+    details_heading: Bestelldetails
+    order_number: Bestellnummer
+    invoice_number: Rechnungsnummer
+    order_date: Bestelldatum
+    email_label: E-Mail
+    items_heading: Bestellpositionen
+    col_item: Artikel
+    col_qty: Menge
+    col_unit: Einzelpreis
+    col_total: Gesamt
+    subtotal: Zwischensumme
+    tax: Steuer
+    grand_total: Gesamtsumme
+    invoice_attached: Die Rechnung finden Sie im Anhang dieser E-Mail.
+    shipping_notice: Wir informieren Sie, sobald Ihre Bestellung versendet wurde.
+    support: Bei Fragen wenden Sie sich bitte an unseren Support.
+    closing: "Mit freundlichen Grüßen\nIhr SymfoShop-Team"
+    automated: Diese E-Mail wurde automatisch erstellt. Bitte antworten Sie nicht darauf.
+
+contact:
+  meta_title: Kontakt
+  meta_description: Nachricht an den SymfoShop-Support senden.
+  heading: Kontakt
+  intro: Füllen Sie das Formular aus — wir melden uns so bald wie möglich.
+  submit: Nachricht senden
+  form:
+    name: Ihr Name
+    email: Ihre E-Mail
+    message: Nachricht
+  email:
+    subject: 'Kontaktformular: %name%'
+    body: "Name: %name%\nE-Mail: %email%\n\n%message%"
+  flash:
+    sent: Vielen Dank — Ihre Nachricht wurde gesendet.
+
+return_request:
+  meta_title: Rücksendeanfrage
+  meta_description: Rücksendung mit Bestellnummer und E-Mail anfragen.
+  heading: Rücksendeanfrage
+  intro: Geben Sie die Bestellnummer und die E-Mail Ihrer Bestellung ein und beschreiben Sie den Rücksendewunsch.
+  submit: Anfrage senden
+  form:
+    order_number: Bestellnummer
+    email: E-Mail-Adresse
+    reason: Grund und Details
+  flash:
+    submitted: Ihre Rücksendeanfrage ist eingegangen. Wir prüfen sie in Kürze.
+    order_not_found: Zu dieser Bestellnummer und E-Mail wurde keine Bestellung gefunden. Bitte prüfen Sie Ihre Angaben.
 

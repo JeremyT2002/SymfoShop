@@ -40,4 +40,10 @@ final class LegalController extends AbstractController
     {
         return $this->render('legal/imprint.html.twig');
     }
+
+    #[Route('/faq', name: 'faq', methods: ['GET'])]
+    public function faq(): Response
+    {
+        return $this->render('legal/faq.html.twig');
+    }
 }

@@ -42,6 +42,8 @@ footer:
   cookies: Cookie Policy
   imprint: Legal notice
   legal_column: Legal
+  return_request: Return request
+  cookie_settings: Cookie settings
 
 common:
   cancel: Cancel
@@ -276,7 +278,7 @@ legal:
     h_optional: Optional cookies
     p_optional: Non-essential cookies (e.g. analytics or marketing) are not enabled in the default SymfoShop setup. If you add such tools, list them here and obtain consent where required.
     h_manage: Your choice
-    p_manage: Use the banner on first visit to choose “Accept all” or “Essential only”. You can change your mind by clearing site data in your browser and reloading the page; the banner will appear again until you save a choice.
+    p_manage: Use the banner on first visit to choose “Accept all” or “Essential only”. You can reopen the banner anytime from the footer link “Cookie settings” (or by clearing site data for this site).
   returns:
     meta_title: Returns and refunds
     meta_description: Return period, conditions, and process for this shop.
@@ -290,6 +292,22 @@ legal:
     p_process: Contact us with your order number. We will provide a return address or label where applicable. Do not send returns without prior notice if your process requires an RMA.
     h_refund: Refunds
     p_refund: After we receive and inspect the return, we refund the purchase price using the same payment method where possible, within a reasonable period. Shipping costs may follow statutory rules.
+    cta: use the form below. We will match your order number and email.
+    cta_link: Submit a return request
+  faq:
+    meta_title: Frequently asked questions
+    meta_description: Common questions about ordering, shipping, and SymfoShop.
+    heading: FAQ
+    q1: How long does delivery take?
+    a1: Delivery times depend on the shipping method you choose at checkout and your location. You will see estimated timelines before you pay.
+    q2: Which payment methods are supported?
+    a2: Available methods are shown on the checkout page (for example card payments via Stripe or PayPal). The demo store may use a test provider in development.
+    q3: Can I return an item?
+    a3: Yes — see our returns page for the policy. You can also submit a return request with your order number and email.
+    q4: How do I contact support?
+    a4: Use the contact form linked in the footer. We aim to respond within a few business days.
+    q5: Is my data secure?
+    a5: We use industry-standard practices for this demo application. Read the privacy policy for details and adapt it for production use.
   terms:
     meta_title: Terms of Service
     meta_description: General terms for using this shop.
@@ -618,6 +636,17 @@ admin:
       regenerate_success: '%count% invoice PDF(s) regenerated successfully.'
       regenerate_partial: '%success% invoice PDF(s) regenerated successfully, %failed% failed.'
       status_updated: Order status updated successfully.
+  return_requests:
+    nav: Return requests
+    page_title: Return requests
+    heading: Return requests
+    subtitle: Customer-submitted return forms (latest first).
+    col_date: Date
+    col_order: Order #
+    col_email: Email
+    col_status: Status
+    col_reason: Reason
+    empty: No return requests yet.
 
 invoice_pdf:
   title: Invoice
@@ -652,3 +681,58 @@ invoice_pdf:
     generated: Official invoice document · generated on %datetime%
     tax_note: All amounts in %currency% · Taxes are shown according to the listed tax rates per line item.
 
+email:
+  order_confirmation:
+    subject: 'Order confirmation - %order%'
+    attachment_prefix: invoice
+    title: Order confirmation
+    greeting: Dear customer,
+    intro: Thank you for your order! We have received your payment and your order is being processed.
+    details_heading: Order details
+    order_number: Order number
+    invoice_number: Invoice number
+    order_date: Order date
+    email_label: Email
+    items_heading: Order items
+    col_item: Item
+    col_qty: Quantity
+    col_unit: Unit price
+    col_total: Total
+    subtotal: Subtotal
+    tax: Tax
+    grand_total: Grand total
+    invoice_attached: Your invoice is attached to this email for your records.
+    shipping_notice: We will notify you once your order has been shipped.
+    support: If you have any questions, please contact our support team.
+    closing: "Best regards,\nSymfoShop team"
+    automated: This is an automated email. Please do not reply to this message.
+
+contact:
+  meta_title: Contact
+  meta_description: Send a message to SymfoShop support.
+  heading: Contact us
+  intro: Fill in the form and we will get back to you as soon as possible.
+  submit: Send message
+  form:
+    name: Your name
+    email: Your email
+    message: Message
+  email:
+    subject: 'Contact form: %name%'
+    body: "Name: %name%\nEmail: %email%\n\n%message%"
+  flash:
+    sent: Thank you — your message has been sent.
+
+return_request:
+  meta_title: Return request
+  meta_description: Request a return using your order number and email.
+  heading: Return request
+  intro: Enter the order number and email from your purchase, and describe what you would like to return.
+  submit: Submit request
+  form:
+    order_number: Order number
+    email: Email address
+    reason: Reason and details
+  flash:
+    submitted: Your return request has been received. We will review it shortly.
+    order_not_found: We could not find an order with that number and email. Please check your details.
