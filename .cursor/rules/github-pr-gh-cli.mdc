@@ -1,0 +1,22 @@
+---
+description: Use GitHub CLI (gh) to create pull requests when the user asks
+alwaysApply: true
+---
+
+# Pull requests: GitHub CLI
+
+When the user asks to **create**, **open**, or **submit** a pull request (or similar: „PR erstellen“, „mach einen PR“):
+
+1. **Use `gh`** from the repository root — do not only paste a compare-URL unless `gh` is unavailable or auth fails.
+2. **Typical command:**
+   ```bash
+   gh pr create --base main --head <branch> --title "…" --body "…"
+   ```
+   For long bodies use a temporary `--body-file` (e.g. under `%TEMP%`), then remove the file; avoid committing scratch PR body files.
+3. **Windows:** If `gh` is not on PATH in this shell, refresh `PATH` from Machine + User environment variables, or call `"$env:ProgramFiles\GitHub CLI\gh.exe"`.
+4. **Auth:** If `gh auth status` fails, tell the user to run `gh auth login` locally; do not invent tokens.
+5. **Branches:** Confirm base/head (`main` ← `dev` is default unless the user names others). Check `git log origin/base..origin/head` to tailor the description.
+6. **Language:** Use **English** for PR title and body unless the user explicitly wants German (or another language).
+7. **Outcome:** Reply with the **PR URL** returned by `gh` (e.g. `https://github.com/…/pull/N`).
+
+If `gh` cannot be run after the above, fall back to the compare URL and a copy-paste title/body.

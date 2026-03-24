@@ -40,7 +40,10 @@
 *.swo
 *~
 .DS_Store
-.cursor/
+# Cursor: ignore local/agent data, but version shared project rules
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
 *.sublime-project
 *.sublime-workspace
 
