@@ -14,98 +14,89 @@
 {% endblock %}
 
 {% block catalog_body %}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {# Breadcrumbs #}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         {% include 'components/breadcrumbs.html.twig' with {
             items: [
                 {label: 'nav.home'|trans, url: path('catalog_home')},
                 {label: product.name|escape, url: null}
             ]
         } %}
-        
-        {# Product Layout #}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
-            {# Product Images #}
-            <div class="space-y-4">
-                {# Main Image #}
-                <div class="bg-white rounded-2xl shadow-lg overflow-hidden aspect-square">
-                    {% if product.media|length > 0 %}
-                        {% set firstMedia = product.media|first %}
-                        <img id="main-product-image" 
-                             src="{{ firstMedia.path|escape }}" 
-                             alt="{{ firstMedia.alt|default(product.name)|escape }}"
-                             class="w-full h-full object-cover cursor-zoom-in"
-                             data-js="product-image-modal">
-                    {% else %}
-                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                            <i class="fas fa-image text-8xl text-gray-400"></i>
-                        </div>
-                    {% endif %}
+
+        <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+            <div class="lg:col-span-7 space-y-4">
+                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                    <div class="aspect-square">
+                        {% if product.media|length > 0 %}
+                            {% set firstMedia = product.media|first %}
+                            <img id="main-product-image"
+                                 src="{{ firstMedia.path|escape }}"
+                                 alt="{{ firstMedia.alt|default(product.name)|escape }}"
+                                 class="h-full w-full object-cover cursor-zoom-in"
+                                 data-js="product-image-modal">
+                        {% else %}
+                            <div class="h-full w-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+                                <i class="fas fa-image text-7xl text-gray-400 dark:text-gray-600"></i>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
-                
-                {# Thumbnail Gallery #}
+
                 {% if product.media|length > 1 %}
-                    <div class="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                    <div class="grid grid-cols-4 sm:grid-cols-6 gap-3">
                         {% for media in product.media %}
                             <button type="button"
-                                    class="aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 {% if loop.first %}border-primary-600 ring-2 ring-primary-200{% else %}border-gray-200 hover:border-primary-400{% endif %}"
+                                    class="aspect-square overflow-hidden rounded-xl border-2 transition-all duration-200 {% if loop.first %}border-primary-600 ring-2 ring-primary-200 dark:ring-primary-900{% else %}border-gray-200 hover:border-primary-400 dark:border-gray-700 dark:hover:border-primary-500{% endif %}"
                                     data-js="product-thumbnail"
                                     data-image-src="{{ media.path|escape }}">
-                                <img src="{{ media.path|escape }}" 
+                                <img src="{{ media.path|escape }}"
                                      alt="{{ media.alt|default(product.name)|escape }}"
-                                     class="w-full h-full object-cover">
+                                     class="h-full w-full object-cover">
                             </button>
                         {% endfor %}
                     </div>
                 {% endif %}
             </div>
-            
-            {# Product Info #}
-            <div class="space-y-6">
-                {# Title & Status #}
-                <div class="flex items-start justify-between">
-                    <div>
-                        <h1 class="text-4xl font-bold text-gray-900 mb-3">{{ product.name|escape }}</h1>
-                        {% if product.status.value == 'active' %}
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                <i class="fas fa-check-circle mr-1.5"></i>
-                                {{ 'product.status.active'|trans }}
-                            </span>
+
+            <div class="lg:col-span-5 space-y-5">
+                <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-5 sm:p-6 shadow-sm dark:border-gray-700 dark:from-gray-900 dark:to-gray-900">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="min-w-0">
+                            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{{ product.name|escape }}</h1>
+                            <div class="mt-3 flex items-center gap-2">
+                                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {% if product.status.value == 'active' %}bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200{% else %}bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300{% endif %}">
+                                    {{ ('product.status.' ~ product.status.value)|trans }}
+                                </span>
+                            </div>
+                        </div>
+                        {% if app.user %}
+                            <button type="button"
+                                    class="wishlist-toggle shrink-0 rounded-full border-2 border-gray-200 bg-white p-3 shadow-sm transition-all hover:border-red-400 dark:border-gray-700 dark:bg-gray-900"
+                                    data-js="wishlist-toggle"
+                                    data-product-id="{{ product.id }}"
+                                    aria-label="{{ 'wishlist.toggle'|trans }}">
+                                <i class="fas fa-heart text-gray-400 wishlist-icon transition-colors duration-200" data-in-wishlist="false"></i>
+                            </button>
                         {% endif %}
                     </div>
-                    {# Wishlist Heart Icon #}
-                    {% if app.user %}
-                        <button type="button"
-                                class="wishlist-toggle bg-white border-2 border-gray-200 hover:border-red-400 p-3 rounded-full shadow-md transition-all duration-200 ml-4"
-                                data-js="wishlist-toggle"
-                                data-product-id="{{ product.id }}"
-                                aria-label="{{ 'wishlist.toggle'|trans }}">
-                            <i class="fas fa-heart text-gray-400 wishlist-icon transition-colors duration-200" data-in-wishlist="false"></i>
-                        </button>
-                    {% endif %}
                 </div>
-                
-                {# Price & Variant Selection #}
+
                 {% if variants|length > 0 %}
-                    <div class="bg-white rounded-2xl shadow-lg p-6 space-y-6">
-                        {# Variant Selector #}
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
                         {% if variants|length > 1 %}
-                            <div>
-                                <label for="variant-select" class="block text-sm font-semibold text-gray-700 mb-2">
-                                    {{ 'product.select_variant'|trans }}
-                                </label>
-                                <select id="variant-select" 
+                            <div class="mb-5">
+                                <label for="variant-select" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">{{ 'product.select_variant'|trans }}</label>
+                                <select id="variant-select"
                                         name="variant"
                                         data-js="product-variant-select"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 bg-white transition-colors">
+                                        class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                                     {% for variant in variants %}
-                                        <option value="{{ variant.id }}" 
-                                                data-price="{{ variant.priceAmount }}" 
+                                        <option value="{{ variant.id }}"
+                                                data-price="{{ variant.priceAmount }}"
                                                 data-currency="{{ variant.currency|escape }}"
                                                 data-sku="{{ variant.sku|escape }}"
                                                 {% if variant == defaultVariant %}selected{% endif %}>
                                             {% if variant.attributes|length > 0 %}
-                                                {{ variant.attributes|map((v, k) => "#{k}: #{v}")|join(', ')|escape }} - 
+                                                {{ variant.attributes|map((v, k) => "#{k}: #{v}")|join(', ')|escape }} -
                                             {% endif %}
                                             {{ (variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ variant.currency|escape }}
                                         </option>
@@ -113,106 +104,91 @@
                                 </select>
                             </div>
                         {% endif %}
-                        
-                        {# Price Display #}
-                        <div class="border-t border-gray-200 pt-6">
-                            <div class="mb-2">
-                                <div class="text-4xl font-bold text-primary-600" id="price-display">
-                                    {{ (defaultVariant.priceAmount / 100)|number_format(2, '.', ',') }} {{ defaultVariant.currency|escape }}
-                                </div>
+
+                        <div class="rounded-xl border border-primary-100 bg-primary-50/70 px-4 py-4 dark:border-primary-900/50 dark:bg-primary-900/20">
+                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ 'product.price'|trans }}</div>
+                            <div class="mt-1 text-3xl sm:text-4xl font-bold tracking-tight text-primary-700 dark:text-primary-300" id="price-display">
+                                {{ (defaultVariant.priceAmount / 100)|number_format(2, '.', ',') }} {{ defaultVariant.currency|escape }}
                             </div>
-                            <div class="text-sm text-gray-500 font-mono" id="sku-display">
-                                SKU: {{ defaultVariant.sku|escape }}
-                            </div>
+                            <div class="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400" id="sku-display">SKU: {{ defaultVariant.sku|escape }}</div>
                         </div>
-                        
-                        {# Add to Cart #}
-                        <div class="space-y-3">
-                            <button type="button" 
+
+                        <div class="mt-5 space-y-3">
+                            <button type="button"
                                     id="add-to-cart-btn"
-                                    class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                                    class="w-full inline-flex items-center justify-center gap-3 rounded-xl bg-primary-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
                                     data-js="add-to-cart"
                                     data-variant-id="{{ defaultVariant.id }}">
                                 <i class="fas fa-shopping-cart"></i>
                                 <span>{{ 'product.add_to_cart'|trans }}</span>
                             </button>
-                            
-                            <div class="flex items-center justify-center gap-6 text-sm text-gray-600">
-                                <div class="flex items-center gap-2">
-                                    <i class="fas fa-shield-alt text-primary-600"></i>
-                                    <span>{{ 'product.secure_payment'|trans }}</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <i class="fas fa-truck text-primary-600"></i>
-                                    <span>{{ 'product.fast_shipping'|trans }}</span>
-                                </div>
+                            <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-gray-600 dark:text-gray-400">
+                                <span class="inline-flex items-center gap-1.5"><i class="fas fa-shield-alt text-primary-600 dark:text-primary-400"></i>{{ 'product.secure_payment'|trans }}</span>
+                                <span class="inline-flex items-center gap-1.5"><i class="fas fa-truck text-primary-600 dark:text-primary-400"></i>{{ 'product.fast_shipping'|trans }}</span>
                             </div>
                         </div>
                     </div>
                 {% else %}
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                        <p class="text-yellow-800">{{ 'product.no_variants'|trans }}</p>
+                    <div class="rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-3 text-yellow-800 dark:border-yellow-700/60 dark:bg-yellow-900/20 dark:text-yellow-200">
+                        {{ 'product.no_variants'|trans }}
                     </div>
                 {% endif %}
-                
-                {# Description #}
-                {% if product.description %}
-                    <div class="bg-white rounded-2xl shadow-lg p-6">
-                        <h2 class="text-xl font-bold text-gray-900 mb-4">{{ 'product.description'|trans }}</h2>
-                        <div class="prose prose-gray max-w-none text-gray-700 leading-relaxed">
-                            {{ product.description|escape|nl2br|raw }}
-                        </div>
-                    </div>
-                {% endif %}
-                
-                {# Product Details #}
-                <div class="bg-gray-50 rounded-2xl p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ 'product.details'|trans }}</h3>
-                    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+
+                <div class="rounded-2xl border border-gray-200 bg-gray-50/70 p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800/60">
+                    <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ 'product.details'|trans }}</h2>
+                    <dl class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                         <div>
-                            <dt class="font-medium text-gray-500">{{ 'product.status'|trans }}</dt>
-                            <dd class="mt-1 text-gray-900 capitalize">{{ product.status.value|escape }}</dd>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ 'product.status'|trans }}</dt>
+                            <dd class="mt-0.5 text-gray-900 capitalize dark:text-gray-100">{{ product.status.value|escape }}</dd>
                         </div>
                         <div>
-                            <dt class="font-medium text-gray-500">{{ 'product.tax_class'|trans }}</dt>
-                            <dd class="mt-1 text-gray-900">{{ product.taxClass|escape }}</dd>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ 'product.tax_class'|trans }}</dt>
+                            <dd class="mt-0.5 text-gray-900 dark:text-gray-100">{{ product.taxClass|escape }}</dd>
                         </div>
                         {% if variants|length > 0 %}
                             <div>
-                                <dt class="font-medium text-gray-500">{{ 'product.variants_count'|trans }}</dt>
-                                <dd class="mt-1 text-gray-900">{{ variants|length }}</dd>
+                                <dt class="text-gray-500 dark:text-gray-400">{{ 'product.variants_count'|trans }}</dt>
+                                <dd class="mt-0.5 text-gray-900 dark:text-gray-100">{{ variants|length }}</dd>
                             </div>
                         {% endif %}
                     </dl>
                 </div>
             </div>
         </div>
-        
-        {# All Variants Table (if multiple) #}
+
+        {% if product.description %}
+            <section class="rounded-2xl border border-gray-200 bg-white shadow-sm p-6 mt-8 dark:border-gray-700 dark:bg-gray-900">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">{{ 'product.description'|trans }}</h2>
+                <div class="prose prose-gray dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {{ product.description|escape|nl2br|raw }}
+                </div>
+            </section>
+        {% endif %}
+
         {% if variants|length > 1 %}
-            <div class="bg-white rounded-2xl shadow-lg p-6 mt-12">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ 'product.all_variants'|trans }}</h2>
+            <section class="rounded-2xl border border-gray-200 bg-white shadow-sm p-6 mt-8 dark:border-gray-700 dark:bg-gray-900">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-5">{{ 'product.all_variants'|trans }}</h2>
                 <div class="overflow-x-auto">
                     <table class="w-full">
-                        <thead class="bg-gray-50">
+                        <thead class="bg-gray-50 dark:bg-gray-800/80">
                             <tr>
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">{{ 'product.variant'|trans }}</th>
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">{{ 'product.sku'|trans }}</th>
-                                <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">{{ 'product.price'|trans }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">{{ 'product.variant'|trans }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">{{ 'product.sku'|trans }}</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">{{ 'product.price'|trans }}</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200">
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             {% for variant in variants %}
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-4 py-3 text-sm text-gray-900">
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors">
+                                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
                                         {% if variant.attributes|length > 0 %}
                                             {{ variant.attributes|map((v, k) => "#{k}: #{v}")|join(', ')|escape }}
                                         {% else %}
                                             {{ 'product.default_variant'|trans }}
                                         {% endif %}
                                     </td>
-                                    <td class="px-4 py-3 text-sm font-mono text-gray-600">{{ variant.sku|escape }}</td>
-                                    <td class="px-4 py-3 text-sm font-bold text-primary-600 text-right">
+                                    <td class="px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-300">{{ variant.sku|escape }}</td>
+                                    <td class="px-4 py-3 text-sm font-semibold text-primary-700 dark:text-primary-300 text-right">
                                         {{ (variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ variant.currency|escape }}
                                     </td>
                                 </tr>
@@ -220,7 +196,7 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </section>
         {% endif %}
     </div>
     

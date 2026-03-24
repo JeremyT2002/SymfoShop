@@ -23,6 +23,13 @@ class UserFixture extends Fixture
         $admin->setRoles(['ROLE_ADMIN', 'ROLE_USER']);
         $admin->setFirstName('Admin');
         $admin->setLastName('User');
+        $admin->setPhone('+49 89 1234567');
+        $admin->setAddressLine1('Adminstraße 99');
+        $admin->setAddressLine2('Büro 5A');
+        $admin->setPostalCode('80331');
+        $admin->setCity('München');
+        $admin->setState('Bayern');
+        $admin->setCountryCode('DE');
         $admin->setIsActive(true);
         $manager->persist($admin);
         $this->addReference('user_admin', $admin);
@@ -47,12 +54,26 @@ class UserFixture extends Fixture
                 'password' => 'user123',
                 'firstName' => 'Jane',
                 'lastName' => 'Smith',
+                'phone' => '+33 1 45 67 89 10',
+                'addressLine1' => '12 Rue de Rivoli',
+                'addressLine2' => 'Appartement 4B',
+                'postalCode' => '75001',
+                'city' => 'Paris',
+                'state' => 'Ile-de-France',
+                'countryCode' => 'FR',
             ],
             [
                 'email' => 'bob.wilson@example.com',
                 'password' => 'user123',
                 'firstName' => 'Bob',
                 'lastName' => 'Wilson',
+                'phone' => '+1 212 555 0134',
+                'addressLine1' => '350 5th Ave',
+                'addressLine2' => 'Floor 21',
+                'postalCode' => '10118',
+                'city' => 'New York',
+                'state' => 'NY',
+                'countryCode' => 'US',
             ],
         ];
 

@@ -5,9 +5,9 @@ namespace App\Service\Payment\Provider;
 use App\Entity\Order;
 use Symfony\Component\HttpFoundation\Request;
 
-final class PayPalPaymentProvider implements PaymentProviderInterface
+final class TestBankPaymentProvider implements PaymentProviderInterface
 {
-    public const NAME = 'paypal';
+    public const NAME = 'testbank';
 
     public function getName(): string
     {
@@ -16,7 +16,7 @@ final class PayPalPaymentProvider implements PaymentProviderInterface
 
     public function startPayment(Order $order): PaymentResult
     {
-        $referenceId = 'paypal_' . bin2hex(random_bytes(12));
+        $referenceId = 'testbank_' . bin2hex(random_bytes(12));
 
         return new PaymentResult(
             provider: self::NAME,
@@ -40,3 +40,4 @@ final class PayPalPaymentProvider implements PaymentProviderInterface
         return null;
     }
 }
+

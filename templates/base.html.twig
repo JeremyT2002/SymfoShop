@@ -100,7 +100,14 @@
       data-js-page="{% block js_page %}{% endblock %}"
       data-cart-add-url="{{ path('cart_add') }}"
       data-wishlist-toggle-url="{{ path('account_wishlist_toggle') }}"
-      data-wishlist-check-url="{{ path('account_wishlist_check') }}">
+      data-wishlist-check-url="{{ path('account_wishlist_check') }}"
+      data-msg-loading="{{ 'common.loading'|trans|e('html_attr') }}"
+      data-msg-error="{{ 'common.error'|trans|e('html_attr') }}"
+      data-msg-cart-added="{{ 'cart.item_added'|trans|e('html_attr') }}"
+      data-msg-cart-add-error="{{ 'product.error_adding'|trans|e('html_attr') }}"
+      data-msg-wishlist-added="{{ 'wishlist.added'|trans|e('html_attr') }}"
+      data-msg-wishlist-removed="{{ 'wishlist.removed'|trans|e('html_attr') }}"
+      data-msg-wishlist-error="{{ 'wishlist.error'|trans|e('html_attr') }}">
     <!-- Navigation -->
     <nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm sticky top-0 z-50 transition-colors duration-200" role="navigation" aria-label="Main navigation">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -4,6 +4,7 @@ namespace App\Service\Payment;
 
 use App\Entity\Order;
 use App\Entity\Payment;
+use App\Repository\PaymentMethodRepository;
 use App\Repository\PaymentRepository;
 use App\Service\Payment\Provider\PaymentProviderInterface;
 use App\Service\Payment\Provider\PaymentResolution;
@@ -14,7 +15,8 @@ class PaymentService
     public function __construct(
         private readonly PaymentProviderRegistry $registry,
         private readonly EntityManagerInterface $entityManager,
-        private readonly PaymentRepository $paymentRepository
+        private readonly PaymentRepository $paymentRepository,
+        private readonly PaymentMethodRepository $paymentMethodRepository
     ) {
     }
 
@@ -25,7 +27,17 @@ class PaymentService
      */
     public function createPaymentIntent(Order $order, ?string $providerName = null): array
     {
-        $provider = $providerName ? $this->registry->get($providerName) : $this->registry->getDefault();
+        $resolvedProviderName = $providerName;
+        if ($resolvedProviderName === null || trim($resolvedProviderName) === '') {
+            $defaultMethod = $this->paymentMethodRepository->findDefaultActive();
+            if ($defaultMethod !== null) {
+                $resolvedProviderName = $defaultMethod->getCode();
+            }
+        }
+
+        $provider = $resolvedProviderName
+            ? $this->registry->get($resolvedProviderName)
+            : $this->registry->getDefault();
 
         $existingPayment = $this->paymentRepository->findOneBy(
             ['order' => $order],

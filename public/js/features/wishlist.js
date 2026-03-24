@@ -6,6 +6,10 @@ import { showToast } from '../core/toast.js';
 import { post, get, parseJson } from '../core/api.js';
 import { getAllByDataJs } from '../core/utils.js';
 
+function getMessage(key, fallback) {
+    return document.body?.dataset?.[key] || fallback;
+}
+
 // Get routes from data attributes
 function getWishlistToggleUrl() {
     const body = document.body;
@@ -56,10 +60,12 @@ export function init() {
                 }
                 
                 // Show toast notification
-                const message = data.message || (data.inWishlist ? 'Product added to wishlist' : 'Product removed from wishlist');
+                const message = data.message || (data.inWishlist
+                    ? getMessage('msgWishlistAdded', 'Product added to wishlist')
+                    : getMessage('msgWishlistRemoved', 'Product removed from wishlist'));
                 showToast('success', message);
             } else {
-                showToast('error', data.message || 'An error occurred');
+                showToast('error', data.message || getMessage('msgWishlistError', 'An error occurred'));
                 if (icon) {
                     icon.innerHTML = originalHTML;
                 }
@@ -67,7 +73,7 @@ export function init() {
         })
         .catch(error => {
             console.error('Error:', error);
-            showToast('error', 'An error occurred');
+            showToast('error', getMessage('msgWishlistError', 'An error occurred'));
             if (icon) {
                 icon.innerHTML = originalHTML;
             }

@@ -58,6 +58,8 @@ common:
   success: Success
   warning: Warning
   info: Info
+  yes: Yes
+  no: No
   
 cart:
   title: Shopping Cart
@@ -207,6 +209,21 @@ checkout:
   simulate_failure: Simulate failure
   simulate_pending: Leave pending
   skip_payment_dev_notice: "Note: CHECKOUT_SKIP_PAYMENT is enabled — payment was auto-completed for local testing only."
+  payment_page_title: Payment
+  payment_meta_description: Complete your payment
+  success_page_title: Order confirmation
+  success_page_meta_description: Your order has been placed successfully
+  success_title: Order Placed Successfully!
+  success_order_number_intro: Thank you for your order. Your order number is:
+  success_email_hint: You will receive an email confirmation shortly with order details.
+  fallback_method_stripe: Stripe
+  flash:
+    cart_empty: Your cart is empty. Please add items before checkout.
+    payment_method_unavailable: Selected payment method is not available.
+    order_not_pending: Order is not in payment pending status.
+  not_found:
+    order: Order not found
+    payment: Payment not found
 
 security:
   login:
@@ -303,6 +320,11 @@ account:
       orders: Orders
       invoices: Invoices
       profile: Profile
+    tabs:
+      aria_label: Account sections
+      profile: Profile
+      orders: Orders
+      invoices: Invoices
     continue_shopping: Continue shopping
     entries: entries
     profile:
@@ -340,6 +362,10 @@ account:
       order_number: Order No.
       date: Date
       action: Action
+      language: Language
+      lang_de: German
+      lang_en: English
+      lang_fr: French
       download_pdf: Download PDF
       empty: No invoices available yet.
       empty_hint: PDF invoices appear here once they are issued for your orders.
@@ -353,6 +379,41 @@ admin:
   dashboard:
     title: Dashboard
     no_widgets: No widgets configured. Use "Customize Dashboard" to add widgets.
+  payment_methods:
+    nav: Payment Methods
+    title: Payment Methods
+    subtitle: Configure which payment providers are available at checkout.
+    new: New Method
+    new_title: Create Payment Method
+    edit_title: Edit Payment Method
+    back: Back to Payment Methods
+    create_submit: Create Method
+    update_submit: Update Method
+    default_badge: Default
+    confirm_delete: Delete payment method?
+    empty: No payment methods configured yet.
+    table:
+      name: Name
+      provider_code: Provider Code
+      sort: Sort
+      active: Active
+      default: Default
+      actions: Actions
+    form:
+      display_name: Display Name
+      provider_code: Provider Code
+      select_provider: Select provider
+      sort_order: Sort Order
+      active: Active
+      active_help: Method can be selected during checkout.
+      default: Default
+      default_help: Used when customer does not explicitly choose a method.
+    flash:
+      code_name_required: Code and name are required.
+      provider_unavailable: Selected provider is not available in this environment.
+      created: Payment method created.
+      updated: Payment method updated.
+      removed: Payment method removed.
   widgets:
     kpi_products:
       title: Total Products
@@ -434,4 +495,36 @@ admin:
       regenerate_success: '%count% invoice PDF(s) regenerated successfully.'
       regenerate_partial: '%success% invoice PDF(s) regenerated successfully, %failed% failed.'
       status_updated: Order status updated successfully.
+
+invoice_pdf:
+  title: Invoice
+  recipient: Invoice recipient
+  email: Email
+  order_number: Order number
+  invoice_details: Invoice details
+  invoice_date: Invoice date
+  order_date: Order date
+  currency: Currency
+  payment_method:
+    label: Payment method
+    stripe: Stripe
+    paypal: PayPal
+    testbank: TestBank
+    unavailable: Not available
+  items: Items
+  table:
+    item: Item
+    sku: SKU
+    quantity: Quantity
+    unit_price: Unit price
+    vat: VAT
+    total: Total
+  subtotal: Subtotal
+  tax_included: incl. VAT
+  grand_total: Grand total
+  thank_you_strong: Thank you for shopping at %shop%.
+  thank_you_text: Please keep this invoice for your records. If you have questions about your order, contact our support.
+  footer:
+    generated: Official invoice document · generated on %datetime%
+    tax_note: All amounts in %currency% · Taxes are shown according to the listed tax rates per line item.
 

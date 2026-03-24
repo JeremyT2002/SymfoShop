@@ -45,9 +45,11 @@ services:
         tags:
             - { name: 'payment.provider' }
 
-    App\Service\Payment\Provider\KlarnaPaymentProvider:
+    App\Service\Payment\Provider\TestBankPaymentProvider:
         tags:
             - { name: 'payment.provider' }
+
+    App\Service\Payment\Provider\KlarnaPaymentProvider: ~
 
     App\Controller\Checkout\CheckoutController:
         arguments:

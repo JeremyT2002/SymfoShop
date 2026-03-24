@@ -58,6 +58,8 @@ common:
   success: Succès
   warning: Avertissement
   info: Info
+  yes: Oui
+  no: Non
   
 cart:
   title: Panier
@@ -207,6 +209,21 @@ checkout:
   simulate_failure: Simuler échec
   simulate_pending: Laisser en attente
   skip_payment_dev_notice: "Remarque : CHECKOUT_SKIP_PAYMENT est activé — le paiement a été marqué comme réussi uniquement pour les tests locaux."
+  payment_page_title: Paiement
+  payment_meta_description: Finalisez votre paiement
+  success_page_title: Confirmation de commande
+  success_page_meta_description: Votre commande a été passée avec succès
+  success_title: Commande passée avec succès !
+  success_order_number_intro: Merci pour votre commande. Votre numéro de commande est :
+  success_email_hint: Vous recevrez sous peu un e-mail de confirmation avec les détails de la commande.
+  fallback_method_stripe: Stripe
+  flash:
+    cart_empty: Votre panier est vide. Veuillez ajouter des articles avant de commander.
+    payment_method_unavailable: Le mode de paiement sélectionné n'est pas disponible.
+    order_not_pending: La commande n'est pas en attente de paiement.
+  not_found:
+    order: Commande introuvable
+    payment: Paiement introuvable
 
 security:
   login:
@@ -303,6 +320,11 @@ account:
       orders: Commandes
       invoices: Factures
       profile: Profil
+    tabs:
+      aria_label: Sections du compte
+      profile: Profil
+      orders: Commandes
+      invoices: Factures
     continue_shopping: Continuer les achats
     entries: entrées
     profile:
@@ -340,6 +362,10 @@ account:
       order_number: N° commande
       date: Date
       action: Action
+      language: Langue
+      lang_de: Allemand
+      lang_en: Anglais
+      lang_fr: Français
       download_pdf: Télécharger le PDF
       empty: Aucune facture disponible pour le moment.
       empty_hint: Les factures PDF s’affichent ici dès qu’elles sont émises pour vos commandes.
@@ -350,6 +376,41 @@ account:
       profile_updated: Vos informations de profil ont été mises à jour.
 
 admin:
+  payment_methods:
+    nav: Moyens de paiement
+    title: Moyens de paiement
+    subtitle: Configurez les fournisseurs de paiement disponibles au checkout.
+    new: Nouvelle méthode
+    new_title: Créer un moyen de paiement
+    edit_title: Modifier le moyen de paiement
+    back: Retour aux moyens de paiement
+    create_submit: Créer la méthode
+    update_submit: Mettre à jour la méthode
+    default_badge: Par défaut
+    confirm_delete: Supprimer ce moyen de paiement ?
+    empty: Aucun moyen de paiement configuré.
+    table:
+      name: Nom
+      provider_code: Code fournisseur
+      sort: Tri
+      active: Actif
+      default: Défaut
+      actions: Actions
+    form:
+      display_name: Nom affiché
+      provider_code: Code fournisseur
+      select_provider: Sélectionner un fournisseur
+      sort_order: Ordre d'affichage
+      active: Actif
+      active_help: La méthode peut être sélectionnée lors du checkout.
+      default: Par défaut
+      default_help: Utilisé si le client ne choisit pas explicitement une méthode.
+    flash:
+      code_name_required: Le code et le nom sont obligatoires.
+      provider_unavailable: Le fournisseur sélectionné n'est pas disponible dans cet environnement.
+      created: Moyen de paiement créé.
+      updated: Moyen de paiement mis à jour.
+      removed: Moyen de paiement supprimé.
   orders:
     page_title: Commandes
     heading: Commandes
@@ -416,4 +477,36 @@ admin:
       regenerate_success: '%count% PDF de facture(s) régénéré(s) avec succès.'
       regenerate_partial: '%success% PDF de facture(s) régénéré(s) avec succès, %failed% échec(s).'
       status_updated: Statut de la commande mis à jour.
+
+invoice_pdf:
+  title: Facture
+  recipient: Destinataire de la facture
+  email: E-mail
+  order_number: Numéro de commande
+  invoice_details: Détails de la facture
+  invoice_date: Date de facture
+  order_date: Date de commande
+  currency: Devise
+  payment_method:
+    label: Méthode de paiement
+    stripe: Stripe
+    paypal: PayPal
+    testbank: TestBank
+    unavailable: Non disponible
+  items: Articles
+  table:
+    item: Article
+    sku: SKU
+    quantity: Quantité
+    unit_price: Prix unitaire
+    vat: TVA
+    total: Total
+  subtotal: Sous-total
+  tax_included: TVA incluse
+  grand_total: Total
+  thank_you_strong: Merci pour votre achat chez %shop%.
+  thank_you_text: Veuillez conserver cette facture pour vos archives. Si vous avez des questions concernant votre commande, contactez notre support.
+  footer:
+    generated: Document de facturation officiel · généré le %datetime%
+    tax_note: Tous les montants sont en %currency% · La TVA est indiquée selon les taux listés par ligne.
 

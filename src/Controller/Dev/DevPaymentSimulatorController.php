@@ -33,7 +33,7 @@ class DevPaymentSimulatorController extends AbstractController
     ) {
     }
 
-    #[Route('/simulate/{referenceId}/{outcome}', name: 'simulate', requirements: ['referenceId' => 'dev_[a-f0-9]+', 'outcome' => 'success|failure|pending'])]
+    #[Route('/simulate/{referenceId}/{outcome}', name: 'simulate', requirements: ['referenceId' => '(dev|paypal|testbank)_[a-f0-9]+', 'outcome' => 'success|failure|pending'])]
     public function simulate(string $referenceId, string $outcome): Response
     {
         if (!in_array($this->kernelEnvironment, ['dev', 'test'], true)) {
@@ -41,8 +41,8 @@ class DevPaymentSimulatorController extends AbstractController
         }
 
         $payment = $this->paymentRepository->findOneByPaymentIntentId($referenceId);
-        if (!$payment || $payment->getProvider() !== 'dev') {
-            $this->addFlash('error', 'Payment not found or not a dev payment.');
+        if (!$payment || !in_array($payment->getProvider(), ['dev', 'paypal', 'testbank'], true)) {
+            $this->addFlash('error', 'Payment not found or not a simulated payment.');
             return $this->redirectToRoute('cart_show');
         }
 

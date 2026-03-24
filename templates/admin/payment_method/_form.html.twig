@@ -1,0 +1,49 @@
+<div class="admin-card admin-form-shell p-6">
+    <form method="post" class="space-y-6">
+        <div class="admin-form-grid">
+            <section class="admin-form-section space-y-4">
+                <div>
+                    <label for="name" class="admin-form-label">{{ 'admin.payment_methods.form.display_name'|trans }} *</label>
+                    <input id="name" name="name" type="text" required class="admin-form-input" value="{{ method.name|default('') }}">
+                </div>
+                <div>
+                    <label for="code" class="admin-form-label">{{ 'admin.payment_methods.form.provider_code'|trans }} *</label>
+                    <select id="code" name="code" class="admin-form-input" required>
+                        <option value="">{{ 'admin.payment_methods.form.select_provider'|trans }}</option>
+                        {% for providerCode in availableProviderNames %}
+                            <option value="{{ providerCode }}" {% if method.code|default('') == providerCode %}selected{% endif %}>{{ providerCode }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="sortOrder" class="admin-form-label">{{ 'admin.payment_methods.form.sort_order'|trans }}</label>
+                    <input id="sortOrder" name="sortOrder" type="number" class="admin-form-input" value="{{ method.sortOrder|default(0) }}">
+                </div>
+            </section>
+
+            <section class="admin-form-section space-y-4">
+                <label class="flex items-start gap-3">
+                    <input type="checkbox" name="isActive" value="1" class="mt-1" {% if method.isActive|default(true) %}checked{% endif %}>
+                    <span>
+                        <span class="block text-sm font-medium text-gray-900">{{ 'admin.payment_methods.form.active'|trans }}</span>
+                        <span class="block text-xs text-gray-500">{{ 'admin.payment_methods.form.active_help'|trans }}</span>
+                    </span>
+                </label>
+
+                <label class="flex items-start gap-3">
+                    <input type="checkbox" name="isDefault" value="1" class="mt-1" {% if method.isDefault|default(false) %}checked{% endif %}>
+                    <span>
+                        <span class="block text-sm font-medium text-gray-900">{{ 'admin.payment_methods.form.default'|trans }}</span>
+                        <span class="block text-xs text-gray-500">{{ 'admin.payment_methods.form.default_help'|trans }}</span>
+                    </span>
+                </label>
+            </section>
+        </div>
+
+        <div class="flex justify-end gap-3 border-t border-gray-200 pt-5">
+            <a href="{{ path('admin_payment_methods_index') }}" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ 'common.cancel'|trans }}</a>
+            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">{{ submitLabel }}</button>
+        </div>
+    </form>
+</div>
+
