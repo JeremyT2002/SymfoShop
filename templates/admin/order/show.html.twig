@@ -144,21 +144,16 @@
 
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ 'admin.orders.show.update_status_title'|trans }}</h3>
-                <form method="post" action="{{ path('admin_orders_update_status', {id: order.id}) }}">
-                    <input type="hidden" name="_token" value="{{ csrf_token('update_status_' ~ order.id) }}">
-                    <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-3">
-                        <option value="new" {% if order.status == 'new' %}selected{% endif %}>{{ 'admin.orders.status.new'|trans }}</option>
-                        <option value="payment_pending" {% if order.status == 'payment_pending' %}selected{% endif %}>{{ 'admin.orders.status.payment_pending'|trans }}</option>
-                        <option value="payment_confirmed" {% if order.status == 'payment_confirmed' %}selected{% endif %}>{{ 'admin.orders.status.payment_confirmed'|trans }}</option>
-                        <option value="processing" {% if order.status == 'processing' %}selected{% endif %}>{{ 'admin.orders.status.processing'|trans }}</option>
-                        <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>{{ 'admin.orders.status.shipped'|trans }}</option>
-                        <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>{{ 'admin.orders.status.completed'|trans }}</option>
-                        <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>{{ 'admin.orders.status.cancelled'|trans }}</option>
-                    </select>
+                {{ form_start(statusForm) }}
+                    {{ form_widget(statusForm.status, {
+                        attr: {
+                            class: 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-3'
+                        }
+                    }) }}
                     <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                         {{ 'admin.orders.show.update_status_submit'|trans }}
                     </button>
-                </form>
+                {{ form_end(statusForm) }}
             </div>
         </div>
     </div>

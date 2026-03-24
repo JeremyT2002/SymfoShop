@@ -2,7 +2,6 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Category;
 use App\Entity\Product;
 use App\Entity\ProductMedia;
 use App\Entity\ProductStatus;
@@ -35,36 +34,27 @@ class ProductController extends AbstractController
         $limit = 20;
         $offset = ($page - 1) * $limit;
         
-        $status = $request->query->get('status');
-        $search = $request->query->get('search');
-        
-        $criteria = [];
-        if ($status) {
-            $criteria['status'] = ProductStatus::from($status);
-        }
-        
-        $products = $this->productRepository->findBy(
-            $criteria,
-            ['createdAt' => 'DESC'],
+        $status = (string) $request->query->get('status', '');
+        $search = trim((string) $request->query->get('search', ''));
+
+        $statusEnum = $status !== '' ? ProductStatus::tryFrom($status) : null;
+
+        $products = $this->productRepository->findForAdminList(
+            $statusEnum,
+            $search !== '' ? $search : null,
             $limit,
             $offset
         );
-        
-        // Apply search filter if provided
-        if ($search) {
-            $products = array_filter($products, function(Product $product) use ($search) {
-                return stripos($product->getName(), $search) !== false 
-                    || stripos($product->getSlug(), $search) !== false;
-            });
-        }
-        
-        $total = $this->productRepository->count($criteria);
+        $total = $this->productRepository->countForAdminList(
+            $statusEnum,
+            $search !== '' ? $search : null
+        );
         
         return $this->render('admin/product/index.html.twig', [
             'products' => $products,
             'currentPage' => $page,
             'totalPages' => ceil($total / $limit),
-            'status' => $status,
+            'status' => $statusEnum?->value ?? '',
             'search' => $search,
         ]);
     }

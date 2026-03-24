@@ -3,10 +3,11 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Coupon;
-use App\Entity\CouponType;
+use App\Form\Admin\CouponFormType;
 use App\Repository\CouponRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -34,54 +35,30 @@ class CouponController extends AbstractController
     public function new(Request $request): Response
     {
         $coupon = new Coupon();
-        
-        if ($request->isMethod('POST')) {
-            $code = strtoupper(trim($request->request->get('code', '')));
-            $type = $request->request->get('type');
-            $value = (int) $request->request->get('value', 0);
-            $expiresAt = $request->request->get('expiresAt');
-            $usageLimit = $request->request->get('usageLimit');
-            $perUserLimit = $request->request->get('perUserLimit');
-            $isActive = $request->request->get('isActive') === '1';
-            
-            // Validate code uniqueness
-            $existing = $this->couponRepository->findByCode($code);
+
+        $form = $this->createForm(CouponFormType::class, $coupon);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $coupon->setCode((string) $coupon->getCode());
+            $existing = $this->couponRepository->findByCode($coupon->getCode());
             if ($existing) {
-                $this->addFlash('error', 'A coupon with this code already exists.');
-                return $this->render('admin/coupon/new.html.twig', [
-                    'coupon' => $coupon,
-                ]);
+                $form->get('code')->addError(new FormError('A coupon with this code already exists.'));
             }
-            
-            $coupon->setCode($code);
-            $coupon->setType(CouponType::from($type));
-            $coupon->setValue($value);
-            
-            if ($expiresAt) {
-                $coupon->setExpiresAt(new \DateTimeImmutable($expiresAt));
-            }
-            
-            if ($usageLimit !== null && $usageLimit !== '') {
-                $coupon->setUsageLimit((int) $usageLimit);
-            }
-            
-            if ($perUserLimit !== null && $perUserLimit !== '') {
-                $coupon->setPerUserLimit((int) $perUserLimit);
-            }
-            
-            $coupon->setIsActive($isActive);
+        }
+
+        if ($form->isSubmitted() && $form->isValid()) {
             $coupon->setUpdatedAt(new \DateTimeImmutable());
-            
             $this->entityManager->persist($coupon);
             $this->entityManager->flush();
-            
+
             $this->addFlash('success', 'Coupon created successfully.');
-            
             return $this->redirectToRoute('admin_coupons_show', ['id' => $coupon->getId()]);
         }
-        
+
         return $this->render('admin/coupon/new.html.twig', [
             'coupon' => $coupon,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -111,60 +88,27 @@ class CouponController extends AbstractController
             throw $this->createNotFoundException('Coupon not found');
         }
         
-        if ($request->isMethod('POST')) {
-            $code = strtoupper(trim($request->request->get('code', '')));
-            $type = $request->request->get('type');
-            $value = (int) $request->request->get('value', 0);
-            $expiresAt = $request->request->get('expiresAt');
-            $usageLimit = $request->request->get('usageLimit');
-            $perUserLimit = $request->request->get('perUserLimit');
-            $isActive = $request->request->get('isActive') === '1';
-            
-            // Validate code uniqueness (except for current coupon)
-            if ($code !== $coupon->getCode()) {
-                $existing = $this->couponRepository->findByCode($code);
-                if ($existing && $existing->getId() !== $coupon->getId()) {
-                    $this->addFlash('error', 'A coupon with this code already exists.');
-                    return $this->render('admin/coupon/edit.html.twig', [
-                        'coupon' => $coupon,
-                    ]);
-                }
+        $form = $this->createForm(CouponFormType::class, $coupon);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $coupon->setCode((string) $coupon->getCode());
+            $existing = $this->couponRepository->findByCode($coupon->getCode());
+            if ($existing && $existing->getId() !== $coupon->getId()) {
+                $form->get('code')->addError(new FormError('A coupon with this code already exists.'));
             }
-            
-            $coupon->setCode($code);
-            $coupon->setType(CouponType::from($type));
-            $coupon->setValue($value);
-            
-            if ($expiresAt) {
-                $coupon->setExpiresAt(new \DateTimeImmutable($expiresAt));
-            } else {
-                $coupon->setExpiresAt(null);
-            }
-            
-            if ($usageLimit !== null && $usageLimit !== '') {
-                $coupon->setUsageLimit((int) $usageLimit);
-            } else {
-                $coupon->setUsageLimit(null);
-            }
-            
-            if ($perUserLimit !== null && $perUserLimit !== '') {
-                $coupon->setPerUserLimit((int) $perUserLimit);
-            } else {
-                $coupon->setPerUserLimit(null);
-            }
-            
-            $coupon->setIsActive($isActive);
+        }
+
+        if ($form->isSubmitted() && $form->isValid()) {
             $coupon->setUpdatedAt(new \DateTimeImmutable());
-            
             $this->entityManager->flush();
-            
             $this->addFlash('success', 'Coupon updated successfully.');
-            
             return $this->redirectToRoute('admin_coupons_show', ['id' => $coupon->getId()]);
         }
-        
+
         return $this->render('admin/coupon/edit.html.twig', [
             'coupon' => $coupon,
+            'form' => $form->createView(),
         ]);
     }
 

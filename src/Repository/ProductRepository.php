@@ -33,6 +33,31 @@ class ProductRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    /**
+     * @return list<Product>
+     */
+    public function findForAdminList(
+        ?ProductStatus $status,
+        ?string $search,
+        int $limit,
+        int $offset
+    ): array {
+        $qb = $this->createAdminListQueryBuilder($status, $search)
+            ->orderBy('p.createdAt', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function countForAdminList(?ProductStatus $status, ?string $search): int
+    {
+        $qb = $this->createAdminListQueryBuilder($status, $search)
+            ->select('COUNT(p.id)');
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
     public function findActiveProductsQueryBuilder(): QueryBuilder
     {
         return $this->createQueryBuilder('p')
@@ -51,6 +76,43 @@ class ProductRepository extends ServiceEntityRepository
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Homepage-optimized query:
+     * - first query fetches product IDs with pagination/sorting
+     * - second query eager-loads variants + media to avoid N+1 in cards
+     *
+     * @return list<Product>
+     */
+    public function findActiveProductsForHomepage(int $limit = 8): array
+    {
+        $ids = $this->createQueryBuilder('p')
+            ->select('p.id')
+            ->where('p.status = :status')
+            ->setParameter('status', ProductStatus::ACTIVE)
+            ->orderBy('p.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getSingleColumnResult();
+
+        if ($ids === []) {
+            return [];
+        }
+
+        /** @var list<Product> $products */
+        $products = $this->createQueryBuilder('p')
+            ->leftJoin('p.variants', 'v')
+            ->addSelect('v')
+            ->leftJoin('p.media', 'm')
+            ->addSelect('m')
+            ->where('p.id IN (:ids)')
+            ->setParameter('ids', array_map('intval', $ids))
+            ->orderBy('p.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return $products;
     }
 
     public function countActiveProducts(): int
@@ -267,5 +329,23 @@ class ProductRepository extends ServiceEntityRepository
             'price_max' => $priceMax,
             'attributes' => $attributes,
         ];
+    }
+
+    private function createAdminListQueryBuilder(?ProductStatus $status, ?string $search): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('p');
+
+        if ($status !== null) {
+            $qb->andWhere('p.status = :status')
+                ->setParameter('status', $status);
+        }
+
+        if ($search !== null && trim($search) !== '') {
+            $term = '%' . mb_strtolower(trim($search)) . '%';
+            $qb->andWhere('LOWER(p.name) LIKE :term OR LOWER(p.slug) LIKE :term')
+                ->setParameter('term', $term);
+        }
+
+        return $qb;
     }
 }

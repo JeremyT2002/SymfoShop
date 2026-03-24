@@ -5,6 +5,8 @@ app:
   
 nav:
   home: Home
+  theme_enable_dark: Switch to dark mode
+  theme_enable_light: Switch to light mode
   cart: Cart
   login: Login
   register: Register

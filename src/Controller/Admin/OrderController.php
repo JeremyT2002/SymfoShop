@@ -3,6 +3,8 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Order;
+use App\Form\Admin\OrderFilterType;
+use App\Form\Admin\OrderStatusType;
 use App\Repository\InvoiceRepository;
 use App\Repository\OrderRepository;
 use App\Service\Invoice\InvoiceService;
@@ -28,34 +30,29 @@ class OrderController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(Request $request): Response
     {
+        $filterForm = $this->createForm(OrderFilterType::class, [
+            'search' => (string) $request->query->get('search', ''),
+            'status' => (string) $request->query->get('status', ''),
+        ]);
+        $filterForm->handleRequest($request);
+
+        $search = trim((string) $filterForm->get('search')->getData());
+        $status = (string) $filterForm->get('status')->getData();
+
         $page = max(1, (int) $request->query->get('page', 1));
         $limit = 20;
         $offset = ($page - 1) * $limit;
-        
-        $status = $request->query->get('status');
-        $search = $request->query->get('search');
-        
-        $criteria = [];
-        if ($status) {
-            $criteria['status'] = $status;
-        }
-        
-        $orders = $this->orderRepository->findBy(
-            $criteria,
-            ['createdAt' => 'DESC'],
+
+        $orders = $this->orderRepository->findForAdminList(
+            $status !== '' ? $status : null,
+            $search !== '' ? $search : null,
             $limit,
             $offset
         );
-        
-        // Apply search filter if provided
-        if ($search) {
-            $orders = array_filter($orders, function(Order $order) use ($search) {
-                return stripos($order->getOrderNumber(), $search) !== false 
-                    || stripos($order->getEmail(), $search) !== false;
-            });
-        }
-        
-        $total = $this->orderRepository->count($criteria);
+        $total = $this->orderRepository->countForAdminList(
+            $status !== '' ? $status : null,
+            $search !== '' ? $search : null
+        );
         
         return $this->render('admin/order/index.html.twig', [
             'orders' => $orders,
@@ -63,6 +60,7 @@ class OrderController extends AbstractController
             'totalPages' => ceil($total / $limit),
             'status' => $status,
             'search' => $search,
+            'filterForm' => $filterForm->createView(),
         ]);
     }
 
@@ -115,6 +113,11 @@ class OrderController extends AbstractController
         return $this->render('admin/order/show.html.twig', [
             'order' => $order,
             'invoice' => $invoice,
+            'statusForm' => $this->createForm(OrderStatusType::class, ['status' => $order->getStatus()], [
+                'action' => $this->generateUrl('admin_orders_update_status', ['id' => $order->getId()]),
+                'method' => 'POST',
+                'csrf_token_id' => 'update_status_' . $order->getId(),
+            ])->createView(),
         ]);
     }
 
@@ -127,12 +130,15 @@ class OrderController extends AbstractController
             throw $this->createNotFoundException('Order not found');
         }
         
-        if ($this->isCsrfTokenValid('update_status_' . $order->getId(), $request->request->get('_token'))) {
-            $newStatus = $request->request->get('status');
+        $form = $this->createForm(OrderStatusType::class, ['status' => $order->getStatus()], [
+            'csrf_token_id' => 'update_status_' . $order->getId(),
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $newStatus = (string) $form->get('status')->getData();
             $order->setStatus($newStatus);
-            
             $this->entityManager->flush();
-            
             $this->addFlash('success', $this->translator->trans('admin.orders.flash.status_updated'));
         } else {
             $this->addFlash('error', $this->translator->trans('admin.orders.flash.invalid_csrf'));

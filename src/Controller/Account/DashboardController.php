@@ -3,11 +3,13 @@
 namespace App\Controller\Account;
 
 use App\Entity\User;
+use App\Form\Account\AccountProfileType;
 use App\Repository\InvoiceRepository;
 use App\Repository\OrderRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,6 +43,10 @@ class DashboardController extends AbstractController
         return $this->render('account/dashboard.html.twig', [
             'orders' => $orders,
             'invoices' => $invoices,
+            'profileForm' => $this->createForm(AccountProfileType::class, $user, [
+                'action' => $this->generateUrl('account_profile_update'),
+                'method' => 'POST',
+            ])->createView(),
         ]);
     }
 
@@ -52,48 +58,40 @@ class DashboardController extends AbstractController
             throw $this->createAccessDeniedException('Invalid user session.');
         }
 
-        if (!$this->isCsrfTokenValid('account_profile_update', (string) $request->request->get('_token'))) {
-            $this->addFlash('error', 'account.dashboard.flash.invalid_csrf');
+        $form = $this->createForm(AccountProfileType::class, $user, [
+            'action' => $this->generateUrl('account_profile_update'),
+            'method' => 'POST',
+        ]);
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted()) {
             return $this->redirectToRoute('account_dashboard');
         }
 
-        $firstName = trim((string) $request->request->get('firstName', ''));
-        $lastName = trim((string) $request->request->get('lastName', ''));
-        $email = trim((string) $request->request->get('email', ''));
-        $phone = trim((string) $request->request->get('phone', ''));
-        $company = trim((string) $request->request->get('company', ''));
-        $addressLine1 = trim((string) $request->request->get('addressLine1', ''));
-        $addressLine2 = trim((string) $request->request->get('addressLine2', ''));
-        $postalCode = trim((string) $request->request->get('postalCode', ''));
-        $city = trim((string) $request->request->get('city', ''));
-        $state = trim((string) $request->request->get('state', ''));
-        $countryCode = strtoupper(trim((string) $request->request->get('countryCode', '')));
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (!$form->isValid()) {
             $this->addFlash('error', 'account.dashboard.flash.invalid_email');
             return $this->redirectToRoute('account_dashboard');
         }
 
-        $existingUser = $this->userRepository->findOneBy(['email' => $email]);
+        $existingUser = $this->userRepository->findOneBy(['email' => (string) $user->getEmail()]);
         if ($existingUser instanceof User && $existingUser->getId() !== $user->getId()) {
+            $form->get('email')->addError(new FormError('account.dashboard.flash.email_in_use'));
             $this->addFlash('error', 'account.dashboard.flash.email_in_use');
             return $this->redirectToRoute('account_dashboard');
         }
 
-        $user->setFirstName($firstName !== '' ? $firstName : null);
-        $user->setLastName($lastName !== '' ? $lastName : null);
-        $user->setEmail($email);
-        $user->setPhone($phone !== '' ? $phone : null);
-        $user->setCompany($company !== '' ? $company : null);
-        $user->setAddressLine1($addressLine1 !== '' ? $addressLine1 : null);
-        $user->setAddressLine2($addressLine2 !== '' ? $addressLine2 : null);
-        $user->setPostalCode($postalCode !== '' ? $postalCode : null);
-        $user->setCity($city !== '' ? $city : null);
-        $user->setState($state !== '' ? $state : null);
-        $user->setCountryCode($countryCode !== '' ? $countryCode : null);
+        $user->setFirstName($user->getFirstName() !== '' ? $user->getFirstName() : null);
+        $user->setLastName($user->getLastName() !== '' ? $user->getLastName() : null);
+        $user->setPhone($user->getPhone() !== '' ? $user->getPhone() : null);
+        $user->setCompany($user->getCompany() !== '' ? $user->getCompany() : null);
+        $user->setAddressLine1($user->getAddressLine1() !== '' ? $user->getAddressLine1() : null);
+        $user->setAddressLine2($user->getAddressLine2() !== '' ? $user->getAddressLine2() : null);
+        $user->setPostalCode($user->getPostalCode() !== '' ? $user->getPostalCode() : null);
+        $user->setCity($user->getCity() !== '' ? $user->getCity() : null);
+        $user->setState($user->getState() !== '' ? $user->getState() : null);
+        $user->setCountryCode($user->getCountryCode() !== '' ? $user->getCountryCode() : null);
 
         $this->entityManager->flush();
-
         $this->addFlash('success', 'account.dashboard.flash.profile_updated');
 
         return $this->redirectToRoute('account_dashboard');

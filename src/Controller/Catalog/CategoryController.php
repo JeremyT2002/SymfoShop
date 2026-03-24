@@ -23,10 +23,12 @@ class CategoryController extends AbstractController
     public function index(): Response
     {
         $categories = $this->categoryRepository->findRootCategories();
-        $featuredProducts = $this->productRepository->findActiveProducts(0, 8);
+        $categoryChildrenCounts = $this->categoryRepository->getRootCategoryChildrenCounts();
+        $featuredProducts = $this->productRepository->findActiveProductsForHomepage(8);
 
         return $this->render('catalog/category/index.html.twig', [
             'categories' => $categories,
+            'categoryChildrenCounts' => $categoryChildrenCounts,
             'featuredProducts' => $featuredProducts,
         ]);
     }

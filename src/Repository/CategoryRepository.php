@@ -33,4 +33,27 @@ class CategoryRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Returns child counts for root categories in one query.
+     *
+     * @return array<int, int> map: categoryId => childrenCount
+     */
+    public function getRootCategoryChildrenCounts(): array
+    {
+        $rows = $this->createQueryBuilder('c')
+            ->select('c.id AS id', 'COUNT(ch.id) AS childrenCount')
+            ->leftJoin('c.children', 'ch')
+            ->where('c.parent IS NULL')
+            ->groupBy('c.id')
+            ->getQuery()
+            ->getArrayResult();
+
+        $result = [];
+        foreach ($rows as $row) {
+            $result[(int) $row['id']] = (int) $row['childrenCount'];
+        }
+
+        return $result;
+    }
 }

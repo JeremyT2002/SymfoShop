@@ -12,6 +12,7 @@
 ] %}
 {% set profile_filled = profile_checklist|filter(v => v)|length %}
 {% set profile_pct = profile_checklist|length > 0 ? (profile_filled * 100 / profile_checklist|length)|round : 0 %}
+{% set profileForm = profileForm ?? null %}
 
 {% set order_status_classes = {
     'new': 'bg-slate-100 text-slate-800 ring-slate-600/10',
@@ -142,13 +143,17 @@
                         {% set input_class = 'w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm transition-colors hover:border-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20' %}
 
                         <form method="post" action="{{ path('account_profile_update') }}" class="flex flex-col">
-                            <input type="hidden" name="_token" value="{{ csrf_token('account_profile_update') }}">
+                            {% if profileForm %}
+                                {{ form_widget(profileForm._token) }}
+                            {% else %}
+                                <input type="hidden" name="_token" value="{{ csrf_token('account_profile_update') }}">
+                            {% endif %}
 
                             <div class="p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 lg:items-stretch">
                                 {# Contact card #}
                                 <section class="rounded-xl border border-gray-200/70 bg-gray-50/50 p-4 sm:p-5 ring-1 ring-gray-900/[0.02] h-full flex flex-col min-w-0" aria-labelledby="profile-section-contact">
                                     <div class="flex items-center gap-3 pb-4 mb-1 border-b border-gray-200/80">
-                                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-primary-600 shadow-sm ring-1 ring-gray-200/80">
+                                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-primary-600 shadow-sm ring-1 ring-gray-200/80">
                                             <i class="fas fa-address-card text-sm" aria-hidden="true"></i>
                                         </span>
                                         <div>
@@ -252,9 +257,24 @@
                                             </div>
                                             <div>
                                                 <label for="profile-countryCode" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">{{ 'account.dashboard.profile.country_code'|trans }}</label>
-                                                <input id="profile-countryCode" name="countryCode" type="text" maxlength="2" placeholder="DE"
-                                                       value="{{ app.user.countryCode|default('') }}"
-                                                       class="{{ input_class }} uppercase" autocomplete="country">
+                                                {% if profileForm %}
+                                                    <div class="relative">
+                                                        {{ form_widget(profileForm.countryCode, {
+                                                            attr: {
+                                                                id: 'profile-countryCode',
+                                                                class: input_class ~ ' appearance-none pr-10',
+                                                                autocomplete: 'country'
+                                                            }
+                                                        }) }}
+                                                        <span class="pointer-events-none absolute inset-y-0 right-0 flex w-10 items-center justify-center text-gray-400">
+                                                            <i class="fas fa-chevron-down text-xs" aria-hidden="true"></i>
+                                                        </span>
+                                                    </div>
+                                                {% else %}
+                                                    <input id="profile-countryCode" name="countryCode" type="text" maxlength="2" placeholder="DE"
+                                                           value="{{ app.user.countryCode|default('') }}"
+                                                           class="{{ input_class }} uppercase" autocomplete="country">
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </fieldset>
