@@ -176,6 +176,9 @@ checkout:
   place_order: Bestellung aufgeben
   customer_information: Kundeninformationen
   subtotal: Zwischensumme
+  shipping_method: Versand
+  shipping_amount: Versand
+  shipping_free: Kostenlos
   tax: Steuer
   terms_agreement: Mit der Bestellung stimmen Sie unseren Allgemeinen Geschäftsbedingungen zu.
   phone_hint: "Optional: Für Bestellupdates und Lieferbenachrichtigungen"
@@ -219,6 +222,7 @@ checkout:
   fallback_method_stripe: Stripe
   flash:
     cart_empty: Ihr Warenkorb ist leer. Bitte fügen Sie vor dem Checkout Artikel hinzu.
+    shipping_method_unavailable: Die ausgewählte Versandoption ist nicht verfügbar.
     payment_method_unavailable: Die ausgewählte Zahlungsmethode ist nicht verfügbar.
     order_not_pending: Die Bestellung befindet sich nicht im Status "Zahlung ausstehend".
   not_found:
@@ -503,6 +507,7 @@ invoice_pdf:
     vat: MwSt.
     total: Gesamt
   subtotal: Zwischensumme
+  shipping: Versand
   tax_included: inkl. MwSt.
   grand_total: Gesamtbetrag
   thank_you_strong: Vielen Dank für Ihren Einkauf bei %shop%.

@@ -7,7 +7,9 @@ use App\DTO\Checkout\CustomerInfoDTO;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\ProductVariant;
+use App\Entity\ShippingMethod;
 use App\Repository\OrderRepository;
+use App\Repository\ShippingMethodRepository;
 use App\Service\Cart\CartService;
 use App\Service\Cart\CouponService;
 use App\Service\Inventory\InventoryService;
@@ -15,14 +17,13 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class CheckoutService
 {
-    private const TAX_RATE = '0.2000'; // 20% default tax rate
-
     public function __construct(
         private readonly CartService $cartService,
         private readonly CouponService $couponService,
         private readonly EntityManagerInterface $entityManager,
         private readonly OrderRepository $orderRepository,
-        private readonly InventoryService $inventoryService
+        private readonly InventoryService $inventoryService,
+        private readonly ShippingMethodRepository $shippingMethodRepository,
     ) {
     }
 
@@ -101,11 +102,19 @@ class CheckoutService
     }
 
     /**
-     * Calculate totals for cart items
-     *
-     * @return array{subtotal: int, discount: int, taxTotal: int, grandTotal: int, currency: string, couponCode: ?string}
+     * @return array{
+     *   subtotal: int,
+     *   discount: int,
+     *   shippingAmount: int,
+     *   shippingMethodCode: ?string,
+     *   shippingMethodLabel: ?string,
+     *   taxTotal: int,
+     *   grandTotal: int,
+     *   currency: string,
+     *   couponCode: ?string
+     * }
      */
-    public function calculateTotals(): array
+    public function calculateTotals(?string $shippingMethodCode = null, ?string $countryCode = null): array
     {
         $items = $this->cartService->getDetailedItems();
         $totals = $this->cartService->getTotals();
@@ -114,6 +123,9 @@ class CheckoutService
             return [
                 'subtotal' => 0,
                 'discount' => 0,
+                'shippingAmount' => 0,
+                'shippingMethodCode' => null,
+                'shippingMethodLabel' => null,
                 'taxTotal' => 0,
                 'grandTotal' => 0,
                 'currency' => 'EUR',
@@ -125,27 +137,34 @@ class CheckoutService
         $discount = 0;
         $couponCode = $totals['couponCode'] ?? null;
 
-        // Calculate discount if coupon is applied
         if ($couponCode) {
-            $user = null; // Could be injected if needed
+            $user = null;
             $validation = $this->couponService->validate($couponCode, $user, $subtotal);
             if ($validation['valid'] && $validation['coupon']) {
                 $discount = $this->couponService->calculateDiscount($validation['coupon'], $subtotal);
             } else {
-                // Invalid coupon, clear it
                 $this->cartService->clearCoupon();
                 $couponCode = null;
             }
         }
 
         $subtotalAfterDiscount = $subtotal - $discount;
-        $taxRate = (float) self::TAX_RATE;
-        $taxTotal = (int) round($subtotalAfterDiscount * $taxRate);
-        $grandTotal = $subtotalAfterDiscount + $taxTotal;
+        $shipping = $this->resolveShippingMethod($shippingMethodCode);
+        $shippingAmount = $shipping?->getAmountCents() ?? 0;
+        $shippingCode = $shipping?->getCode();
+        $shippingLabel = $shipping?->getName();
+
+        $taxRate = $this->resolveTaxRateForCountry($countryCode);
+        $taxableBase = $subtotalAfterDiscount + $shippingAmount;
+        $taxTotal = (int) round($taxableBase * $taxRate);
+        $grandTotal = $taxableBase + $taxTotal;
 
         return [
             'subtotal' => $subtotal,
             'discount' => $discount,
+            'shippingAmount' => $shippingAmount,
+            'shippingMethodCode' => $shippingCode,
+            'shippingMethodLabel' => $shippingLabel,
             'taxTotal' => $taxTotal,
             'grandTotal' => $grandTotal,
             'currency' => $totals['currency'],
@@ -156,7 +175,7 @@ class CheckoutService
     /**
      * Create order from cart with price snapshots
      */
-    public function createOrder(CustomerInfoDTO $customerInfo, AddressDTO $shippingAddress): Order
+    public function createOrder(CustomerInfoDTO $customerInfo, AddressDTO $shippingAddress, ?string $shippingMethodCode = null): Order
     {
         $validation = $this->validateCart();
         if (!$validation['valid']) {
@@ -164,7 +183,9 @@ class CheckoutService
         }
 
         $items = $this->cartService->getDetailedItems();
-        $totals = $this->calculateTotals();
+        $countryForTax = trim($shippingAddress->country) !== '' ? trim($shippingAddress->country) : null;
+        $totals = $this->calculateTotals($shippingMethodCode, $countryForTax);
+        $taxRateStr = $this->formatTaxRate($this->resolveTaxRateForCountry($countryForTax));
 
         $order = new Order();
         $order->setOrderNumber($this->generateOrderNumber());
@@ -174,11 +195,10 @@ class CheckoutService
         $order->setSubtotal($totals['subtotal']);
         $order->setTaxTotal($totals['taxTotal']);
         $order->setGrandTotal($totals['grandTotal']);
-        
-        // Store coupon code if applied (will be added to Order entity in migration)
-        // For now, we'll add it to a notes field or extend Order entity later
+        $order->setShippingAmount($totals['shippingAmount']);
+        $order->setShippingMethodCode($totals['shippingMethodCode']);
+        $order->setShippingMethodLabel($totals['shippingMethodLabel']);
 
-        // Create order items with price snapshots
         foreach ($items as $item) {
             $variant = $item['variant'];
             $quantity = $item['quantity'];
@@ -187,9 +207,9 @@ class CheckoutService
             $orderItem->setSku($variant->getSku());
             $orderItem->setNameSnapshot($variant->getProduct()->getName());
             $orderItem->setQuantity($quantity);
-            $orderItem->setUnitPriceAmount($variant->getPriceAmount()); // Frozen price
-            $orderItem->setTaxRate(self::TAX_RATE);
-            $orderItem->setTotalAmount($item['itemTotal']); // Frozen total
+            $orderItem->setUnitPriceAmount($variant->getPriceAmount());
+            $orderItem->setTaxRate($taxRateStr);
+            $orderItem->setTotalAmount($item['itemTotal']);
 
             $order->addItem($orderItem);
         }
@@ -197,19 +217,53 @@ class CheckoutService
         $this->entityManager->persist($order);
         $this->entityManager->flush();
 
-        // Reserve inventory for the order
         $reservationResult = $this->inventoryService->reserve($order);
         if (!$reservationResult['success']) {
-            // Rollback order creation if reservation fails
             $this->entityManager->remove($order);
             $this->entityManager->flush();
             throw new \RuntimeException('Inventory reservation failed: ' . implode(', ', $reservationResult['errors']));
         }
 
-        // Clear cart after successful order creation
         $this->cartService->clear();
 
         return $order;
+    }
+
+    private function resolveShippingMethod(?string $code): ?ShippingMethod
+    {
+        $active = $this->shippingMethodRepository->findActiveOrdered();
+        if ($active === []) {
+            return null;
+        }
+
+        if ($code !== null && $code !== '') {
+            $found = $this->shippingMethodRepository->findOneByCode($code);
+            if ($found !== null && $found->isActive()) {
+                return $found;
+            }
+        }
+
+        return $this->shippingMethodRepository->findFirstActive();
+    }
+
+    private function resolveTaxRateForCountry(?string $countryCode): float
+    {
+        $cc = $countryCode !== null ? strtoupper(trim($countryCode)) : '';
+        if ($cc === '') {
+            return 0.19;
+        }
+
+        return match ($cc) {
+            'DE' => 0.19,
+            'FR' => 0.20,
+            'US' => 0.0,
+            default => 0.19,
+        };
+    }
+
+    private function formatTaxRate(float $rate): string
+    {
+        return number_format($rate, 4, '.', '');
     }
 
     /**
@@ -225,4 +279,3 @@ class CheckoutService
         return $orderNumber;
     }
 }
-

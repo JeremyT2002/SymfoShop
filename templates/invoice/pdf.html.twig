@@ -286,6 +286,12 @@
                             <td>{{ 'invoice_pdf.subtotal'|trans }}</td>
                             <td class="text-right">{{ (order.subtotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
                         </tr>
+                        {% if order.shippingAmount > 0 or order.shippingMethodLabel %}
+                        <tr>
+                            <td>{{ 'invoice_pdf.shipping'|trans }}{% if order.shippingMethodLabel %} ({{ order.shippingMethodLabel }}){% endif %}</td>
+                            <td class="text-right">{{ (order.shippingAmount / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
+                        </tr>
+                        {% endif %}
                         <tr>
                             <td>{{ 'invoice_pdf.tax_included'|trans }}</td>
                             <td class="text-right">{{ (order.taxTotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>

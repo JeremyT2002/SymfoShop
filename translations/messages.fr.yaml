@@ -176,6 +176,9 @@ checkout:
   place_order: Passer la commande
   customer_information: Informations client
   subtotal: Sous-total
+  shipping_method: Livraison
+  shipping_amount: Livraison
+  shipping_free: Gratuit
   tax: Taxe
   terms_agreement: En passant votre commande, vous acceptez nos conditions générales.
   phone_hint: "Optionnel : pour les mises à jour de commande et notifications de livraison"
@@ -219,6 +222,7 @@ checkout:
   fallback_method_stripe: Stripe
   flash:
     cart_empty: Votre panier est vide. Veuillez ajouter des articles avant de commander.
+    shipping_method_unavailable: L'option de livraison sélectionnée n'est pas disponible.
     payment_method_unavailable: Le mode de paiement sélectionné n'est pas disponible.
     order_not_pending: La commande n'est pas en attente de paiement.
   not_found:
@@ -412,6 +416,36 @@ admin:
       created: Moyen de paiement créé.
       updated: Moyen de paiement mis à jour.
       removed: Moyen de paiement supprimé.
+  shipping_methods:
+    nav: Modes de livraison
+    title: Modes de livraison
+    subtitle: Configurez les options et montants (centimes, HT) affichés au checkout.
+    new: Nouvelle méthode
+    new_title: Créer un mode de livraison
+    edit_title: Modifier le mode de livraison
+    back: Retour aux modes de livraison
+    create_submit: Créer
+    save_submit: Enregistrer
+    confirm_delete: Supprimer ce mode de livraison ?
+    empty: Aucun mode de livraison configuré.
+    table:
+      name: Nom
+      code: Code
+      amount_cents: Montant (centimes)
+      sort: Tri
+      active: Actif
+      actions: Actions
+    form:
+      code: Code
+      name: Nom affiché
+      amount_cents: Prix (centimes, HT)
+      sort: Ordre
+      active: Actif
+    flash:
+      code_name_required: Le code et le nom sont obligatoires.
+      created: Mode de livraison créé.
+      updated: Mode de livraison mis à jour.
+      removed: Mode de livraison supprimé.
   orders:
     page_title: Commandes
     heading: Commandes
@@ -503,6 +537,7 @@ invoice_pdf:
     vat: TVA
     total: Total
   subtotal: Sous-total
+  shipping: Livraison
   tax_included: TVA incluse
   grand_total: Total
   thank_you_strong: Merci pour votre achat chez %shop%.
