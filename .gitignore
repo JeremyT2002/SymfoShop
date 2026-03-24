@@ -117,6 +117,7 @@ secrets/
 # Application specific
 /storage/
 /uploads/
+/public/uploads/
 /private/
 /invoices/
 *.pdf

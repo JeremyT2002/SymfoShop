@@ -395,64 +395,104 @@
     
     <!-- Footer -->
     <footer class="bg-gray-900 text-white mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <div class="flex items-center space-x-2 mb-4">
-                        <i class="fas fa-shopping-bag text-2xl"></i>
+        {% set footerCols = theme_config().footer.columns|default([]) %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-14">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
+                <div class="lg:col-span-4">
+                    <div class="flex items-center space-x-2.5 mb-4">
+                        <span class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                            <i class="fas fa-shopping-bag text-lg"></i>
+                        </span>
                         <span class="text-xl font-bold">{{ theme_config().brand.siteName|default('SymfoShop') }}</span>
                     </div>
-                    <p class="text-gray-400 text-sm">{{ 'footer.description'|trans }}</p>
-                    {% if theme_config().footer.socialLinks is defined and theme_config().footer.socialLinks|length > 0 %}
-                    <div class="flex gap-3 mt-4">
-                        {% for link in theme_config().footer.socialLinks %}
-                        <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors" aria-label="{{ link.platform|default('Social') }}">
-                            <i class="fab fa-{{ link.platform }} text-lg"></i>
-                        </a>
-                        {% endfor %}
+                    <p class="text-sm leading-6 text-gray-300 max-w-md">{{ 'footer.description'|trans }}</p>
+
+                    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div class="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-gray-200">
+                            <i class="fas fa-shield-alt mr-1.5 text-emerald-300"></i>{{ 'footer.rights'|trans }}
+                        </div>
+                        <div class="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-gray-200">
+                            <i class="fas fa-truck mr-1.5 text-sky-300"></i>{{ 'footer.shipping'|trans }}
+                        </div>
+                        <div class="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-gray-200">
+                            <i class="fas fa-headset mr-1.5 text-violet-300"></i>{{ 'footer.support'|trans }}
+                        </div>
                     </div>
+
+                    {% if theme_config().footer.socialLinks is defined and theme_config().footer.socialLinks|length > 0 %}
+                        <div class="flex flex-wrap gap-2.5 mt-6">
+                            {% for link in theme_config().footer.socialLinks %}
+                                <a href="{{ link.url }}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                                   aria-label="{{ link.platform|default('Social') }}">
+                                    <i class="fab fa-{{ link.platform }} text-sm"></i>
+                                </a>
+                            {% endfor %}
+                        </div>
                     {% endif %}
                 </div>
-                {% set footerCols = theme_config().footer.columns|default([]) %}
-                {% if footerCols|length > 0 %}
-                    {% for col in footerCols %}
-                    <div>
-                        <h3 class="font-semibold mb-4">{{ col.title|default('Links') }}</h3>
-                        <ul class="space-y-2 text-sm text-gray-400">
-                            {% for link in col.links|default([]) %}
-                            <li><a href="{{ link.url }}" {% if link.external|default(false) %}target="_blank" rel="noopener noreferrer"{% endif %} class="hover:text-white transition-colors">{{ link.label }}</a></li>
+
+                <div class="lg:col-span-8">
+                    {% if footerCols|length > 0 %}
+                        {% set footerGridClass = footerCols|length == 1
+                            ? 'grid-cols-1'
+                            : (footerCols|length == 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3')
+                        %}
+                        <div class="grid {{ footerGridClass }} gap-8">
+                            {% for col in footerCols %}
+                                <div>
+                                    <h3 class="font-semibold text-white mb-3">{{ col.title|default('Links') }}</h3>
+                                    <ul class="space-y-2.5 text-sm">
+                                        {% for link in col.links|default([]) %}
+                                            <li>
+                                                <a href="{{ link.url }}"
+                                                   {% if link.external|default(false) %}target="_blank" rel="noopener noreferrer"{% endif %}
+                                                   class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2">
+                                                    <span class="w-1 h-1 rounded-full bg-white/40"></span>
+                                                    <span>{{ link.label }}</span>
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
                             {% endfor %}
-                        </ul>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                <div>
-                    <h3 class="font-semibold mb-4">{{ 'footer.shop'|trans }}</h3>
-                    <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="{{ path('catalog_home') }}" class="hover:text-white transition-colors">{{ 'footer.categories'|trans }}</a></li>
-                        <li><a href="{{ path('cart_show') }}" class="hover:text-white transition-colors">{{ 'footer.cart'|trans }}</a></li>
-                    </ul>
+                        </div>
+                    {% else %}
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                            <div>
+                                <h3 class="font-semibold text-white mb-3">{{ 'footer.shop'|trans }}</h3>
+                                <ul class="space-y-2.5 text-sm">
+                                    <li><a href="{{ path('catalog_home') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.categories'|trans }}</a></li>
+                                    <li><a href="{{ path('cart_show') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.cart'|trans }}</a></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-white mb-3">{{ 'footer.account'|trans }}</h3>
+                                <ul class="space-y-2.5 text-sm">
+                                    <li><a href="{{ path('login') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.login'|trans }}</a></li>
+                                    <li><a href="{{ path('register') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.register'|trans }}</a></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-white mb-3">{{ 'footer.support'|trans }}</h3>
+                                <ul class="space-y-2.5 text-sm">
+                                    <li><a href="#" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.contact'|trans }}</a></li>
+                                    <li><a href="#" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.faq'|trans }}</a></li>
+                                    <li><a href="#" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.shipping'|trans }}</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
-                <div>
-                    <h3 class="font-semibold mb-4">{{ 'footer.account'|trans }}</h3>
-                    <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="{{ path('login') }}" class="hover:text-white transition-colors">{{ 'footer.login'|trans }}</a></li>
-                        <li><a href="{{ path('register') }}" class="hover:text-white transition-colors">{{ 'footer.register'|trans }}</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-semibold mb-4">{{ 'footer.support'|trans }}</h3>
-                    <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="#" class="hover:text-white transition-colors">{{ 'footer.contact'|trans }}</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">{{ 'footer.faq'|trans }}</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">{{ 'footer.shipping'|trans }}</a></li>
-                    </ul>
-                </div>
-                {% endif %}
             </div>
-            
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-                <p>{{ theme_config().footer.copyright|default('© ' ~ 'now'|date('Y') ~ ' SymfoShop. ' ~ ('footer.rights'|trans)) }}</p>
+
+            <div class="border-t border-gray-800/80 mt-10 pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm text-gray-400">
+                <p>
+                    &copy; <span id="js-footer-year">{{ 'now'|date('Y') }}</span> {{ theme_config().brand.siteName|default('SymfoShop') }}. {{ 'footer.rights'|trans }}
+                </p>
+                <p class="text-xs text-gray-500">Built with Symfony</p>
             </div>
         </div>
     </footer>
@@ -475,6 +515,14 @@
             animation: slide-in-right 0.3s ease-out;
         }
     </style>
+    <script>
+        (function () {
+            var y = document.getElementById('js-footer-year');
+            if (y) {
+                y.textContent = String(new Date().getFullYear());
+            }
+        })();
+    </script>
     {% endblock %}
 </body>
 </html>
