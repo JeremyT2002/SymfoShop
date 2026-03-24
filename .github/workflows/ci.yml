@@ -45,6 +45,7 @@ jobs:
           cat > .env << 'EOF'
           APP_ENV=dev
           APP_SECRET=0000000000000000000000000000000000000000000000000000000000000000
+          DEFAULT_URI=http://localhost
           DATABASE_URL="sqlite:///%kernel.project_dir%/var/data.db"
           MAILER_DSN=null://null
           MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0
