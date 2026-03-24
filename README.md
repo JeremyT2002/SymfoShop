@@ -36,6 +36,8 @@ Access at `http://localhost:8000`
 
 **Docker Commands**: `docker-up`, `docker-down`, `docker-build`, `docker-logs`, `docker-db-setup`, `docker-load-fixture`, `docker-admin-user`
 
+Docker configuration files live in `docker/` (`docker/compose.yaml`, `docker/compose.override.yaml`, `docker/Dockerfile`).
+
 ## 🛠️ Local Installation
 
 ```bash

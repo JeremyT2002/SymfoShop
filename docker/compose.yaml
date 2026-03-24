@@ -2,12 +2,12 @@
 services:
   app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
     ports:
       - "8000:80"
     volumes:
-      - .:/var/www/html:cached
+      - ../:/var/www/html:cached
     depends_on:
       database:
         condition: service_healthy
