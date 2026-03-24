@@ -487,6 +487,9 @@ account:
       profile_updated: Deine Profildaten wurden aktualisiert.
 
 admin:
+  dashboard:
+    title: Dashboard
+    no_widgets: Keine Widgets konfiguriert. Nutzen Sie „Dashboard anpassen“, um Widgets hinzuzufügen.
   payment_methods:
     nav: Zahlungsmethoden
     title: Zahlungsmethoden
@@ -522,6 +525,51 @@ admin:
       created: Zahlungsmethode erstellt.
       updated: Zahlungsmethode aktualisiert.
       removed: Zahlungsmethode entfernt.
+  shipping_methods:
+    nav: Versandmethoden
+    title: Versandmethoden
+    subtitle: Versandoptionen und Beträge (Kleinsteinheiten, zzgl. MwSt.) für den Checkout konfigurieren.
+    new: Neue Methode
+    new_title: Versandmethode erstellen
+    edit_title: Versandmethode bearbeiten
+    back: Zurück zu Versandmethoden
+    create_submit: Methode erstellen
+    save_submit: Speichern
+    confirm_delete: Diese Versandmethode löschen?
+    empty: Noch keine Versandmethoden konfiguriert.
+    table:
+      name: Name
+      code: Code
+      amount_cents: Betrag (Cent)
+      sort: Sortierung
+      active: Aktiv
+      actions: Aktionen
+    form:
+      code: Code
+      name: Anzeigename
+      amount_cents: Preis (Cent, zzgl. MwSt.)
+      sort: Sortierreihenfolge
+      active: Aktiv
+    flash:
+      code_name_required: Code und Name sind erforderlich.
+      created: Versandmethode erstellt.
+      updated: Versandmethode aktualisiert.
+      removed: Versandmethode entfernt.
+  widgets:
+    kpi_products:
+      title: Produkte gesamt
+    kpi_orders:
+      title: Bestellungen gesamt
+    kpi_users:
+      title: Benutzer gesamt
+    recent_orders:
+      title: Letzte Bestellungen
+      order_number: Bestellnr.
+      customer: Kunde
+      total: Summe
+      status: Status
+      actions: Aktionen
+      empty: Keine Bestellungen gefunden
   orders:
     page_title: Bestellungen
     heading: Bestellungen
