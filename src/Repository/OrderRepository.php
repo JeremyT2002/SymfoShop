@@ -25,6 +25,17 @@ class OrderRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    public function findOneByOrderNumberAndEmail(string $orderNumber, string $email): ?Order
+    {
+        return $this->createQueryBuilder('o')
+            ->where('o.orderNumber = :orderNumber')
+            ->andWhere('LOWER(o.email) = :email')
+            ->setParameter('orderNumber', trim($orderNumber))
+            ->setParameter('email', mb_strtolower(trim($email)))
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     /**
      * @return list<Order>
      */

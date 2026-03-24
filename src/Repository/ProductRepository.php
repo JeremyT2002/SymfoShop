@@ -331,6 +331,22 @@ class ProductRepository extends ServiceEntityRepository
         ];
     }
 
+    /**
+     * @return list<string>
+     */
+    public function findActiveSlugs(): array
+    {
+        $rows = $this->createQueryBuilder('p')
+            ->select('p.slug')
+            ->where('p.status = :status')
+            ->setParameter('status', ProductStatus::ACTIVE)
+            ->orderBy('p.slug', 'ASC')
+            ->getQuery()
+            ->getScalarResult();
+
+        return array_map(static fn (array $r): string => (string) $r['slug'], $rows);
+    }
+
     private function createAdminListQueryBuilder(?ProductStatus $status, ?string $search): QueryBuilder
     {
         $qb = $this->createQueryBuilder('p');

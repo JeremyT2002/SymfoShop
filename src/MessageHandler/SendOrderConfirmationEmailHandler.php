@@ -2,18 +2,19 @@
 
 namespace App\MessageHandler;
 
-use App\Entity\Invoice;
-use App\Entity\Order;
 use App\Message\SendOrderConfirmationEmail;
 use App\Repository\InvoiceRepository;
 use App\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Exception\RecoverableMessageHandlingException;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Translation\LocaleSwitcher;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
 #[AsMessageHandler]
@@ -25,7 +26,13 @@ class SendOrderConfirmationEmailHandler
         private readonly InvoiceRepository $invoiceRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly LoggerInterface $logger,
-        private readonly Environment $twig
+        private readonly Environment $twig,
+        private readonly LocaleSwitcher $localeSwitcher,
+        private readonly TranslatorInterface $translator,
+        #[Autowire('%kernel.default_locale%')]
+        private readonly string $defaultLocale,
+        #[Autowire('%env(default:app.default_mailer_from:MAILER_FROM)%')]
+        private readonly string $mailerFrom,
     ) {
     }
 
@@ -37,6 +44,7 @@ class SendOrderConfirmationEmailHandler
             $this->logger->error('Order not found for email sending', [
                 'order_id' => $message->getOrderId(),
             ]);
+
             return;
         }
 
@@ -46,42 +54,53 @@ class SendOrderConfirmationEmailHandler
             $this->logger->error('Invoice not found for email sending', [
                 'invoice_number' => $message->getInvoiceNumber(),
             ]);
+
             return;
         }
 
+        $locale = $order->getLocale();
+        if ($locale === '') {
+            $locale = $this->defaultLocale;
+        }
+
         try {
-            $email = (new Email())
-                ->from('noreply@symfoshop.local')
-                ->to($order->getEmail())
-                ->subject('Order Confirmation - ' . $order->getOrderNumber())
-                ->html($this->twig->render('email/order_confirmation.html.twig', [
-                    'order' => $order,
-                    'invoice' => $invoice,
-                ]));
+            $this->localeSwitcher->runWithLocale($locale, function () use ($order, $invoice, $locale): void {
+                $subject = $this->translator->trans('email.order_confirmation.subject', [
+                    '%order_number%' => $order->getOrderNumber(),
+                ]);
+                $email = (new Email())
+                    ->from($this->mailerFrom)
+                    ->to($order->getEmail())
+                    ->subject($subject)
+                    ->html($this->twig->render('email/order_confirmation.html.twig', [
+                        'order' => $order,
+                        'invoice' => $invoice,
+                    ]));
 
-            // Attach PDF if available
-            if ($invoice->getPdfPath() && file_exists($invoice->getPdfPath())) {
-                $email->attachFromPath($invoice->getPdfPath(), 'invoice_' . $invoice->getInvoiceNumber() . '.pdf', 'application/pdf');
-            }
+                if ($invoice->getPdfPath() && file_exists($invoice->getPdfPath())) {
+                    $attachName = $this->translator->trans('email.order_confirmation.attachment_prefix')
+                        . '_' . $invoice->getInvoiceNumber() . '.pdf';
+                    $email->attachFromPath($invoice->getPdfPath(), $attachName, 'application/pdf');
+                }
 
-            $this->mailer->send($email);
+                $this->mailer->send($email);
 
-            // Mark invoice as sent
-            $invoice->setSentAt(new \DateTimeImmutable());
-            $this->entityManager->flush();
+                $invoice->setSentAt(new \DateTimeImmutable());
+                $this->entityManager->flush();
 
-            $this->logger->info('Order confirmation email sent', [
-                'order_id' => $order->getId(),
-                'order_number' => $order->getOrderNumber(),
-                'invoice_number' => $invoice->getInvoiceNumber(),
-            ]);
+                $this->logger->info('Order confirmation email sent', [
+                    'order_id' => $order->getId(),
+                    'order_number' => $order->getOrderNumber(),
+                    'invoice_number' => $invoice->getInvoiceNumber(),
+                    'locale' => $locale,
+                ]);
+            });
         } catch (TransportExceptionInterface $e) {
             $this->logger->error('Failed to send order confirmation email', [
                 'order_id' => $order->getId(),
                 'error' => $e->getMessage(),
             ]);
 
-            // Re-throw as recoverable to allow retry
             throw new RecoverableMessageHandlingException('Email transport failed: ' . $e->getMessage(), 0, $e);
         } catch (\Exception $e) {
             $this->logger->error('Unexpected error sending order confirmation email', [
@@ -90,10 +109,7 @@ class SendOrderConfirmationEmailHandler
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            // Don't retry on non-recoverable errors
             throw $e;
         }
     }
-
 }
-

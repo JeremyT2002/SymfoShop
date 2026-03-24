@@ -1,0 +1,31 @@
+{% extends 'legal/_layout.html.twig' %}
+
+{% block title %}{{ 'legal.faq.meta_title'|trans }} · {{ theme_config().brand.siteName|default('SymfoShop') }}{% endblock %}
+{% block meta_description %}{{ 'legal.faq.meta_description'|trans }}{% endblock %}
+
+{% block legal_heading %}{{ 'legal.faq.heading'|trans }}{% endblock %}
+
+{% block legal_content %}
+    <div class="space-y-8 text-gray-700 dark:text-gray-300 text-base leading-relaxed">
+        <div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ 'legal.faq.q1'|trans }}</h2>
+            <p class="mt-2">{{ 'legal.faq.a1'|trans }}</p>
+        </div>
+        <div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ 'legal.faq.q2'|trans }}</h2>
+            <p class="mt-2">{{ 'legal.faq.a2'|trans }}</p>
+        </div>
+        <div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ 'legal.faq.q3'|trans }}</h2>
+            <p class="mt-2">{{ 'legal.faq.a3'|trans }}</p>
+        </div>
+        <div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ 'legal.faq.q4'|trans }}</h2>
+            <p class="mt-2">{{ 'legal.faq.a4'|trans }}</p>
+        </div>
+        <div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ 'legal.faq.q5'|trans }}</h2>
+            <p class="mt-2">{{ 'legal.faq.a5'|trans }}</p>
+        </div>
+    </div>
+{% endblock %}

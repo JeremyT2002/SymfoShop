@@ -1,0 +1,20 @@
+{% extends 'legal/_layout.html.twig' %}
+
+{% block title %}{{ 'legal.imprint.meta_title'|trans }} · {{ theme_config().brand.siteName|default('SymfoShop') }}{% endblock %}
+{% block meta_description %}{{ 'legal.imprint.meta_description'|trans }}{% endblock %}
+
+{% block legal_heading %}{{ 'legal.imprint.heading'|trans }}{% endblock %}
+
+{% block legal_content %}
+    <div class="space-y-6 text-gray-700 dark:text-gray-300 text-base leading-relaxed">
+        <p>{{ 'legal.imprint.p1'|trans }}</p>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 pt-2">{{ 'legal.imprint.h_operator'|trans }}</h2>
+        <p class="whitespace-pre-line">{{ 'legal.imprint.p_operator'|trans }}</p>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 pt-2">{{ 'legal.imprint.h_contact'|trans }}</h2>
+        <p>{{ 'legal.imprint.p_contact'|trans }}</p>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 pt-2">{{ 'legal.imprint.h_register'|trans }}</h2>
+        <p>{{ 'legal.imprint.p_register'|trans }}</p>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 pt-2">{{ 'legal.imprint.h_dispute'|trans }}</h2>
+        <p>{{ 'legal.imprint.p_dispute'|trans }}</p>
+    </div>
+{% endblock %}

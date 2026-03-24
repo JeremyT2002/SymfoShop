@@ -10,9 +10,9 @@ A production-grade e-commerce shop system built with Symfony 7.4 and PHP 8.2+.
 
 ## 🚀 Features
 
-**Core E-Commerce**: Catalog management (products, variants, categories), shopping cart, order management with Symfony Workflow, Stripe payment processing, inventory management, PDF invoices, audit logging, admin panel, RESTful API with Swagger/OpenAPI docs, multi-language support (EN/DE/FR)
+**Core E-Commerce**: Catalog management (products, variants, categories), shopping cart, order management with Symfony Workflow, **Stripe** and **PayPal** (Orders API v2) payment processing, shipping methods and country-based VAT at checkout, inventory management, PDF invoices, audit logging, admin panel, RESTful API with Swagger/OpenAPI docs, multi-language support (EN/DE/FR)
 
-**User Features**: Authentication (registration, login, password reset), role-based access control, wishlist with heart icon toggle, coupon/discount codes
+**User Features**: Authentication (registration, login, password reset), role-based access control, wishlist with heart icon toggle, coupon/discount codes, storefront **legal pages** (privacy, cookies, returns, terms, imprint) and a **cookie consent** banner (localStorage)
 
 **Frontend**: Tailwind CSS design system, Font Awesome icons, Alpine.js notifications, responsive mobile-first design, real-time cart updates, modular ES6 JavaScript architecture
 
@@ -84,6 +84,13 @@ With `APP_ENV=prod`, Monolog writes **JSON** to **stderr** (see `config/packages
 - **Signature verification** uses `\Stripe\Webhook::constructEvent()`; missing or invalid `Stripe-Signature` → `400`.
 - **Idempotency:** each Stripe `event.id` is stored in `processed_webhook_event` with status `pending` → `completed`. Duplicate deliveries return `200` once completed. Concurrent deliveries for the same event may receive `503` with `Retry-After` until the first finishes.
 - **Failures:** if handling throws after the claim is inserted, the claim row is removed so Stripe retries can succeed.
+
+### PayPal Checkout (`PAYMENT_PROVIDER=paypal`)
+
+- **Credentials:** set `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` (sandbox first). Optional `PAYPAL_BASE_URL` (default `https://api-m.sandbox.paypal.com`; live: `https://api-m.paypal.com`).
+- **Flow:** after placing an order, the customer is redirected to PayPal. **Return URL:** `GET /payment/paypal/return` (configured in the Orders API `application_context`). **Cancel:** `GET /payment/paypal/cancel`.
+- **Webhooks:** `POST /webhook/paypal` — set `PAYPAL_WEBHOOK_ID` from the PayPal Developer dashboard and register the same URL. Events are verified with PayPal’s signature API; idempotency uses `processed_webhook_event` (same table as Stripe, distinct event IDs).
+- **Stub mode:** if `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` are unset, behavior matches the old simulator (`paypal_…` reference + dev payment simulator UI).
 
 ## 📚 Usage
 

@@ -1,0 +1,13 @@
+{% extends 'catalog/base.html.twig' %}
+
+{% block catalog_body %}
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+        <article class="max-w-none">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">{% block legal_heading %}{% endblock %}</h1>
+            <p class="text-sm text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-3 mb-8">
+                {{ 'legal.disclaimer'|trans }}
+            </p>
+            {% block legal_content %}{% endblock %}
+        </article>
+    </div>
+{% endblock %}

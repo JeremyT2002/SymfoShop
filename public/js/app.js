@@ -8,6 +8,7 @@ import { init as initLanguageSwitcher } from './components/language-switcher.js'
 import { init as initColorSchemeToggle } from './components/color-scheme-toggle.js';
 import { init as initAddToCart } from './global/add-to-cart.js';
 import { init as initWishlist } from './features/wishlist.js';
+import { init as initCookieConsent, openCookiePreferences } from './components/cookie-consent.js';
 
 // Initialize core components (always loaded)
 initMobileMenu();
@@ -15,6 +16,14 @@ initLanguageSwitcher();
 initColorSchemeToggle();
 initAddToCart();
 initWishlist();
+initCookieConsent();
+
+document.querySelectorAll('[data-open-cookie-preferences]').forEach((el) => {
+    el.addEventListener('click', (e) => {
+        e.preventDefault();
+        openCookiePreferences();
+    });
+});
 
 // Initialize page-specific modules based on data-js-page attribute
 document.addEventListener('DOMContentLoaded', function() {

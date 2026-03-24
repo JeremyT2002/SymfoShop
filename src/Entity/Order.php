@@ -26,6 +26,10 @@ class Order
     #[ORM\Column(type: Types::STRING, length: 255)]
     private string $email;
 
+    /** Request locale at checkout (ISO language, e.g. en, de, fr) for transactional emails */
+    #[ORM\Column(type: Types::STRING, length: 10, options: ['default' => 'en'])]
+    private string $locale = 'en';
+
     #[ORM\Column(type: Types::STRING, length: 3)]
     private string $currency;
 
@@ -100,6 +104,17 @@ class Order
     public function setEmail(string $email): self
     {
         $this->email = $email;
+        return $this;
+    }
+
+    public function getLocale(): string
+    {
+        return $this->locale;
+    }
+
+    public function setLocale(string $locale): self
+    {
+        $this->locale = $locale;
         return $this;
     }
 

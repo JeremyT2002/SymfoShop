@@ -1,0 +1,9 @@
+# https://www.robotstxt.org/
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_dev/
+Disallow: /checkout/payment/
+Disallow: /webhook/
