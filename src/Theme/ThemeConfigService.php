@@ -2,6 +2,7 @@
 
 namespace App\Theme;
 
+use App\Entity\Shop;
 use App\Entity\Theme;
 use App\Entity\ThemeRevision;
 use App\Entity\User;

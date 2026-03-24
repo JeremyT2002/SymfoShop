@@ -293,10 +293,25 @@ account:
   dashboard:
     page_title: Mon compte
     title: Mon tableau de bord
-    subtitle: Gérez vos informations personnelles, vos commandes et vos factures en un seul endroit.
+    subtitle: Gérez votre profil, vos commandes et vos factures au même endroit.
+    greeting: Bonjour, %name% !
+    member_since: Membre depuis le %date%
+    stats_region: Résumé du compte
+    stats:
+      orders: Commandes
+      invoices: Factures
+      profile: Profil
+    continue_shopping: Continuer les achats
     entries: entrées
     profile:
       title: Informations personnelles
+      section_contact: Contact
+      section_contact_hint: Nom, e-mail de connexion et coordonnées.
+      section_address: Adresse & livraison
+      section_address_hint: Utilisée pour l’expédition et la facturation.
+      completion_hint: Votre profil est rempli à environ %percent%%. Ajoutez votre adresse pour un paiement plus rapide.
+      complete_badge: Profil complet
+      save_footer: Les modifications sont enregistrées lorsque vous cliquez sur le bouton ci-dessous.
       first_name: Prénom
       last_name: Nom
       email: E-mail
@@ -316,6 +331,7 @@ account:
       status: Statut
       total: Total
       empty: Aucune commande pour le moment.
+      empty_hint: Après un achat, votre commande apparaîtra ici avec le statut et le total.
     invoices:
       title: Mes factures
       invoice_number: N° facture
@@ -324,6 +340,7 @@ account:
       action: Action
       download_pdf: Télécharger le PDF
       empty: Aucune facture disponible pour le moment.
+      empty_hint: Les factures PDF s’affichent ici dès qu’elles sont émises pour vos commandes.
     flash:
       invalid_csrf: Jeton de formulaire invalide. Veuillez réessayer.
       invalid_email: Veuillez saisir une adresse e-mail valide.

@@ -293,10 +293,25 @@ account:
   dashboard:
     page_title: Mein Konto
     title: Mein Dashboard
-    subtitle: Verwalte deine Profildaten, Bestellungen und Rechnungen an einem Ort.
+    subtitle: Verwalte Profil, Bestellungen und Rechnungen an einem Ort.
+    greeting: Hallo, %name%!
+    member_since: Mitglied seit %date%
+    stats_region: Kontoübersicht
+    stats:
+      orders: Bestellungen
+      invoices: Rechnungen
+      profile: Profil
+    continue_shopping: Weiter einkaufen
     entries: Einträge
     profile:
       title: Persönliche Daten
+      section_contact: Kontakt
+      section_contact_hint: Name, E-Mail für die Anmeldung und Erreichbarkeit.
+      section_address: Adresse & Lieferung
+      section_address_hint: Für Versandetiketten und Rechnungsangaben.
+      completion_hint: Dein Profil ist zu etwa %percent%% vollständig. Ergänze die Adresse für einen schnelleren Checkout.
+      complete_badge: Profil vollständig
+      save_footer: Änderungen werden übernommen, sobald du speicherst.
       first_name: Vorname
       last_name: Nachname
       email: E-Mail
@@ -316,6 +331,7 @@ account:
       status: Status
       total: Summe
       empty: Noch keine Bestellungen vorhanden.
+      empty_hint: Sobald du bestellt hast, siehst du hier Status und Betrag.
     invoices:
       title: Meine Rechnungen
       invoice_number: Rechnungsnr.
@@ -324,6 +340,7 @@ account:
       action: Aktion
       download_pdf: PDF herunterladen
       empty: Noch keine Rechnungen verfügbar.
+      empty_hint: PDF-Rechnungen erscheinen hier, sobald sie zu deinen Bestellungen erstellt wurden.
     flash:
       invalid_csrf: Ungültiges Formular-Token. Bitte erneut versuchen.
       invalid_email: Bitte gib eine gültige E-Mail-Adresse ein.
