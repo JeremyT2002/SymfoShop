@@ -4,7 +4,8 @@
     "logoUrl": "/uploads/theme/logo.png",
     "logoAlt": "Shop Logo",
     "faviconUrl": "/uploads/theme/favicon.ico",
-    "siteName": "SymfoShop"
+    "siteName": "SymfoShop",
+    "tagline": "Dein Online-Shop"
   },
   "colors": {
     "primary": {
