@@ -238,6 +238,7 @@ security:
     register_here: Inscrivez-vous ici
     forgot_password: Mot de passe oublié ?
   register:
+    rate_limited: Trop de tentatives d'inscription depuis votre réseau. Veuillez réessayer plus tard.
     title: Créez votre compte
     already_have_account: Vous avez déjà un compte ?
     sign_in: Se connecter

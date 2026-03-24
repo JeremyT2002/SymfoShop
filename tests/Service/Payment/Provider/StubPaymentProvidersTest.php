@@ -18,9 +18,10 @@ final class StubPaymentProvidersTest extends TestCase
         $this->assertNull($p->handleWebhook(Request::create('/')));
         $this->assertNull($p->getClientSecretForReference('x'));
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('PayPal provider is not implemented');
-        $p->startPayment($this->minimalOrder());
+        $result = $p->startPayment($this->minimalOrder());
+        $this->assertSame('paypal', $result->provider);
+        $this->assertStringStartsWith('paypal_', $result->referenceId);
+        $this->assertNull($result->clientSecret);
     }
 
     public function testKlarnaStub(): void

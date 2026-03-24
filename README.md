@@ -72,6 +72,12 @@ Load order (later wins): `.env` → `.env.local` → `.env.<APP_ENV>` → `.env.
 
 With `APP_ENV=prod`, Monolog writes **JSON** to **stderr** (see `config/packages/monolog.yaml`), which suits containers and log aggregators. Do not log payment payloads or tokens. Optional error tracking: install a Sentry bundle and set `SENTRY_DSN` in the host environment (not in committed `.env`).
 
+### Security basics (built-in)
+
+- **Login throttling:** after repeated failed logins, Symfony temporarily blocks further attempts (see `config/packages/security.yaml`).
+- **Registration rate limit:** `/register` POSTs are limited per IP per hour (see `framework.rate_limiter` in `config/packages/framework.yaml`; tests use a high limit).
+- **CSRF:** session-based forms (e.g. login, registration) use Symfony’s form CSRF protection; the REST API uses API keys and is stateless.
+
 ## 📚 Usage
 
 ### Makefile Commands

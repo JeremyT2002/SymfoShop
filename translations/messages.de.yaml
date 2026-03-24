@@ -238,6 +238,7 @@ security:
     register_here: Hier registrieren
     forgot_password: Passwort vergessen?
   register:
+    rate_limited: Zu viele Registrierungsversuche von Ihrem Netzwerk. Bitte versuchen Sie es später erneut.
     title: Erstellen Sie Ihr Konto
     already_have_account: Haben Sie bereits ein Konto?
     sign_in: Anmelden

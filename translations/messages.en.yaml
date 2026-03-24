@@ -238,6 +238,7 @@ security:
     register_here: Register here
     forgot_password: Forgot your password?
   register:
+    rate_limited: Too many registration attempts from your network. Please try again later.
     title: Create your account
     already_have_account: Already have an account?
     sign_in: Sign in
