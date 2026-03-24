@@ -4,8 +4,12 @@
 
 {% form_theme registrationForm _self %}
 {% block _registration_form_submit_widget %}
-<button type="submit" {{ block('button_attributes') }} class="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-primary-600/25 hover:shadow-primary-600/30" id="register-submit-btn">
-    <i class="fas fa-user-plus"></i>{{ label }}
+<button type="submit"
+        {{ block('button_attributes') }}
+        class="w-full inline-flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-600 border border-primary-600 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-primary-500/40 hover:shadow-primary-600/50"
+        id="register-submit-btn">
+    <i class="fas fa-user-plus text-sm"></i>
+    <span>{{ label }}</span>
 </button>
 {% endblock %}
 
@@ -76,16 +80,6 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                        {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1.5'}}) }}
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                                <i class="fas fa-envelope"></i>
-                            </div>
-                            {{ form_widget(registrationForm.email, {'attr': {'class': 'block w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors', 'placeholder': 'you@example.com'}}) }}
-                        </div>
-                        {{ form_errors(registrationForm.email) }}
-                    </div>
-                    <div>
                         {{ form_label(registrationForm.firstName, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1.5'}}) }}
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
@@ -95,17 +89,27 @@
                         </div>
                         {{ form_errors(registrationForm.firstName) }}
                     </div>
+                    <div>
+                        {{ form_label(registrationForm.lastName, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1.5'}}) }}
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            {{ form_widget(registrationForm.lastName, {'attr': {'class': 'block w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors', 'placeholder': 'Last name'}}) }}
+                        </div>
+                        {{ form_errors(registrationForm.lastName) }}
+                    </div>
                 </div>
 
                 <div>
-                    {{ form_label(registrationForm.lastName, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1.5'}}) }}
+                    {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1.5'}}) }}
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                            <i class="fas fa-user"></i>
+                            <i class="fas fa-envelope"></i>
                         </div>
-                        {{ form_widget(registrationForm.lastName, {'attr': {'class': 'block w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors', 'placeholder': 'Last name'}}) }}
+                        {{ form_widget(registrationForm.email, {'attr': {'class': 'block w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors', 'placeholder': 'you@example.com'}}) }}
                     </div>
-                    {{ form_errors(registrationForm.lastName) }}
+                    {{ form_errors(registrationForm.email) }}
                 </div>
 
                 <div>
@@ -145,18 +149,13 @@
                 </div>
                 {{ form_errors(registrationForm.agreeTerms) }}
 
-                <div class="pt-2">
-                    {{ form_widget(registrationForm.submit) }}
-                </div>
-
                 {{ form_end(registrationForm) }}
 
-                <p class="mt-6 text-center text-sm text-gray-500">
-                    {{ 'security.register.already_have_account'|trans }}
-                    <a href="{{ path('login') }}" class="font-medium text-primary-600 hover:text-primary-500 transition-colors">
-                        {{ 'security.register.sign_in_here'|trans }}
-                    </a>
-                </p>
+                <button type="submit" id="login-submit-btn"
+                        class="w-full inline-flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-600 border border-primary-600 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-primary-500/40 hover:shadow-primary-600/50">
+                        <i class="fas fa-sign-in-alt login-icon"></i>
+                        <span class="login-text">{{ 'security.register.submit'|trans }}</span>
+                </button>
             </div>
         </div>
     </div>

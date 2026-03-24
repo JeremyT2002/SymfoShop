@@ -17,8 +17,8 @@ class WishlistRepositoryTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
-        $this->entityManager = $kernel->getContainer()->get('doctrine')->getManager();
+        self::bootKernel();
+        $this->entityManager = static::getContainer()->get('doctrine')->getManager();
         $this->wishlistRepository = $this->entityManager->getRepository(Wishlist::class);
     }
 
@@ -67,8 +67,8 @@ class WishlistRepositoryTest extends KernelTestCase
     public function testFindByUser(): void
     {
         $user = $this->createTestUser();
-        $product1 = $this->createTestProduct('Product 1', 'product-1');
-        $product2 = $this->createTestProduct('Product 2', 'product-2');
+        $product1 = $this->createTestProduct('Product 1', 'product-1-' . uniqid('', true));
+        $product2 = $this->createTestProduct('Product 2', 'product-2-' . uniqid('', true));
 
         // Initially empty
         $this->assertCount(0, $this->wishlistRepository->findByUser($user));
@@ -112,15 +112,16 @@ class WishlistRepositoryTest extends KernelTestCase
     private function createTestUser(): User
     {
         $user = new User();
-        $user->setEmail('test@example.com');
+        $user->setEmail('test-' . uniqid('', true) . '@example.com');
         $user->setPassword('password');
         $this->entityManager->persist($user);
         $this->entityManager->flush();
         return $user;
     }
 
-    private function createTestProduct(string $name = 'Test Product', string $slug = 'test-product'): Product
+    private function createTestProduct(string $name = 'Test Product', string $slug = null): Product
     {
+        $slug = $slug ?? ('test-product-' . uniqid('', true));
         $product = new Product();
         $product->setName($name);
         $product->setSlug($slug);

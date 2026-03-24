@@ -14,6 +14,10 @@
         <ini name="display_errors" value="1" />
         <ini name="error_reporting" value="-1" />
         <server name="APP_ENV" value="test" force="true" />
+        <server name="KERNEL_CLASS" value="App\Kernel" />
+        <server name="DATABASE_URL" value="sqlite:///%kernel.project_dir%/var/data_test.db" force="true" />
+        <server name="DEFAULT_URI" value="http://localhost" force="true" />
+        <server name="CHECKOUT_SKIP_PAYMENT" value="0" force="true" />
         <server name="SHELL_VERBOSITY" value="-1" />
     </php>
 
@@ -23,13 +27,22 @@
         </testsuite>
     </testsuites>
 
+    <!--
+        Coverage target (make test-coverage): ≥80% line coverage on this scope (domain + application services).
+        Controllers, Twig, Theme-Editor, Commands, etc. are excluded; cover them with functional/E2E tests if needed.
+    -->
     <source ignoreSuppressionOfDeprecations="true"
             ignoreIndirectDeprecations="true"
             restrictNotices="true"
             restrictWarnings="true"
     >
         <include>
-            <directory>src</directory>
+            <directory>src/Catalog</directory>
+            <directory>src/DTO</directory>
+            <directory>src/Entity</directory>
+            <directory>src/Repository</directory>
+            <directory>src/Service</directory>
+            <directory>src/Workflow</directory>
         </include>
 
         <deprecationTrigger>

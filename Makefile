@@ -223,6 +223,7 @@ docker-admin-user: ## Create admin user in Docker
 # Testing
 test: ## Run all tests
 	@echo "$(BLUE)Running tests...$(NC)"
+	php bin/console doctrine:migrations:migrate --env=test --no-interaction
 	php bin/phpunit
 
 test-unit: ## Run unit tests only
@@ -231,11 +232,13 @@ test-unit: ## Run unit tests only
 
 test-integration: ## Run integration tests only
 	@echo "$(BLUE)Running integration tests...$(NC)"
+	php bin/console doctrine:migrations:migrate --env=test --no-interaction
 	php bin/phpunit --testsuite=Integration
 
-test-coverage: ## Generate test coverage report
+test-coverage: ## Generate test coverage report (Xdebug 3: needs XDEBUG_MODE=coverage before php; use scripts/phpunit-coverage.ps1 in PowerShell)
 	@echo "$(BLUE)Generating test coverage...$(NC)"
-	php bin/phpunit --coverage-html coverage/
+	php bin/console doctrine:migrations:migrate --env=test --no-interaction
+	XDEBUG_MODE=coverage php bin/phpunit --coverage-html coverage/
 
 # Code Quality
 lint: lint-container lint-yaml lint-twig ## Run all linting checks

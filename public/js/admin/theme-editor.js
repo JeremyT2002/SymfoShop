@@ -107,20 +107,21 @@ function initSectionBuilder() {
     }
 
     function renderSection(section) {
+        const typeLabel = (section.type || '').replace(/_/g, ' ');
         const li = document.createElement('li');
-        li.className = 'flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-lg';
+        li.className = 'section-card flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm';
         li.dataset.sectionId = section.id;
         li.innerHTML = `
-            <span class="cursor-move text-gray-400"><i class="fas fa-grip-vertical"></i></span>
-            <div class="flex-1">
-                <span class="font-medium">${section.type}</span>
-                <span class="text-sm text-gray-500 ml-2">(${section.settings?.title || section.id})</span>
+            <span class="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 p-1" title="Drag to reorder"><i class="fas fa-grip-vertical"></i></span>
+            <div class="flex-1 min-w-0">
+                <span class="font-medium text-gray-900">${typeLabel}</span>
+                <span class="text-sm text-gray-500 ml-2">— ${section.settings?.title || section.id}</span>
             </div>
-            <label class="flex items-center gap-2">
-                <input type="checkbox" class="section-enabled rounded border-gray-300 text-blue-600" ${section.enabled !== false ? 'checked' : ''}>
-                <span class="text-sm">Enabled</span>
+            <label class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer">
+                <input type="checkbox" class="section-enabled rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4" ${section.enabled !== false ? 'checked' : ''}>
+                <span class="text-sm text-gray-600">Enabled</span>
             </label>
-            <button type="button" class="section-remove text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+            <button type="button" class="section-remove p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Remove section"><i class="fas fa-trash"></i></button>
         `;
         li.querySelector('.section-enabled').addEventListener('change', () => {
             const sections = getSections();
@@ -150,7 +151,7 @@ function initSectionBuilder() {
         };
         sections.push(section);
         saveSections(sections);
-        const empty = list.querySelector('.text-gray-500');
+        const empty = list.querySelector('[data-empty-placeholder]');
         if (empty) empty.remove();
         list.appendChild(renderSection(section));
         updateConfigInputs();
@@ -161,10 +162,20 @@ function initSectionBuilder() {
     });
 }
 
+function initKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            document.querySelector('.theme-save-form')?.requestSubmit();
+        }
+    });
+}
+
 function init() {
     initTabs();
     initFormSubmit();
     initSectionBuilder();
+    initKeyboardShortcuts();
     document.querySelectorAll('[data-theme-key]').forEach((el) => {
         el.addEventListener('change', updateConfigInputs);
         el.addEventListener('input', updateConfigInputs);

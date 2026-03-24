@@ -1,45 +1,69 @@
-<div class="max-w-2xl space-y-6">
-    <h3 class="text-sm font-semibold text-gray-900">Header</h3>
-    <div class="space-y-4">
-        <label class="flex items-center gap-2">
-            <input type="checkbox" data-theme-key="header.sticky" {% if config.header.sticky|default(true) %}checked{% endif %}
-                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-            <span class="text-sm text-gray-700">Sticky header</span>
-        </label>
-        <label class="flex items-center gap-2">
-            <input type="checkbox" data-theme-key="header.showCart" {% if config.header.showCart|default(true) %}checked{% endif %}
-                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-            <span class="text-sm text-gray-700">Show cart</span>
-        </label>
-        <label class="flex items-center gap-2">
-            <input type="checkbox" data-theme-key="header.showLanguageSwitcher" {% if config.header.showLanguageSwitcher|default(true) %}checked{% endif %}
-                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-            <span class="text-sm text-gray-700">Show language switcher</span>
-        </label>
-    </div>
+<div class="max-w-2xl space-y-8">
+    {# Header #}
+    <section class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-bars text-gray-500"></i>
+                Header
+            </h3>
+            <p class="text-xs text-gray-500 mt-0.5">Navigation and header behavior</p>
+        </div>
+        <div class="p-6 space-y-5">
+            <div class="flex flex-col gap-3">
+                <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
+                    <input type="checkbox" data-theme-key="header.sticky" {% if config.header.sticky|default(true) %}checked{% endif %}
+                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4">
+                    <span class="text-sm text-gray-700">Sticky header</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
+                    <input type="checkbox" data-theme-key="header.showCart" {% if config.header.showCart|default(true) %}checked{% endif %}
+                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4">
+                    <span class="text-sm text-gray-700">Show cart icon</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
+                    <input type="checkbox" data-theme-key="header.showLanguageSwitcher" {% if config.header.showLanguageSwitcher|default(true) %}checked{% endif %}
+                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4">
+                    <span class="text-sm text-gray-700">Show language switcher</span>
+                </label>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Menu items (JSON)</label>
+                <textarea data-theme-key="header.menuItems" rows="6"
+                          class="block w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+                          placeholder='[{"label":"Home","url":"/","external":false}]'>{{ config.header.menuItems|default([])|json_encode(192) }}</textarea>
+                <p class="mt-1.5 text-xs text-gray-500">Format: [{"label":"Home","url":"/","external":false}]</p>
+            </div>
+        </div>
+    </section>
 
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Menu items (JSON)</label>
-        <textarea data-theme-key="header.menuItems" rows="6"
-                  class="block w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">{{ config.header.menuItems|default([])|json_encode(192) }}</textarea>
-        <p class="mt-1 text-xs text-gray-500">Format: [{"label":"Home","url":"/","external":false}]</p>
-    </div>
-
-    <h3 class="text-sm font-semibold text-gray-900 pt-4">Footer</h3>
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Copyright</label>
-        <input type="text" data-theme-key="footer.copyright" value="{{ config.footer.copyright|default('© 2025 SymfoShop') }}"
-               class="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-    </div>
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Footer columns (JSON)</label>
-        <textarea data-theme-key="footer.columns" rows="8"
-                  class="block w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">{{ config.footer.columns|default([])|json_encode(192) }}</textarea>
-    </div>
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Social links (JSON)</label>
-        <textarea data-theme-key="footer.socialLinks" rows="4"
-                  class="block w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">{{ config.footer.socialLinks|default([])|json_encode(192) }}</textarea>
-        <p class="mt-1 text-xs text-gray-500">Format: [{"platform":"facebook","url":"https://..."}]</p>
-    </div>
+    {# Footer #}
+    <section class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-shoe-prints text-gray-500"></i>
+                Footer
+            </h3>
+            <p class="text-xs text-gray-500 mt-0.5">Copyright, columns, and social links</p>
+        </div>
+        <div class="p-6 space-y-5">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Copyright text</label>
+                <input type="text" data-theme-key="footer.copyright" value="{{ config.footer.copyright|default('© 2025 SymfoShop') }}"
+                       class="block w-full rounded-lg border border-gray-300 px-3 py-2.5 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+                       placeholder="© 2025 Your Shop">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Footer columns (JSON)</label>
+                <textarea data-theme-key="footer.columns" rows="8"
+                          class="block w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors">{{ config.footer.columns|default([])|json_encode(192) }}</textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Social links (JSON)</label>
+                <textarea data-theme-key="footer.socialLinks" rows="4"
+                          class="block w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+                          placeholder='[{"platform":"facebook","url":"https://facebook.com"}]'>{{ config.footer.socialLinks|default([])|json_encode(192) }}</textarea>
+                <p class="mt-1.5 text-xs text-gray-500">Format: [{"platform":"facebook","url":"https://..."}]</p>
+            </div>
+        </div>
+    </section>
 </div>

@@ -190,6 +190,40 @@ class CartServiceTest extends TestCase
         $this->assertEquals('EUR', $totals['currency']);
     }
 
+    public function testSetCouponCodeNormalizesAndGetTotalsIncludesCode(): void
+    {
+        $variant = $this->createMockVariant(1, 500, 'EUR');
+        $this->variantRepository->method('find')->willReturnMap([[1, $variant]]);
+
+        $this->cartService->add(1, 1);
+        $this->cartService->setCouponCode('  save10  ');
+
+        $this->assertSame('SAVE10', $this->cartService->getCouponCode());
+
+        $totals = $this->cartService->getTotals();
+        $this->assertSame('SAVE10', $totals['couponCode']);
+    }
+
+    public function testSetCouponCodeNullOrEmptyRemoves(): void
+    {
+        $this->cartService->setCouponCode('ABC');
+        $this->assertSame('ABC', $this->cartService->getCouponCode());
+
+        $this->cartService->setCouponCode('');
+        $this->assertNull($this->cartService->getCouponCode());
+
+        $this->cartService->setCouponCode('X');
+        $this->cartService->setCouponCode(null);
+        $this->assertNull($this->cartService->getCouponCode());
+    }
+
+    public function testClearCoupon(): void
+    {
+        $this->cartService->setCouponCode('DROP');
+        $this->cartService->clearCoupon();
+        $this->assertNull($this->cartService->getCouponCode());
+    }
+
     public function testCartItemValidation(): void
     {
         $this->expectException(\InvalidArgumentException::class);

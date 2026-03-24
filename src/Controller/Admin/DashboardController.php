@@ -8,6 +8,7 @@ use App\Dashboard\Widget\WidgetRenderer;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use App\Repository\UserRepository;
+use Nelmio\ApiDocBundle\Render\RenderOpenApi;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -21,6 +22,7 @@ class DashboardController extends AbstractController
         private readonly AdminDashboardConfigService $dashboardConfigService,
         private readonly WidgetRenderer $widgetRenderer,
         private readonly WidgetRegistry $widgetRegistry,
+        private readonly RenderOpenApi $renderOpenApi,
     ) {
     }
 
@@ -91,6 +93,10 @@ class DashboardController extends AbstractController
     #[Route('/admin/api-docs', name: 'admin_api_docs')]
     public function apiDocs(): Response
     {
-        return $this->redirect('/api/v1/docs');
+        $openApiSpec = $this->renderOpenApi->render(RenderOpenApi::JSON, 'default');
+
+        return $this->render('admin/api_docs.html.twig', [
+            'openApiSpec' => $openApiSpec,
+        ]);
     }
 }

@@ -15,8 +15,9 @@ class WishlistControllerTest extends WebTestCase
 
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
-        $this->entityManager = $kernel->getContainer()->get('doctrine')->getManager();
+        $client = static::createClient();
+        $this->entityManager = $client->getContainer()->get('doctrine')->getManager();
+        static::ensureKernelShutdown();
     }
 
     public function testWishlistPageRequiresAuthentication(): void
