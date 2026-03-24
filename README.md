@@ -208,10 +208,10 @@ Proprietary
 
 ## 🤝 Contributing
 
-1. Follow architecture rules in `.cursor/rules/symfoshop.mdc`
-2. Write tests for new features
-3. Update documentation
-4. Create small, reviewable commits
+1. Follow the **Development Guidelines** above (PSR-12, type hints, thin controllers, business logic in `src/Service`, Symfony conventions).
+2. Write tests for new features.
+3. Update documentation when behavior, APIs, or setup change.
+4. Prefer small, reviewable commits with clear messages.
 
 ## 📞 Support
 
