@@ -214,5 +214,31 @@ class Product
         $this->category = $category;
         return $this;
     }
+
+    public function getStockOnHand(): int
+    {
+        $onHand = 0;
+        foreach ($this->variants as $variant) {
+            $stockItem = $variant->getStockItem();
+            if ($stockItem !== null) {
+                $onHand += $stockItem->getOnHand();
+            }
+        }
+
+        return $onHand;
+    }
+
+    public function getStockAvailable(): int
+    {
+        $available = 0;
+        foreach ($this->variants as $variant) {
+            $stockItem = $variant->getStockItem();
+            if ($stockItem !== null) {
+                $available += $stockItem->getAvailable();
+            }
+        }
+
+        return $available;
+    }
 }
 

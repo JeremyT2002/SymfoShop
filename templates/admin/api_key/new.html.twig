@@ -10,60 +10,37 @@
         <h2 class="text-2xl font-bold text-gray-900">Create New API Key</h2>
     </div>
     
-    <div class="bg-white rounded-lg shadow p-6 max-w-2xl">
-        <form method="post">
-            <div class="space-y-6">
+    <div class="admin-card admin-form-shell p-6">
+        <form method="post" class="space-y-6">
+            <div class="rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-5">
+                <h3 class="text-base font-semibold text-gray-900">Access key setup</h3>
+                <p class="mt-1 text-sm text-gray-600">Create an API key with owner, expiration and optional scopes.</p>
+            </div>
+
+            <div class="admin-form-grid">
+                <section class="admin-form-section space-y-4">
                 <div>
-                    <label for="name" class="flex items-center text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-key mr-2 text-gray-500"></i>
-                        API Key Name <span class="text-red-500 ml-1">*</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-tag text-gray-400"></i>
-                        </div>
-                        <input type="text" id="name" name="name" required
-                               placeholder="e.g., Production API Key, Development Key"
-                               class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                    </div>
+                    <label for="name" class="admin-form-label">API key name *</label>
+                    <input type="text" id="name" name="name" required placeholder="e.g., Production API Key, Development Key" class="admin-form-input">
                     <p class="mt-1 text-xs text-gray-500">Give this API key a descriptive name to identify its purpose</p>
                 </div>
                 
                 <div>
-                    <label for="user" class="flex items-center text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-user mr-2 text-gray-500"></i>
-                        User <span class="text-red-500 ml-1">*</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-envelope text-gray-400"></i>
-                        </div>
-                        <select id="user" name="user" required
-                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white">
-                            <option value="">Select a user...</option>
-                            {% for user in users %}
-                                <option value="{{ user.id }}">{{ user.email }}</option>
-                            {% endfor %}
-                        </select>
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <i class="fas fa-chevron-down text-gray-400"></i>
-                        </div>
-                    </div>
+                    <label for="user" class="admin-form-label">User *</label>
+                    <select id="user" name="user" required class="admin-form-input">
+                        <option value="">Select a user...</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.email }}</option>
+                        {% endfor %}
+                    </select>
                     <p class="mt-1 text-xs text-gray-500">Select the user who will own this API key</p>
                 </div>
+                </section>
                 
+                <section class="admin-form-section space-y-4">
                 <div>
-                    <label for="expiresAt" class="flex items-center text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-calendar-times mr-2 text-gray-500"></i>
-                        Expiration Date (Optional)
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-clock text-gray-400"></i>
-                        </div>
-                        <input type="datetime-local" id="expiresAt" name="expiresAt"
-                               class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                    </div>
+                    <label for="expiresAt" class="admin-form-label">Expiration date (optional)</label>
+                    <input type="datetime-local" id="expiresAt" name="expiresAt" class="admin-form-input">
                     <p class="mt-1 text-xs text-gray-500">
                         <i class="fas fa-info-circle mr-1"></i>
                         Set an expiration date for security. Leave empty for no expiration.
@@ -71,24 +48,16 @@
                 </div>
                 
                 <div>
-                    <label for="scopes" class="flex items-center text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-shield-alt mr-2 text-gray-500"></i>
-                        Scopes (Optional)
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-list text-gray-400"></i>
-                        </div>
-                        <input type="text" id="scopes" name="scopes"
-                               placeholder="read, write, delete (comma-separated)"
-                               class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                    </div>
+                    <label for="scopes" class="admin-form-label">Scopes (optional)</label>
+                    <input type="text" id="scopes" name="scopes" placeholder="read, write, delete (comma-separated)" class="admin-form-input">
                     <p class="mt-1 text-xs text-gray-500">
                         Define access scopes for this API key. Separate multiple scopes with commas (e.g., "read, write")
                     </p>
                 </div>
+                </section>
+            </div>
                 
-                <div class="flex items-center justify-end space-x-4 pt-4 border-t">
+                <div class="flex items-center justify-end space-x-4 border-t border-gray-200 pt-5">
                     <a href="{{ path('admin_api_keys_index') }}" class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
                         Cancel
                     </a>
@@ -96,7 +65,6 @@
                         Create API Key
                     </button>
                 </div>
-            </div>
         </form>
     </div>
 {% endblock %}
