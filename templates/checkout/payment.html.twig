@@ -2,7 +2,7 @@
 
 {% block title %}{{ 'checkout.payment_page_title'|trans }} - SymfoShop{% endblock %}
 {% block meta_description %}{{ 'checkout.payment_meta_description'|trans }}{% endblock %}
-{% set is_simulated_provider = paymentProvider in ['dev', 'paypal', 'testbank'] %}
+{% set is_simulated_provider = simulatePaymentUi|default(false) %}
 {% block js_page %}{% if is_simulated_provider %}payment-simulator{% else %}payment{% endif %}{% endblock %}
 
 {% block body %}

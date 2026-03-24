@@ -6,13 +6,17 @@ use App\Entity\Order;
 use App\Service\Payment\Provider\KlarnaPaymentProvider;
 use App\Service\Payment\Provider\PayPalPaymentProvider;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
+use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class StubPaymentProvidersTest extends TestCase
 {
     public function testPayPalStub(): void
     {
-        $p = new PayPalPaymentProvider();
+        $router = $this->createMock(UrlGeneratorInterface::class);
+        $p = new PayPalPaymentProvider(new MockHttpClient(), $router, new NullLogger());
         $this->assertSame('paypal', $p->getName());
         $this->assertNull($p->handleReturn(Request::create('/')));
         $this->assertNull($p->handleWebhook(Request::create('/')));

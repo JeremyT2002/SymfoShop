@@ -229,6 +229,14 @@ checkout:
     order: Commande introuvable
     payment: Paiement introuvable
 
+payment:
+  paypal:
+    flash:
+      return_invalid: Impossible de finaliser le paiement PayPal. Réessayez ou choisissez un autre moyen.
+      payment_not_found: Session de paiement introuvable.
+      capture_failed: PayPal n'a pas pu encaisser le paiement.
+      cancelled: Vous avez annulé le paiement PayPal.
+
 security:
   login:
     title: Connectez-vous à votre compte

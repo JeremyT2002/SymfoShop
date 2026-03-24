@@ -46,6 +46,8 @@ security:
         - { path: ^/api/v1/docs, roles: PUBLIC_ACCESS }  # API documentation is public
         - { path: ^/api/v1$, roles: PUBLIC_ACCESS }  # API info endpoint is public
         - { path: ^/api, roles: PUBLIC_ACCESS }  # API handles auth internally
+        - { path: ^/webhook/paypal, roles: PUBLIC_ACCESS }
+        - { path: ^/payment/paypal, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }

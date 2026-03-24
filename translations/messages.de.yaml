@@ -229,6 +229,14 @@ checkout:
     order: Bestellung nicht gefunden
     payment: Zahlung nicht gefunden
 
+payment:
+  paypal:
+    flash:
+      return_invalid: Die PayPal-Zahlung konnte nicht abgeschlossen werden. Bitte erneut versuchen oder eine andere Zahlungsart wählen.
+      payment_not_found: Zahlungssitzung nicht gefunden.
+      capture_failed: PayPal konnte die Zahlung nicht einziehen.
+      cancelled: Sie haben den PayPal-Checkout abgebrochen.
+
 security:
   login:
     title: Melden Sie sich in Ihrem Konto an

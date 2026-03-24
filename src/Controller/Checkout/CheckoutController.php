@@ -38,7 +38,8 @@ class CheckoutController extends AbstractController
         private readonly ShippingMethodRepository $shippingMethodRepository,
         private readonly LoggerInterface $logger,
         private readonly bool $checkoutSkipPayment = false,
-        private readonly string $kernelEnvironment = 'prod'
+        private readonly string $kernelEnvironment = 'prod',
+        private readonly string $paypalClientId = '',
     ) {
     }
 
@@ -145,6 +146,10 @@ class CheckoutController extends AbstractController
                         $this->entityManager->flush();
                     }
 
+                    if (!empty($paymentIntent['redirectUrl'])) {
+                        return $this->redirect($paymentIntent['redirectUrl']);
+                    }
+
                     return $this->redirectToRoute('checkout_payment', [
                         'orderId' => $order->getId(),
                         'paymentIntentId' => $paymentIntent['paymentIntentId'],
@@ -195,6 +200,7 @@ class CheckoutController extends AbstractController
             'clientSecret' => $clientSecret,
             'paymentProvider' => $payment->getProvider(),
             'stripePublishableKey' => $_ENV['STRIPE_PUBLISHABLE_KEY'] ?? 'pk_test_placeholder',
+            'simulatePaymentUi' => $this->isSimulatedPaymentUi($payment->getProvider()),
         ]);
     }
 
@@ -209,6 +215,15 @@ class CheckoutController extends AbstractController
     /**
      * Same outcome as DevPaymentSimulatorController success path (inventory commit, paid, invoice).
      */
+    private function isSimulatedPaymentUi(string $provider): bool
+    {
+        if (in_array($provider, ['dev', 'testbank'], true)) {
+            return true;
+        }
+
+        return $provider === 'paypal' && trim($this->paypalClientId) === '';
+    }
+
     private function finalizeOrderAfterSimulatedPaymentSuccess(Order $order, string $referenceId): void
     {
         $resolution = new PaymentResolution($referenceId, PaymentResolution::STATUS_SUCCEEDED, $order->getId());

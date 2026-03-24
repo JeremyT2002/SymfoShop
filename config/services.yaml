@@ -10,6 +10,7 @@ parameters:
     payment_default_provider: 'dev'
     # Placeholder when STRIPE_SECRET_KEY is not set (e.g. using PAYMENT_PROVIDER=dev). Set STRIPE_SECRET_KEY in .env.local for real Stripe.
     stripe_secret_key_default: 'sk_test_placeholder'
+    paypal.default_base_url: 'https://api-m.sandbox.paypal.com'
 
 services:
     # default configuration for services in *this* file
@@ -56,6 +57,11 @@ services:
             $orderWorkflow: '@state_machine.order'
             $checkoutSkipPayment: '%env(bool:CHECKOUT_SKIP_PAYMENT)%'
             $kernelEnvironment: '%kernel.environment%'
+            $paypalClientId: '%env(default::PAYPAL_CLIENT_ID)%'
+
+    App\Controller\Payment\PayPalReturnController:
+        arguments:
+            $orderWorkflow: '@state_machine.order'
 
     App\Controller\Dev\DevPaymentSimulatorController:
         arguments:

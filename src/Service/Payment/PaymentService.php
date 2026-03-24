@@ -23,7 +23,7 @@ class PaymentService
     /**
      * Create payment for order using the given provider (or default). Persists Payment and returns intent data.
      *
-     * @return array{paymentIntentId: string, clientSecret: string|null}
+     * @return array{paymentIntentId: string, clientSecret: string|null, redirectUrl: string|null}
      */
     public function createPaymentIntent(Order $order, ?string $providerName = null): array
     {
@@ -48,6 +48,7 @@ class PaymentService
             return [
                 'paymentIntentId' => $existingPayment->getPaymentIntentId(),
                 'clientSecret' => $clientSecret ?? '',
+                'redirectUrl' => null,
             ];
         }
 
@@ -71,6 +72,7 @@ class PaymentService
         return [
             'paymentIntentId' => $result->referenceId,
             'clientSecret' => $result->clientSecret ?? $provider->getClientSecretForReference($result->referenceId) ?? '',
+            'redirectUrl' => $result->redirectUrl,
         ];
     }
 

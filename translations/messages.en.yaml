@@ -229,6 +229,14 @@ checkout:
     order: Order not found
     payment: Payment not found
 
+payment:
+  paypal:
+    flash:
+      return_invalid: We could not complete the PayPal payment. Please try again or choose another method.
+      payment_not_found: Payment session not found.
+      capture_failed: PayPal could not capture the payment.
+      cancelled: You cancelled PayPal checkout.
+
 security:
   login:
     title: Sign in to your account

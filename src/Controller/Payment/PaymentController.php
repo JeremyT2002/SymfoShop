@@ -35,7 +35,11 @@ class PaymentController extends AbstractController
         try {
             $result = $this->paymentService->createPaymentIntent($order);
 
-            return new JsonResponse($result);
+            return new JsonResponse([
+                'paymentIntentId' => $result['paymentIntentId'],
+                'clientSecret' => $result['clientSecret'],
+                'redirectUrl' => $result['redirectUrl'] ?? null,
+            ]);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
