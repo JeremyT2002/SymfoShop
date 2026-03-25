@@ -25,6 +25,7 @@ Production-oriented e-commerce on **Symfony 7.4** and **PHP 8.2+**: catalog, car
 | [Makefile](#makefile-commands) | Common commands |
 | [Payments](#payments) | Stripe & PayPal notes |
 | [Usage](#usage) | Admin, API, i18n, fixtures |
+| [Fixture users](#fixture-users) | Demo logins after `doctrine:fixtures:load` |
 | [Testing & CI](#testing--ci) | PHPUnit & GitHub Actions |
 | [Architecture](#architecture) | Structure & order flow |
 | [Troubleshooting](#troubleshooting) | When something breaks |
@@ -185,7 +186,6 @@ make dev
 make db-fixtures
 ```
 
-**Users:** `admin@symfoshop.com` / `admin123`, `john.doe@example.com` / `user123`, plus other fixture users.  
 **Catalog:** 5 categories, 9 products with variants, stock, media.
 
 ### Async
