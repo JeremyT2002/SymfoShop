@@ -135,18 +135,18 @@
             
             <!-- Navigation -->
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-                <a href="{{ path('admin') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if app.request.get('_route') == 'admin' %}bg-gray-800{% endif %}">
+                <a href="{{ path('admin') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if app.request.attributes.get('_route') == 'admin' %}bg-gray-800{% endif %}">
                     <i class="fas fa-home w-5"></i>
                     <span>Dashboard</span>
                 </a>
                 
                 <div class="pt-4">
                     <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Catalog</p>
-                    <a href="{{ path('admin_products_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_products' in app.request.get('_route') %}bg-gray-800{% endif %}">
+                    <a href="{{ path('admin_products_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_products' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-box w-5"></i>
                         <span>Products</span>
                     </a>
-                    <a href="{{ path('admin_categories_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_categories' in app.request.get('_route') %}bg-gray-800{% endif %}">
+                    <a href="{{ path('admin_categories_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_categories' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-tags w-5"></i>
                         <span>Categories</span>
                     </a>
@@ -154,23 +154,23 @@
                 
                 <div class="pt-4">
                     <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Sales</p>
-                    <a href="{{ path('admin_orders_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_orders' in app.request.get('_route') %}bg-gray-800{% endif %}">
+                    <a href="{{ path('admin_orders_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_orders' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-shopping-cart w-5"></i>
                         <span>Orders</span>
                     </a>
-                    <a href="{{ path('admin_coupons_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_coupons' in app.request.get('_route') %}bg-gray-800{% endif %}">
+                    <a href="{{ path('admin_coupons_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_coupons' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-gift w-5"></i>
                         <span>Coupons</span>
                     </a>
-                    <a href="{{ path('admin_payment_methods_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_payment_methods' in app.request.get('_route') %}bg-gray-800{% endif %}">
+                    <a href="{{ path('admin_payment_methods_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_payment_methods' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-credit-card w-5"></i>
                         <span>{{ 'admin.payment_methods.nav'|trans }}</span>
                     </a>
-                    <a href="{{ path('admin_shipping_methods_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_shipping_methods' in app.request.get('_route') %}bg-gray-800{% endif %}">
+                    <a href="{{ path('admin_shipping_methods_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_shipping_methods' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-truck w-5"></i>
                         <span>{{ 'admin.shipping_methods.nav'|trans }}</span>
                     </a>
-                    <a href="{{ path('admin_return_requests_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_return_requests' in app.request.get('_route') %}bg-gray-800{% endif %}">
+                    <a href="{{ path('admin_return_requests_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_return_requests' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-undo-alt w-5"></i>
                         <span>{{ 'admin.return_requests.nav'|trans }}</span>
                     </a>
@@ -178,11 +178,11 @@
                 
                 <div class="pt-4">
                     <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Users</p>
-                    <a href="{{ path('admin_users_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_users' in app.request.get('_route') %}bg-gray-800{% endif %}">
+                    <a href="{{ path('admin_users_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_users' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-users w-5"></i>
                         <span>Users</span>
                     </a>
-                    <a href="{{ path('admin_api_keys_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_api_keys' in app.request.get('_route') %}bg-gray-800{% endif %}">
+                    <a href="{{ path('admin_api_keys_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_api_keys' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-key w-5"></i>
                         <span>API Keys</span>
                     </a>
@@ -190,7 +190,7 @@
                 
                 <div class="pt-4">
                     <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Appearance</p>
-                    <a href="{{ path('admin_theme_editor') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_theme' in app.request.get('_route') %}bg-gray-800{% endif %}">
+                    <a href="{{ path('admin_theme_editor') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_theme' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-palette w-5"></i>
                         <span>Theme Editor</span>
                     </a>
@@ -198,7 +198,7 @@
                 
                 <div class="pt-4">
                     <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">System</p>
-                    <a href="{{ path('admin_api_docs') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_api_docs' in app.request.get('_route') %}bg-gray-800{% endif %}">
+                    <a href="{{ path('admin_api_docs') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_api_docs' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-book w-5"></i>
                         <span>API Documentation</span>
                     </a>

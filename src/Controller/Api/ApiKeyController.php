@@ -3,22 +3,23 @@
 namespace App\Controller\Api;
 
 use App\Entity\ApiKey;
+use App\Entity\User;
 use App\Repository\ApiKeyRepository;
 use App\Service\Api\ApiKeyService;
-use Doctrine\ORM\EntityManagerInterface;
-use Nelmio\ApiDocBundle\Attribute\Security;
+use Nelmio\ApiDocBundle\Attribute\Security as DocSecurity;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/v1/api-keys', name: 'api_api_keys_')]
 #[OA\Tag(name: 'API Keys')]
-#[Security(name: 'BearerAuth')]
+#[DocSecurity(name: 'BearerAuth')]
 class ApiKeyController extends AbstractController
 {
+    use ApiResponderTrait;
+
     public function __construct(
         private readonly ApiKeyRepository $apiKeyRepository,
         private readonly ApiKeyService $apiKeyService
@@ -29,7 +30,7 @@ class ApiKeyController extends AbstractController
     #[OA\Get(
         path: '/api/v1/api-keys',
         summary: 'List API keys',
-        description: 'Get a list of all active API keys for the current user',
+        description: 'Active API keys for the authenticated user (metadata only; never the secret).',
         tags: ['API Keys']
     )]
     #[OA\Response(
@@ -41,17 +42,17 @@ class ApiKeyController extends AbstractController
             ]
         )
     )]
-    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 401, description: 'Unauthorized', content: new OA\JsonContent(ref: '#/components/schemas/ApiError'))]
     public function list(): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) {
-            return $this->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        if (!$user instanceof User) {
+            return $this->apiError('Unauthorized', Response::HTTP_UNAUTHORIZED);
         }
 
         $apiKeys = $this->apiKeyRepository->findActiveKeysForUser($user->getId());
 
-        $data = array_map(fn(ApiKey $key) => [
+        $data = array_map(fn (ApiKey $key) => [
             'id' => $key->getId(),
             'name' => $key->getName(),
             'createdAt' => $key->getCreatedAt()->format('c'),
@@ -60,15 +61,14 @@ class ApiKeyController extends AbstractController
             'scopes' => $key->getScopes(),
         ], $apiKeys);
 
-        return $this->json(['data' => $data]);
+        return $this->apiData($data);
     }
-
 
     #[Route('/{id}', name: 'revoke', methods: ['DELETE'])]
     #[OA\Delete(
         path: '/api/v1/api-keys/{id}',
         summary: 'Revoke API key',
-        description: 'Revoke (deactivate) an API key by ID',
+        description: 'Deactivates an API key owned by the current user.',
         tags: ['API Keys']
     )]
     #[OA\Parameter(
@@ -80,40 +80,36 @@ class ApiKeyController extends AbstractController
     )]
     #[OA\Response(
         response: 200,
-        description: 'API key revoked successfully',
+        description: 'Key revoked',
         content: new OA\JsonContent(
             properties: [
-                new OA\Property(property: 'success', type: 'boolean'),
-                new OA\Property(property: 'message', type: 'string'),
+                new OA\Property(property: 'data', type: 'object', properties: [new OA\Property(property: 'revoked', type: 'boolean')]),
+                new OA\Property(property: 'meta', type: 'object', properties: [new OA\Property(property: 'message', type: 'string')]),
             ]
         )
     )]
-    #[OA\Response(response: 401, description: 'Unauthorized')]
-    #[OA\Response(response: 404, description: 'API key not found')]
+    #[OA\Response(response: 401, description: 'Unauthorized', content: new OA\JsonContent(ref: '#/components/schemas/ApiError'))]
+    #[OA\Response(response: 403, description: 'Forbidden', content: new OA\JsonContent(ref: '#/components/schemas/ApiError'))]
+    #[OA\Response(response: 404, description: 'Not found', content: new OA\JsonContent(ref: '#/components/schemas/ApiError'))]
     public function revoke(int $id): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) {
-            return $this->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        if (!$user instanceof User) {
+            return $this->apiError('Unauthorized', Response::HTTP_UNAUTHORIZED);
         }
 
         $apiKey = $this->apiKeyRepository->find($id);
 
         if (!$apiKey) {
-            return $this->json(['error' => 'API key not found'], Response::HTTP_NOT_FOUND);
+            return $this->apiError('API key not found', Response::HTTP_NOT_FOUND);
         }
 
-        // Check if user owns this API key
-        if ($apiKey->getUser()->getId() !== $user->getId() && !in_array('ROLE_ADMIN', $user->getRoles())) {
-            return $this->json(['error' => 'Access denied'], Response::HTTP_FORBIDDEN);
+        if ($apiKey->getUser()->getId() !== $user->getId() && !\in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            return $this->apiError('Access denied', Response::HTTP_FORBIDDEN);
         }
 
         $this->apiKeyService->revokeApiKey($apiKey);
 
-        return $this->json([
-            'success' => true,
-            'message' => 'API key revoked successfully',
-        ]);
+        return $this->apiData(['revoked' => true], Response::HTTP_OK, ['message' => 'API key revoked']);
     }
 }
-

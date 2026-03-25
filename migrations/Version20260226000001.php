@@ -25,6 +25,12 @@ final class Version20260226000001 extends AbstractMigration
         $isPostgres = $platform instanceof PostgreSQLPlatform;
         $isSqlite = $platform instanceof SqlitePlatform;
 
+        // `user` is a reserved keyword; escape identifiers per platform.
+        $userTable = $isPostgres ? '"user"' : ($isSqlite ? '"user"' : '`user`');
+
+        // Re-runnable: allow clean re-try after a failed run.
+        $this->addSql('DROP TABLE IF EXISTS admin_dashboard_config');
+
         if ($isSqlite) {
             $this->addSql('CREATE TABLE admin_dashboard_config (
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -32,7 +38,7 @@ final class Version20260226000001 extends AbstractMigration
                 config_json CLOB NOT NULL,
                 version INTEGER DEFAULT 1 NOT NULL,
                 updated_at DATETIME NOT NULL,
-                CONSTRAINT FK_admin_dashboard_config_owner FOREIGN KEY (owner_id) REFERENCES "user" (id) ON DELETE CASCADE
+                CONSTRAINT FK_admin_dashboard_config_owner FOREIGN KEY (owner_id) REFERENCES '.$userTable.' (id) ON DELETE CASCADE
             )');
             $this->addSql('CREATE UNIQUE INDEX uniq_admin_dashboard_config_owner ON admin_dashboard_config (owner_id)');
             $this->addSql('CREATE INDEX idx_admin_dashboard_config_owner ON admin_dashboard_config (owner_id)');
@@ -43,7 +49,7 @@ final class Version20260226000001 extends AbstractMigration
                 config_json JSON NOT NULL,
                 version INT DEFAULT 1 NOT NULL,
                 updated_at TIMESTAMP(0) NOT NULL,
-                CONSTRAINT FK_admin_dashboard_config_owner FOREIGN KEY (owner_id) REFERENCES "user" (id) ON DELETE CASCADE
+                CONSTRAINT FK_admin_dashboard_config_owner FOREIGN KEY (owner_id) REFERENCES '.$userTable.' (id) ON DELETE CASCADE
             )');
             $this->addSql('CREATE UNIQUE INDEX uniq_admin_dashboard_config_owner ON admin_dashboard_config (owner_id)');
             $this->addSql('CREATE INDEX idx_admin_dashboard_config_owner ON admin_dashboard_config (owner_id)');

@@ -11,30 +11,39 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: 'API Info')]
 class ApiInfoController extends AbstractController
 {
+    use ApiResponderTrait;
+
     #[Route('', name: 'info', methods: ['GET'])]
     #[OA\Get(
         path: '/api/v1',
         summary: 'API Information',
-        description: 'Get general information about the API, including available endpoints and authentication methods',
-        tags: ['API Info']
+        description: 'Public endpoint: API version, entry paths, and how to authenticate. No API key required.',
+        tags: ['API Info'],
+        security: []
     )]
     #[OA\Response(
         response: 200,
         description: 'API information',
         content: new OA\JsonContent(
             properties: [
-                new OA\Property(property: 'name', type: 'string'),
-                new OA\Property(property: 'version', type: 'string'),
-                new OA\Property(property: 'description', type: 'string'),
-                new OA\Property(property: 'endpoints', type: 'object'),
-                new OA\Property(property: 'authentication', type: 'object'),
-                new OA\Property(property: 'documentation', type: 'string'),
+                new OA\Property(
+                    property: 'data',
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'name', type: 'string'),
+                        new OA\Property(property: 'version', type: 'string'),
+                        new OA\Property(property: 'description', type: 'string'),
+                        new OA\Property(property: 'endpoints', type: 'object'),
+                        new OA\Property(property: 'authentication', type: 'object'),
+                        new OA\Property(property: 'documentation', type: 'string'),
+                    ]
+                ),
             ]
         )
     )]
     public function info(): JsonResponse
     {
-        return $this->json([
+        return $this->apiData([
             'name' => 'SymfoShop API',
             'version' => '1.0.0',
             'description' => 'RESTful API for SymfoShop e-commerce platform',
@@ -43,7 +52,7 @@ class ApiInfoController extends AbstractController
                 'categories' => '/api/v1/categories',
                 'cart' => '/api/v1/cart',
                 'orders' => '/api/v1/orders',
-                'api-keys' => '/api/v1/api-keys',
+                'apiKeys' => '/api/v1/api-keys',
                 'auth' => '/api/v1/auth',
             ],
             'authentication' => [
@@ -51,11 +60,10 @@ class ApiInfoController extends AbstractController
                 'methods' => [
                     'Authorization: Bearer <api-key>',
                     'X-API-Key: <api-key>',
-                    'Query parameter: ?api_key=<api-key>',
+                    'Query: ?api_key=<api-key> (avoid in production)',
                 ],
             ],
             'documentation' => '/api/v1/docs',
         ]);
     }
 }
-

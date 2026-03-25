@@ -135,13 +135,13 @@
                     <!-- Desktop Navigation Links -->
                     <div class="hidden lg:flex items-center space-x-1">
                         <a href="{{ path('catalog_home') }}" 
-                           class="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-all duration-200 {% if app.request.get('_route') == 'catalog_home' %}text-primary-600 bg-primary-50{% endif %}">
+                           class="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-all duration-200 {% if app.request.attributes.get('_route') == 'catalog_home' %}text-primary-600 bg-primary-50{% endif %}">
                             <i class="fas fa-home text-sm"></i>
                             <span>{{ 'nav.home'|trans }}</span>
                         </a>
                         {% if app.user %}
                             <a href="{{ path('account_wishlist_show') }}" 
-                               class="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-all duration-200 {% if app.request.get('_route') == 'account_wishlist_show' %}text-primary-600 bg-primary-50{% endif %}">
+                               class="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-all duration-200 {% if app.request.attributes.get('_route') == 'account_wishlist_show' %}text-primary-600 bg-primary-50{% endif %}">
                                 <i class="fas fa-heart text-sm"></i>
                                 <span>{{ 'footer.wishlist'|trans }}</span>
                             </a>
@@ -281,19 +281,19 @@
         <div id="mobile-menu" class="lg:hidden hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-lg">
             <div class="px-4 py-4 space-y-1">
                 <a href="{{ path('catalog_home') }}" 
-                   class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors {% if app.request.get('_route') == 'catalog_home' %}text-primary-600 bg-primary-50{% endif %}">
+                   class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors {% if app.request.attributes.get('_route') == 'catalog_home' %}text-primary-600 bg-primary-50{% endif %}">
                     <i class="fas fa-home w-5 text-center"></i>
                     <span>{{ 'nav.home'|trans }}</span>
                 </a>
                 
                 {% if app.user %}
                     <a href="{{ path('account_wishlist_show') }}" 
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors {% if app.request.get('_route') == 'account_wishlist_show' %}text-primary-600 bg-primary-50{% endif %}">
+                       class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors {% if app.request.attributes.get('_route') == 'account_wishlist_show' %}text-primary-600 bg-primary-50{% endif %}">
                         <i class="fas fa-heart w-5 text-center"></i>
                         <span>{{ 'footer.wishlist'|trans }}</span>
                     </a>
                     <a href="{{ path('account_dashboard') }}" 
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors {% if app.request.get('_route') starts with 'account_' and app.request.get('_route') != 'account_wishlist_show' %}text-primary-600 bg-primary-50{% endif %}">
+                       class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors {% if app.request.attributes.get('_route') starts with 'account_' and app.request.attributes.get('_route') != 'account_wishlist_show' %}text-primary-600 bg-primary-50{% endif %}">
                         <i class="fas fa-user-circle w-5 text-center"></i>
                         <span>{{ 'nav.dashboard'|trans }}</span>
                     </a>
