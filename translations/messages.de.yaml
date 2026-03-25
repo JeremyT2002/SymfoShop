@@ -170,6 +170,12 @@ category:
     clear_all: Alle löschen
     apply: Anwenden
 
+catalog:
+  all_products:
+    title: Alle Produkte
+    meta: Alle Produkte im Shop durchsuchen.
+    empty: Noch keine Produkte verfügbar.
+
 checkout:
   page_title: Zur Kasse
   meta_description: Schließen Sie Ihre Bestellung ab

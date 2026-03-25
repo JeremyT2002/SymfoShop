@@ -115,6 +115,42 @@ class ProductRepository extends ServiceEntityRepository
         return $products;
     }
 
+    /**
+     * Paginated active products with variants + media (product cards).
+     *
+     * @return list<Product>
+     */
+    public function findActiveProductsForListing(int $offset = 0, int $limit = 12): array
+    {
+        $ids = $this->createQueryBuilder('p')
+            ->select('p.id')
+            ->where('p.status = :status')
+            ->setParameter('status', ProductStatus::ACTIVE)
+            ->orderBy('p.createdAt', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getSingleColumnResult();
+
+        if ($ids === []) {
+            return [];
+        }
+
+        /** @var list<Product> $products */
+        $products = $this->createQueryBuilder('p')
+            ->leftJoin('p.variants', 'v')
+            ->addSelect('v')
+            ->leftJoin('p.media', 'm')
+            ->addSelect('m')
+            ->where('p.id IN (:ids)')
+            ->setParameter('ids', array_map('intval', $ids))
+            ->orderBy('p.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return $products;
+    }
+
     public function countActiveProducts(): int
     {
         return (int) $this->createQueryBuilder('p')

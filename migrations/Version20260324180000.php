@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
@@ -17,27 +19,45 @@ final class Version20260324180000 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $platform = $this->connection->getDatabasePlatform();
-        $isSqlite = $platform instanceof \Doctrine\DBAL\Platforms\SqlitePlatform;
-        $orderTable = $platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform ? '"order"' : '`order`';
+        $isPostgres = $platform instanceof PostgreSQLPlatform;
+        $isSqlite = $platform instanceof SqlitePlatform;
 
-        // Re-run safety: previous attempts may have already added `order.locale`
-        // before failing on the subsequent CREATE TABLE.
         $this->addSql('DROP TABLE IF EXISTS return_request');
-        // Drop locale only if it exists (rerunnable migration).
-        if (!$isSqlite) {
+
+        if ($isSqlite) {
+            $columns = $this->connection->fetchAllAssociative('PRAGMA table_info("order")');
+            $hasLocale = false;
+            foreach ($columns as $col) {
+                if (($col['name'] ?? '') === 'locale') {
+                    $hasLocale = true;
+                    break;
+                }
+            }
+            if (!$hasLocale) {
+                $this->addSql('ALTER TABLE "order" ADD COLUMN locale VARCHAR(10) NOT NULL DEFAULT \'en\'');
+            }
+        } elseif ($isPostgres) {
+            $localeColumnCount = (int) $this->connection->fetchOne(
+                "SELECT COUNT(*) FROM information_schema.columns
+                 WHERE table_schema = current_schema()
+                   AND table_name = 'order'
+                   AND column_name = 'locale'"
+            );
+            if ($localeColumnCount === 0) {
+                $this->addSql('ALTER TABLE "order" ADD COLUMN locale VARCHAR(10) NOT NULL DEFAULT \'en\'');
+            }
+        } else {
             $localeColumnCount = (int) $this->connection->fetchOne(
                 "SELECT COUNT(*) FROM information_schema.columns
                  WHERE table_schema = DATABASE()
                    AND table_name = 'order'
                    AND column_name = 'locale'"
             );
-
-            if ($localeColumnCount > 0) {
-                $this->addSql('ALTER TABLE '.$orderTable.' DROP COLUMN locale');
+            if ($localeColumnCount === 0) {
+                $this->addSql('ALTER TABLE `order` ADD COLUMN locale VARCHAR(10) NOT NULL DEFAULT \'en\'');
             }
         }
 
-        // Create return_request table (clean SQL without Doctrine inline hints).
         $this->addSql('CREATE TABLE return_request (
             id INTEGER NOT NULL AUTO_INCREMENT,
             order_number VARCHAR(50) NOT NULL,
@@ -54,7 +74,9 @@ final class Version20260324180000 extends AbstractMigration
     {
         $this->addSql('DROP TABLE return_request');
         $platform = $this->connection->getDatabasePlatform();
-        $orderTable = $platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform ? '"order"' : '`order`';
+        $isPostgres = $platform instanceof PostgreSQLPlatform;
+        $isSqlite = $platform instanceof SqlitePlatform;
+        $orderTable = $isPostgres ? '"order"' : ($isSqlite ? '"order"' : '`order`');
 
         $this->addSql('ALTER TABLE '.$orderTable.' DROP COLUMN locale');
     }

@@ -170,6 +170,12 @@ category:
     clear_all: Clear all
     apply: Apply
 
+catalog:
+  all_products:
+    title: All products
+    meta: Browse all products in the shop.
+    empty: No products available yet.
+
 checkout:
   page_title: Checkout
   meta_description: Complete your order

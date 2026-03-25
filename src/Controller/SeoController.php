@@ -25,6 +25,7 @@ final class SeoController extends AbstractController
 
         $staticRoutes = [
             'catalog_home',
+            'catalog_products',
             'cart_show',
             'login',
             'register',
@@ -41,7 +42,7 @@ final class SeoController extends AbstractController
             $urls[] = [
                 'loc' => $base . $this->generateUrl($name, referenceType: UrlGeneratorInterface::ABSOLUTE_PATH),
                 'changefreq' => 'weekly',
-                'priority' => $name === 'catalog_home' ? '1.0' : '0.6',
+                'priority' => $name === 'catalog_home' ? '1.0' : ($name === 'catalog_products' ? '0.9' : '0.6'),
             ];
         }
 

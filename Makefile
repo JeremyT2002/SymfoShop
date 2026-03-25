@@ -102,7 +102,7 @@ setup: install ## Complete project setup (install, db, migrate, admin user)
 	@echo "Setting up database..."
 	@$(MAKE) db-create
 	@echo "Checking migration status..."
-	@php bin/console doctrine:migrations:status --no-interaction 2>nul || echo "Note: If you see 'table already exists' errors, run 'make db-reset' to start fresh."
+	-php bin/console doctrine:migrations:status --no-interaction || echo "Note: If you see 'table already exists' errors, run 'make db-reset' to start fresh."
 	@$(MAKE) db-migrate
 	@echo "Creating admin user..."
 	@echo "Note: Admin user creation requires interactive input. If this fails, run 'make admin-user' separately."
@@ -112,16 +112,14 @@ setup: install ## Complete project setup (install, db, migrate, admin user)
 # Database Operations
 db-create: ## Create database
 	@echo "Creating database..."
-	@php bin/console doctrine:database:create --if-not-exists 2>nul || \
+	-php bin/console doctrine:database:create --if-not-exists || \
 		echo "Database may already exist or platform doesn't support listing databases."
 
+# Uses POSIX sh-friendly commands (Linux/macOS/Git Bash). No Windows cmd syntax — dash rejects "if exist" / "(".
 db-drop: ## Drop database (WARNING: destructive)
 	@echo "Dropping database..."
-	@php bin/console doctrine:database:drop --force --if-exists 2>nul || \
-		(echo "Attempting to delete SQLite database file..." && \
-		if exist "var\data_dev.db" (del /q "var\data_dev.db" 2>nul) || \
-		if exist "var/data_dev.db" (rm -f "var/data_dev.db" 2>nul) || \
-		echo "Database drop not supported by platform or database doesn't exist. Skipping...")
+	-php bin/console doctrine:database:drop --force --if-exists
+	-rm -f var/data_dev.db var/data.db
 
 db-migrate: ## Run database migrations
 	@echo "Running database migrations..."
@@ -171,10 +169,14 @@ server-start: ## Start Symfony development server
 
 server-stop: ## Stop Symfony development server
 	@echo "$(BLUE)Stopping Symfony server...$(NC)"
+ifeq ($(OS),Windows_NT)
 	@if exist "symfony.lock" (symfony server:stop) else ( \
 		taskkill /F /IM php.exe /FI "WINDOWTITLE eq *localhost:8000*" 2>nul || \
 		echo "No Symfony server process found to stop." \
 	)
+else
+	-symfony server:stop 2>/dev/null || true
+endif
 
 server-log: ## Show Symfony server logs
 	symfony server:log
@@ -259,8 +261,8 @@ lint-twig: ## Lint Twig templates
 
 format: ## Format code (if using PHP CS Fixer)
 	@echo "$(BLUE)Formatting code...$(NC)"
-	@php bin/php-cs-fixer fix src/ 2>nul || \
-		(echo "$(YELLOW)PHP CS Fixer not installed. Install with: composer require --dev friendsofphp/php-cs-fixer$(NC)")
+	-php bin/php-cs-fixer fix src/ || \
+		echo "$(YELLOW)PHP CS Fixer not installed. Install with: composer require --dev friendsofphp/php-cs-fixer$(NC)"
 
 check: lint test ## Run all checks (lint + test)
 
@@ -293,6 +295,7 @@ reset: clean cache-clear db-reset ## Full reset (clean, cache, database)
 
 clean: ## Clean generated files (cross-platform)
 	@echo "$(BLUE)Cleaning generated files...$(NC)"
+ifeq ($(OS),Windows_NT)
 	@php bin/console cache:clear --no-warmup 2>nul || echo "Cache cleared"
 	@if exist var\cache (for /d /r var\cache %%d in (*) do @rd /s /q "%%d" 2>nul) & (del /q /s var\cache\*.* 2>nul) || (rm -rf var/cache/* 2>/dev/null || true)
 	@if exist var\log (del /q /s var\log\*.* 2>nul) || (rm -f var/log/* 2>/dev/null || true)
@@ -300,6 +303,12 @@ clean: ## Clean generated files (cross-platform)
 	@if exist var\invoices (del /q /s var\invoices\*.* 2>nul) || (rm -f var/invoices/* 2>/dev/null || true)
 	@if exist coverage (rd /s /q coverage 2>nul) || (rm -rf coverage 2>/dev/null || true)
 	@if exist .phpunit.result.cache (del /q .phpunit.result.cache 2>nul) || (rm -f .phpunit.result.cache 2>/dev/null || true)
+else
+	-php bin/console cache:clear --no-warmup || echo "Cache cleared"
+	-rm -rf var/cache/* var/log/* var/sessions/* var/invoices/* 2>/dev/null || true
+	-rm -rf coverage 2>/dev/null || true
+	-rm -f .phpunit.result.cache 2>/dev/null || true
+endif
 
 # Database Fixtures
 db-fixtures: ## Load database fixtures (sample data)
@@ -334,7 +343,11 @@ info: ## Show project information
 	@echo "SymfoShop - Project Information"
 	@echo ""
 	@echo "PHP Version:"
+ifeq ($(OS),Windows_NT)
 	@php -v | findstr /C:"PHP"
+else
+	@php -v | head -n 1
+endif
 	@echo ""
 	@echo "Symfony Version:"
 	@php bin/console --version
@@ -343,8 +356,16 @@ info: ## Show project information
 	@composer --version
 	@echo ""
 	@echo "Database Status:"
+ifeq ($(OS),Windows_NT)
 	@php bin/console doctrine:schema:validate 2>&1 | findstr /C:"mapping" >nul && echo "  Database connection OK" || echo "  Database not configured or not accessible"
+else
+	@php bin/console doctrine:schema:validate 2>&1 | grep -q mapping && echo "  Database connection OK" || echo "  Database not configured or not accessible"
+endif
 	@echo ""
 	@echo "Migration Status:"
+ifeq ($(OS),Windows_NT)
 	@php bin/console doctrine:migrations:status 2>&1 | findstr /C:"Migration Status" || echo "  Run 'make db-migrate-status' to check migrations"
+else
+	@php bin/console doctrine:migrations:status 2>&1 | grep "Migration Status" || echo "  Run 'make db-migrate-status' to check migrations"
+endif
 
