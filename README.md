@@ -8,10 +8,15 @@
 
 Production-oriented e-commerce on **Symfony 7.4** and **PHP 8.2+**: catalog, cart, checkout, payments (Stripe & PayPal), shipping/VAT, invoices, admin, API docs, EN/DE/FR.
 
+## 🌐 Live demo
+
+**Public demo:** [symfoshop-demo.kittyware.io](https://symfoshop-demo.kittyware.io/)
+
 ## Contents
 
 | Section | What you’ll find |
 |--------|-------------------|
+| [Live demo](#-live-demo) | Public demo instance |
 | [Quick start](#quick-start) | Fastest path to a running shop |
 | [Features](#features-at-a-glance) | Capabilities in one screen |
 | [Requirements](#requirements) | Tooling |
