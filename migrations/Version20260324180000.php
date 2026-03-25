@@ -58,15 +58,36 @@ final class Version20260324180000 extends AbstractMigration
             }
         }
 
-        $this->addSql('CREATE TABLE return_request (
-            id INTEGER NOT NULL AUTO_INCREMENT,
-            order_number VARCHAR(50) NOT NULL,
-            email VARCHAR(255) NOT NULL,
-            reason TEXT NOT NULL,
-            status VARCHAR(20) DEFAULT \'pending\' NOT NULL,
-            created_at DATETIME NOT NULL,
-            PRIMARY KEY(id)
-        )');
+        if ($isSqlite) {
+            $this->addSql('CREATE TABLE return_request (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                order_number VARCHAR(50) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                reason TEXT NOT NULL,
+                status VARCHAR(20) DEFAULT \'pending\' NOT NULL,
+                created_at DATETIME NOT NULL
+            )');
+        } elseif ($isPostgres) {
+            $this->addSql('CREATE TABLE return_request (
+                id SERIAL NOT NULL,
+                order_number VARCHAR(50) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                reason TEXT NOT NULL,
+                status VARCHAR(20) DEFAULT \'pending\' NOT NULL,
+                created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+                PRIMARY KEY(id)
+            )');
+        } else {
+            $this->addSql('CREATE TABLE return_request (
+                id INTEGER NOT NULL AUTO_INCREMENT,
+                order_number VARCHAR(50) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                reason TEXT NOT NULL,
+                status VARCHAR(20) DEFAULT \'pending\' NOT NULL,
+                created_at DATETIME NOT NULL,
+                PRIMARY KEY(id)
+            )');
+        }
         $this->addSql('CREATE INDEX idx_return_request_created_at ON return_request (created_at)');
     }
 
