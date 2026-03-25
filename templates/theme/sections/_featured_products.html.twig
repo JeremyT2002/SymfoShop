@@ -19,15 +19,13 @@
                 } %}
             {% endfor %}
         </div>
-        {% if categories is defined and categories|length > 0 %}
         <div class="text-center">
-            <a href="{{ path('catalog_category', {slug: categories|first.slug}) }}" 
+            <a href="{{ path('catalog_products') }}"
                class="inline-flex items-center px-8 py-4 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                 {{ 'home.featured.view_all'|trans|default('View All Products') }}
                 <i class="fas fa-arrow-right ml-2"></i>
             </a>
         </div>
-        {% endif %}
     </div>
 </section>
 {% endif %}

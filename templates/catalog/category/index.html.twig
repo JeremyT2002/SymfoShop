@@ -45,11 +45,9 @@
                 <h2 class="text-3xl sm:text-4xl font-bold mb-4">{{ 'home.cta.title'|trans|default('Ready to Start Shopping?') }}</h2>
                 <p class="text-xl text-primary-100 mb-8">{{ 'home.cta.subtitle'|trans|default('Join thousands of satisfied customers and discover amazing products today.') }}</p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    {% if categories|length > 0 %}
-                    <a href="{{ path('catalog_category', {slug: categories|first.slug}) }}" class="bg-white text-primary-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-50 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
+                    <a href="{{ path('catalog_products') }}" class="bg-white text-primary-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-50 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
                         <i class="fas fa-shopping-bag mr-2"></i>{{ 'home.cta.start_shopping'|trans|default('Start Shopping') }}
                     </a>
-                    {% endif %}
                     {% if not app.user %}
                     <a href="{{ path('register') }}" class="bg-primary-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-400 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 border-2 border-white">
                         <i class="fas fa-user-plus mr-2"></i>{{ 'home.cta.create_account'|trans|default('Create Account') }}

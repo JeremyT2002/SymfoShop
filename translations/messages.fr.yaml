@@ -170,6 +170,12 @@ category:
     clear_all: Tout effacer
     apply: Appliquer
 
+catalog:
+  all_products:
+    title: Tous les produits
+    meta: Parcourir tous les produits de la boutique.
+    empty: Aucun produit disponible pour le moment.
+
 checkout:
   page_title: Commander
   meta_description: Finalisez votre commande
