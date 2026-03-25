@@ -12,6 +12,8 @@ Production-oriented e-commerce on **Symfony 7.4** and **PHP 8.2+**: catalog, car
 
 **Public demo:** [symfoshop-demo.kittyware.io](https://symfoshop-demo.kittyware.io/)
 
+**Admin:** `admin@symfoshop.com` / `admin123`
+
 ## Contents
 
 | Section | What you’ll find |
