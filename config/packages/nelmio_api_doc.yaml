@@ -5,22 +5,38 @@ nelmio_api_doc:
             description: RESTful API for SymfoShop e-commerce platform
             version: 1.0.0
         components:
+            schemas:
+                ApiError:
+                    type: object
+                    required: [error]
+                    properties:
+                        error:
+                            type: object
+                            required: [code, message]
+                            properties:
+                                code:
+                                    type: string
+                                    example: BAD_REQUEST
+                                message:
+                                    type: string
             securitySchemes:
                 BearerAuth:
                     type: http
                     scheme: bearer
                     bearerFormat: API Key
-                    description: API Key authentication via Authorization Bearer header
+                    description: API Key authentication via Authorization Bearer header, X-API-Key header, or ?api_key=
         security:
             - BearerAuth: []
     areas:
         default:
             path_patterns:
-                - ^/api
+                # Document /api/* but not the Swagger HTML route itself (avoids empty CRUD stubs).
+                - ^/api(?!/v1/docs)
             name_patterns:
                 - ^api_
-            host_patterns:
-                - ^api\.
-                - ^localhost$
-            with_attribute: true
+            # Do not set host_patterns: dev often uses 127.0.0.1; only ^localhost$ would
+            # drop every route from the spec.
+            # with_attribute: true means "only routes tagged with Nelmio #[Areas('default')]";
+            # this project documents via OpenApi\Attributes only, so that would yield no paths.
+            with_attribute: false
 

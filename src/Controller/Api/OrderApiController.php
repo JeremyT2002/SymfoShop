@@ -3,8 +3,9 @@
 namespace App\Controller\Api;
 
 use App\Entity\Order;
+use App\Entity\User;
 use App\Repository\OrderRepository;
-use Nelmio\ApiDocBundle\Attribute\Security;
+use Nelmio\ApiDocBundle\Attribute\Security as DocSecurity;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,9 +15,11 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/v1/orders', name: 'api_orders_')]
 #[OA\Tag(name: 'Orders')]
-#[Security(name: 'BearerAuth')]
+#[DocSecurity(name: 'BearerAuth')]
 class OrderApiController extends AbstractController
 {
+    use ApiResponderTrait;
+
     public function __construct(
         private readonly OrderRepository $orderRepository
     ) {
@@ -26,21 +29,17 @@ class OrderApiController extends AbstractController
     #[OA\Get(
         path: '/api/v1/orders',
         summary: 'List orders',
-        description: 'Get a paginated list of orders. Users can only see their own orders. Admins can see all orders.',
+        description: 'Customers see their own orders; admins see all.',
         tags: ['Orders']
     )]
     #[OA\Parameter(
         name: 'page',
         in: 'query',
-        description: 'Page number',
-        required: false,
         schema: new OA\Schema(type: 'integer', default: 1)
     )]
     #[OA\Parameter(
         name: 'limit',
         in: 'query',
-        description: 'Items per page (max 100)',
-        required: false,
         schema: new OA\Schema(type: 'integer', default: 20, maximum: 100)
     )]
     #[OA\Response(
@@ -62,51 +61,48 @@ class OrderApiController extends AbstractController
             ]
         )
     )]
-    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 401, description: 'Unauthorized', content: new OA\JsonContent(ref: '#/components/schemas/ApiError'))]
     public function list(Request $request): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) {
-            return $this->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        if (!$user instanceof User) {
+            return $this->apiError('Unauthorized', Response::HTTP_UNAUTHORIZED);
         }
 
         $page = max(1, (int) $request->query->get('page', 1));
         $limit = min(100, max(1, (int) $request->query->get('limit', 20)));
         $offset = ($page - 1) * $limit;
 
-        // Users can only see their own orders (unless admin)
         $criteria = ['email' => $user->getEmail()];
-        if (in_array('ROLE_ADMIN', $user->getRoles())) {
-            $criteria = []; // Admins can see all orders
+        if (\in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            $criteria = [];
         }
 
         $orders = $this->orderRepository->findBy($criteria, ['createdAt' => 'DESC'], $limit, $offset);
         $total = $this->orderRepository->count($criteria);
 
-        $data = array_map(fn(Order $order) => $this->serializeOrder($order), $orders);
+        $data = array_map(fn (Order $order) => $this->serializeOrder($order), $orders);
 
-        return $this->json([
-            'data' => $data,
-            'pagination' => [
+        return $this->apiCollection(
+            $data,
+            [
                 'page' => $page,
                 'limit' => $limit,
                 'total' => $total,
-                'pages' => ceil($total / $limit),
-            ],
-        ]);
+                'pages' => (int) ceil($total / $limit),
+            ]
+        );
     }
 
     #[Route('/{orderNumber}', name: 'show', methods: ['GET'])]
     #[OA\Get(
         path: '/api/v1/orders/{orderNumber}',
-        summary: 'Get order by order number',
-        description: 'Get detailed information about a specific order',
+        summary: 'Get order by number',
         tags: ['Orders']
     )]
     #[OA\Parameter(
         name: 'orderNumber',
         in: 'path',
-        description: 'Order number',
         required: true,
         schema: new OA\Schema(type: 'string')
     )]
@@ -119,28 +115,27 @@ class OrderApiController extends AbstractController
             ]
         )
     )]
-    #[OA\Response(response: 401, description: 'Unauthorized')]
-    #[OA\Response(response: 403, description: 'Access denied')]
-    #[OA\Response(response: 404, description: 'Order not found')]
+    #[OA\Response(response: 401, description: 'Unauthorized', content: new OA\JsonContent(ref: '#/components/schemas/ApiError'))]
+    #[OA\Response(response: 403, description: 'Forbidden', content: new OA\JsonContent(ref: '#/components/schemas/ApiError'))]
+    #[OA\Response(response: 404, description: 'Not found', content: new OA\JsonContent(ref: '#/components/schemas/ApiError'))]
     public function show(string $orderNumber): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) {
-            return $this->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        if (!$user instanceof User) {
+            return $this->apiError('Unauthorized', Response::HTTP_UNAUTHORIZED);
         }
 
         $order = $this->orderRepository->findOneBy(['orderNumber' => $orderNumber]);
 
         if (!$order) {
-            return $this->json(['error' => 'Order not found'], Response::HTTP_NOT_FOUND);
+            return $this->apiError('Order not found', Response::HTTP_NOT_FOUND);
         }
 
-        // Check if user has access to this order
-        if (!in_array('ROLE_ADMIN', $user->getRoles()) && $order->getEmail() !== $user->getEmail()) {
-            return $this->json(['error' => 'Access denied'], Response::HTTP_FORBIDDEN);
+        if (!\in_array('ROLE_ADMIN', $user->getRoles(), true) && $order->getEmail() !== $user->getEmail()) {
+            return $this->apiError('Access denied', Response::HTTP_FORBIDDEN);
         }
 
-        return $this->json(['data' => $this->serializeOrder($order, true)]);
+        return $this->apiData($this->serializeOrder($order, true));
     }
 
     private function serializeOrder(Order $order, bool $detailed = false): array
@@ -153,15 +148,15 @@ class OrderApiController extends AbstractController
             'totals' => [
                 'subtotal' => [
                     'amount' => $order->getSubtotal(),
-                    'formatted' => number_format($order->getSubtotal() / 100, 2, '.', ',') . ' ' . $order->getCurrency(),
+                    'formatted' => number_format($order->getSubtotal() / 100, 2, '.', ',').' '.$order->getCurrency(),
                 ],
                 'taxTotal' => [
                     'amount' => $order->getTaxTotal(),
-                    'formatted' => number_format($order->getTaxTotal() / 100, 2, '.', ',') . ' ' . $order->getCurrency(),
+                    'formatted' => number_format($order->getTaxTotal() / 100, 2, '.', ',').' '.$order->getCurrency(),
                 ],
                 'grandTotal' => [
                     'amount' => $order->getGrandTotal(),
-                    'formatted' => number_format($order->getGrandTotal() / 100, 2, '.', ',') . ' ' . $order->getCurrency(),
+                    'formatted' => number_format($order->getGrandTotal() / 100, 2, '.', ',').' '.$order->getCurrency(),
                 ],
             ],
             'createdAt' => $order->getCreatedAt()->format('c'),
@@ -176,12 +171,12 @@ class OrderApiController extends AbstractController
                     'quantity' => $item->getQuantity(),
                     'unitPrice' => [
                         'amount' => $item->getUnitPriceAmount(),
-                        'formatted' => number_format($item->getUnitPriceAmount() / 100, 2, '.', ',') . ' ' . $order->getCurrency(),
+                        'formatted' => number_format($item->getUnitPriceAmount() / 100, 2, '.', ',').' '.$order->getCurrency(),
                     ],
                     'taxRate' => (float) $item->getTaxRate(),
                     'total' => [
                         'amount' => $item->getTotalAmount(),
-                        'formatted' => number_format($item->getTotalAmount() / 100, 2, '.', ',') . ' ' . $order->getCurrency(),
+                        'formatted' => number_format($item->getTotalAmount() / 100, 2, '.', ',').' '.$order->getCurrency(),
                     ],
                 ];
             }
@@ -199,4 +194,3 @@ class OrderApiController extends AbstractController
         return $data;
     }
 }
-

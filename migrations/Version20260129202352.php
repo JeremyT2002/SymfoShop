@@ -28,6 +28,12 @@ final class Version20260129202352 extends AbstractMigration
         $jsonType = $isPostgres ? 'JSON' : 'TEXT';
         $boolType = $isPostgres ? 'BOOLEAN' : 'INTEGER';
         $boolDefault = $isPostgres ? 'true' : '1';
+
+        // `user` is a reserved keyword; escape identifiers per platform.
+        $userTable = $isPostgres ? '"user"' : ($isSqlite ? '"user"' : '`user`');
+
+        // Allow re-running after partial schema creation.
+        $this->addSql('DROP TABLE IF EXISTS api_key');
         
         // Create api_key table
         if ($isSqlite) {
@@ -42,7 +48,7 @@ final class Version20260129202352 extends AbstractMigration
                 scopes TEXT DEFAULT NULL,
                 user_id INTEGER NOT NULL,
                 UNIQUE (key_hash),
-                CONSTRAINT FK_C912ED9DA76ED395 FOREIGN KEY (user_id) REFERENCES \"user\" (id) ON DELETE CASCADE
+                CONSTRAINT FK_C912ED9DA76ED395 FOREIGN KEY (user_id) REFERENCES $userTable (id) ON DELETE CASCADE
             )");
         } else {
             $this->addSql("CREATE TABLE api_key (
@@ -57,7 +63,7 @@ final class Version20260129202352 extends AbstractMigration
                 user_id INT NOT NULL,
                 PRIMARY KEY(id)
             )");
-            $this->addSql('ALTER TABLE api_key ADD CONSTRAINT FK_C912ED9DA76ED395 FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE');
+            $this->addSql('ALTER TABLE api_key ADD CONSTRAINT FK_C912ED9DA76ED395 FOREIGN KEY (user_id) REFERENCES '.$userTable.' (id) ON DELETE CASCADE');
         }
         $this->addSql('CREATE UNIQUE INDEX UNIQ_C912ED9D57BFB971 ON api_key (key_hash)');
         $this->addSql('CREATE INDEX idx_api_key_hash ON api_key (key_hash)');

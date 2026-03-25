@@ -16,8 +16,19 @@ final class Version20260324000100 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('CREATE TABLE payment_method (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, code VARCHAR(50) NOT NULL, name VARCHAR(120) NOT NULL, is_active BOOLEAN DEFAULT 1 NOT NULL, is_default BOOLEAN DEFAULT 0 NOT NULL, sort_order INTEGER DEFAULT 0 NOT NULL, created_at DATETIME NOT NULL --(DC2Type:datetime_immutable)
-        , updated_at DATETIME DEFAULT NULL --(DC2Type:datetime_immutable)
+        // Note: Doctrine sometimes adds inline `--(DC2Type:...)` hints.
+        // MariaDB only treats `--` as a comment when followed by whitespace,
+        // so we remove those hints to keep the SQL valid.
+        $this->addSql('CREATE TABLE payment_method (
+            id INTEGER NOT NULL AUTO_INCREMENT,
+            code VARCHAR(50) NOT NULL,
+            name VARCHAR(120) NOT NULL,
+            is_active BOOLEAN DEFAULT 1 NOT NULL,
+            is_default BOOLEAN DEFAULT 0 NOT NULL,
+            sort_order INTEGER DEFAULT 0 NOT NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME DEFAULT NULL,
+            PRIMARY KEY(id)
         )');
         $this->addSql('CREATE UNIQUE INDEX uniq_payment_method_code ON payment_method (code)');
 

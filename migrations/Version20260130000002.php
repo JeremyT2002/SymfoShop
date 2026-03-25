@@ -27,6 +27,13 @@ final class Version20260130000002 extends AbstractMigration
         $timestampType = $isPostgres ? 'TIMESTAMP(0) WITHOUT TIME ZONE' : 'DATETIME';
         $boolType = $isPostgres ? 'BOOLEAN' : 'INTEGER';
         $boolDefault = $isPostgres ? 'true' : '1';
+
+        // `user` is a reserved keyword; escape identifiers per platform.
+        $userTable = $isPostgres ? '"user"' : ($isSqlite ? '"user"' : '`user`');
+
+        // Allow re-running after partial schema creation.
+        $this->addSql('DROP TABLE IF EXISTS coupon_usage');
+        $this->addSql('DROP TABLE IF EXISTS coupon');
         
         // Create coupon table
         if ($isSqlite) {
@@ -72,7 +79,7 @@ final class Version20260130000002 extends AbstractMigration
                 usage_count INTEGER DEFAULT 1 NOT NULL,
                 used_at DATETIME NOT NULL,
                 CONSTRAINT FK_COUPON_USAGE_COUPON FOREIGN KEY (coupon_id) REFERENCES coupon (id) ON DELETE CASCADE,
-                CONSTRAINT FK_COUPON_USAGE_USER FOREIGN KEY (user_id) REFERENCES \"user\" (id) ON DELETE CASCADE
+                CONSTRAINT FK_COUPON_USAGE_USER FOREIGN KEY (user_id) REFERENCES $userTable (id) ON DELETE CASCADE
             )");
         } else {
             $this->addSql("CREATE TABLE coupon_usage (
@@ -84,7 +91,7 @@ final class Version20260130000002 extends AbstractMigration
                 PRIMARY KEY(id)
             )");
             $this->addSql('ALTER TABLE coupon_usage ADD CONSTRAINT FK_COUPON_USAGE_COUPON FOREIGN KEY (coupon_id) REFERENCES coupon (id) ON DELETE CASCADE');
-            $this->addSql('ALTER TABLE coupon_usage ADD CONSTRAINT FK_COUPON_USAGE_USER FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE');
+            $this->addSql('ALTER TABLE coupon_usage ADD CONSTRAINT FK_COUPON_USAGE_USER FOREIGN KEY (user_id) REFERENCES '.$userTable.' (id) ON DELETE CASCADE');
         }
         
         $this->addSql('CREATE UNIQUE INDEX coupon_user_unique ON coupon_usage (coupon_id, user_id)');

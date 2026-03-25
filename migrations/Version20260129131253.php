@@ -24,6 +24,15 @@ final class Version20260129131253 extends AbstractMigration
         $platform = $this->connection->getDatabasePlatform();
         $isPostgres = $platform instanceof PostgreSQLPlatform;
         $isSqlite = $platform instanceof SqlitePlatform;
+
+        // Reserved keyword: use DBAL’s per-platform quoting (`order` on MySQL/MariaDB, "order" on PostgreSQL/SQLite).
+        $orderTable = $platform->quoteSingleIdentifier('order');
+
+        // Previous runs may have created a partial schema before failing on the `order` table.
+        // Ensure we can re-run migrations safely for a fresh/empty database.
+        $this->addSql('DROP TABLE IF EXISTS order_item');
+        $this->addSql('DROP TABLE IF EXISTS '.$orderTable);
+        $this->addSql('DROP TABLE IF EXISTS customer');
         
         $idType = $isPostgres ? 'SERIAL' : 'INTEGER';
         $timestampType = $isPostgres ? 'TIMESTAMP(0) WITHOUT TIME ZONE' : 'DATETIME';
@@ -62,27 +71,29 @@ final class Version20260129131253 extends AbstractMigration
                 UNIQUE (order_number)
             )");
         } else {
-            $this->addSql("CREATE TABLE \"order\" (
-                id {$idType} NOT NULL,
-                order_number VARCHAR(50) NOT NULL,
-                email VARCHAR(255) NOT NULL,
-                currency VARCHAR(3) NOT NULL,
-                status VARCHAR(50) NOT NULL,
-                subtotal INT NOT NULL,
-                tax_total INT NOT NULL,
-                grand_total INT NOT NULL,
-                created_at {$timestampType} NOT NULL,
-                UNIQUE (order_number),
-                PRIMARY KEY(id)
-            )");
+            $this->addSql(
+                'CREATE TABLE '.$orderTable.' (
+                    id '.$idType.' NOT NULL,
+                    order_number VARCHAR(50) NOT NULL,
+                    email VARCHAR(255) NOT NULL,
+                    currency VARCHAR(3) NOT NULL,
+                    status VARCHAR(50) NOT NULL,
+                    subtotal INT NOT NULL,
+                    tax_total INT NOT NULL,
+                    grand_total INT NOT NULL,
+                    created_at '.$timestampType.' NOT NULL,
+                    UNIQUE (order_number),
+                    PRIMARY KEY(id)
+                )'
+            );
         }
-        $this->addSql('CREATE INDEX idx_order_order_number ON "order" (order_number)');
-        $this->addSql('CREATE INDEX idx_order_email ON "order" (email)');
-        $this->addSql('CREATE INDEX idx_order_status ON "order" (status)');
+        $this->addSql('CREATE INDEX idx_order_order_number ON '.$orderTable.' (order_number)');
+        $this->addSql('CREATE INDEX idx_order_email ON '.$orderTable.' (email)');
+        $this->addSql('CREATE INDEX idx_order_status ON '.$orderTable.' (status)');
 
         // Create order_item table
         if ($isSqlite) {
-            $this->addSql("CREATE TABLE order_item (
+            $this->addSql('CREATE TABLE order_item (
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 order_id INTEGER NOT NULL,
                 sku VARCHAR(255) NOT NULL,
@@ -91,8 +102,8 @@ final class Version20260129131253 extends AbstractMigration
                 unit_price_amount INTEGER NOT NULL,
                 tax_rate NUMERIC(5, 4) NOT NULL,
                 total_amount INTEGER NOT NULL,
-                CONSTRAINT FK_order_item_order FOREIGN KEY (order_id) REFERENCES \"order\" (id) ON DELETE CASCADE
-            )");
+                CONSTRAINT FK_order_item_order FOREIGN KEY (order_id) REFERENCES '.$orderTable.' (id) ON DELETE CASCADE
+            )');
         } else {
             $this->addSql("CREATE TABLE order_item (
                 id {$idType} NOT NULL,
@@ -105,7 +116,7 @@ final class Version20260129131253 extends AbstractMigration
                 total_amount INT NOT NULL,
                 PRIMARY KEY(id)
             )");
-            $this->addSql('ALTER TABLE order_item ADD CONSTRAINT FK_order_item_order FOREIGN KEY (order_id) REFERENCES "order" (id) ON DELETE CASCADE');
+            $this->addSql('ALTER TABLE order_item ADD CONSTRAINT FK_order_item_order FOREIGN KEY (order_id) REFERENCES '.$orderTable.' (id) ON DELETE CASCADE');
         }
         $this->addSql('CREATE INDEX idx_order_item_order ON order_item (order_id)');
     }
@@ -114,12 +125,13 @@ final class Version20260129131253 extends AbstractMigration
     {
         $platform = $this->connection->getDatabasePlatform();
         $isSqlite = $platform instanceof SqlitePlatform;
-        
+        $orderTable = $platform->quoteSingleIdentifier('order');
+
         if (!$isSqlite) {
             $this->addSql('ALTER TABLE order_item DROP CONSTRAINT FK_order_item_order');
         }
-        $this->addSql('DROP TABLE customer');
-        $this->addSql('DROP TABLE "order"');
-        $this->addSql('DROP TABLE order_item');
+        $this->addSql('DROP TABLE IF EXISTS order_item');
+        $this->addSql('DROP TABLE IF EXISTS '.$orderTable);
+        $this->addSql('DROP TABLE IF EXISTS customer');
     }
 }

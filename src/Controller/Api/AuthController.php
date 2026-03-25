@@ -2,8 +2,9 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\User;
 use App\Service\Api\ApiKeyService;
-use Nelmio\ApiDocBundle\Attribute\Security;
+use Nelmio\ApiDocBundle\Attribute\Security as DocSecurity;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,17 +17,19 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[OA\Tag(name: 'Authentication')]
 class AuthController extends AbstractController
 {
+    use ApiResponderTrait;
+
     public function __construct(
         private readonly ApiKeyService $apiKeyService
     ) {
     }
 
     #[Route('/api-keys', name: 'create_api_key', methods: ['POST'])]
-    #[IsGranted('ROLE_USER')]
+    #[IsGranted('ROLE_USER', statusCode: Response::HTTP_UNAUTHORIZED)]
     #[OA\Post(
         path: '/api/v1/auth/api-keys',
         summary: 'Create API key',
-        description: 'Create a new API key. Requires user authentication (not API key). The API key is only shown once in the response.',
+        description: 'Creates a new API key for the **logged-in shop user** (session cookie). Not available with API key authentication. The plain key is returned only once.',
         tags: ['Authentication'],
         security: []
     )]
@@ -34,72 +37,77 @@ class AuthController extends AbstractController
         required: true,
         content: new OA\JsonContent(
             properties: [
-                new OA\Property(property: 'name', type: 'string', description: 'API key name'),
-                new OA\Property(property: 'expiresAt', type: 'string', format: 'date-time', description: 'Expiration date (optional)'),
-                new OA\Property(property: 'scopes', type: 'array', items: new OA\Items(type: 'string'), description: 'API key scopes (optional)'),
+                new OA\Property(property: 'name', type: 'string', description: 'API key label'),
+                new OA\Property(property: 'expiresAt', type: 'string', format: 'date-time', description: 'Optional expiry (ISO 8601)'),
+                new OA\Property(property: 'scopes', type: 'array', items: new OA\Items(type: 'string'), description: 'Optional scopes'),
             ],
             required: ['name']
         )
     )]
     #[OA\Response(
         response: 201,
-        description: 'API key created successfully',
+        description: 'API key created',
         content: new OA\JsonContent(
             properties: [
-                new OA\Property(property: 'success', type: 'boolean'),
-                new OA\Property(property: 'message', type: 'string'),
-                new OA\Property(
-                    property: 'data',
-                    type: 'object',
-                    properties: [
-                        new OA\Property(property: 'apiKey', type: 'string', description: 'The API key (only shown once!)'),
-                        new OA\Property(property: 'name', type: 'string'),
-                        new OA\Property(property: 'expiresAt', type: 'string', format: 'date-time', nullable: true),
-                        new OA\Property(property: 'scopes', type: 'array', items: new OA\Items(type: 'string'), nullable: true),
-                    ]
-                ),
+                new OA\Property(property: 'data', type: 'object'),
+                new OA\Property(property: 'meta', type: 'object', properties: [new OA\Property(property: 'message', type: 'string')]),
             ]
         )
     )]
-    #[OA\Response(response: 400, description: 'Invalid request')]
-    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 400, description: 'Invalid request', content: new OA\JsonContent(ref: '#/components/schemas/ApiError'))]
+    #[OA\Response(response: 401, description: 'Not logged in to the shop')]
     public function createApiKey(Request $request): JsonResponse
     {
-        // This endpoint requires regular user authentication (not API key)
-        // Users must be logged in via the web interface to create API keys
         $user = $this->getUser();
-        if (!$user) {
-            return $this->json(['error' => 'You must be logged in to create API keys'], Response::HTTP_UNAUTHORIZED);
+        if (!$user instanceof User) {
+            return $this->apiError('Authentication required', Response::HTTP_UNAUTHORIZED);
         }
-        $data = json_decode($request->getContent(), true);
 
-        $name = $data['name'] ?? null;
-        $expiresAt = isset($data['expiresAt']) ? new \DateTimeImmutable($data['expiresAt']) : null;
+        $data = $this->apiJsonBody($request);
+        if ($data instanceof JsonResponse) {
+            return $data;
+        }
+
+        $name = isset($data['name']) ? trim((string) $data['name']) : '';
+        if ('' === $name) {
+            return $this->apiError('Name is required', Response::HTTP_BAD_REQUEST, 'INVALID_BODY');
+        }
+
+        $expiresAt = null;
+        if (!empty($data['expiresAt'])) {
+            try {
+                $expiresAt = new \DateTimeImmutable((string) $data['expiresAt']);
+            } catch (\Exception) {
+                return $this->apiError('Invalid expiresAt value', Response::HTTP_BAD_REQUEST, 'INVALID_BODY');
+            }
+        }
+
+        /** @var list<string>|null $scopes */
         $scopes = $data['scopes'] ?? null;
-
-        if (!$name) {
-            return $this->json(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
+        if (null !== $scopes && !\is_array($scopes)) {
+            return $this->apiError('scopes must be an array of strings', Response::HTTP_BAD_REQUEST, 'INVALID_BODY');
         }
 
-        $apiKey = $this->apiKeyService->generateApiKey($user, $name, $expiresAt, $scopes);
+        $plainKey = $this->apiKeyService->generateApiKey($user, $name, $expiresAt, $scopes);
 
-        return $this->json([
-            'success' => true,
-            'message' => 'API key created successfully',
-            'data' => [
-                'apiKey' => $apiKey, // Only shown once!
+        return $this->apiData(
+            [
+                'apiKey' => $plainKey,
                 'name' => $name,
                 'expiresAt' => $expiresAt?->format('c'),
                 'scopes' => $scopes,
             ],
-        ], Response::HTTP_CREATED);
+            Response::HTTP_CREATED,
+            ['message' => 'API key created successfully']
+        );
     }
 
     #[Route('/me', name: 'me', methods: ['GET'])]
+    #[DocSecurity(name: 'BearerAuth')]
     #[OA\Get(
         path: '/api/v1/auth/me',
-        summary: 'Get current user',
-        description: 'Get information about the currently authenticated user',
+        summary: 'Current user (API key)',
+        description: 'Returns the user tied to the API key used for this request.',
         tags: ['Authentication']
     )]
     #[OA\Response(
@@ -121,23 +129,20 @@ class AuthController extends AbstractController
             ]
         )
     )]
-    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 401, description: 'Unauthorized', content: new OA\JsonContent(ref: '#/components/schemas/ApiError'))]
     public function me(): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) {
-            return $this->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        if (!$user instanceof User) {
+            return $this->apiError('Unauthorized', Response::HTTP_UNAUTHORIZED);
         }
 
-        return $this->json([
-            'data' => [
-                'id' => $user->getId(),
-                'email' => $user->getEmail(),
-                'firstName' => $user->getFirstName(),
-                'lastName' => $user->getLastName(),
-                'roles' => $user->getRoles(),
-            ],
+        return $this->apiData([
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+            'firstName' => $user->getFirstName(),
+            'lastName' => $user->getLastName(),
+            'roles' => $user->getRoles(),
         ]);
     }
 }
-

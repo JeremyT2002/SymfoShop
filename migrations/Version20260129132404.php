@@ -24,6 +24,14 @@ final class Version20260129132404 extends AbstractMigration
         $platform = $this->connection->getDatabasePlatform();
         $isPostgres = $platform instanceof PostgreSQLPlatform;
         $isSqlite = $platform instanceof SqlitePlatform;
+
+        // `order` is reserved; escape identifiers per platform.
+        $orderTable = $isPostgres ? '"order"' : ($isSqlite ? '"order"' : '`order`');
+
+        // Previous runs may have created partial schema before failing (e.g. FK quoting).
+        // Make the migration re-runnable on MariaDB/MySQL.
+        $this->addSql('DROP TABLE IF EXISTS order_reservation');
+        $this->addSql('DROP TABLE IF EXISTS stock_item');
         
         $idType = $isPostgres ? 'SERIAL' : 'INTEGER';
         $timestampType = $isPostgres ? 'TIMESTAMP(0) WITHOUT TIME ZONE' : 'DATETIME';
@@ -62,7 +70,7 @@ final class Version20260129132404 extends AbstractMigration
                 quantity INTEGER NOT NULL,
                 expires_at DATETIME NOT NULL,
                 created_at DATETIME NOT NULL,
-                CONSTRAINT FK_order_reservation_order FOREIGN KEY (order_id) REFERENCES \"order\" (id) ON DELETE CASCADE,
+                CONSTRAINT FK_order_reservation_order FOREIGN KEY (order_id) REFERENCES $orderTable (id) ON DELETE CASCADE,
                 CONSTRAINT FK_order_reservation_variant FOREIGN KEY (variant_id) REFERENCES product_variant (id) ON DELETE CASCADE
             )");
         } else {
@@ -75,7 +83,7 @@ final class Version20260129132404 extends AbstractMigration
                 created_at {$timestampType} NOT NULL,
                 PRIMARY KEY(id)
             )");
-            $this->addSql('ALTER TABLE order_reservation ADD CONSTRAINT FK_order_reservation_order FOREIGN KEY (order_id) REFERENCES "order" (id) ON DELETE CASCADE');
+            $this->addSql('ALTER TABLE order_reservation ADD CONSTRAINT FK_order_reservation_order FOREIGN KEY (order_id) REFERENCES '.$orderTable.' (id) ON DELETE CASCADE');
             $this->addSql('ALTER TABLE order_reservation ADD CONSTRAINT FK_order_reservation_variant FOREIGN KEY (variant_id) REFERENCES product_variant (id) ON DELETE CASCADE');
         }
         $this->addSql('CREATE INDEX idx_order_reservation_order ON order_reservation (order_id)');

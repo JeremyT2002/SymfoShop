@@ -2,8 +2,9 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\Category;
 use App\Repository\CategoryRepository;
-use Nelmio\ApiDocBundle\Attribute\Security;
+use Nelmio\ApiDocBundle\Attribute\Security as DocSecurity;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,9 +13,11 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/v1/categories', name: 'api_categories_')]
 #[OA\Tag(name: 'Categories')]
-#[Security(name: 'BearerAuth')]
+#[DocSecurity(name: 'BearerAuth')]
 class CategoryApiController extends AbstractController
 {
+    use ApiResponderTrait;
+
     public function __construct(
         private readonly CategoryRepository $categoryRepository
     ) {
@@ -24,7 +27,7 @@ class CategoryApiController extends AbstractController
     #[OA\Get(
         path: '/api/v1/categories',
         summary: 'List categories',
-        description: 'Get a list of all root categories with their children',
+        description: 'Root categories with nested children.',
         tags: ['Categories']
     )]
     #[OA\Response(
@@ -40,22 +43,20 @@ class CategoryApiController extends AbstractController
     {
         $categories = $this->categoryRepository->findBy(['parent' => null], ['name' => 'ASC']);
 
-        $data = array_map(fn($category) => $this->serializeCategory($category, true), $categories);
+        $data = array_map(fn (Category $category) => $this->serializeCategory($category, true), $categories);
 
-        return $this->json(['data' => $data]);
+        return $this->apiData($data);
     }
 
     #[Route('/{slug}', name: 'show', methods: ['GET'])]
     #[OA\Get(
         path: '/api/v1/categories/{slug}',
         summary: 'Get category by slug',
-        description: 'Get detailed information about a specific category',
         tags: ['Categories']
     )]
     #[OA\Parameter(
         name: 'slug',
         in: 'path',
-        description: 'Category slug',
         required: true,
         schema: new OA\Schema(type: 'string')
     )]
@@ -68,19 +69,19 @@ class CategoryApiController extends AbstractController
             ]
         )
     )]
-    #[OA\Response(response: 404, description: 'Category not found')]
+    #[OA\Response(response: 404, description: 'Not found', content: new OA\JsonContent(ref: '#/components/schemas/ApiError'))]
     public function show(string $slug): JsonResponse
     {
         $category = $this->categoryRepository->findOneBy(['slug' => $slug]);
 
         if (!$category) {
-            return $this->json(['error' => 'Category not found'], Response::HTTP_NOT_FOUND);
+            return $this->apiError('Category not found', Response::HTTP_NOT_FOUND);
         }
 
-        return $this->json(['data' => $this->serializeCategory($category, true)]);
+        return $this->apiData($this->serializeCategory($category, true));
     }
 
-    private function serializeCategory($category, bool $includeChildren = false): array
+    private function serializeCategory(Category $category, bool $includeChildren = false): array
     {
         $data = [
             'id' => $category->getId(),
@@ -98,7 +99,7 @@ class CategoryApiController extends AbstractController
 
         if ($includeChildren && $category->getChildren()->count() > 0) {
             $data['children'] = array_map(
-                fn($child) => $this->serializeCategory($child, false),
+                fn (Category $child) => $this->serializeCategory($child, false),
                 $category->getChildren()->toArray()
             );
         }
@@ -106,4 +107,3 @@ class CategoryApiController extends AbstractController
         return $data;
     }
 }
-

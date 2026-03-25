@@ -23,6 +23,15 @@ final class Version20260129131951 extends AbstractMigration
         $isPostgres = $platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform;
         $isSqlite = $platform instanceof \Doctrine\DBAL\Platforms\SqlitePlatform;
         
+        // `order` is a reserved keyword; identifier quoting differs by platform.
+        // PostgreSQL uses double quotes, MySQL/MariaDB needs backticks.
+        $orderTable = $isPostgres ? '"order"' : ($isSqlite ? '"order"' : '`order`');
+
+        // Previous runs may have created a partial schema before failing.
+        // Allow re-running by dropping the involved tables first.
+        $this->addSql('DROP TABLE IF EXISTS processed_webhook_event');
+        $this->addSql('DROP TABLE IF EXISTS payment');
+        
         $idType = $isPostgres ? 'SERIAL' : 'INTEGER';
         $timestampType = $isPostgres ? 'TIMESTAMP(0) WITHOUT TIME ZONE' : 'DATETIME';
         
@@ -39,7 +48,7 @@ final class Version20260129131951 extends AbstractMigration
                 created_at DATETIME NOT NULL,
                 updated_at DATETIME DEFAULT NULL,
                 UNIQUE (payment_intent_id),
-                CONSTRAINT FK_payment_order FOREIGN KEY (order_id) REFERENCES \"order\" (id) ON DELETE CASCADE
+                CONSTRAINT FK_payment_order FOREIGN KEY (order_id) REFERENCES $orderTable (id) ON DELETE CASCADE
             )");
         } else {
             $this->addSql("CREATE TABLE payment (
@@ -55,7 +64,7 @@ final class Version20260129131951 extends AbstractMigration
                 UNIQUE (payment_intent_id),
                 PRIMARY KEY(id)
             )");
-            $this->addSql('ALTER TABLE payment ADD CONSTRAINT FK_payment_order FOREIGN KEY (order_id) REFERENCES "order" (id) ON DELETE CASCADE');
+            $this->addSql('ALTER TABLE payment ADD CONSTRAINT FK_payment_order FOREIGN KEY (order_id) REFERENCES '.$orderTable.' (id) ON DELETE CASCADE');
         }
         $this->addSql('CREATE INDEX idx_payment_order ON payment (order_id)');
         $this->addSql('CREATE INDEX idx_payment_intent_id ON payment (payment_intent_id)');

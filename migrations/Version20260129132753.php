@@ -22,6 +22,12 @@ final class Version20260129132753 extends AbstractMigration
         $platform = $this->connection->getDatabasePlatform();
         $isPostgres = $platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform;
         $isSqlite = $platform instanceof \Doctrine\DBAL\Platforms\SqlitePlatform;
+
+        // `order` is a reserved keyword; identifier quoting differs by platform.
+        $orderTable = $isPostgres ? '"order"' : ($isSqlite ? '"order"' : '`order`');
+
+        // Allow re-running after partial schema creation.
+        $this->addSql('DROP TABLE IF EXISTS invoice');
         
         $idType = $isPostgres ? 'SERIAL' : 'INTEGER';
         $timestampType = $isPostgres ? 'TIMESTAMP(0) WITHOUT TIME ZONE' : 'DATETIME';
@@ -36,7 +42,7 @@ final class Version20260129132753 extends AbstractMigration
                 created_at DATETIME NOT NULL,
                 sent_at DATETIME DEFAULT NULL,
                 UNIQUE (invoice_number),
-                CONSTRAINT FK_invoice_order FOREIGN KEY (order_id) REFERENCES \"order\" (id) ON DELETE CASCADE
+                CONSTRAINT FK_invoice_order FOREIGN KEY (order_id) REFERENCES $orderTable (id) ON DELETE CASCADE
             )");
         } else {
             $this->addSql("CREATE TABLE invoice (
@@ -49,7 +55,7 @@ final class Version20260129132753 extends AbstractMigration
                 UNIQUE (invoice_number),
                 PRIMARY KEY(id)
             )");
-            $this->addSql('ALTER TABLE invoice ADD CONSTRAINT FK_invoice_order FOREIGN KEY (order_id) REFERENCES "order" (id) ON DELETE CASCADE');
+            $this->addSql('ALTER TABLE invoice ADD CONSTRAINT FK_invoice_order FOREIGN KEY (order_id) REFERENCES '.$orderTable.' (id) ON DELETE CASCADE');
         }
         $this->addSql('CREATE INDEX idx_invoice_order ON invoice (order_id)');
         $this->addSql('CREATE INDEX idx_invoice_number ON invoice (invoice_number)');

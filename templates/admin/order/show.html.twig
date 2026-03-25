@@ -133,7 +133,7 @@
                     </div>
                 </dl>
                 <div class="space-y-2">
-                    <a href="{{ path('invoice_download', { invoiceNumber: invoice.invoiceNumber }) }}"
+                        <a href="{{ path('account_invoice_download', { invoiceNumber: invoice.invoiceNumber }) }}"
                        class="block w-full text-center bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
                         <i class="fas fa-file-pdf mr-1"></i> {{ 'admin.orders.show.download_pdf'|trans }}
                     </a>

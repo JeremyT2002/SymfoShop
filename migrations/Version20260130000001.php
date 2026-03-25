@@ -23,9 +23,15 @@ final class Version20260130000001 extends AbstractMigration
         $isPostgres = $platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform;
         $isSqlite = $platform instanceof \Doctrine\DBAL\Platforms\SqlitePlatform;
         
+        // `user` is a reserved keyword; escape identifiers per platform.
+        $userTable = $isPostgres ? '"user"' : ($isSqlite ? '"user"' : '`user`');
+        
         $idType = $isPostgres ? 'SERIAL' : 'INTEGER';
         $timestampType = $isPostgres ? 'TIMESTAMP(0) WITHOUT TIME ZONE' : 'DATETIME';
         
+        // Re-runnable: allow a clean re-try after a failed run.
+        $this->addSql('DROP TABLE IF EXISTS wishlist');
+
         // Create wishlist table
         if ($isSqlite) {
             $this->addSql("CREATE TABLE wishlist (
@@ -33,7 +39,7 @@ final class Version20260130000001 extends AbstractMigration
                 user_id INTEGER NOT NULL,
                 product_id INTEGER NOT NULL,
                 created_at DATETIME NOT NULL,
-                CONSTRAINT FK_9CE58A1DA76ED395 FOREIGN KEY (user_id) REFERENCES \"user\" (id) ON DELETE CASCADE,
+                CONSTRAINT FK_9CE58A1DA76ED395 FOREIGN KEY (user_id) REFERENCES $userTable (id) ON DELETE CASCADE,
                 CONSTRAINT FK_9CE58A1D4584665A FOREIGN KEY (product_id) REFERENCES product (id) ON DELETE CASCADE
             )");
         } else {
@@ -44,7 +50,7 @@ final class Version20260130000001 extends AbstractMigration
                 created_at {$timestampType} NOT NULL,
                 PRIMARY KEY(id)
             )");
-            $this->addSql('ALTER TABLE wishlist ADD CONSTRAINT FK_9CE58A1DA76ED395 FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE');
+            $this->addSql('ALTER TABLE wishlist ADD CONSTRAINT FK_9CE58A1DA76ED395 FOREIGN KEY (user_id) REFERENCES '.$userTable.' (id) ON DELETE CASCADE');
             $this->addSql('ALTER TABLE wishlist ADD CONSTRAINT FK_9CE58A1D4584665A FOREIGN KEY (product_id) REFERENCES product (id) ON DELETE CASCADE');
         }
         

@@ -25,8 +25,27 @@ class ApiKeyAuthenticator extends AbstractAuthenticator
 
     public function supports(Request $request): ?bool
     {
-        // Only authenticate API routes
-        return str_starts_with($request->getPathInfo(), '/api/');
+        if (!str_starts_with($request->getPathInfo(), '/api/')) {
+            return false;
+        }
+
+        // Public discovery (no API key)
+        if ($this->isPublicApiRoute($request)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function isPublicApiRoute(Request $request): bool
+    {
+        if ('GET' !== $request->getMethod()) {
+            return false;
+        }
+
+        $path = $request->getPathInfo();
+
+        return '/api/v1' === $path || '/api/v1/' === $path;
     }
 
     public function authenticate(Request $request): Passport
@@ -66,8 +85,10 @@ class ApiKeyAuthenticator extends AbstractAuthenticator
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         return new JsonResponse([
-            'error' => 'Authentication failed',
-            'message' => $exception->getMessage(),
+            'error' => [
+                'code' => 'UNAUTHORIZED',
+                'message' => $exception->getMessage(),
+            ],
         ], Response::HTTP_UNAUTHORIZED);
     }
 
