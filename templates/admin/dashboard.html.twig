@@ -3,6 +3,39 @@
 {% block page_title %}{{ 'admin.dashboard.title'|trans }}{% endblock %}
 
 {% block body %}
+    <div class="mb-4">
+        <div class="bg-white rounded-lg shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="min-w-0">
+                <div class="text-sm font-semibold text-gray-800">App Update</div>
+                {% if app_update.ok %}
+                    {% if app_update.updates_available %}
+                        <div class="text-sm text-amber-700 mt-0.5">
+                            Update verfügbar ({{ app_update.behind_by }} commit{{ app_update.behind_by == 1 ? '' : 's' }}).
+                        </div>
+                    {% else %}
+                        <div class="text-sm text-gray-600 mt-0.5">Up to date.</div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-sm text-red-700 mt-0.5 truncate">
+                        Update-Check fehlgeschlagen{% if app_update.error %}: {{ app_update.error }}{% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="flex items-center gap-2">
+                <form method="post" action="{{ path('admin_system_update') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('admin_system_update') }}">
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                            {% if not app_update.ok or not app_update.updates_available %}disabled{% endif %}>
+                        <i class="fas fa-cloud-download-alt"></i>
+                        Jetzt updaten
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="dashboard-grid" data-js="dashboard-grid" data-dashboard-widgets="{{ widgets|json_encode|e('html_attr') }}">
         <div class="grid grid-cols-1 md:grid-cols-6 gap-4" style="grid-auto-rows: minmax(120px, auto);">
             {% for widget in widgets %}

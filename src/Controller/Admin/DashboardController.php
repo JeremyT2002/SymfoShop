@@ -8,8 +8,11 @@ use App\Dashboard\Widget\WidgetRenderer;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use App\Repository\UserRepository;
+use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Render\RenderOpenApi;
+use App\Service\System\AppUpdateService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -31,6 +34,7 @@ class DashboardController extends AbstractController
         private readonly RenderOpenApi $renderOpenApi,
         private readonly EntityManagerInterface $entityManager,
         private readonly CacheInterface $cache,
+        private readonly AppUpdateService $appUpdateService,
     ) {
     }
 
@@ -64,6 +68,7 @@ class DashboardController extends AbstractController
         return $this->render('admin/dashboard.html.twig', [
             'widgets' => $widgets,
             'dashboardConfig' => $config,
+            'app_update' => $this->appUpdateService->checkForUpdates(),
         ]);
     }
 
@@ -122,11 +127,17 @@ class DashboardController extends AbstractController
         return $this->cache->get('admin_dashboard_kpi_counts', function (ItemInterface $item): array {
             $item->expiresAfter(30);
 
+            $platform = $this->entityManager->getConnection()->getDatabasePlatform();
+            $isSqlite = $platform instanceof SqlitePlatform;
+            $isPostgres = $platform instanceof PostgreSQLPlatform;
+            $orderTable = $isSqlite || $isPostgres ? '"order"' : '`order`';
+            $userTable = $isSqlite || $isPostgres ? '"user"' : '`user`';
+
             $row = $this->entityManager->getConnection()->fetchAssociative(
                 'SELECT
                     (SELECT COUNT(*) FROM product) AS products_count,
-                    (SELECT COUNT(*) FROM "order") AS orders_count,
-                    (SELECT COUNT(*) FROM "user") AS users_count'
+                    (SELECT COUNT(*) FROM ' . $orderTable . ') AS orders_count,
+                    (SELECT COUNT(*) FROM ' . $userTable . ') AS users_count'
             );
 
             return [

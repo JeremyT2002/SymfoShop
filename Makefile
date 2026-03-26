@@ -1,4 +1,4 @@
-.PHONY: help install setup test clean cache-clear db-create db-migrate db-reset fixtures admin-user server-start server-stop lint format check docker-up docker-down docker-build docker-logs docker-exec docker-db-setup docker-db-drop docker-db-reset docker-load-fixture docker-admin-user
+.PHONY: help install update setup test clean cache-clear db-create db-migrate db-reset fixtures admin-user server-start server-stop lint format check docker-up docker-down docker-build docker-logs docker-exec docker-db-setup docker-db-drop docker-db-reset docker-load-fixture docker-admin-user app-update
 
 # Default target
 .DEFAULT_GOAL := help
@@ -32,6 +32,7 @@ help: ## Show this help message
 	@echo ""
 	@echo "Installation & Setup:"
 	@echo "  install              Install Composer dependencies"
+	@echo "  app-update           Update app from GitHub + migrate + cache (for demo/prod servers)"
 	@echo "  setup                Complete project setup (install, db, migrate, admin user)"
 	@echo ""
 	@echo "Database:"
@@ -97,6 +98,18 @@ install: ## Install Composer dependencies
 update: ## Update Composer dependencies
 	@echo "$(BLUE)Updating Composer dependencies...$(NC)"
 	composer update
+
+app-update: ## Update app from GitHub (fast-forward only) + migrations + cache for current env
+	@echo "$(BLUE)Updating repository (git pull --ff-only)...$(NC)"
+	git pull --ff-only
+	@echo "$(BLUE)Installing Composer dependencies...$(NC)"
+	composer install --no-interaction --prefer-dist --optimize-autoloader
+	@echo "$(BLUE)Running database migrations...$(NC)"
+	php bin/console doctrine:migrations:migrate --no-interaction
+	@echo "$(BLUE)Clearing & warming up cache...$(NC)"
+	php bin/console cache:clear --env=$${APP_ENV:-prod}
+	php bin/console cache:warmup --env=$${APP_ENV:-prod}
+	@echo "$(GREEN)✓ App update complete.$(NC)"
 
 setup: install ## Complete project setup (install, db, migrate, admin user)
 	@echo "Setting up database..."
