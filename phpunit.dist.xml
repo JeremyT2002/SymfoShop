@@ -29,8 +29,8 @@
     </testsuites>
 
     <!--
-        Coverage target (make test-coverage): ≥80% line coverage on this scope (domain + application services).
-        Controllers, Twig, Theme-Editor, Commands, etc. are excluded; cover them with functional/E2E tests if needed.
+        Coverage target (CI): ≥50% statement coverage on this scope (core application services).
+        Controllers, Twig, Theme-Editor, Commands, Entities, etc. are excluded; cover them with functional/E2E tests if needed.
     -->
     <source ignoreSuppressionOfDeprecations="true"
             ignoreIndirectDeprecations="true"
