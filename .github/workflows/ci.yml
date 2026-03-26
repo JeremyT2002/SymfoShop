@@ -25,7 +25,7 @@ jobs:
         with:
           php-version: '8.2'
           extensions: ctype, dom, iconv, intl, mbstring, pdo_sqlite, xml
-          coverage: none
+          coverage: pcov
 
       - name: Get Composer cache directory
         id: composer-cache
@@ -76,5 +76,26 @@ jobs:
       - name: Lint DI container (test env)
         run: php bin/console lint:container --env=test --no-debug
 
-      - name: Run PHPUnit
-        run: php vendor/bin/phpunit
+      - name: Run PHPUnit (with coverage)
+        run: |
+          mkdir -p var/coverage
+          php vendor/bin/phpunit --coverage-clover var/coverage/clover.xml
+
+      - name: Enforce minimum coverage (80%)
+        run: |
+          php -r '
+          $min = 80.0;
+          $file = "var/coverage/clover.xml";
+          if (!file_exists($file)) { fwrite(STDERR, "Missing $file\n"); exit(1); }
+          $xml = simplexml_load_file($file);
+          if ($xml === false) { fwrite(STDERR, "Failed to parse clover.xml\n"); exit(1); }
+          $metrics = $xml->xpath("/coverage/project/metrics");
+          if (!$metrics || !isset($metrics[0])) { fwrite(STDERR, "Missing project metrics in clover.xml\n"); exit(1); }
+          $m = $metrics[0];
+          $covered = (float) ($m["coveredstatements"] ?? 0);
+          $total = (float) ($m["statements"] ?? 0);
+          if ($total <= 0) { fwrite(STDERR, "No statements found in clover.xml\n"); exit(1); }
+          $pct = ($covered / $total) * 100.0;
+          printf("Total statement coverage: %.2f%% (min %.2f%%)\n", $pct, $min);
+          if ($pct + 1e-9 < $min) { exit(1); }
+          '
