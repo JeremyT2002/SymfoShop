@@ -234,6 +234,13 @@
                                         <i class="fas fa-heart w-5 text-center"></i>
                                         <span>{{ 'footer.wishlist'|trans }}</span>
                                     </a>
+                                    {% if (theme_config().support.provider|default('selfcoded')) == 'selfcoded' %}
+                                        <a href="{{ path('account_support_index') }}"
+                                           class="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">
+                                            <i class="fas fa-headset w-5 text-center"></i>
+                                            <span>{{ 'footer.support'|trans }}</span>
+                                        </a>
+                                    {% endif %}
                                     {% if is_granted('ROLE_ADMIN') %}
                                     <a href="{{ path('admin') }}" 
                                        class="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">
@@ -297,6 +304,13 @@
                         <i class="fas fa-user-circle w-5 text-center"></i>
                         <span>{{ 'nav.dashboard'|trans }}</span>
                     </a>
+                    {% if (theme_config().support.provider|default('selfcoded')) == 'selfcoded' %}
+                        <a href="{{ path('account_support_index') }}"
+                           class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors {% if app.request.attributes.get('_route') starts with 'account_support_' %}text-primary-600 bg-primary-50{% endif %}">
+                            <i class="fas fa-headset w-5 text-center"></i>
+                            <span>{{ 'footer.support'|trans }}</span>
+                        </a>
+                    {% endif %}
                     <a href="{{ path('cart_show') }}" 
                        class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors">
                         <i class="fas fa-shopping-cart w-5 text-center"></i>
@@ -399,6 +413,51 @@
     <main class="flex-grow flex flex-col">
         {% block body %}{% endblock %}
     </main>
+
+    {% set supportProvider = theme_config().support.provider|default('selfcoded') %}
+    {% if app.user and supportProvider == 'selfcoded' %}
+        <a href="{{ path('account_support_index') }}"
+           class="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full bg-primary-600 hover:bg-primary-700 text-white px-4 py-3 shadow-xl shadow-primary-600/30 transition-colors"
+           aria-label="Open support chat">
+            <i class="fas fa-comments"></i>
+            <span class="hidden sm:inline text-sm font-semibold">{{ 'footer.support'|trans }}</span>
+        </a>
+    {% endif %}
+
+    {% if supportProvider in ['tawkto', 'tawk_charla'] %}
+        {% set tawkEmbedPath = theme_config().support.tawkEmbedPath|default('') %}
+        {% if not tawkEmbedPath and theme_config().support.tawkPropertyId|default('') %}
+            {% set tawkEmbedPath = theme_config().support.tawkPropertyId ~ (theme_config().support.tawkWidgetId|default('') ? '/' ~ theme_config().support.tawkWidgetId : '') %}
+        {% endif %}
+    {% endif %}
+    {% if supportProvider in ['tawkto', 'tawk_charla'] and tawkEmbedPath %}
+        <script type="text/javascript">
+            var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+            (function () {
+                var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+                s1.async = true;
+                s1.src = "https://embed.tawk.to/{{ tawkEmbedPath|e('js') }}";
+                s1.charset = "UTF-8";
+                s1.setAttribute("crossorigin", "*");
+                s0.parentNode.insertBefore(s1, s0);
+            })();
+        </script>
+    {% endif %}
+    {% if supportProvider in ['charla', 'tawk_charla'] %}
+        {% set charlaProjectId = theme_config().support.charlaProjectId|default(theme_config().support.charlaWebsiteId|default('')) %}
+    {% endif %}
+    {% if supportProvider in ['charla', 'tawk_charla'] and charlaProjectId %}
+        <script type="text/javascript" charset="utf-8">
+            window.addEventListener('load', function () {
+                const widgetElement = document.createElement('charla-widget');
+                widgetElement.setAttribute('p', '{{ charlaProjectId|e('js') }}');
+                document.body.appendChild(widgetElement);
+                const widgetCode = document.createElement('script');
+                widgetCode.src = 'https://app.charla.com/widget/widget.js';
+                document.body.appendChild(widgetCode);
+            });
+        </script>
+    {% endif %}
 
     <div id="cookie-consent-banner"
          class="hidden fixed bottom-0 left-0 right-0 z-[60] border-t border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-[0_-4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.4)]"

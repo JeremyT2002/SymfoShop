@@ -108,6 +108,40 @@
             <!-- Variants -->
             <div class="admin-card p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Product Variants ({{ product.variants|length }})</h3>
+
+                <form method="post" action="{{ path('admin_products_variants', {id: product.id}) }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-5 p-4 rounded-lg border border-gray-200">
+                    <input type="hidden" name="_token" value="{{ csrf_token('create_variant_' ~ product.id) }}">
+                    <div class="lg:col-span-2">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">SKU *</label>
+                        <input type="text" name="sku" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="e.g. TSHIRT-BLACK-M">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Price (minor units) *</label>
+                        <input type="number" name="price_amount" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="1999">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Currency *</label>
+                        <input type="text" name="currency" value="EUR" maxlength="3" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">On hand *</label>
+                        <input type="number" name="on_hand" min="0" value="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Reserved *</label>
+                        <input type="number" name="reserved" min="0" value="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    </div>
+                    <div class="md:col-span-2 lg:col-span-2">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Attributes (JSON or key:value lines)</label>
+                        <textarea name="attributes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder='{"size":"M","color":"black"}'></textarea>
+                    </div>
+                    <div class="md:col-span-2 lg:col-span-4">
+                        <button type="submit" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
+                            <i class="fas fa-plus"></i> Add variant
+                        </button>
+                    </div>
+                </form>
+
                 {% if product.variants|length > 0 %}
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -115,34 +149,46 @@
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Attributes</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Attributes</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 {% for variant in product.variants %}
                                     <tr>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ variant.sku }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">
-                                            {{ (variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ variant.currency }}
+                                        <td class="px-4 py-3 align-top">
+                                            <input form="variant-edit-{{ variant.id }}" type="text" name="sku" value="{{ variant.sku }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                                         </td>
-                                        <td class="px-4 py-3 text-sm text-gray-500">
-                                            {% if variant.attributes %}
-                                                {% for key, value in variant.attributes %}
-                                                    <span class="inline-block bg-gray-100 px-2 py-1 rounded text-xs mr-1">
-                                                        {{ key }}: {{ value }}
-                                                    </span>
-                                                {% endfor %}
-                                            {% else %}
-                                                <span class="text-gray-400">No attributes</span>
-                                            {% endif %}
+                                        <td class="px-4 py-3 align-top">
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <input form="variant-edit-{{ variant.id }}" type="number" name="price_amount" min="0" value="{{ variant.priceAmount }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                                <input form="variant-edit-{{ variant.id }}" type="text" name="currency" maxlength="3" value="{{ variant.currency }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                            </div>
                                         </td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">
-                                            {% if variant.stockItem %}
-                                                {{ variant.stockItem.available }} / {{ variant.stockItem.onHand }}
-                                            {% else %}
-                                                <span class="text-gray-400">0 / 0</span>
-                                            {% endif %}
+                                        <td class="px-4 py-3 align-top">
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <input form="variant-edit-{{ variant.id }}" type="number" name="on_hand" min="0" value="{{ variant.stockItem ? variant.stockItem.onHand : 0 }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                                <input form="variant-edit-{{ variant.id }}" type="number" name="reserved" min="0" value="{{ variant.stockItem ? variant.stockItem.reserved : 0 }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                            </div>
+                                            <p class="mt-1 text-xs text-gray-500">Available: {{ variant.stockItem ? variant.stockItem.available : 0 }}</p>
+                                        </td>
+                                        <td class="px-4 py-3 align-top">
+                                            <textarea form="variant-edit-{{ variant.id }}" name="attributes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">{{ variant.attributes ? variant.attributes|json_encode(constant('JSON_PRETTY_PRINT')) : '' }}</textarea>
+                                        </td>
+                                        <td class="px-4 py-3 align-top text-right space-y-2">
+                                            <form id="variant-edit-{{ variant.id }}" method="post" action="{{ path('admin_products_variant_edit', {id: product.id, variantId: variant.id}) }}">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('edit_variant_' ~ variant.id) }}">
+                                                <button type="submit" class="inline-flex items-center gap-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+                                                    <i class="fas fa-save"></i> Save
+                                                </button>
+                                            </form>
+                                            <form method="post" action="{{ path('admin_products_variant_delete', {id: product.id, variantId: variant.id}) }}" onsubmit="return confirm('Delete this variant?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete_variant_' ~ variant.id) }}">
+                                                <button type="submit" class="inline-flex items-center gap-1 px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 {% endfor %}

@@ -17,10 +17,10 @@ class PaymentMethod
     private ?int $id = null;
 
     #[ORM\Column(type: Types::STRING, length: 50)]
-    private string $code;
+    private string $code = '';
 
     #[ORM\Column(type: Types::STRING, length: 120)]
-    private string $name;
+    private string $name = '';
 
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
     private bool $isActive = true;

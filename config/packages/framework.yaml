@@ -12,6 +12,10 @@ framework:
             policy: sliding_window
             limit: 10
             interval: '1 hour'
+        support_message_limiter:
+            policy: sliding_window
+            limit: 30
+            interval: '1 minute'
 
     #esi: true
     #fragments: true
@@ -26,3 +30,7 @@ when@test:
                 policy: sliding_window
                 limit: 1000
                 interval: '1 hour'
+            support_message_limiter:
+                policy: sliding_window
+                limit: 1000
+                interval: '1 minute'

@@ -1,13 +1,15 @@
-<div id="chart-status-{{ random(10000, 99999) }}" class="chart-container" style="min-height: 220px;"></div>
+<div id="chart-status-{{ random(10000, 99999) }}" class="chart-container" style="min-height: 220px;"
+     data-empty="{{ 'admin.dashboard.chart.no_orders'|trans|e('html_attr') }}"></div>
 <script>
 (function() {
     const statusData = {{ data|default([])|json_encode|raw }};
     const el = document.currentScript.previousElementSibling;
     if (statusData.length === 0) {
-        el.innerHTML = '<p class="text-sm text-gray-500 flex items-center justify-center h-full">No orders yet</p>';
+        el.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center h-full min-h-[220px]">' + el.dataset.empty + '</p>';
         return;
     }
     const options = {
+        theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' },
         chart: { type: 'donut', height: 220 },
         series: statusData.map(d => d.count),
         labels: statusData.map(d => d.status.charAt(0).toUpperCase() + d.status.slice(1)),

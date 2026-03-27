@@ -5,6 +5,8 @@ namespace App\Controller\Admin;
 use App\Entity\Product;
 use App\Entity\ProductMedia;
 use App\Entity\ProductStatus;
+use App\Entity\ProductVariant;
+use App\Entity\StockItem;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Service\Product\ImageUploadService;
@@ -113,15 +115,153 @@ class ProductController extends AbstractController
     #[Route('/{id}', name: 'show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(int $id): Response
     {
-        $product = $this->productRepository->find($id);
-        
-        if (!$product) {
-            throw $this->createNotFoundException('Product not found');
-        }
+        $product = $this->findProductOr404($id);
         
         return $this->render('admin/product/show.html.twig', [
             'product' => $product,
         ]);
+    }
+
+    #[Route('/{id}/variants', name: 'variants', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
+    public function variants(int $id, Request $request): Response
+    {
+        $product = $this->findProductOr404($id);
+
+        if ($request->isMethod('GET')) {
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+
+        if (!$this->isCsrfTokenValid('create_variant_' . $product->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+
+            $sku = trim((string) $request->request->get('sku', ''));
+            $priceAmount = (int) $request->request->get('price_amount', 0);
+            $currency = strtoupper(trim((string) $request->request->get('currency', 'EUR')));
+            $onHand = max(0, (int) $request->request->get('on_hand', 0));
+            $reserved = max(0, (int) $request->request->get('reserved', 0));
+            $attributesRaw = (string) $request->request->get('attributes', '');
+
+        if ($sku === '') {
+            $this->addFlash('error', 'SKU is required.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+        if ($priceAmount < 0) {
+            $this->addFlash('error', 'Price must be 0 or higher.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+        if (!preg_match('/^[A-Z]{3}$/', $currency)) {
+            $this->addFlash('error', 'Currency must be a 3-letter code (e.g. EUR).');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+        if ($reserved > $onHand) {
+            $this->addFlash('error', 'Reserved stock cannot be higher than on hand.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+        if ($this->entityManager->getRepository(ProductVariant::class)->findOneBy(['sku' => $sku]) !== null) {
+            $this->addFlash('error', 'SKU already exists.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+
+            $variant = new ProductVariant();
+            $variant->setProduct($product);
+            $variant->setSku($sku);
+            $variant->setPriceAmount($priceAmount);
+            $variant->setCurrency($currency);
+            $variant->setAttributes($this->parseAttributesInput($attributesRaw));
+            $variant->setUpdatedAt(new \DateTimeImmutable());
+
+            $stockItem = new StockItem();
+            $stockItem->setVariant($variant);
+            $stockItem->setOnHand($onHand);
+            $stockItem->setReserved($reserved);
+            $variant->setStockItem($stockItem);
+
+            $this->entityManager->persist($variant);
+            $this->entityManager->persist($stockItem);
+            $this->entityManager->flush();
+
+        $this->addFlash('success', 'Variant created.');
+        return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+    }
+
+    #[Route('/{id}/variants/{variantId}/edit', name: 'variant_edit', methods: ['POST'], requirements: ['id' => '\d+', 'variantId' => '\d+'])]
+    public function editVariant(int $id, int $variantId, Request $request): Response
+    {
+        $product = $this->findProductOr404($id);
+        $variant = $this->findVariantForProductOr404($product, $variantId);
+
+        if (!$this->isCsrfTokenValid('edit_variant_' . $variant->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+
+        $sku = trim((string) $request->request->get('sku', ''));
+        $priceAmount = (int) $request->request->get('price_amount', 0);
+        $currency = strtoupper(trim((string) $request->request->get('currency', 'EUR')));
+        $onHand = max(0, (int) $request->request->get('on_hand', 0));
+        $reserved = max(0, (int) $request->request->get('reserved', 0));
+        $attributesRaw = (string) $request->request->get('attributes', '');
+
+        if ($sku === '') {
+            $this->addFlash('error', 'SKU is required.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+        if ($priceAmount < 0) {
+            $this->addFlash('error', 'Price must be 0 or higher.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+        if (!preg_match('/^[A-Z]{3}$/', $currency)) {
+            $this->addFlash('error', 'Currency must be a 3-letter code (e.g. EUR).');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+        if ($reserved > $onHand) {
+            $this->addFlash('error', 'Reserved stock cannot be higher than on hand.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+
+        $existing = $this->entityManager->getRepository(ProductVariant::class)->findOneBy(['sku' => $sku]);
+        if ($existing !== null && $existing->getId() !== $variant->getId()) {
+            $this->addFlash('error', 'SKU already exists.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+
+        $variant->setSku($sku);
+        $variant->setPriceAmount($priceAmount);
+        $variant->setCurrency($currency);
+        $variant->setAttributes($this->parseAttributesInput($attributesRaw));
+        $variant->setUpdatedAt(new \DateTimeImmutable());
+
+        $stockItem = $variant->getStockItem() ?? (new StockItem())->setVariant($variant);
+        $stockItem->setOnHand($onHand);
+        $stockItem->setReserved($reserved);
+        $variant->setStockItem($stockItem);
+
+        $this->entityManager->persist($variant);
+        $this->entityManager->persist($stockItem);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Variant updated.');
+        return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+    }
+
+    #[Route('/{id}/variants/{variantId}/delete', name: 'variant_delete', methods: ['POST'], requirements: ['id' => '\d+', 'variantId' => '\d+'])]
+    public function deleteVariant(int $id, int $variantId, Request $request): Response
+    {
+        $product = $this->findProductOr404($id);
+        $variant = $this->findVariantForProductOr404($product, $variantId);
+
+        if (!$this->isCsrfTokenValid('delete_variant_' . $variant->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+
+        $this->entityManager->remove($variant);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Variant deleted.');
+        return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
     }
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
@@ -238,6 +378,60 @@ class ProductController extends AbstractController
         }
         
         return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+    }
+
+    private function findProductOr404(int $id): Product
+    {
+        $product = $this->productRepository->find($id);
+        if (!$product) {
+            throw $this->createNotFoundException('Product not found');
+        }
+        return $product;
+    }
+
+    private function findVariantForProductOr404(Product $product, int $variantId): ProductVariant
+    {
+        foreach ($product->getVariants() as $variant) {
+            if ($variant->getId() === $variantId) {
+                return $variant;
+            }
+        }
+        throw $this->createNotFoundException('Variant not found');
+    }
+
+    /** @return array<string, string> */
+    private function parseAttributesInput(string $input): array
+    {
+        $attributes = [];
+        $trimmed = trim($input);
+        if ($trimmed === '') {
+            return $attributes;
+        }
+
+        $decoded = json_decode($trimmed, true);
+        if (is_array($decoded)) {
+            foreach ($decoded as $key => $value) {
+                $k = trim((string) $key);
+                $v = trim((string) $value);
+                if ($k !== '' && $v !== '') {
+                    $attributes[$k] = $v;
+                }
+            }
+            return $attributes;
+        }
+
+        foreach (preg_split('/\R/', $trimmed) ?: [] as $line) {
+            $line = trim($line);
+            if ($line === '' || !str_contains($line, ':')) {
+                continue;
+            }
+            [$k, $v] = array_map('trim', explode(':', $line, 2));
+            if ($k !== '' && $v !== '') {
+                $attributes[$k] = $v;
+            }
+        }
+
+        return $attributes;
     }
 }
 

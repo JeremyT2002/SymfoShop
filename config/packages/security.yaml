@@ -57,6 +57,9 @@ security:
         - { path: ^/webhook/paypal, roles: PUBLIC_ACCESS }
         - { path: ^/payment/paypal, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/account/support, roles: ROLE_USER }
+        - { path: ^/support/api, roles: ROLE_USER }
+        - { path: ^/support/attachment, roles: ROLE_USER }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
         - { path: ^/reset-password, roles: PUBLIC_ACCESS }

@@ -493,9 +493,103 @@ account:
       profile_updated: Vos informations de profil ont été mises à jour.
 
 admin:
+  brand:
+    name: SymfoShop
+  layout:
+    title_default: Panneau d’administration
+    panel_subtitle: Panneau d’administration
+    view_storefront: Voir la boutique
+    view_storefront_aria: Ouvrir la boutique dans un nouvel onglet
+    logout: Déconnexion
+    guest: Invité
+    administrator: Administrateur
+    dark_mode: Mode sombre
+    light_mode: Mode clair
+    theme_toggle_aria: Basculer le mode sombre
+  nav:
+    dashboard: Tableau de bord
+    catalog: Catalogue
+    sales: Ventes
+    users: Utilisateurs
+    appearance: Apparence
+    system: Système
+    products: Produits
+    categories: Catégories
+    orders: Commandes
+    coupons: Codes promo
+    support_inbox: Boîte support
+    theme_editor: Éditeur de thème
+    api_documentation: Documentation API
+    api_keys: Clés API
+  settings:
+    title: Paramètres système
+    subtitle: Options générales de la boutique et des intégrations.
+    nav: Paramètres
+    open: Ouvrir les paramètres
+    section_support: Support et chat
+    section_support_intro: Choisissez comment les clients contactent le support sur la boutique.
+    section_storefront: Vitrine
+    section_storefront_intro: Nom du site, catalogue et page produit (enregistrés dans le thème et publiés).
+    theme_editor_link: Éditeur de thème (couleurs, page d’accueil, …)
+    brand_site_name: Nom du site
+    brand_tagline: Slogan
+    footer_copyright: Ligne de copyright (pied de page)
+    footer_copyright_placeholder: Facultatif, ex. © 2025 Votre boutique
+    section_header: En-tête
+    header_sticky: En-tête fixe
+    header_show_cart: Afficher le panier dans l’en-tête
+    header_show_language: Afficher le sélecteur de langue
+    section_catalog: Catalogue
+    catalog_show_filters: Afficher les filtres produits
+    catalog_filter_position: Position des filtres
+    catalog_filter_sidebar: Barre latérale
+    catalog_filter_top: Haut
+    catalog_badge_style: Style des badges
+    catalog_badge_pill: Pilule
+    catalog_badge_square: Carré
+    catalog_grid_mobile: Colonnes mobile
+    catalog_grid_tablet: Colonnes tablette
+    catalog_grid_desktop: Colonnes bureau
+    section_product: Page produit
+    product_gallery_style: Galerie d’images
+    product_gallery_thumbnails: Vignettes
+    product_gallery_carousel: Carrousel
+    product_sticky_add_to_cart: Barre « Ajouter au panier » fixe
+    product_tabs_layout: Description et détails
+    product_tabs_accordion: Accordéon
+    product_tabs_horizontal: Onglets
+    placeholder_tawk_embed_path: "XXXXXXXXXXXX/XXXXXXXX"
+    placeholder_charla_project_id: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+    flash:
+      support_saved: Paramètres enregistrés.
+      storefront_saved: Paramètres de la vitrine enregistrés.
+      invalid_tawk_path: Chemin d’intégration Tawk invalide.
+      invalid_charla_id: Identifiant projet Charla invalide.
   dashboard:
     title: Tableau de bord
     no_widgets: Aucun widget configuré. Utilisez « Personnaliser le tableau de bord » pour en ajouter.
+    app_update_title: Mise à jour de l’application
+    app_update_up_to_date: À jour.
+    app_update_one_commit: Mise à jour disponible (1 commit).
+    app_update_n_commits: Mise à jour disponible (%count% commits).
+    app_update_failed: Échec de la vérification des mises à jour
+    app_update_now: Mettre à jour
+    chart:
+      series_orders: Commandes
+      series_revenue: Chiffre d’affaires
+      yaxis_orders: Commandes
+      yaxis_revenue: Chiffre d’affaires
+      no_orders: Pas encore de commandes
+    settings_teaser: Vitrine, fournisseur de support, widgets de chat et options associées.
+    support_provider: Fournisseur de support
+    provider_label: Fournisseur
+    tawk_embed_path: Chemin d’intégration Tawk
+    charla_project_id: ID projet Charla (p)
+    support_option_selfcoded: Selfcoded (intégré)
+    support_option_disabled: Désactivé (pas de support)
+    support_option_tawk: tawk.to
+    support_option_charla: Charla
+    support_option_tawk_charla: Tawk + Charla
   payment_methods:
     nav: Moyens de paiement
     title: Moyens de paiement
@@ -561,6 +655,55 @@ admin:
       created: Mode de livraison créé.
       updated: Mode de livraison mis à jour.
       removed: Mode de livraison supprimé.
+  products:
+    page_title: Produits
+    heading: Produits
+    subtitle: Gérer le catalogue produits
+    new: Nouveau produit
+    search_placeholder: Rechercher des produits…
+    all_statuses: Tous les statuts
+    status_active: Actif
+    status_draft: Brouillon
+    status_archived: Archivé
+    filter: Filtrer
+    clear: Réinitialiser
+    table:
+      id: ID
+      name: Nom
+      category: Catégorie
+      slug: Slug
+      status: Statut
+      variants: Variantes
+      variants_one: 1 variante
+      variants_n: '%count% variantes'
+      stock: Stock
+      created: Créé
+      actions: Actions
+    no_category: Sans catégorie
+    empty: Aucun produit trouvé
+    empty_hint: Commencez par créer votre premier produit.
+    create_first: Créer un produit
+    delete_confirm: Supprimer ce produit ?
+    pagination_showing: Page %page% sur %total%
+  categories:
+    page_title: Catégories
+    heading: Catégories
+    subtitle: Gérer les catégories produits
+    new: Nouvelle catégorie
+    table:
+      id: ID
+      name: Nom
+      slug: Slug
+      parent: Parent
+      children: Sous-catégories
+      children_0: Aucune sous-catégorie
+      children_1: 1 sous-catégorie
+      children_n: '%count% sous-catégories'
+      actions: Actions
+    empty: Aucune catégorie trouvée
+    empty_hint: Commencez par créer votre première catégorie.
+    create_first: Créer une catégorie
+    delete_confirm: Supprimer cette catégorie ?
   widgets:
     kpi_products:
       title: Total produits
@@ -576,6 +719,10 @@ admin:
       status: Statut
       actions: Actions
       empty: Aucune commande trouvée
+    chart_sales:
+      title: Ventes dans le temps
+    chart_orders_by_status:
+      title: Commandes par statut
   orders:
     page_title: Commandes
     heading: Commandes
@@ -742,4 +889,88 @@ return_request:
   flash:
     submitted: Votre demande de retour a bien été reçue. Nous l’examinerons sous peu.
     order_not_found: Aucune commande ne correspond à ce numéro et cet e-mail. Vérifiez vos informations.
+
+support:
+  common:
+    na: n/a
+    anonymous: anonyme
+  sender:
+    you: Vous
+    support: Support
+    customer: Client
+  status:
+    open: OUVERT
+    closed: FERMÉ
+  category:
+    order: Commande
+    payment: Paiement
+    shipping: Livraison
+    product: Produit
+    technical: Technique
+    other: Autre
+  form:
+    subject: Sujet
+    category: Catégorie
+    related_order: Commande concernée (optionnel)
+    related_order_none: Aucune commande sélectionnée
+    related_order_placeholder: ex. ORD-2026-000123
+    message: Message
+  provider_help:
+    tawk_where: "Dans le tableau de bord tawk.to : Administration → Channels → Website → votre propriété → Widget / lien direct ou « Embed code ». L’URL du script ressemble à https://embed.tawk.to/PROPERTY_ID/WIDGET_ID — ne collez que la partie après embed.tawk.to/ (PROPERTY_ID/WIDGET_ID)."
+    charla_where: "Dans le tableau de bord Charla : ouvrez le site ou les réglages du widget → Installation / code d’intégration. Le snippet contient <charla-widget> et setAttribute(\"p\", \"…\") — copiez la valeur UUID de p (identifiant projet/widget)."
+    footer: "Selfcoded utilise le support intégré ; tawk.to et Charla chargent leur widget sur la boutique."
+  flash:
+    rate_limited: Vous envoyez des messages trop rapidement. Veuillez patienter une minute.
+    subject_message_required: Veuillez saisir un sujet et un message.
+    conversation_created: Conversation de support créée.
+    message_required: Le message ne peut pas être vide.
+    message_sent: Message envoyé.
+    reply_sent: Réponse envoyée.
+    conversation_closed: Conversation fermée.
+  customer:
+    page_title: Support
+    heading: Support
+    subtitle: Ouvrez une conversation avec notre équipe support.
+    back_to_account: Retour au compte
+    new_conversation: Nouvelle conversation
+    create_chat: Créer un chat support
+    your_conversations: Vos conversations
+    updated_at: "Mis à jour %date%"
+    empty: Aucune conversation de support pour le moment.
+    chat_page_title: Chat Support
+    back_to_support: Retour au support
+    conversation_line: "Conversation n°%id% · %status% · %category%"
+    order_label: Commande
+    no_messages: Aucun message pour le moment.
+    write_message: Écrivez votre message...
+    send: Envoyer
+    attachment_hint: "Pièces jointes autorisées : pdf, png, jpg, jpeg, txt (max 10 Mo chacune)."
+    shortcut_hint: "Astuce : appuyez sur Ctrl+Entrée pour envoyer plus vite."
+    search_placeholder: Rechercher par sujet ou numéro de commande...
+    filter_all: Toutes les conversations
+  admin:
+    inbox_page_title: Boîte support
+    inbox_heading: Boîte support
+    inbox_subtitle: Conversations de support client.
+    table:
+      updated: Mis à jour
+      customer: Client
+      subject: Sujet
+      category: Catégorie
+      order: Commande
+      status: Statut
+      unread: Non lus
+    open: Ouvrir
+    empty: Aucune conversation pour le moment.
+    conversation_page_title: Conversation support
+    customer_label: Client
+    status_label: Statut
+    category_label: Catégorie
+    order_label: Commande
+    back_to_inbox: Retour à la boîte
+    reply_placeholder: Répondre en tant que support...
+    close_conversation: Fermer la conversation
+    send_reply: Envoyer la réponse
+    filter_unread_all: Toutes (y compris lues)
+    filter_unread_only: Non lues uniquement
 
