@@ -7,6 +7,8 @@ namespace App\Tests\Controller\Support;
 use App\Entity\SupportConversation;
 use App\Entity\User;
 use App\Repository\SupportConversationRepository;
+use App\Theme\ShopContextResolver;
+use App\Theme\ThemeConfigService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -18,6 +20,7 @@ final class SupportFlowTest extends WebTestCase
     {
         $client = static::createClient();
         $this->entityManager = $client->getContainer()->get('doctrine')->getManager();
+        $this->ensureSelfcodedSupportProvider($client->getContainer()->get(ThemeConfigService::class), $client->getContainer()->get(ShopContextResolver::class));
         static::ensureKernelShutdown();
     }
 
@@ -106,6 +109,18 @@ final class SupportFlowTest extends WebTestCase
     {
         parent::tearDown();
         $this->entityManager->close();
+    }
+
+    private function ensureSelfcodedSupportProvider(ThemeConfigService $themeConfigService, ShopContextResolver $shopContextResolver): void
+    {
+        $shop = $shopContextResolver->resolve();
+        $theme = $themeConfigService->getOrCreateDraftTheme($shop);
+        $config = $theme->getConfig();
+        $support = is_array($config['support'] ?? null) ? $config['support'] : [];
+        $support['provider'] = 'selfcoded';
+        $config['support'] = $support;
+        $themeConfigService->saveDraft($theme, $config);
+        $themeConfigService->publish($theme);
     }
 }
 
