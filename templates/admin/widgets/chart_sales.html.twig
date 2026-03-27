@@ -1,17 +1,22 @@
-<div id="chart-sales-{{ random(10000, 99999) }}" class="chart-container" style="min-height: 220px;"></div>
+<div id="chart-sales-{{ random(10000, 99999) }}" class="chart-container" style="min-height: 220px;"
+     data-series-orders="{{ 'admin.dashboard.chart.series_orders'|trans|e('html_attr') }}"
+     data-series-revenue="{{ 'admin.dashboard.chart.series_revenue'|trans|e('html_attr') }}"
+     data-yaxis-orders="{{ 'admin.dashboard.chart.yaxis_orders'|trans|e('html_attr') }}"
+     data-yaxis-revenue="{{ 'admin.dashboard.chart.yaxis_revenue'|trans|e('html_attr') }}"></div>
 <script>
 (function() {
     const el = document.currentScript.previousElementSibling;
     const options = {
+        theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' },
         chart: { type: 'line', height: 220, toolbar: { show: false }, zoom: { enabled: false } },
         series: [
-            { name: 'Orders', data: {{ orderCounts|json_encode|raw }}, color: '#3b82f6' },
-            { name: 'Revenue', data: {{ revenueFormatted|default(revenue)|json_encode|raw }}, color: '#22c55e' }
+            { name: el.dataset.seriesOrders, data: {{ orderCounts|json_encode|raw }}, color: '#3b82f6' },
+            { name: el.dataset.seriesRevenue, data: {{ revenueFormatted|default(revenue)|json_encode|raw }}, color: '#22c55e' }
         ],
         xaxis: { categories: {{ labels|json_encode|raw }}, labels: { rotate: -45 } },
         yaxis: [
-            { title: { text: 'Orders' }, labels: { formatter: v => Math.round(v) } },
-            { opposite: true, title: { text: 'Revenue' } }
+            { title: { text: el.dataset.yaxisOrders }, labels: { formatter: v => Math.round(v) } },
+            { opposite: true, title: { text: el.dataset.yaxisRevenue } }
         ],
         stroke: { curve: 'smooth', width: 2 },
         fill: { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0.05 } },

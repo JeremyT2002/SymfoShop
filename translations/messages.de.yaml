@@ -493,9 +493,103 @@ account:
       profile_updated: Deine Profildaten wurden aktualisiert.
 
 admin:
+  brand:
+    name: SymfoShop
+  layout:
+    title_default: Admin-Panel
+    panel_subtitle: Admin-Panel
+    view_storefront: Shop ansehen
+    view_storefront_aria: Schaufenster in neuem Tab öffnen
+    logout: Abmelden
+    guest: Gast
+    administrator: Administrator
+    dark_mode: Dunkelmodus
+    light_mode: Hellmodus
+    theme_toggle_aria: Dunkelmodus umschalten
+  nav:
+    dashboard: Dashboard
+    catalog: Katalog
+    sales: Verkauf
+    users: Benutzer
+    appearance: Darstellung
+    system: System
+    products: Produkte
+    categories: Kategorien
+    orders: Bestellungen
+    coupons: Gutscheine
+    support_inbox: Support-Posteingang
+    theme_editor: Theme-Editor
+    api_documentation: API-Dokumentation
+    api_keys: API-Schlüssel
+  settings:
+    title: Systemeinstellungen
+    subtitle: Allgemeine Optionen für Shop und Integrationen.
+    nav: Einstellungen
+    open: Einstellungen öffnen
+    section_support: Support & Chat
+    section_support_intro: Legen Sie fest, wie Kunden im Shop Support erreichen.
+    section_storefront: Schaufenster
+    section_storefront_intro: Shop-Name, Katalog-Layout und Produktseite (werden im Theme gespeichert und veröffentlicht).
+    theme_editor_link: Theme-Editor (Farben, Startseite, …)
+    brand_site_name: Seitenname
+    brand_tagline: Untertitel
+    footer_copyright: Copyright-Zeile (Footer)
+    footer_copyright_placeholder: Optional, z. B. © 2025 Ihr Shop
+    section_header: Kopfzeile
+    header_sticky: Fixierte Navigation
+    header_show_cart: Warenkorb in der Kopfzeile
+    header_show_language: Sprachwahl anzeigen
+    section_catalog: Katalog
+    catalog_show_filters: Produktfilter anzeigen
+    catalog_filter_position: Position der Filter
+    catalog_filter_sidebar: Seitenleiste
+    catalog_filter_top: Oben
+    catalog_badge_style: Badge-Stil
+    catalog_badge_pill: Pill
+    catalog_badge_square: Eckig
+    catalog_grid_mobile: Spalten Mobil
+    catalog_grid_tablet: Spalten Tablet
+    catalog_grid_desktop: Spalten Desktop
+    section_product: Produktseite
+    product_gallery_style: Bildergalerie
+    product_gallery_thumbnails: Thumbnails
+    product_gallery_carousel: Karussell
+    product_sticky_add_to_cart: Fixierte „In den Warenkorb“-Leiste
+    product_tabs_layout: Beschreibung & Details
+    product_tabs_accordion: Akkordeon
+    product_tabs_horizontal: Tabs
+    placeholder_tawk_embed_path: "XXXXXXXXXXXX/XXXXXXXX"
+    placeholder_charla_project_id: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+    flash:
+      support_saved: Einstellungen gespeichert.
+      storefront_saved: Schaufenster-Einstellungen gespeichert.
+      invalid_tawk_path: Ungültiger Tawk-Embed-Pfad.
+      invalid_charla_id: Ungültige Charla-Projekt-ID.
   dashboard:
     title: Dashboard
     no_widgets: Keine Widgets konfiguriert. Nutzen Sie „Dashboard anpassen“, um Widgets hinzuzufügen.
+    app_update_title: App-Update
+    app_update_up_to_date: Auf dem neuesten Stand.
+    app_update_one_commit: Update verfügbar (1 Commit).
+    app_update_n_commits: Update verfügbar (%count% Commits).
+    app_update_failed: Update-Prüfung fehlgeschlagen
+    app_update_now: Jetzt updaten
+    chart:
+      series_orders: Bestellungen
+      series_revenue: Umsatz
+      yaxis_orders: Bestellungen
+      yaxis_revenue: Umsatz
+      no_orders: Noch keine Bestellungen
+    settings_teaser: Schaufenster, Support-Anbieter, Chat-Widgets und weitere Optionen.
+    support_provider: Support-Anbieter
+    provider_label: Anbieter
+    tawk_embed_path: Tawk Embed-Pfad
+    charla_project_id: Charla Projekt-ID (p)
+    support_option_selfcoded: Selfcoded (intern)
+    support_option_disabled: Deaktiviert (kein Support)
+    support_option_tawk: tawk.to
+    support_option_charla: Charla
+    support_option_tawk_charla: Tawk + Charla
   payment_methods:
     nav: Zahlungsmethoden
     title: Zahlungsmethoden
@@ -561,6 +655,55 @@ admin:
       created: Versandmethode erstellt.
       updated: Versandmethode aktualisiert.
       removed: Versandmethode entfernt.
+  products:
+    page_title: Produkte
+    heading: Produkte
+    subtitle: Produktkatalog verwalten
+    new: Neues Produkt
+    search_placeholder: Produkte suchen…
+    all_statuses: Alle Status
+    status_active: Aktiv
+    status_draft: Entwurf
+    status_archived: Archiviert
+    filter: Filtern
+    clear: Zurücksetzen
+    table:
+      id: ID
+      name: Name
+      category: Kategorie
+      slug: Slug
+      status: Status
+      variants: Varianten
+      variants_one: 1 Variante
+      variants_n: '%count% Varianten'
+      stock: Bestand
+      created: Erstellt
+      actions: Aktionen
+    no_category: Keine Kategorie
+    empty: Keine Produkte gefunden
+    empty_hint: Legen Sie Ihr erstes Produkt an.
+    create_first: Produkt anlegen
+    delete_confirm: Dieses Produkt wirklich löschen?
+    pagination_showing: Seite %page% von %total%
+  categories:
+    page_title: Kategorien
+    heading: Kategorien
+    subtitle: Produktkategorien verwalten
+    new: Neue Kategorie
+    table:
+      id: ID
+      name: Name
+      slug: Slug
+      parent: Übergeordnet
+      children: Unterkategorien
+      children_0: Keine Unterkategorien
+      children_1: 1 Unterkategorie
+      children_n: '%count% Unterkategorien'
+      actions: Aktionen
+    empty: Keine Kategorien gefunden
+    empty_hint: Legen Sie Ihre erste Kategorie an.
+    create_first: Kategorie anlegen
+    delete_confirm: Diese Kategorie wirklich löschen?
   widgets:
     kpi_products:
       title: Produkte gesamt
@@ -576,6 +719,10 @@ admin:
       status: Status
       actions: Aktionen
       empty: Keine Bestellungen gefunden
+    chart_sales:
+      title: Umsatz im Zeitverlauf
+    chart_orders_by_status:
+      title: Bestellungen nach Status
   orders:
     page_title: Bestellungen
     heading: Bestellungen
@@ -742,4 +889,88 @@ return_request:
   flash:
     submitted: Ihre Rücksendeanfrage ist eingegangen. Wir prüfen sie in Kürze.
     order_not_found: Zu dieser Bestellnummer und E-Mail wurde keine Bestellung gefunden. Bitte prüfen Sie Ihre Angaben.
+
+support:
+  common:
+    na: n/a
+    anonymous: anonym
+  sender:
+    you: Du
+    support: Support
+    customer: Kunde
+  status:
+    open: OFFEN
+    closed: GESCHLOSSEN
+  category:
+    order: Bestellung
+    payment: Zahlung
+    shipping: Versand
+    product: Produkt
+    technical: Technisch
+    other: Sonstiges
+  form:
+    subject: Betreff
+    category: Kategorie
+    related_order: Relevante Bestellung (optional)
+    related_order_none: Keine Bestellung ausgewählt
+    related_order_placeholder: z. B. ORD-2026-000123
+    message: Nachricht
+  provider_help:
+    tawk_where: "Im tawk.to-Dashboard: Administration → Channels → Website → deine Property → Widget / Direktlink oder „Embed code“. Die Script-URL hat die Form https://embed.tawk.to/PROPERTY_ID/WIDGET_ID — hier nur den Teil nach embed.tawk.to/ eintragen (PROPERTY_ID/WIDGET_ID)."
+    charla_where: "Im Charla-Dashboard: Website oder Widget öffnen → Installation / Embed-Code. Im Snippet steht <charla-widget> und setAttribute(\"p\", \"…\") — den UUID-Wert von p (Projekt-/Widget-ID) übernehmen."
+    footer: "Bei Selfcoded nutzt du das interne Support-System; bei tawk.to und Charla wird stattdessen das externe Widget im Shop geladen."
+  flash:
+    rate_limited: Du sendest Nachrichten zu schnell. Bitte warte eine Minute.
+    subject_message_required: Bitte gib einen Betreff und eine Nachricht an.
+    conversation_created: Support-Konversation erstellt.
+    message_required: Nachricht darf nicht leer sein.
+    message_sent: Nachricht gesendet.
+    reply_sent: Antwort gesendet.
+    conversation_closed: Konversation geschlossen.
+  customer:
+    page_title: Support
+    heading: Support
+    subtitle: Starte eine Konversation mit unserem Support-Team.
+    back_to_account: Zurück zum Konto
+    new_conversation: Neue Konversation
+    create_chat: Support-Chat erstellen
+    your_conversations: Deine Konversationen
+    updated_at: "Aktualisiert %date%"
+    empty: Noch keine Support-Konversationen.
+    chat_page_title: Support-Chat
+    back_to_support: Zurück zum Support
+    conversation_line: "Konversation #%id% · %status% · %category%"
+    order_label: Bestellung
+    no_messages: Noch keine Nachrichten.
+    write_message: Schreibe deine Nachricht...
+    send: Senden
+    attachment_hint: "Erlaubte Anhänge: pdf, png, jpg, jpeg, txt (max. 10 MB je Datei)."
+    shortcut_hint: "Tipp: Mit Strg+Enter kannst du schneller senden."
+    search_placeholder: Nach Betreff oder Bestellnummer suchen...
+    filter_all: Alle Konversationen
+  admin:
+    inbox_page_title: Support-Postfach
+    inbox_heading: Support-Postfach
+    inbox_subtitle: Support-Konversationen von Kunden.
+    table:
+      updated: Aktualisiert
+      customer: Kunde
+      subject: Betreff
+      category: Kategorie
+      order: Bestellung
+      status: Status
+      unread: Ungelesen
+    open: Öffnen
+    empty: Noch keine Konversationen.
+    conversation_page_title: Support-Konversation
+    customer_label: Kunde
+    status_label: Status
+    category_label: Kategorie
+    order_label: Bestellung
+    back_to_inbox: Zurück zum Postfach
+    reply_placeholder: Als Support antworten...
+    close_conversation: Konversation schließen
+    send_reply: Antwort senden
+    filter_unread_all: Alle (inkl. gelesen)
+    filter_unread_only: Nur ungelesen
 

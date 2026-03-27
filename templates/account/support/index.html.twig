@@ -1,0 +1,128 @@
+{% extends 'catalog/base.html.twig' %}
+
+{% block page_title %}{{ 'support.customer.page_title'|trans }} - {{ theme_config().brand.siteName|default('SymfoShop') }}{% endblock %}
+
+{% block catalog_body %}
+<section class="bg-gray-50 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">{{ 'support.customer.heading'|trans }}</h1>
+                <p class="text-sm text-gray-600 mt-1">{{ 'support.customer.subtitle'|trans }}</p>
+            </div>
+            <a href="{{ path('account_dashboard') }}" class="inline-flex items-center gap-2 text-sm font-medium text-primary-700 hover:text-primary-800">
+                <i class="fas fa-arrow-left"></i>
+                {{ 'support.customer.back_to_account'|trans }}
+            </a>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-1 bg-white rounded-xl border border-gray-200 p-5">
+                <h2 class="text-base font-semibold text-gray-900 mb-4">{{ 'support.customer.new_conversation'|trans }}</h2>
+                <form method="post" class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'support.form.subject'|trans }}</label>
+                        <input type="text" name="subject" maxlength="180" required class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'support.form.category'|trans }}</label>
+                        <select name="category" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" required>
+                            <option value="order">{{ 'support.category.order'|trans }}</option>
+                            <option value="payment">{{ 'support.category.payment'|trans }}</option>
+                            <option value="shipping">{{ 'support.category.shipping'|trans }}</option>
+                            <option value="product">{{ 'support.category.product'|trans }}</option>
+                            <option value="technical">{{ 'support.category.technical'|trans }}</option>
+                            <option value="other" selected>{{ 'support.category.other'|trans }}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'support.form.related_order'|trans }}</label>
+                        <select name="relatedOrderNumber" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                            <option value="">{{ 'support.form.related_order_none'|trans }}</option>
+                            {% for order in orders %}
+                                <option value="{{ order.orderNumber }}">{{ order.orderNumber }} - {{ order.createdAt|date('Y-m-d') }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'support.form.message'|trans }}</label>
+                        <textarea name="message" rows="5" required class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"></textarea>
+                    </div>
+                    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 text-white px-4 py-2.5 text-sm font-semibold hover:bg-primary-700">
+                        <i class="fas fa-paper-plane"></i>
+                        {{ 'support.customer.create_chat'|trans }}
+                    </button>
+                </form>
+            </div>
+
+            <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div class="px-5 py-4 border-b border-gray-200 space-y-3">
+                    <h2 class="text-base font-semibold text-gray-900">{{ 'support.customer.your_conversations'|trans }}</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input id="support-customer-search" type="search" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="{{ 'support.customer.search_placeholder'|trans }}">
+                        <select id="support-customer-status" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                            <option value="all">{{ 'support.customer.filter_all'|trans }}</option>
+                            <option value="open">{{ 'support.status.open'|trans }}</option>
+                            <option value="closed">{{ 'support.status.closed'|trans }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="support-customer-list" class="divide-y divide-gray-100">
+                    {% for c in conversations %}
+                        <a href="{{ path('account_support_show', {id: c.id}) }}" class="block px-5 py-4 hover:bg-gray-50 transition-colors support-customer-item" data-status="{{ c.status }}" data-subject="{{ c.subject|lower }}" data-order="{{ (c.relatedOrderNumber ?? '')|lower }}">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="min-w-0">
+                                    <p class="font-medium text-gray-900 truncate">{{ c.subject }}</p>
+                                    <p class="text-xs text-gray-500 mt-1">{{ 'support.customer.updated_at'|trans({'%date%': c.updatedAt|date('Y-m-d H:i')}) }} · {{ ('support.category.' ~ c.category)|trans }}{% if c.relatedOrderNumber %} · {{ c.relatedOrderNumber }}{% endif %}</p>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    {% if c.customerUnreadCount > 0 %}
+                                        <span class="inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full bg-primary-600 text-white text-xs font-bold">{{ c.customerUnreadCount }}</span>
+                                    {% endif %}
+                                    <span class="text-xs px-2 py-1 rounded-full {{ c.status == 'open' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-700' }}">{{ ('support.status.' ~ c.status)|trans }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    {% else %}
+                        <div class="px-5 py-12 text-center text-sm text-gray-500">
+                            {{ 'support.customer.empty'|trans }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block catalog_javascripts %}
+    {{ parent() }}
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('support-customer-search');
+        const statusSelect = document.getElementById('support-customer-status');
+        const items = Array.from(document.querySelectorAll('.support-customer-item'));
+
+        if (!searchInput || !statusSelect || items.length === 0) {
+            return;
+        }
+
+        const applyFilters = () => {
+            const term = (searchInput.value || '').trim().toLowerCase();
+            const status = statusSelect.value;
+
+            items.forEach((item) => {
+                const itemStatus = item.getAttribute('data-status') || '';
+                const haystack = ((item.getAttribute('data-subject') || '') + ' ' + (item.getAttribute('data-order') || '')).toLowerCase();
+                const statusMatch = status === 'all' || status === itemStatus;
+                const termMatch = term === '' || haystack.includes(term);
+                item.style.display = statusMatch && termMatch ? '' : 'none';
+            });
+        };
+
+        searchInput.addEventListener('input', applyFilters);
+        statusSelect.addEventListener('change', applyFilters);
+    });
+    </script>
+{% endblock %}
+

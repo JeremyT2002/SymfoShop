@@ -55,7 +55,7 @@ final class DefaultWidgetDefinitionsProvider
             ),
             new WidgetDefinition(
                 id: 'chart_sales',
-                title: 'Sales Over Time',
+                title: 'admin.widgets.chart_sales.title',
                 description: 'Orders and revenue for the last 30 days',
                 template: 'admin/widgets/chart_sales.html.twig',
                 defaultW: 4,
@@ -67,7 +67,7 @@ final class DefaultWidgetDefinitionsProvider
             ),
             new WidgetDefinition(
                 id: 'chart_orders_by_status',
-                title: 'Orders by Status',
+                title: 'admin.widgets.chart_orders_by_status.title',
                 description: 'Order count by status',
                 template: 'admin/widgets/chart_orders_by_status.html.twig',
                 defaultW: 2,

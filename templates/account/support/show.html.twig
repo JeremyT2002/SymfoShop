@@ -1,0 +1,149 @@
+{% extends 'catalog/base.html.twig' %}
+
+{% block page_title %}{{ 'support.customer.chat_page_title'|trans }} - {{ theme_config().brand.siteName|default('SymfoShop') }}{% endblock %}
+
+{% block catalog_body %}
+<section class="bg-gray-50 py-8">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-4">
+            <a href="{{ path('account_support_index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-primary-700 hover:text-primary-800">
+                <i class="fas fa-arrow-left"></i>
+                {{ 'support.customer.back_to_support'|trans }}
+            </a>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+            <header class="px-5 py-4 border-b border-gray-200 flex items-start justify-between gap-3 bg-gradient-to-r from-white to-gray-50">
+                <div>
+                    <h1 class="text-lg font-semibold text-gray-900">{{ conversation.subject }}</h1>
+                    <p class="text-xs text-gray-500 mt-1 flex flex-wrap items-center gap-1">
+                        {{ 'support.customer.conversation_line'|trans({'%id%': conversation.id, '%status%': ('support.status.' ~ conversation.status)|trans, '%category%': ('support.category.' ~ conversation.category)|trans}) }}
+                        {% if conversation.relatedOrderNumber %} · {{ 'support.customer.order_label'|trans }}: {{ conversation.relatedOrderNumber }}{% endif %}
+                    </p>
+                </div>
+                <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {{ conversation.status == 'open' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-700' }}">
+                    {{ ('support.status.' ~ conversation.status)|trans }}
+                </span>
+            </header>
+
+            <div id="support-thread" class="p-5 space-y-3 max-h-[58vh] overflow-y-auto bg-gray-50/60" data-conversation-id="{{ conversation.id }}">
+                {% for m in messages %}
+                    <article class="rounded-xl px-4 py-3 shadow-sm {{ m.senderType == 'customer' ? 'bg-primary-50 border border-primary-100 ml-8' : 'bg-white border border-gray-200 mr-8' }}" data-message-id="{{ m.id }}">
+                        <div class="text-xs text-gray-500 mb-1">
+                            {{ m.senderType == 'customer' ? 'support.sender.you'|trans : 'support.sender.support'|trans }} · {{ m.createdAt|date('Y-m-d H:i:s') }}
+                        </div>
+                        <p class="text-sm text-gray-800 whitespace-pre-wrap">{{ m.body }}</p>
+                        {% if m.attachments|length > 0 %}
+                            <div class="mt-2 space-y-1">
+                                {% for a in m.attachments %}
+                                    <a href="{{ path('support_attachment_download', {id: a.id}) }}" class="inline-flex items-center gap-1 text-xs text-primary-700 hover:text-primary-800 hover:underline">
+                                        <i class="fas fa-paperclip"></i>{{ a.originalName }}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </article>
+                {% else %}
+                    <div class="text-sm text-gray-500">{{ 'support.customer.no_messages'|trans }}</div>
+                {% endfor %}
+            </div>
+
+            <form id="support-customer-form" method="post" action="{{ path('account_support_show', {id: conversation.id}) }}" enctype="multipart/form-data" class="p-5 border-t border-gray-200 bg-white space-y-3 sticky bottom-0">
+                <textarea id="support-customer-body" name="body" rows="3" required class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500" placeholder="{{ 'support.customer.write_message'|trans }}"></textarea>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="space-y-1">
+                        <input id="support-customer-attachments" type="file" name="attachments[]" multiple class="text-sm">
+                        <p id="support-customer-files" class="text-xs text-gray-500"></p>
+                    </div>
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 text-white px-4 py-2.5 text-sm font-semibold hover:bg-primary-700">
+                        <i class="fas fa-paper-plane"></i>
+                        {{ 'support.customer.send'|trans }}
+                    </button>
+                </div>
+                <p class="text-xs text-gray-500">{{ 'support.customer.attachment_hint'|trans }}</p>
+                <p class="text-xs text-gray-400">{{ 'support.customer.shortcut_hint'|trans }}</p>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block catalog_javascripts %}
+    {{ parent() }}
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const thread = document.getElementById('support-thread');
+        if (!thread) {
+            return;
+        }
+        const conversationId = thread.getAttribute('data-conversation-id');
+        const bodyInput = document.getElementById('support-customer-body');
+        const form = document.getElementById('support-customer-form');
+        const attachmentInput = document.getElementById('support-customer-attachments');
+        const filesInfo = document.getElementById('support-customer-files');
+        let lastId = 0;
+        const nodes = thread.querySelectorAll('[data-message-id]');
+        if (nodes.length > 0) {
+            lastId = parseInt(nodes[nodes.length - 1].getAttribute('data-message-id') || '0', 10) || 0;
+            thread.scrollTop = thread.scrollHeight;
+        }
+
+        const renderMessage = (msg) => {
+            const article = document.createElement('article');
+            article.setAttribute('data-message-id', String(msg.id));
+            article.className = 'rounded-xl px-4 py-3 border shadow-sm ' + (msg.senderType === 'customer'
+                ? 'bg-primary-50 border-primary-100 ml-8'
+                : 'bg-white border-gray-200 mr-8');
+            let attachmentsHtml = '';
+            if (msg.attachments && msg.attachments.length > 0) {
+                attachmentsHtml = '<div class="mt-2 space-y-1">' + msg.attachments.map((a) =>
+                    `<a class="inline-flex items-center gap-1 text-xs text-primary-700 hover:text-primary-800 hover:underline" href="/support/attachment/${a.id}/download"><i class="fas fa-paperclip"></i>${a.name}</a>`
+                ).join('') + '</div>';
+            }
+            article.innerHTML =
+                `<div class="text-xs text-gray-500 mb-1">${msg.senderType === 'customer' ? '{{ 'support.sender.you'|trans|e('js') }}' : '{{ 'support.sender.support'|trans|e('js') }}'} · ${new Date(msg.createdAt).toLocaleString()}</div>` +
+                `<p class="text-sm text-gray-800 whitespace-pre-wrap"></p>` + attachmentsHtml;
+            article.querySelector('p').textContent = msg.body;
+            thread.appendChild(article);
+            thread.scrollTop = thread.scrollHeight;
+        };
+
+        const poll = async () => {
+            try {
+                const response = await fetch(`/support/api/conversations/${conversationId}/messages?afterId=${lastId}`, {
+                    headers: {'X-Requested-With': 'XMLHttpRequest'}
+                });
+                if (!response.ok) return;
+                const data = await response.json();
+                if (Array.isArray(data.messages)) {
+                    data.messages.forEach((m) => {
+                        renderMessage(m);
+                        lastId = Math.max(lastId, Number(m.id) || 0);
+                    });
+                }
+            } catch (e) {
+                // ignore network hiccups in polling loop
+            }
+        };
+
+        if (attachmentInput && filesInfo) {
+            attachmentInput.addEventListener('change', () => {
+                const names = Array.from(attachmentInput.files || []).map((file) => file.name);
+                filesInfo.textContent = names.length > 0 ? names.join(', ') : '';
+            });
+        }
+
+        if (bodyInput && form) {
+            bodyInput.addEventListener('keydown', (event) => {
+                if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                    event.preventDefault();
+                    form.submit();
+                }
+            });
+        }
+
+        setInterval(poll, 4000);
+    });
+    </script>
+{% endblock %}
+

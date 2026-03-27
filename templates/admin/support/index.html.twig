@@ -1,0 +1,126 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}{{ 'support.admin.inbox_page_title'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="admin-page-header">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">{{ 'support.admin.inbox_heading'|trans }}</h2>
+            <p class="text-gray-600 mt-1">{{ 'support.admin.inbox_subtitle'|trans }}</p>
+        </div>
+    </div>
+
+    <div class="admin-card p-4 mb-4 space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input id="support-admin-search" type="search" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="{{ 'support.customer.search_placeholder'|trans }}">
+            <select id="support-admin-status" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                <option value="all">{{ 'support.customer.filter_all'|trans }}</option>
+                <option value="open">{{ 'support.status.open'|trans }}</option>
+                <option value="closed">{{ 'support.status.closed'|trans }}</option>
+            </select>
+            <select id="support-admin-unread" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                <option value="all">{{ 'support.admin.filter_unread_all'|trans }}</option>
+                <option value="yes">{{ 'support.admin.filter_unread_only'|trans }}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="admin-card admin-table-wrap">
+        <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead>
+                <tr>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'support.admin.table.updated'|trans }}</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'support.admin.table.customer'|trans }}</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'support.admin.table.subject'|trans }}</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'support.admin.table.category'|trans }}</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'support.admin.table.order'|trans }}</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'support.admin.table.status'|trans }}</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'support.admin.table.unread'|trans }}</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for c in conversations %}
+                    <tr class="support-admin-row hover:bg-gray-50/60 cursor-pointer" data-href="{{ path('admin_support_show', {id: c.id}) }}" data-status="{{ c.status }}" data-unread="{{ c.supporterUnreadCount }}" data-customer="{{ c.customer ? c.customer.email|lower : '' }}" data-subject="{{ c.subject|lower }}">
+                        <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ c.updatedAt|date('Y-m-d H:i') }}</td>
+                        <td class="px-4 py-3">{{ c.customer ? c.customer.email : 'support.common.na'|trans }}</td>
+                        <td class="px-4 py-3 font-medium text-gray-900">{{ c.subject }}</td>
+                        <td class="px-4 py-3">{{ ('support.category.' ~ c.category)|trans }}</td>
+                        <td class="px-4 py-3 font-mono text-xs">{{ c.relatedOrderNumber ?: '—' }}</td>
+                        <td class="px-4 py-3">
+                            <span class="text-xs px-2 py-1 rounded-full {{ c.status == 'open' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-700' }}">{{ ('support.status.' ~ c.status)|trans }}</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if c.supporterUnreadCount > 0 %}
+                                <span class="inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full bg-primary-600 text-white text-xs font-bold">{{ c.supporterUnreadCount }}</span>
+                            {% else %}
+                                <span class="text-gray-500">0</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            <a href="{{ path('admin_support_show', {id: c.id}) }}" class="inline-flex items-center gap-1 text-primary-700 hover:text-primary-800 font-medium">
+                                {{ 'support.admin.open'|trans }} <i class="fas fa-arrow-right text-xs"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="px-4 py-8 text-center text-gray-500">{{ 'support.admin.empty'|trans }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('support-admin-search');
+        const statusSelect = document.getElementById('support-admin-status');
+        const unreadSelect = document.getElementById('support-admin-unread');
+        const rows = Array.from(document.querySelectorAll('.support-admin-row'));
+
+        rows.forEach((row) => {
+            row.addEventListener('click', (event) => {
+                const target = event.target;
+                if (target && target.closest('a')) {
+                    return;
+                }
+                const href = row.getAttribute('data-href');
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
+
+        if (!searchInput || !statusSelect || !unreadSelect || rows.length === 0) {
+            return;
+        }
+
+        const applyFilters = () => {
+            const term = (searchInput.value || '').trim().toLowerCase();
+            const status = statusSelect.value;
+            const unread = unreadSelect.value;
+
+            rows.forEach((row) => {
+                const rowStatus = row.getAttribute('data-status') || '';
+                const rowUnread = Number(row.getAttribute('data-unread') || '0');
+                const haystack = ((row.getAttribute('data-customer') || '') + ' ' + (row.getAttribute('data-subject') || '')).toLowerCase();
+
+                const statusMatch = status === 'all' || status === rowStatus;
+                const unreadMatch = unread === 'all' || (unread === 'yes' && rowUnread > 0);
+                const termMatch = term === '' || haystack.includes(term);
+
+                row.style.display = statusMatch && unreadMatch && termMatch ? '' : 'none';
+            });
+        };
+
+        searchInput.addEventListener('input', applyFilters);
+        statusSelect.addEventListener('change', applyFilters);
+        unreadSelect.addEventListener('change', applyFilters);
+    });
+    </script>
+{% endblock %}
+

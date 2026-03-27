@@ -149,5 +149,10 @@
       "inputRadius": "md"
     }
   },
+  "support": {
+    "provider": "selfcoded",
+    "tawkEmbedPath": "",
+    "charlaProjectId": ""
+  },
   "customCss": ""
 }

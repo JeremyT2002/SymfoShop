@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app.request.locale }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Admin Panel - SymfoShop{% endblock %}</title>
+    <title>{% block title %}{{ block('page_title') }} · {{ 'admin.brand.name'|trans }}{% endblock %}</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -22,6 +23,23 @@
                 },
             },
         }
+    </script>
+    <script>
+    (function () {
+        var k = 'symfoshop-color-scheme';
+        var legacyKey = 'symfoshop_admin_theme';
+        var stored = localStorage.getItem(k);
+        if (stored !== 'dark' && stored !== 'light') {
+            var legacy = localStorage.getItem(legacyKey);
+            if (legacy === 'dark' || legacy === 'light') {
+                stored = legacy;
+                localStorage.setItem(k, legacy);
+            }
+        }
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var dark = stored === 'dark' || (stored !== 'light' && prefersDark);
+        document.documentElement.classList.toggle('dark', dark);
+    })();
     </script>
     
     <!-- ApexCharts -->
@@ -116,11 +134,126 @@
             border-color: #3b82f6;
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
         }
+
+        html.dark .admin-card {
+            border-color: #374151;
+            background: #1f2937;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+        }
+
+        html.dark .admin-table thead th {
+            background: #111827;
+        }
+
+        html.dark .admin-form-section {
+            border-color: #374151;
+            background: linear-gradient(180deg, rgba(17, 24, 39, 0.9), #1f2937);
+        }
+
+        html.dark .admin-form-input {
+            border-color: #4b5563;
+            background: #111827;
+            color: #f3f4f6;
+        }
+
+        /* List/detail pages: tables & filters align with dark main area */
+        html.dark main tbody.bg-white {
+            background-color: rgb(31 41 55) !important;
+        }
+        html.dark main thead.bg-gray-50 {
+            background-color: rgb(17 24 39) !important;
+        }
+        html.dark main thead.bg-gray-50 th {
+            color: #9ca3af !important;
+        }
+        html.dark main .admin-table tbody tr:hover,
+        html.dark main tbody tr.hover\:bg-gray-50:hover {
+            background-color: rgb(55 65 81) !important;
+        }
+        html.dark main tr.bg-gray-50 {
+            background-color: rgba(31, 41, 55, 0.65) !important;
+        }
+        html.dark main .admin-page-header h2 {
+            color: #f9fafb !important;
+        }
+        html.dark main .admin-page-header p {
+            color: #9ca3af !important;
+        }
+        html.dark main h1.text-gray-900,
+        html.dark main h2.text-gray-900,
+        html.dark main h3.text-gray-900 {
+            color: #f9fafb !important;
+        }
+        html.dark main .admin-card .text-gray-900,
+        html.dark main .admin-table .text-gray-900 {
+            color: #f3f4f6 !important;
+        }
+        html.dark main .admin-card .text-gray-500,
+        html.dark main .admin-table .text-gray-500 {
+            color: #9ca3af !important;
+        }
+        html.dark main .text-gray-700 {
+            color: #d1d5db !important;
+        }
+        html.dark main input[type="text"],
+        html.dark main input[type="search"],
+        html.dark main input[type="email"],
+        html.dark main input[type="number"],
+        html.dark main input[type="password"],
+        html.dark main select,
+        html.dark main textarea {
+            background-color: #111827 !important;
+            border-color: #4b5563 !important;
+            color: #f3f4f6 !important;
+        }
+        html.dark main input::placeholder,
+        html.dark main textarea::placeholder {
+            color: #6b7280 !important;
+        }
+        html.dark main a.text-gray-600 {
+            color: #9ca3af !important;
+        }
+        html.dark main a.text-gray-600:hover {
+            color: #f3f4f6 !important;
+        }
+        html.dark main a.border-gray-300:hover {
+            background-color: #374151 !important;
+        }
+        html.dark main a.border-gray-300 {
+            border-color: #4b5563 !important;
+            color: #e5e7eb !important;
+        }
+        html.dark main .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+            border-color: rgb(55 65 81) !important;
+        }
+
+        /* New/Edit form intro cards (used across admin forms) */
+        html.dark main .bg-gradient-to-br.from-gray-50.to-white {
+            background: linear-gradient(135deg, #111827, #1f2937) !important;
+            border-color: #374151 !important;
+        }
+        html.dark main .bg-gradient-to-br.from-gray-50.to-white .text-gray-900 {
+            color: #f3f4f6 !important;
+        }
+        html.dark main .bg-gradient-to-br.from-gray-50.to-white .text-gray-600 {
+            color: #d1d5db !important;
+        }
+
+        /* Generic utility cards used in forms */
+        html.dark main .border-gray-200 {
+            border-color: #374151 !important;
+        }
+        html.dark main .bg-white {
+            background-color: #1f2937 !important;
+        }
+        html.dark main .hover\:bg-gray-50:hover {
+            background-color: #374151 !important;
+        }
     </style>
     
     {% block stylesheets %}{% endblock %}
 </head>
-<body class="bg-gray-50 admin font-sans">
+<body class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 admin font-sans antialiased">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside class="w-64 bg-gray-900 text-white flex flex-col">
@@ -128,39 +261,39 @@
             <div class="p-6 border-b border-gray-800">
                 <a href="{{ path('admin') }}" class="flex items-center gap-2">
                     <i class="fas fa-shopping-bag text-2xl text-blue-400"></i>
-                    <span class="text-xl font-bold">SymfoShop</span>
+                    <span class="text-xl font-bold">{{ 'admin.brand.name'|trans }}</span>
                 </a>
-                <p class="text-sm text-gray-400 mt-1">Admin Panel</p>
+                <p class="text-sm text-gray-400 mt-1">{{ 'admin.layout.panel_subtitle'|trans }}</p>
             </div>
             
             <!-- Navigation -->
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
                 <a href="{{ path('admin') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if app.request.attributes.get('_route') == 'admin' %}bg-gray-800{% endif %}">
                     <i class="fas fa-home w-5"></i>
-                    <span>Dashboard</span>
+                    <span>{{ 'admin.nav.dashboard'|trans }}</span>
                 </a>
                 
                 <div class="pt-4">
-                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Catalog</p>
+                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{{ 'admin.nav.catalog'|trans }}</p>
                     <a href="{{ path('admin_products_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_products' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-box w-5"></i>
-                        <span>Products</span>
+                        <span>{{ 'admin.nav.products'|trans }}</span>
                     </a>
                     <a href="{{ path('admin_categories_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_categories' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-tags w-5"></i>
-                        <span>Categories</span>
+                        <span>{{ 'admin.nav.categories'|trans }}</span>
                     </a>
                 </div>
                 
                 <div class="pt-4">
-                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Sales</p>
+                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{{ 'admin.nav.sales'|trans }}</p>
                     <a href="{{ path('admin_orders_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_orders' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-shopping-cart w-5"></i>
-                        <span>Orders</span>
+                        <span>{{ 'admin.nav.orders'|trans }}</span>
                     </a>
                     <a href="{{ path('admin_coupons_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_coupons' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-gift w-5"></i>
-                        <span>Coupons</span>
+                        <span>{{ 'admin.nav.coupons'|trans }}</span>
                     </a>
                     <a href="{{ path('admin_payment_methods_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_payment_methods' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-credit-card w-5"></i>
@@ -174,33 +307,41 @@
                         <i class="fas fa-undo-alt w-5"></i>
                         <span>{{ 'admin.return_requests.nav'|trans }}</span>
                     </a>
+                    <a href="{{ path('admin_support_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_support' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
+                        <i class="fas fa-headset w-5"></i>
+                        <span>{{ 'admin.nav.support_inbox'|trans }}</span>
+                    </a>
                 </div>
                 
                 <div class="pt-4">
-                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Users</p>
+                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{{ 'admin.nav.users'|trans }}</p>
                     <a href="{{ path('admin_users_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_users' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-users w-5"></i>
-                        <span>Users</span>
+                        <span>{{ 'admin.nav.users'|trans }}</span>
                     </a>
                     <a href="{{ path('admin_api_keys_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_api_keys' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-key w-5"></i>
-                        <span>API Keys</span>
+                        <span>{{ 'admin.nav.api_keys'|trans }}</span>
                     </a>
                 </div>
                 
                 <div class="pt-4">
-                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Appearance</p>
+                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{{ 'admin.nav.appearance'|trans }}</p>
                     <a href="{{ path('admin_theme_editor') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_theme' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-palette w-5"></i>
-                        <span>Theme Editor</span>
+                        <span>{{ 'admin.nav.theme_editor'|trans }}</span>
                     </a>
                 </div>
                 
                 <div class="pt-4">
-                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">System</p>
+                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{{ 'admin.nav.system'|trans }}</p>
+                    <a href="{{ path('admin_settings') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if app.request.attributes.get('_route') == 'admin_settings' %}bg-gray-800{% endif %}">
+                        <i class="fas fa-sliders-h w-5"></i>
+                        <span>{{ 'admin.settings.nav'|trans }}</span>
+                    </a>
                     <a href="{{ path('admin_api_docs') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_api_docs' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
                         <i class="fas fa-book w-5"></i>
-                        <span>API Documentation</span>
+                        <span>{{ 'admin.nav.api_documentation'|trans }}</span>
                     </a>
                 </div>
             </nav>
@@ -216,15 +357,15 @@
                             {% if app.user %}
                                 {{ app.user.email }}
                             {% else %}
-                                Guest
+                                {{ 'admin.layout.guest'|trans }}
                             {% endif %}
                         </p>
-                        <p class="text-xs text-gray-400 truncate">Administrator</p>
+                        <p class="text-xs text-gray-400 truncate">{{ 'admin.layout.administrator'|trans }}</p>
                     </div>
                 </div>
                 <a href="{{ path('logout') }}" class="mt-3 flex items-center space-x-2 text-sm text-gray-400 hover:text-white transition-colors">
                     <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
+                    <span>{{ 'admin.layout.logout'|trans }}</span>
                 </a>
             </div>
         </aside>
@@ -232,11 +373,26 @@
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Top Bar -->
-            <header class="bg-white border-b border-gray-200 px-6 py-4">
-                <div class="flex items-center justify-between">
-                    <h1 class="text-2xl font-bold text-gray-900">{% block page_title %}Dashboard{% endblock %}</h1>
-                    <div class="flex items-center space-x-4">
-                        <a href="{{ path('catalog_home') }}" class="text-gray-600 hover:text-gray-900 transition-colors" title="View Site">
+            <header class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4">
+                <div class="flex items-center justify-end gap-4">
+                    <div class="flex items-center space-x-2 sm:space-x-3">
+                        <div class="relative">
+                            <select id="admin-language-switcher"
+                                    class="appearance-none bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 pr-8 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors cursor-pointer"
+                                    aria-label="{{ 'nav.language'|trans }}">
+                                <option value="en" {% if app.request.locale == 'en' %}selected{% endif %}>🇬🇧 EN</option>
+                                <option value="de" {% if app.request.locale == 'de' %}selected{% endif %}>🇩🇪 DE</option>
+                                <option value="fr" {% if app.request.locale == 'fr' %}selected{% endif %}>🇫🇷 FR</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                            </div>
+                        </div>
+                        <button type="button" id="admin-theme-toggle" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-pressed="false" title="{{ 'admin.layout.theme_toggle_aria'|trans }}" aria-label="{{ 'admin.layout.theme_toggle_aria'|trans }}">
+                            <i class="fas fa-moon inline dark:hidden" aria-hidden="true"></i>
+                            <i class="fas fa-sun hidden dark:inline" aria-hidden="true"></i>
+                        </button>
+                        <a href="{{ path('catalog_home') }}" target="_blank" rel="noopener noreferrer" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors" title="{{ 'admin.layout.view_storefront'|trans }}" aria-label="{{ 'admin.layout.view_storefront_aria'|trans }}">
                             <i class="fas fa-external-link-alt"></i>
                         </a>
                     </div>
@@ -264,6 +420,44 @@
     {% block javascripts %}
     <!-- Application JavaScript -->
     <script type="module" src="{{ asset('js/app.js') }}"></script>
+    <script>
+    (function () {
+        var btn = document.getElementById('admin-theme-toggle');
+        var localeSelect = document.getElementById('admin-language-switcher');
+
+        if (localeSelect) {
+            var currentRoute = '{{ app.request.attributes.get('_route') }}';
+            var localeToken = '__LOCALE__';
+            var routeUrlTemplate = '{{ path(app.request.attributes.get('_route') ?: 'admin', app.request.attributes.get('_route_params')|default({})|merge({'_locale': '__LOCALE__'})) }}';
+            var adminFallbackTemplate = '{{ path('admin', {'_locale': '__LOCALE__'}) }}';
+
+            localeSelect.addEventListener('change', function () {
+                var targetLocale = localeSelect.value;
+                var targetUrl = adminFallbackTemplate.replace(localeToken, targetLocale);
+
+                if (currentRoute) {
+                    targetUrl = routeUrlTemplate.replace(localeToken, targetLocale);
+                }
+
+                window.location.href = targetUrl;
+            });
+        }
+
+        if (btn) {
+            var k = 'symfoshop-color-scheme';
+            function syncPressed() {
+                btn.setAttribute('aria-pressed', document.documentElement.classList.contains('dark') ? 'true' : 'false');
+            }
+            syncPressed();
+            btn.addEventListener('click', function () {
+                var next = !document.documentElement.classList.contains('dark');
+                document.documentElement.classList.toggle('dark', next);
+                localStorage.setItem(k, next ? 'dark' : 'light');
+                syncPressed();
+            });
+        }
+    })();
+    </script>
     {% endblock %}
 </body>
 </html>

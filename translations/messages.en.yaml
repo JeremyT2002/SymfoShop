@@ -493,9 +493,103 @@ account:
       profile_updated: Your profile data has been updated.
 
 admin:
+  brand:
+    name: SymfoShop
+  layout:
+    title_default: Admin Panel
+    panel_subtitle: Admin Panel
+    view_storefront: View storefront
+    view_storefront_aria: Open storefront in a new tab
+    logout: Logout
+    guest: Guest
+    administrator: Administrator
+    dark_mode: Dark mode
+    light_mode: Light mode
+    theme_toggle_aria: Toggle dark mode
+  nav:
+    dashboard: Dashboard
+    catalog: Catalog
+    sales: Sales
+    users: Users
+    appearance: Appearance
+    system: System
+    products: Products
+    categories: Categories
+    orders: Orders
+    coupons: Coupons
+    support_inbox: Support inbox
+    theme_editor: Theme editor
+    api_documentation: API documentation
+    api_keys: API keys
+  settings:
+    title: System settings
+    subtitle: General options for the shop and integrations.
+    nav: Settings
+    open: Open settings
+    section_support: Support & chat
+    section_support_intro: Choose how customers reach support on the storefront.
+    section_storefront: Storefront
+    section_storefront_intro: Site name, catalog layout, and product page options (stored in the theme and published).
+    theme_editor_link: Theme editor (colors, homepage, …)
+    brand_site_name: Site name
+    brand_tagline: Tagline
+    footer_copyright: Copyright line (footer)
+    footer_copyright_placeholder: Optional, e.g. © 2025 Your Shop
+    section_header: Header
+    header_sticky: Sticky header
+    header_show_cart: Show cart in header
+    header_show_language: Show language switcher
+    section_catalog: Catalog
+    catalog_show_filters: Show product filters
+    catalog_filter_position: Filter position
+    catalog_filter_sidebar: Sidebar
+    catalog_filter_top: Top
+    catalog_badge_style: Badge style
+    catalog_badge_pill: Pill
+    catalog_badge_square: Square
+    catalog_grid_mobile: Mobile columns
+    catalog_grid_tablet: Tablet columns
+    catalog_grid_desktop: Desktop columns
+    section_product: Product page
+    product_gallery_style: Image gallery
+    product_gallery_thumbnails: Thumbnails
+    product_gallery_carousel: Carousel
+    product_sticky_add_to_cart: Sticky add-to-cart bar
+    product_tabs_layout: Description & details
+    product_tabs_accordion: Accordion
+    product_tabs_horizontal: Tabs
+    placeholder_tawk_embed_path: "XXXXXXXXXXXX/XXXXXXXX"
+    placeholder_charla_project_id: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+    flash:
+      support_saved: Settings saved.
+      storefront_saved: Storefront settings saved.
+      invalid_tawk_path: Invalid Tawk embed path.
+      invalid_charla_id: Invalid Charla project id.
   dashboard:
     title: Dashboard
     no_widgets: No widgets configured. Use "Customize Dashboard" to add widgets.
+    app_update_title: App update
+    app_update_up_to_date: Up to date.
+    app_update_one_commit: Update available (1 commit).
+    app_update_n_commits: Update available (%count% commits).
+    app_update_failed: Update check failed
+    app_update_now: Update now
+    chart:
+      series_orders: Orders
+      series_revenue: Revenue
+      yaxis_orders: Orders
+      yaxis_revenue: Revenue
+      no_orders: No orders yet
+    settings_teaser: Storefront, support provider, chat widgets, and related options.
+    support_provider: Support provider
+    provider_label: Provider
+    tawk_embed_path: Tawk embed path
+    charla_project_id: Charla project ID (p)
+    support_option_selfcoded: Selfcoded (built-in)
+    support_option_disabled: Disabled (no support)
+    support_option_tawk: tawk.to
+    support_option_charla: Charla
+    support_option_tawk_charla: Tawk + Charla
   payment_methods:
     nav: Payment Methods
     title: Payment Methods
@@ -561,6 +655,55 @@ admin:
       created: Shipping method created.
       updated: Shipping method updated.
       removed: Shipping method removed.
+  products:
+    page_title: Products
+    heading: Products
+    subtitle: Manage your product catalog
+    new: New product
+    search_placeholder: Search products…
+    all_statuses: All statuses
+    status_active: Active
+    status_draft: Draft
+    status_archived: Archived
+    filter: Filter
+    clear: Clear
+    table:
+      id: ID
+      name: Name
+      category: Category
+      slug: Slug
+      status: Status
+      variants: Variants
+      variants_one: 1 variant
+      variants_n: '%count% variants'
+      stock: Stock
+      created: Created
+      actions: Actions
+    no_category: No category
+    empty: No products found
+    empty_hint: Get started by creating your first product.
+    create_first: Create product
+    delete_confirm: Are you sure you want to delete this product?
+    pagination_showing: Showing page %page% of %total%
+  categories:
+    page_title: Categories
+    heading: Categories
+    subtitle: Manage your product categories
+    new: New category
+    table:
+      id: ID
+      name: Name
+      slug: Slug
+      parent: Parent
+      children: Subcategories
+      children_0: No subcategories
+      children_1: 1 subcategory
+      children_n: '%count% subcategories'
+      actions: Actions
+    empty: No categories found
+    empty_hint: Get started by creating your first category.
+    create_first: Create category
+    delete_confirm: Are you sure you want to delete this category?
   widgets:
     kpi_products:
       title: Total Products
@@ -576,6 +719,10 @@ admin:
       status: Status
       actions: Actions
       empty: No orders found
+    chart_sales:
+      title: Sales over time
+    chart_orders_by_status:
+      title: Orders by status
   orders:
     page_title: Orders
     heading: Orders
@@ -742,3 +889,87 @@ return_request:
   flash:
     submitted: Your return request has been received. We will review it shortly.
     order_not_found: We could not find an order with that number and email. Please check your details.
+
+support:
+  common:
+    na: n/a
+    anonymous: anonymous
+  sender:
+    you: You
+    support: Support
+    customer: Customer
+  status:
+    open: OPEN
+    closed: CLOSED
+  category:
+    order: Order
+    payment: Payment
+    shipping: Shipping
+    product: Product
+    technical: Technical
+    other: Other
+  form:
+    subject: Subject
+    category: Category
+    related_order: Relevant order (optional)
+    related_order_none: No order selected
+    related_order_placeholder: e.g. ORD-2026-000123
+    message: Message
+  provider_help:
+    tawk_where: "In the tawk.to dashboard: Administration → Channels → Website → your property → Widget / Direct chat link or “Embed code”. The script URL looks like https://embed.tawk.to/PROPERTY_ID/WIDGET_ID — paste only the part after embed.tawk.to/ (PROPERTY_ID/WIDGET_ID)."
+    charla_where: "In the Charla dashboard: open your site or widget settings → Installation / Embed code. The snippet contains <charla-widget> and setAttribute(\"p\", \"…\") — copy the UUID value of p (the project/widget id)."
+    footer: "Selfcoded uses the built-in support area; tawk.to and Charla load their widget on the storefront instead."
+  flash:
+    rate_limited: You are sending messages too quickly. Please wait a minute.
+    subject_message_required: Please provide a subject and message.
+    conversation_created: Support conversation created.
+    message_required: Message cannot be empty.
+    message_sent: Message sent.
+    reply_sent: Reply sent.
+    conversation_closed: Conversation closed.
+  customer:
+    page_title: Support
+    heading: Support
+    subtitle: Open a conversation with our support team.
+    back_to_account: Back to account
+    new_conversation: New conversation
+    create_chat: Create support chat
+    your_conversations: Your conversations
+    updated_at: "Updated %date%"
+    empty: No support conversations yet.
+    chat_page_title: Support Chat
+    back_to_support: Back to support
+    conversation_line: "Conversation #%id% · %status% · %category%"
+    order_label: Order
+    no_messages: No messages yet.
+    write_message: Write your message...
+    send: Send
+    attachment_hint: "Allowed attachments: pdf, png, jpg, jpeg, txt (max 10 MB each)."
+    shortcut_hint: "Tip: Press Ctrl+Enter to send faster."
+    search_placeholder: Search by subject or order number...
+    filter_all: All conversations
+  admin:
+    inbox_page_title: Support Inbox
+    inbox_heading: Support Inbox
+    inbox_subtitle: Customer support conversations.
+    table:
+      updated: Updated
+      customer: Customer
+      subject: Subject
+      category: Category
+      order: Order
+      status: Status
+      unread: Unread
+    open: Open
+    empty: No conversations yet.
+    conversation_page_title: Support Conversation
+    customer_label: Customer
+    status_label: Status
+    category_label: Category
+    order_label: Order
+    back_to_inbox: Back to inbox
+    reply_placeholder: Reply as support...
+    close_conversation: Close conversation
+    send_reply: Send reply
+    filter_unread_all: All (including read)
+    filter_unread_only: Unread only
