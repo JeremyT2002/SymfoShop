@@ -6,6 +6,7 @@ use App\Entity\Product;
 use App\Entity\ProductReview;
 use App\Entity\User;
 use App\Repository\ProductRepository;
+use App\Service\Catalog\RecentlyViewedService;
 use App\Repository\ProductReviewRepository;
 use App\Service\Review\VerifiedPurchaseChecker;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,6 +20,7 @@ class ProductController extends AbstractController
 {
     public function __construct(
         private readonly ProductRepository $productRepository,
+        private readonly RecentlyViewedService $recentlyViewedService,
         private readonly ProductReviewRepository $productReviewRepository,
         private readonly VerifiedPurchaseChecker $verifiedPurchaseChecker,
         private readonly EntityManagerInterface $entityManager
@@ -40,6 +42,7 @@ class ProductController extends AbstractController
             return $this->redirectToRoute('catalog_product', ['slug' => $product->getSlug()]);
         }
 
+        $this->recentlyViewedService->addProduct($product);
         $variants = $product->getVariants()->toArray();
         $defaultVariant = !empty($variants) ? $variants[0] : null;
         $reviewPage = max(1, $request->query->getInt('reviewPage', 1));
@@ -60,6 +63,7 @@ class ProductController extends AbstractController
             'product' => $product,
             'variants' => $variants,
             'defaultVariant' => $defaultVariant,
+            'recentlyViewedProducts' => $this->recentlyViewedService->getRecentlyViewedProducts($product->getId(), 8),
             'approvedReviews' => $approvedReviews,
             'reviewCount' => $approvedReviewCount,
             'reviewPage' => $reviewPage,

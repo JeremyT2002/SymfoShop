@@ -304,6 +304,8 @@
                 </div>
             {% endif %}
         </section>
+        
+        {% include 'components/recently_viewed_products.html.twig' with { recentlyViewedProducts: recentlyViewedProducts|default([]) } %}
     </div>
     
     {# Image Modal #}
