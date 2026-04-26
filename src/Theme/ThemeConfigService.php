@@ -62,7 +62,7 @@ class ThemeConfigService
     {
         $allowed = [
             'brand', 'colors', 'typography', 'layout', 'header', 'footer',
-            'homepage', 'catalog', 'product', 'components', 'support', 'customCss',
+            'homepage', 'catalog', 'product', 'components', 'support', 'seo', 'customCss',
         ];
         $out = [];
         foreach ($allowed as $key) {
@@ -246,6 +246,9 @@ class ThemeConfigService
                 'provider' => 'selfcoded',
                 'tawkEmbedPath' => '',
                 'charlaProjectId' => '',
+            ],
+            'seo' => [
+                'defaultNoIndex' => false,
             ],
             'customCss' => '',
         ];

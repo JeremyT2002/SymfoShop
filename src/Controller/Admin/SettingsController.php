@@ -91,6 +91,12 @@ final class SettingsController extends AbstractController
         ];
         $config['catalog'] = $catalog;
 
+        $seo = is_array($config['seo'] ?? null) ? $config['seo'] : [];
+        $enableIndexing = $request->request->getBoolean('seo_enableIndexing');
+        // defaultNoIndex = true means search engines should not index
+        $seo['defaultNoIndex'] = !$enableIndexing;
+        $config['seo'] = $seo;
+
         $product = is_array($config['product'] ?? null) ? $config['product'] : [];
         $galleryStyle = (string) $request->request->get('product_galleryStyle', 'thumbnails');
         $product['galleryStyle'] = in_array($galleryStyle, ['thumbnails', 'carousel'], true) ? $galleryStyle : 'thumbnails';
@@ -199,6 +205,7 @@ final class SettingsController extends AbstractController
         $catalog = is_array($config['catalog'] ?? null) ? $config['catalog'] : [];
         $grid = is_array($catalog['gridColumns'] ?? null) ? $catalog['gridColumns'] : [];
         $product = is_array($config['product'] ?? null) ? $config['product'] : [];
+        $seo = is_array($config['seo'] ?? null) ? $config['seo'] : [];
 
         return [
             'brand_siteName' => (string) ($brand['siteName'] ?? ''),
@@ -216,6 +223,7 @@ final class SettingsController extends AbstractController
             'product_galleryStyle' => (string) ($product['galleryStyle'] ?? 'thumbnails'),
             'product_stickyAddToCart' => (bool) ($product['stickyAddToCart'] ?? true),
             'product_tabsLayout' => (string) ($product['tabsLayout'] ?? 'accordion'),
+            'seo_enableIndexing' => !(bool) ($seo['defaultNoIndex'] ?? false),
         ];
     }
 }

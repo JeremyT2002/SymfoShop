@@ -375,7 +375,9 @@ class ProductRepository extends ServiceEntityRepository
         $rows = $this->createQueryBuilder('p')
             ->select('p.slug')
             ->where('p.status = :status')
+            ->andWhere('p.seoNoIndex = :noIndex')
             ->setParameter('status', ProductStatus::ACTIVE)
+            ->setParameter('noIndex', false)
             ->orderBy('p.slug', 'ASC')
             ->getQuery()
             ->getScalarResult();

@@ -38,6 +38,21 @@
                 </div>
 
                 <div>
+                    <p class="text-xs font-medium text-gray-700 mb-2">{{ 'admin.settings.section_seo'|trans }}</p>
+                    <div class="flex flex-wrap gap-x-6 gap-y-2">
+                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox"
+                                   name="seo_enableIndexing"
+                                   value="1"
+                                   class="rounded border-gray-300"
+                                   {% if storefront.seo_enableIndexing %}checked{% endif %}>
+                            {{ 'admin.settings.seo_enable_indexing'|trans }}
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2 leading-relaxed max-w-3xl">{{ 'admin.settings.seo_enable_indexing_help'|trans }}</p>
+                </div>
+
+                <div>
                     <p class="text-xs font-medium text-gray-700 mb-2">{{ 'admin.settings.section_header'|trans }}</p>
                     <div class="flex flex-wrap gap-x-6 gap-y-2">
                         <label class="inline-flex items-center gap-2 text-sm text-gray-700">

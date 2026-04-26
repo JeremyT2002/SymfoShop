@@ -1,12 +1,25 @@
 {% extends 'catalog/base.html.twig' %}
 
-{% block page_title %}{{ category.name|escape }} - SymfoShop{% endblock %}
-{% block page_meta_description %}Browse products in {{ category.name|escape }}{% endblock %}
+{% block robots_meta %}
+    {% set globalNoIndex = theme_config().seo.defaultNoIndex|default(false) %}
+    {% set pageNoIndex = category.seoNoIndex|default(false) %}
+    {% set noIndex = globalNoIndex or pageNoIndex %}
+    <meta name="robots" content="{{ noIndex ? 'noindex,nofollow' : 'index,follow' }}">
+{% endblock %}
+
+{% block page_title %}{{ category.seoTitle|default(category.name)|escape }} - SymfoShop{% endblock %}
+{% block page_meta_description %}{{ category.seoDescription|default('Browse products in ' ~ category.name)|escape|slice(0, 160) }}{% endblock %}
 {% block js_page %}category-filters{% endblock %}
 
 {% block meta_tags %}
-    <meta property="og:title" content="{{ category.name|escape }} - SymfoShop">
-    <meta property="og:description" content="Browse products in {{ category.name|escape }}">
+    {% set seoTitle = category.seoTitle|default(category.name) %}
+    {% set seoDescription = category.seoDescription|default('Browse products in ' ~ category.name)|slice(0, 160) %}
+
+    <meta property="og:title" content="{{ seoTitle|escape }} - SymfoShop">
+    <meta property="og:description" content="{{ seoDescription|escape }}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ seoTitle|escape }} - SymfoShop">
+    <meta name="twitter:description" content="{{ seoDescription|escape }}">
 {% endblock %}
 
 {% block catalog_body %}

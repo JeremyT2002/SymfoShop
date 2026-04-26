@@ -154,5 +154,8 @@
     "tawkEmbedPath": "",
     "charlaProjectId": ""
   },
+  "seo": {
+    "defaultNoIndex": false
+  },
   "customCss": ""
 }

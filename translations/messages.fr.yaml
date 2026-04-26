@@ -530,6 +530,9 @@ admin:
     section_support_intro: Choisissez comment les clients contactent le support sur la boutique.
     section_storefront: Vitrine
     section_storefront_intro: Nom du site, catalogue et page produit (enregistrés dans le thème et publiés).
+    section_seo: SEO
+    seo_enable_indexing: Activer l’indexation
+    seo_enable_indexing_help: Si désactivé, la boutique enverra des directives robots meta pour empêcher l’indexation par les moteurs de recherche (produits/catégories peuvent encore être désactivés via « No indexing »).
     theme_editor_link: Éditeur de thème (couleurs, page d’accueil, …)
     brand_site_name: Nom du site
     brand_tagline: Slogan

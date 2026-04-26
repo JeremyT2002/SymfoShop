@@ -72,6 +72,14 @@ class ProductController extends AbstractController
             $product->setDescription($request->request->get('description', ''));
             $product->setStatus(ProductStatus::from($request->request->get('status', 'draft')));
             $product->setTaxClass($request->request->get('tax_class', 'standard'));
+
+            $seoTitle = trim((string) $request->request->get('seo_title', ''));
+            $product->setSeoTitle($seoTitle !== '' ? $seoTitle : null);
+
+            $seoDescription = trim((string) $request->request->get('seo_description', ''));
+            $product->setSeoDescription($seoDescription !== '' ? $seoDescription : null);
+
+            $product->setSeoNoIndex($request->request->getBoolean('seo_noindex'));
             
             // Set category if provided
             $categoryId = $request->request->get('category_id');
@@ -279,6 +287,15 @@ class ProductController extends AbstractController
             $product->setDescription($request->request->get('description', ''));
             $product->setStatus(ProductStatus::from($request->request->get('status')));
             $product->setTaxClass($request->request->get('tax_class', $product->getTaxClass()));
+
+            $seoTitle = trim((string) $request->request->get('seo_title', ''));
+            $product->setSeoTitle($seoTitle !== '' ? $seoTitle : null);
+
+            $seoDescription = trim((string) $request->request->get('seo_description', ''));
+            $product->setSeoDescription($seoDescription !== '' ? $seoDescription : null);
+
+            $product->setSeoNoIndex($request->request->getBoolean('seo_noindex'));
+
             $product->setUpdatedAt(new \DateTimeImmutable());
             
             // Set category if provided

@@ -34,6 +34,15 @@ class Product
     #[ORM\Column(type: Types::STRING, length: 100)]
     private string $taxClass;
 
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $seoTitle = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $seoDescription = null;
+
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $seoNoIndex = false;
+
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
@@ -125,6 +134,39 @@ class Product
     public function setTaxClass(string $taxClass): self
     {
         $this->taxClass = $taxClass;
+        return $this;
+    }
+
+    public function getSeoTitle(): ?string
+    {
+        return $this->seoTitle;
+    }
+
+    public function setSeoTitle(?string $seoTitle): self
+    {
+        $this->seoTitle = $seoTitle;
+        return $this;
+    }
+
+    public function getSeoDescription(): ?string
+    {
+        return $this->seoDescription;
+    }
+
+    public function setSeoDescription(?string $seoDescription): self
+    {
+        $this->seoDescription = $seoDescription;
+        return $this;
+    }
+
+    public function isSeoNoIndex(): bool
+    {
+        return $this->seoNoIndex;
+    }
+
+    public function setSeoNoIndex(bool $seoNoIndex): self
+    {
+        $this->seoNoIndex = $seoNoIndex;
         return $this;
     }
 

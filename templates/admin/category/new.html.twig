@@ -34,6 +34,41 @@
                     </select>
                     <p class="mt-2 text-xs text-gray-500">Optional. Choose a parent to create a subcategory.</p>
                 </section>
+
+                <section class="admin-form-section">
+                    <label for="seo_title" class="admin-form-label">SEO Title</label>
+                    <input
+                        type="text"
+                        id="seo_title"
+                        name="seo_title"
+                        class="admin-form-input"
+                        placeholder="Overrides the <title> tag"
+                        value="{{ category.seoTitle|default('') }}"
+                    >
+                    <p class="mt-2 text-xs text-gray-500">Optional. Leave empty to use the category name.</p>
+
+                    <label for="seo_description" class="admin-form-label mt-4">SEO Description</label>
+                    <textarea
+                        id="seo_description"
+                        name="seo_description"
+                        rows="3"
+                        class="admin-form-input resize-y"
+                        placeholder="Overrides the meta description"
+                    >{{ category.seoDescription|default('') }}</textarea>
+                    <p class="mt-2 text-xs text-gray-500">Optional. Leave empty to use the category name/description.</p>
+
+                    <div class="flex items-center gap-3 mt-4">
+                        <input
+                            type="checkbox"
+                            id="seo_noindex"
+                            name="seo_noindex"
+                            value="1"
+                            class="rounded border-gray-300"
+                            {% if category.seoNoIndex %}checked{% endif %}
+                        >
+                        <label for="seo_noindex" class="admin-form-label mb-0">No indexing (robots `noindex`)</label>
+                    </div>
+                </section>
             </div>
 
             <div class="flex items-center justify-end gap-3 border-t border-gray-200 pt-5">

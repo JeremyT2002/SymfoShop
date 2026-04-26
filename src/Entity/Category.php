@@ -32,6 +32,15 @@ class Category
     #[ORM\Column(type: Types::STRING, length: 255)]
     private string $slug;
 
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $seoTitle = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $seoDescription = null;
+
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $seoNoIndex = false;
+
     public function __construct()
     {
         $this->children = new ArrayCollection();
@@ -103,6 +112,39 @@ class Category
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
+        return $this;
+    }
+
+    public function getSeoTitle(): ?string
+    {
+        return $this->seoTitle;
+    }
+
+    public function setSeoTitle(?string $seoTitle): self
+    {
+        $this->seoTitle = $seoTitle;
+        return $this;
+    }
+
+    public function getSeoDescription(): ?string
+    {
+        return $this->seoDescription;
+    }
+
+    public function setSeoDescription(?string $seoDescription): self
+    {
+        $this->seoDescription = $seoDescription;
+        return $this;
+    }
+
+    public function isSeoNoIndex(): bool
+    {
+        return $this->seoNoIndex;
+    }
+
+    public function setSeoNoIndex(bool $seoNoIndex): self
+    {
+        $this->seoNoIndex = $seoNoIndex;
         return $this;
     }
 }

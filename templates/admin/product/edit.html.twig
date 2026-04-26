@@ -32,6 +32,43 @@
                               class="admin-form-input resize-y">{{ product.description }}</textarea>
                     <p class="mt-1 text-xs text-gray-500">Optional: Add a detailed description to help customers understand your product</p>
                 </div>
+
+                <div>
+                    <label for="seo_title" class="admin-form-label">SEO Title</label>
+                    <input
+                        type="text"
+                        id="seo_title"
+                        name="seo_title"
+                        placeholder="Overrides the <title> tag"
+                        class="admin-form-input"
+                        value="{{ product.seoTitle|default('') }}"
+                    >
+                    <p class="mt-1 text-xs text-gray-500">Optional. Leave empty to use the product name.</p>
+                </div>
+
+                <div>
+                    <label for="seo_description" class="admin-form-label">SEO Description</label>
+                    <textarea
+                        id="seo_description"
+                        name="seo_description"
+                        rows="3"
+                        placeholder="Overrides the meta description"
+                        class="admin-form-input resize-y"
+                    >{{ product.seoDescription|default('') }}</textarea>
+                    <p class="mt-1 text-xs text-gray-500">Optional. Leave empty to use the product description.</p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <input
+                        type="checkbox"
+                        id="seo_noindex"
+                        name="seo_noindex"
+                        value="1"
+                        class="rounded border-gray-300"
+                        {% if product.seoNoIndex %}checked{% endif %}
+                    >
+                    <label for="seo_noindex" class="admin-form-label mb-0">No indexing (robots `noindex`)</label>
+                </div>
                 </section>
                 
                 <section class="admin-form-section space-y-4">

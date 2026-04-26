@@ -43,6 +43,14 @@ class CategoryController extends AbstractController
         if ($request->isMethod('POST')) {
             $category->setName($request->request->get('name'));
             $category->setSlug($this->slugger->slug($category->getName())->lower());
+
+            $seoTitle = trim((string) $request->request->get('seo_title', ''));
+            $category->setSeoTitle($seoTitle !== '' ? $seoTitle : null);
+
+            $seoDescription = trim((string) $request->request->get('seo_description', ''));
+            $category->setSeoDescription($seoDescription !== '' ? $seoDescription : null);
+
+            $category->setSeoNoIndex($request->request->getBoolean('seo_noindex'));
             
             $parentId = $request->request->get('parent');
             if ($parentId) {
@@ -94,6 +102,14 @@ class CategoryController extends AbstractController
         if ($request->isMethod('POST')) {
             $category->setName($request->request->get('name'));
             $category->setSlug($this->slugger->slug($category->getName())->lower());
+
+            $seoTitle = trim((string) $request->request->get('seo_title', ''));
+            $category->setSeoTitle($seoTitle !== '' ? $seoTitle : null);
+
+            $seoDescription = trim((string) $request->request->get('seo_description', ''));
+            $category->setSeoDescription($seoDescription !== '' ? $seoDescription : null);
+
+            $category->setSeoNoIndex($request->request->getBoolean('seo_noindex'));
             
             $parentId = $request->request->get('parent');
             if ($parentId && $parentId != $category->getId()) {
