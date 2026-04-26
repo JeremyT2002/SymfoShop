@@ -235,6 +235,98 @@
                 </div>
             </section>
         {% endif %}
+
+        <section class="rounded-2xl border border-gray-200 bg-white shadow-sm p-6 mt-8 dark:border-gray-700 dark:bg-gray-900">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ 'review.section_title'|trans }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {% if product.averageRating is not null %}
+                            {{ 'review.summary'|trans({'%rating%': product.averageRating|number_format(1, '.', ','), '%count%': reviewCount}) }}
+                        {% else %}
+                            {{ 'review.no_reviews_yet'|trans }}
+                        {% endif %}
+                    </p>
+                </div>
+                {% if product.averageRating is not null %}
+                    <div class="flex items-center gap-1 text-yellow-500">
+                        {% for i in 1..5 %}
+                            <i class="fa{% if i <= product.averageRating %}s{% else %}r{% endif %} fa-star"></i>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if app.user %}
+                {% if canReview %}
+                    <form method="post" action="{{ path('catalog_product', {slug: product.slug}) }}" class="mt-6 border rounded-xl p-4 space-y-3 border-gray-200 dark:border-gray-700">
+                        <input type="hidden" name="_token" value="{{ csrf_token('product_review_' ~ product.id) }}">
+                        <div>
+                            <label for="review_rating" class="admin-form-label">{{ 'review.form.rating'|trans }}</label>
+                            <select id="review_rating" name="rating" class="admin-form-input" required>
+                                {% for r in 5..1 %}
+                                    <option value="{{ r }}">{{ r }}/5</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="review_title" class="admin-form-label">{{ 'review.form.title'|trans }}</label>
+                            <input id="review_title" name="title" class="admin-form-input" maxlength="120" required>
+                        </div>
+                        <div>
+                            <label for="review_body" class="admin-form-label">{{ 'review.form.body'|trans }}</label>
+                            <textarea id="review_body" name="body" class="admin-form-input resize-y" rows="4" maxlength="2000" required></textarea>
+                        </div>
+                        <button type="submit" class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-white font-semibold text-sm hover:bg-primary-700">
+                            {{ 'review.form.submit'|trans }}
+                        </button>
+                    </form>
+                {% elseif hasExistingReview %}
+                    <p class="mt-6 text-sm text-gray-600 dark:text-gray-300">{{ 'review.form.already_reviewed'|trans }}</p>
+                {% else %}
+                    <p class="mt-6 text-sm text-gray-600 dark:text-gray-300">{{ 'review.form.verified_purchase_only'|trans }}</p>
+                {% endif %}
+            {% else %}
+                <p class="mt-6 text-sm text-gray-600 dark:text-gray-300">{{ 'review.form.login_to_review'|trans }}</p>
+            {% endif %}
+
+            <div class="mt-6 space-y-4">
+                {% for review in approvedReviews %}
+                    <article class="border rounded-xl p-4 border-gray-200 dark:border-gray-700">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ review.title }}</h3>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    {{ review.user.fullName is not empty ? review.user.fullName : review.user.email }}
+                                    · {{ review.createdAt|date('Y-m-d') }}
+                                </p>
+                            </div>
+                            <div class="text-yellow-500 text-sm">{{ review.rating }}/5</div>
+                        </div>
+                        {% if review.verifiedPurchase %}
+                            <span class="inline-flex mt-2 text-xs px-2 py-1 rounded bg-green-100 text-green-700">{{ 'review.verified_purchase'|trans }}</span>
+                        {% endif %}
+                        <p class="mt-3 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{{ review.body|escape|nl2br|raw }}</p>
+                    </article>
+                {% else %}
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ 'review.no_reviews_yet'|trans }}</p>
+                {% endfor %}
+            </div>
+
+            {% if reviewPages > 1 %}
+                <div class="mt-4 flex items-center justify-between text-sm">
+                    <span class="text-gray-500">{{ 'review.pagination'|trans({'%page%': reviewPage, '%pages%': reviewPages}) }}</span>
+                    <div class="flex gap-2">
+                        {% if reviewPage > 1 %}
+                            <a href="{{ path('catalog_product', {slug: product.slug, reviewPage: reviewPage - 1}) }}" class="px-3 py-2 rounded border border-gray-300">{{ 'common.previous'|trans }}</a>
+                        {% endif %}
+                        {% if reviewPage < reviewPages %}
+                            <a href="{{ path('catalog_product', {slug: product.slug, reviewPage: reviewPage + 1}) }}" class="px-3 py-2 rounded border border-gray-300">{{ 'common.next'|trans }}</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </section>
     </div>
     
     {# Image Modal #}
