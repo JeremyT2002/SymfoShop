@@ -2,87 +2,263 @@
 
 {% block page_title %}{{ 'admin.dashboard.title'|trans }}{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+{% endblock %}
+
 {% block body %}
-    <div class="mb-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/40 border border-transparent dark:border-gray-700 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div class="min-w-0">
-                <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ 'admin.dashboard.app_update_title'|trans }}</div>
-                {% if app_update.ok %}
-                    {% if app_update.updates_available %}
-                        <div class="text-sm text-amber-700 dark:text-amber-400 mt-0.5">
-                            {% if app_update.behind_by == 1 %}
-                                {{ 'admin.dashboard.app_update_one_commit'|trans }}
-                            {% else %}
-                                {{ 'admin.dashboard.app_update_n_commits'|trans({'%count%': app_update.behind_by}) }}
-                            {% endif %}
-                        </div>
-                    {% else %}
-                        <div class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">{{ 'admin.dashboard.app_update_up_to_date'|trans }}</div>
-                    {% endif %}
+    {% set periods = [
+        { id: 'today', label: 'admin.dashboard.period.today'|trans },
+        { id: '7d', label: 'admin.dashboard.period.7d'|trans },
+        { id: '30d', label: 'admin.dashboard.period.30d'|trans },
+        { id: '12m', label: 'admin.dashboard.period.12m'|trans }
+    ] %}
+
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ 'admin.dashboard.heading'|trans }}</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400">{{ 'admin.dashboard.conversion_formula_note'|trans }}</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                {% for option in periods %}
+                    <a href="{{ path('admin', {period: option.id}) }}"
+                       class="focus-ring rounded-xl px-3 py-2 text-sm font-medium {{ period == option.id ? 'bg-primary-600 text-white' : 'border border-slate-300 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800' }}">
+                        {{ option.label }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        {% include 'admin/components/stat-card.html.twig' with {
+            title: 'admin.dashboard.kpi.revenue'|trans,
+            value: (dashboard.kpis.revenue.value / 100)|number_format(2, '.', ',') ~ ' EUR',
+            trend: dashboard.kpis.revenue.change,
+            trendLabel: dashboard.kpis.revenue.change ~ ' %',
+            iconName: 'shopping-cart'
+        } %}
+        {% include 'admin/components/stat-card.html.twig' with {
+            title: 'admin.dashboard.kpi.orders'|trans,
+            value: dashboard.kpis.orders.value,
+            trend: dashboard.kpis.orders.change,
+            trendLabel: dashboard.kpis.orders.change ~ ' %',
+            iconName: 'shopping-bag'
+        } %}
+        {% include 'admin/components/stat-card.html.twig' with {
+            title: 'admin.dashboard.kpi.aov'|trans,
+            value: (dashboard.kpis.aov.value / 100)|number_format(2, '.', ',') ~ ' EUR',
+            trend: dashboard.kpis.aov.change,
+            trendLabel: dashboard.kpis.aov.change ~ ' %',
+            iconName: 'tag'
+        } %}
+        {% include 'admin/components/stat-card.html.twig' with {
+            title: 'admin.dashboard.kpi.new_customers'|trans,
+            value: dashboard.kpis.newCustomers.value,
+            trend: dashboard.kpis.newCustomers.change,
+            trendLabel: dashboard.kpis.newCustomers.change ~ ' %',
+            iconName: 'users'
+        } %}
+        {% include 'admin/components/stat-card.html.twig' with {
+            title: 'admin.dashboard.kpi.conversion'|trans,
+            value: dashboard.kpis.conversion.value|number_format(2, '.', ',') ~ ' %',
+            trend: dashboard.kpis.conversion.change,
+            trendLabel: dashboard.kpis.conversion.change ~ ' %',
+            iconName: 'chart-line'
+        } %}
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-admin dark:border-slate-800 dark:bg-slate-900 xl:col-span-2">
+            <h3 class="mb-3 text-sm font-semibold">{{ 'admin.dashboard.chart.revenue'|trans }}</h3>
+            <div class="h-72">
+                <canvas id="revenue-chart"></canvas>
+            </div>
+        </section>
+        <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+            <h3 class="mb-3 text-sm font-semibold">{{ 'admin.dashboard.chart.status'|trans }}</h3>
+            <div class="h-72">
+                <canvas id="status-chart"></canvas>
+            </div>
+        </section>
+
+        <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-admin dark:border-slate-800 dark:bg-slate-900 xl:col-span-3">
+            <h3 class="mb-3 text-sm font-semibold">{{ 'admin.dashboard.chart.top_products'|trans }}</h3>
+            <div class="h-80">
+                <canvas id="top-products-chart"></canvas>
+            </div>
+        </section>
+
+        <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+            <div class="mb-3 flex items-center justify-between">
+                <h3 class="text-sm font-semibold">{{ 'admin.dashboard.widget.recent_orders'|trans }}</h3>
+                <a class="text-xs text-primary-600 dark:text-primary-300" href="{{ path('admin_orders_index') }}">{{ 'admin.dashboard.widget.view_all'|trans }}</a>
+            </div>
+            <div class="space-y-2">
+                {% for order in dashboard.recentOrders %}
+                    <a href="{{ path('admin_orders_show', {id: order.id}) }}" class="block rounded-xl border border-slate-200 px-3 py-2 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">
+                        <p class="text-sm font-medium">{{ order.orderNumber }}</p>
+                        <p class="text-xs text-slate-500">{{ (order.grandTotal / 100)|number_format(2, '.', ',') }} {{ order.currency }} · {{ order.status }}</p>
+                    </a>
                 {% else %}
-                    <div class="text-sm text-red-700 dark:text-red-400 mt-0.5 truncate">
-                        {{ 'admin.dashboard.app_update_failed'|trans }}{% if app_update.error %}: {{ app_update.error }}{% endif %}
+                    <p class="text-sm text-slate-500">{{ 'admin.dashboard.widget.no_orders'|trans }}</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+            <div class="mb-3 flex items-center justify-between">
+                <h3 class="text-sm font-semibold">{{ 'admin.dashboard.widget.low_stock'|trans }}</h3>
+                <span class="text-xs text-slate-500">{{ 'admin.dashboard.widget.threshold'|trans }}</span>
+            </div>
+            <div class="space-y-2">
+                {% for stockItem in dashboard.lowStockItems %}
+                    <div class="rounded-xl border border-slate-200 px-3 py-2 dark:border-slate-700">
+                        <p class="text-sm font-medium">{{ stockItem.variant.product.name }}</p>
+                        <p class="text-xs text-slate-500">{{ stockItem.variant.sku }} · {{ 'admin.dashboard.widget.available'|trans }}: {{ stockItem.available }}</p>
                     </div>
+                {% else %}
+                    <p class="text-sm text-slate-500">{{ 'admin.dashboard.widget.no_low_stock'|trans }}</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+            <div class="mb-3 flex items-center justify-between">
+                <h3 class="text-sm font-semibold">{{ 'admin.dashboard.widget.pending_reviews'|trans }}</h3>
+                <a class="text-xs text-primary-600 dark:text-primary-300" href="{{ path('admin_reviews_index') }}">{{ 'admin.dashboard.widget.view_all'|trans }}</a>
+            </div>
+            <div class="space-y-2">
+                {% for review in dashboard.pendingReviews %}
+                    <div class="rounded-xl border border-slate-200 px-3 py-2 dark:border-slate-700">
+                        <p class="text-sm font-medium">{{ review.product.name }}</p>
+                        <p class="text-xs text-slate-500">{{ review.rating }}/5 · {{ review.user.email }}</p>
+                    </div>
+                {% else %}
+                    <p class="text-sm text-slate-500">{{ 'admin.dashboard.widget.no_pending_reviews'|trans }}</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="text-sm font-semibold">{{ 'admin.dashboard.app_update_title'|trans }}</div>
+                {% if app_update.ok %}
+                    <div class="text-sm text-slate-500 dark:text-slate-400">
+                        {{ app_update.updates_available ? 'admin.dashboard.app_update_n_commits'|trans({'%count%': app_update.behind_by}) : 'admin.dashboard.app_update_up_to_date'|trans }}
+                    </div>
+                {% else %}
+                    <div class="text-sm text-red-600">{{ 'admin.dashboard.app_update_failed'|trans }}</div>
                 {% endif %}
             </div>
-
-            <div class="flex items-center gap-2 shrink-0">
-                <form method="post" action="{{ path('admin_system_update') }}">
-                    <input type="hidden" name="_token" value="{{ csrf_token('admin_system_update') }}">
-                    <button type="submit"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed"
-                            {% if not app_update.ok or not app_update.updates_available %}disabled{% endif %}>
-                        <i class="fas fa-cloud-download-alt"></i>
-                        {{ 'admin.dashboard.app_update_now'|trans }}
-                    </button>
-                </form>
-            </div>
+            <form method="post" action="{{ path('admin_system_update') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('admin_system_update') }}">
+                <button type="submit"
+                        class="focus-ring rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-60"
+                        {% if not app_update.ok or not app_update.updates_available %}disabled{% endif %}>
+                    {{ 'admin.dashboard.app_update_now'|trans }}
+                </button>
+            </form>
         </div>
-    </div>
+    </section>
+{% endblock %}
 
-    <div class="mb-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/40 border border-transparent dark:border-gray-700 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-                <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ 'admin.settings.title'|trans }}</div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">{{ 'admin.dashboard.settings_teaser'|trans }}</p>
-            </div>
-            <a href="{{ path('admin_settings') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-primary-700 dark:text-primary-400 border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-950/50 shrink-0">
-                <i class="fas fa-cog"></i>
-                {{ 'admin.settings.open'|trans }}
-            </a>
-        </div>
-    </div>
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        (function () {
+            if (typeof Chart === 'undefined') {
+                return;
+            }
 
-    <div class="mb-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/40 border border-transparent dark:border-gray-700 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-                <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ 'admin.reviews.pending_title'|trans }}</div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">{{ 'admin.reviews.pending_description'|trans({'%count%': pendingReviewsCount}) }}</p>
-            </div>
-            <a href="{{ path('admin_reviews_index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-primary-700 dark:text-primary-400 border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-950/50 shrink-0">
-                <i class="fas fa-star"></i>
-                {{ 'admin.reviews.open'|trans }}
-            </a>
-        </div>
-    </div>
+            var revenueData = {{ dashboard.charts.revenue|json_encode|raw }};
+            var statusData = {{ dashboard.charts.status|json_encode|raw }};
+            var topProductData = {{ dashboard.charts.topProducts|json_encode|raw }};
 
-    <div class="dashboard-grid" data-js="dashboard-grid" data-dashboard-widgets="{{ widgets|json_encode|e('html_attr') }}">
-        <div class="grid grid-cols-1 md:grid-cols-6 gap-4" style="grid-auto-rows: minmax(120px, auto);">
-            {% for widget in widgets %}
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/40 border border-transparent dark:border-gray-700 p-6 min-w-0"
-                     style="grid-column: span {{ widget.w|default(1) }}; grid-row: span {{ widget.h|default(1) }};"
-                     data-widget-id="{{ widget.id|e }}"
-                     data-widget-type="{{ widget.type|e }}">
-                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">{{ widget.title|trans }}</h3>
-                    <div class="widget-content">
-                        {{ widget.html|raw }}
-                    </div>
-                </div>
-            {% else %}
-                <div class="col-span-full bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/40 border border-transparent dark:border-gray-700 p-6 text-center text-gray-500 dark:text-gray-400">
-                    <p>{{ 'admin.dashboard.no_widgets'|trans }}</p>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
+            var charts = [];
+
+            function palette() {
+                var dark = document.documentElement.classList.contains('dark');
+                return {
+                    text: dark ? '#cbd5e1' : '#475569',
+                    grid: dark ? '#334155' : '#e2e8f0',
+                    line: '#6366f1',
+                    bars: '#4f46e5',
+                    donut: ['#6366f1', '#06b6d4', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#94a3b8'],
+                };
+            }
+
+            function destroyCharts() {
+                charts.forEach(function (chart) { chart.destroy(); });
+                charts = [];
+            }
+
+            function buildCharts() {
+                destroyCharts();
+                var colors = palette();
+                Chart.defaults.color = colors.text;
+                Chart.defaults.borderColor = colors.grid;
+
+                var revenueCtx = document.getElementById('revenue-chart');
+                if (revenueCtx) {
+                    charts.push(new Chart(revenueCtx, {
+                        type: 'line',
+                        data: {
+                            labels: revenueData.labels,
+                            datasets: [{
+                                label: '{{ "admin.dashboard.chart.revenue_dataset"|trans }}',
+                                data: revenueData.revenue,
+                                borderColor: colors.line,
+                                backgroundColor: 'rgba(99,102,241,0.15)',
+                                fill: true,
+                                tension: 0.3
+                            }]
+                        },
+                        options: { maintainAspectRatio: false }
+                    }));
+                }
+
+                var statusCtx = document.getElementById('status-chart');
+                if (statusCtx) {
+                    charts.push(new Chart(statusCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: statusData.labels,
+                            datasets: [{ data: statusData.values, backgroundColor: colors.donut }]
+                        },
+                        options: { maintainAspectRatio: false }
+                    }));
+                }
+
+                var topCtx = document.getElementById('top-products-chart');
+                if (topCtx) {
+                    charts.push(new Chart(topCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: topProductData.map(function (x) { return x.name; }),
+                            datasets: [{
+                                label: '{{ "admin.dashboard.chart.top_products_dataset"|trans }}',
+                                data: topProductData.map(function (x) { return (x.revenue / 100).toFixed(2); }),
+                                backgroundColor: colors.bars
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            maintainAspectRatio: false,
+                            scales: { x: { beginAtZero: true } }
+                        }
+                    }));
+                }
+            }
+
+            buildCharts();
+            document.getElementById('admin-theme-toggle')?.addEventListener('click', function () {
+                setTimeout(buildCharts, 0);
+            });
+        })();
+    </script>
 {% endblock %}

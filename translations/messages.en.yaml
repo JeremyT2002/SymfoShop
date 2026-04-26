@@ -587,6 +587,8 @@ admin:
       invalid_charla_id: Invalid Charla project id.
   dashboard:
     title: Dashboard
+    heading: Business overview
+    conversion_formula_note: Conversion uses Orders / New users for this period.
     no_widgets: No widgets configured. Use "Customize Dashboard" to add widgets.
     app_update_title: App update
     app_update_up_to_date: Up to date.
@@ -594,12 +596,38 @@ admin:
     app_update_n_commits: Update available (%count% commits).
     app_update_failed: Update check failed
     app_update_now: Update now
+    period:
+      today: Today
+      7d: Last 7 days
+      30d: Last 30 days
+      12m: Last 12 months
+    kpi:
+      revenue: Revenue
+      orders: Orders
+      aov: Average order value
+      new_customers: New customers
+      conversion: Conversion rate
     chart:
+      revenue: Revenue trend
+      revenue_dataset: Revenue
+      top_products: Top products by revenue
+      top_products_dataset: Revenue (EUR)
+      status: Orders by status
       series_orders: Orders
       series_revenue: Revenue
       yaxis_orders: Orders
       yaxis_revenue: Revenue
       no_orders: No orders yet
+    widget:
+      recent_orders: Latest orders
+      low_stock: Low stock
+      pending_reviews: Pending reviews
+      no_orders: No orders in this period.
+      no_low_stock: No low stock items.
+      no_pending_reviews: No pending reviews.
+      view_all: View all
+      threshold: threshold based
+      available: Available
     settings_teaser: Storefront, support provider, chat widgets, and related options.
     support_provider: Support provider
     provider_label: Provider
