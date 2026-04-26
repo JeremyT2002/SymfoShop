@@ -2,8 +2,14 @@
 
 namespace App\Service\Cart;
 
+use App\Entity\Cart;
+use App\Entity\CartItem as PersistentCartItem;
 use App\Entity\ProductVariant;
+use App\Entity\User;
+use App\Repository\CartRepository;
 use App\Repository\ProductVariantRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class CartService
@@ -13,7 +19,10 @@ class CartService
 
     public function __construct(
         private readonly RequestStack $requestStack,
-        private readonly ProductVariantRepository $variantRepository
+        private readonly ProductVariantRepository $variantRepository,
+        private readonly Security $security,
+        private readonly CartRepository $cartRepository,
+        private readonly EntityManagerInterface $entityManager
     ) {
     }
 
@@ -37,6 +46,7 @@ class CartService
         }
 
         $this->saveItems($items);
+        $this->syncPersistentCart($items);
     }
 
     /**
@@ -52,6 +62,7 @@ class CartService
 
         $items[$variantId] = new CartItem($variantId, $quantity);
         $this->saveItems($items);
+        $this->syncPersistentCart($items);
     }
 
     /**
@@ -62,6 +73,7 @@ class CartService
         $items = $this->getItems();
         unset($items[$variantId]);
         $this->saveItems($items);
+        $this->syncPersistentCart($items);
     }
 
     /**
@@ -70,6 +82,7 @@ class CartService
     public function clear(): void
     {
         $this->getSession()->remove(self::SESSION_KEY);
+        $this->syncPersistentCart([]);
     }
 
     /**
@@ -233,6 +246,46 @@ class CartService
     private function findItem(array $items, int $variantId): ?CartItem
     {
         return $items[$variantId] ?? null;
+    }
+
+    /**
+     * @param array<int, CartItem> $sessionItems
+     */
+    private function syncPersistentCart(array $sessionItems): void
+    {
+        $user = $this->security->getUser();
+        if (!$user instanceof User) {
+            return;
+        }
+
+        $cart = $this->cartRepository->findOneByUser($user);
+        if ($cart === null) {
+            $cart = (new Cart())->setUser($user);
+            $this->entityManager->persist($cart);
+        }
+
+        foreach ($cart->getItems()->toArray() as $existing) {
+            $cart->removeItem($existing);
+            $this->entityManager->remove($existing);
+        }
+
+        foreach ($sessionItems as $item) {
+            $variant = $this->variantRepository->find($item->variantId);
+            if ($variant === null) {
+                continue;
+            }
+
+            $persistentItem = (new PersistentCartItem())
+                ->setCart($cart)
+                ->setProductVariant($variant)
+                ->setQuantity($item->quantity);
+            $cart->addItem($persistentItem);
+            $this->entityManager->persist($persistentItem);
+        }
+
+        $cart->setUpdatedAt(new \DateTimeImmutable());
+        $this->entityManager->persist($cart);
+        $this->entityManager->flush();
     }
 }
 

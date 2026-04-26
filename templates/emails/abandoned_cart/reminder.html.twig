@@ -1,0 +1,14 @@
+<h2>{{ 'email.abandoned_cart.title'|trans }}</h2>
+<p>{{ 'email.abandoned_cart.intro'|trans }}</p>
+<ul>
+    {% for item in cart.items %}
+        <li>{{ item.productVariant.product.name }} ({{ item.quantity }})</li>
+    {% endfor %}
+</ul>
+<p>
+    <a href="{{ url('cart_show') }}">{{ 'email.abandoned_cart.cta'|trans }}</a>
+</p>
+<p>
+    <a href="{{ url('account_marketing_opt_out', {id: user.id}) }}">{{ 'email.abandoned_cart.opt_out'|trans }}</a>
+</p>
+

@@ -491,6 +491,8 @@ account:
       invalid_email: Bitte gib eine gültige E-Mail-Adresse ein.
       email_in_use: Diese E-Mail-Adresse wird bereits verwendet.
       profile_updated: Deine Profildaten wurden aktualisiert.
+  marketing:
+    opt_out_success: Sie wurden von Warenkorb-Erinnerungen abgemeldet.
 
 admin:
   brand:
@@ -893,6 +895,12 @@ email:
     support: Bei Fragen wenden Sie sich bitte an unseren Support.
     closing: "Mit freundlichen Grüßen\nIhr SymfoShop-Team"
     automated: Diese E-Mail wurde automatisch erstellt. Bitte antworten Sie nicht darauf.
+  abandoned_cart:
+    subject: Sie haben Artikel im Warenkorb
+    title: Ihr Warenkorb wartet
+    intro: Sie haben noch Produkte in Ihrem Warenkorb.
+    cta: Zurück zum Warenkorb
+    opt_out: Keine Erinnerungs-E-Mails mehr senden
 
 contact:
   meta_title: Kontakt

@@ -5,10 +5,13 @@ namespace App\Tests\Service\Cart;
 use App\Entity\Product;
 use App\Entity\ProductStatus;
 use App\Entity\ProductVariant;
+use App\Repository\CartRepository;
 use App\Repository\ProductVariantRepository;
 use App\Service\Cart\CartItem;
 use App\Service\Cart\CartService;
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
@@ -28,7 +31,11 @@ class CartServiceTest extends TestCase
         $requestStack->method('getSession')->willReturn($this->session);
         
         $this->variantRepository = $this->createMock(ProductVariantRepository::class);
-        $this->cartService = new CartService($requestStack, $this->variantRepository);
+        $security = $this->createMock(Security::class);
+        $security->method('getUser')->willReturn(null);
+        $cartRepository = $this->createMock(CartRepository::class);
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $this->cartService = new CartService($requestStack, $this->variantRepository, $security, $cartRepository, $entityManager);
     }
 
     public function testAddItem(): void
