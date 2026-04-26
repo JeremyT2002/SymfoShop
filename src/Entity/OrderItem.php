@@ -23,6 +23,10 @@ class OrderItem
     #[ORM\Column(type: Types::STRING, length: 255)]
     private string $sku;
 
+    #[ORM\ManyToOne(targetEntity: ProductVariant::class)]
+    #[ORM\JoinColumn(name: 'product_variant_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?ProductVariant $productVariant = null;
+
     #[ORM\Column(type: Types::STRING, length: 500)]
     private string $nameSnapshot;
 
@@ -62,6 +66,17 @@ class OrderItem
     public function setSku(string $sku): self
     {
         $this->sku = $sku;
+        return $this;
+    }
+
+    public function getProductVariant(): ?ProductVariant
+    {
+        return $this->productVariant;
+    }
+
+    public function setProductVariant(?ProductVariant $productVariant): self
+    {
+        $this->productVariant = $productVariant;
         return $this;
     }
 

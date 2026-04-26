@@ -494,6 +494,8 @@ account:
       invalid_email: Veuillez saisir une adresse e-mail valide.
       email_in_use: Cette adresse e-mail est déjà utilisée.
       profile_updated: Vos informations de profil ont été mises à jour.
+  marketing:
+    opt_out_success: Vous êtes désinscrit des rappels de panier abandonné.
 
 admin:
   brand:
@@ -524,6 +526,7 @@ admin:
     theme_editor: Éditeur de thème
     api_documentation: Documentation API
     api_keys: Clés API
+    reviews: Avis
   settings:
     title: Paramètres système
     subtitle: Options générales de la boutique et des intégrations.
@@ -596,6 +599,36 @@ admin:
     support_option_tawk: tawk.to
     support_option_charla: Charla
     support_option_tawk_charla: Tawk + Charla
+  reviews:
+    title: Avis produits
+    subtitle: '%count% avis en attente de modération.'
+    filter: Filtre
+    filters:
+      pending: En attente
+      approved: Approuvés
+      all: Tous
+    table:
+      product: Produit
+      user: Utilisateur
+      rating: Note
+      status: Statut
+      created_at: Créé le
+      actions: Actions
+    status:
+      pending: En attente
+      approved: Approuvé
+    actions:
+      approve: Approuver
+      reject: Rejeter
+    flash:
+      approved: Avis approuvé.
+      rejected: Avis remis en attente.
+      deleted: Avis supprimé.
+    empty: Aucun avis pour ce filtre.
+    pagination: 'Page %page% sur %pages%'
+    pending_title: Modération des avis
+    pending_description: '%count% avis attendent une modération.'
+    open: Ouvrir les avis
   payment_methods:
     nav: Moyens de paiement
     title: Moyens de paiement
@@ -865,6 +898,12 @@ email:
     support: Pour toute question, contactez notre support.
     closing: "Cordialement,\nL’équipe SymfoShop"
     automated: Cet e-mail est généré automatiquement. Merci de ne pas y répondre.
+  abandoned_cart:
+    subject: Vous avez laissé des articles dans votre panier
+    title: Votre panier vous attend
+    intro: Vous avez encore des produits dans votre panier.
+    cta: Retourner au panier
+    opt_out: Ne plus recevoir de rappels panier
 
 contact:
   meta_title: Contact
@@ -979,4 +1018,26 @@ support:
     send_reply: Envoyer la réponse
     filter_unread_all: Toutes (y compris lues)
     filter_unread_only: Non lues uniquement
+
+review:
+  section_title: Avis
+  summary: '%rating%/5 basé sur %count% avis'
+  no_reviews_yet: Aucun avis pour le moment.
+  verified_purchase: Achat vérifié
+  pagination: 'Page %page% sur %pages%'
+  form:
+    login_to_review: Connectez-vous pour écrire un avis.
+    verified_purchase_only: Seuls les clients ayant acheté ce produit peuvent laisser un avis.
+    already_reviewed: Vous avez déjà laissé un avis sur ce produit.
+    rating: Note
+    title: Titre
+    body: Avis
+    submit: Envoyer l'avis
+  flash:
+    login_required: Veuillez vous connecter pour envoyer un avis.
+    invalid_csrf: Jeton de formulaire invalide. Veuillez réessayer.
+    already_exists: Vous avez déjà évalué ce produit.
+    verified_purchase_required: Seuls les acheteurs vérifiés peuvent évaluer ce produit.
+    invalid_payload: Veuillez renseigner la note, le titre et le texte.
+    submitted: Avis envoyé et en attente de modération.
 
