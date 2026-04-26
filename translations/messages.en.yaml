@@ -898,6 +898,32 @@ email:
     support: If you have any questions, please contact our support team.
     closing: "Best regards,\nSymfoShop team"
     automated: This is an automated email. Please do not reply to this message.
+  stock_notification:
+    available_subject: '%product% is back in stock'
+    confirm_title: Confirm your stock alert
+    confirm_intro: 'Please confirm your stock notification request for %product%.'
+    confirm_cta: Confirm stock alert
+    confirm_footer: If you did not request this, you can ignore this message.
+    available_title: Product available again
+    available_intro: '%product% is back in stock.'
+    available_cta: Back to product
+    available_footer: This message was sent because you asked for stock updates.
+
+stock_notification:
+  out_of_stock: This variant is currently out of stock.
+  cta: Notify me when available
+  email_placeholder: your@email.com
+  privacy_consent: I agree to receive this one-time stock notification email.
+  flash:
+    invalid_csrf: Invalid form token. Please try again.
+    invalid_email: Please enter a valid email address.
+    privacy_required: Please accept privacy consent.
+    already_subscribed: You already subscribed for this variant.
+    rate_limited: Too many requests. Please try again later.
+    subscribed: You will be notified when this product is back in stock.
+    confirm_email_sent: Please confirm your subscription using the link in your email.
+    invalid_token: This confirmation link is invalid or expired.
+    confirmed: Stock notification confirmed.
   abandoned_cart:
     subject: You left items in your cart
     title: Your cart is waiting

@@ -32,7 +32,10 @@ class ProductReviewControllerTest extends WebTestCase
         $client->loginUser($user);
 
         $crawler = $client->request('GET', '/product/' . $product->getSlug());
-        $token = (string) $crawler->filter('input[name="_token"]')->attr('value');
+        $reviewForm = $crawler->filter('form')->reduce(
+            static fn (\Symfony\Component\DomCrawler\Crawler $node): bool => $node->filter('select[name="rating"]')->count() > 0
+        );
+        $token = (string) $reviewForm->first()->filter('input[name="_token"]')->attr('value');
 
         $client->request('POST', '/product/' . $product->getSlug(), [
             '_token' => $token,

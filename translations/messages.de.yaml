@@ -898,6 +898,32 @@ email:
     support: Bei Fragen wenden Sie sich bitte an unseren Support.
     closing: "Mit freundlichen Grüßen\nIhr SymfoShop-Team"
     automated: Diese E-Mail wurde automatisch erstellt. Bitte antworten Sie nicht darauf.
+  stock_notification:
+    available_subject: '%product% ist wieder auf Lager'
+    confirm_title: Lagerbenachrichtigung bestätigen
+    confirm_intro: 'Bitte bestätige deine Lagerbenachrichtigung für %product%.'
+    confirm_cta: Benachrichtigung bestätigen
+    confirm_footer: Falls du das nicht angefordert hast, ignoriere diese Nachricht.
+    available_title: Produkt wieder verfügbar
+    available_intro: '%product% ist wieder auf Lager.'
+    available_cta: Zum Produkt
+    available_footer: Diese Nachricht wurde gesendet, weil du eine Lagerbenachrichtigung angefordert hast.
+
+stock_notification:
+  out_of_stock: Diese Variante ist aktuell nicht auf Lager.
+  cta: Benachrichtige mich
+  email_placeholder: deine@email.de
+  privacy_consent: Ich stimme zu, eine einmalige E-Mail zur Verfügbarkeit zu erhalten.
+  flash:
+    invalid_csrf: Ungültiges Formular-Token. Bitte erneut versuchen.
+    invalid_email: Bitte gib eine gültige E-Mail-Adresse ein.
+    privacy_required: Bitte stimme dem Datenschutz-Hinweis zu.
+    already_subscribed: Du bist für diese Variante bereits eingetragen.
+    rate_limited: Zu viele Anfragen. Bitte versuche es später erneut.
+    subscribed: Du wirst benachrichtigt, sobald das Produkt wieder verfügbar ist.
+    confirm_email_sent: Bitte bestätige deine Anfrage über den Link in deiner E-Mail.
+    invalid_token: Dieser Bestätigungslink ist ungültig oder abgelaufen.
+    confirmed: Lagerbenachrichtigung bestätigt.
   abandoned_cart:
     subject: Sie haben Artikel im Warenkorb
     title: Ihr Warenkorb wartet

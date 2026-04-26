@@ -898,6 +898,32 @@ email:
     support: Pour toute question, contactez notre support.
     closing: "Cordialement,\nL’équipe SymfoShop"
     automated: Cet e-mail est généré automatiquement. Merci de ne pas y répondre.
+  stock_notification:
+    available_subject: '%product% est de nouveau en stock'
+    confirm_title: Confirmez votre alerte stock
+    confirm_intro: 'Veuillez confirmer votre demande d’alerte stock pour %product%.'
+    confirm_cta: Confirmer l’alerte
+    confirm_footer: Si vous n’êtes pas à l’origine de cette demande, ignorez cet e-mail.
+    available_title: Produit à nouveau disponible
+    available_intro: '%product% est de nouveau en stock.'
+    available_cta: Retour au produit
+    available_footer: Ce message a été envoyé car vous avez demandé une alerte stock.
+
+stock_notification:
+  out_of_stock: Cette variante est actuellement en rupture de stock.
+  cta: Prévenez-moi
+  email_placeholder: votre@email.com
+  privacy_consent: J’accepte de recevoir cet e-mail ponctuel de disponibilité.
+  flash:
+    invalid_csrf: Jeton de formulaire invalide. Veuillez réessayer.
+    invalid_email: Veuillez saisir une adresse e-mail valide.
+    privacy_required: Veuillez accepter le consentement vie privée.
+    already_subscribed: Vous êtes déjà inscrit pour cette variante.
+    rate_limited: Trop de demandes. Veuillez réessayer plus tard.
+    subscribed: Vous serez notifié dès que ce produit sera en stock.
+    confirm_email_sent: Veuillez confirmer via le lien envoyé par e-mail.
+    invalid_token: Ce lien de confirmation est invalide ou expiré.
+    confirmed: Alerte stock confirmée.
   abandoned_cart:
     subject: Vous avez laissé des articles dans votre panier
     title: Votre panier vous attend
