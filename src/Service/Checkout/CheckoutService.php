@@ -8,6 +8,7 @@ use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\ProductVariant;
 use App\Entity\ShippingMethod;
+use App\Entity\User;
 use App\Repository\OrderRepository;
 use App\Repository\ShippingMethodRepository;
 use App\Service\Cart\CartService;
@@ -183,7 +184,12 @@ class CheckoutService
     /**
      * Create order from cart with price snapshots
      */
-    public function createOrder(CustomerInfoDTO $customerInfo, AddressDTO $shippingAddress, ?string $shippingMethodCode = null): Order
+    public function createOrder(
+        CustomerInfoDTO $customerInfo,
+        AddressDTO $shippingAddress,
+        ?string $shippingMethodCode = null,
+        ?User $user = null
+    ): Order
     {
         $validation = $this->validateCart();
         if (!$validation['valid']) {
@@ -212,6 +218,9 @@ class CheckoutService
         $order->setShippingAmount($totals['shippingAmount']);
         $order->setShippingMethodCode($totals['shippingMethodCode']);
         $order->setShippingMethodLabel($totals['shippingMethodLabel']);
+        if ($user instanceof User) {
+            $order->setUser($user);
+        }
 
         foreach ($items as $item) {
             $variant = $item['variant'];
@@ -219,6 +228,7 @@ class CheckoutService
 
             $orderItem = new OrderItem();
             $orderItem->setSku($variant->getSku());
+            $orderItem->setProductVariant($variant);
             $orderItem->setNameSnapshot($variant->getProduct()->getName());
             $orderItem->setQuantity($quantity);
             $orderItem->setUnitPriceAmount($variant->getPriceAmount());
