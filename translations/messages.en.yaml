@@ -976,3 +976,15 @@ support:
     send_reply: Send reply
     filter_unread_all: All (including read)
     filter_unread_only: Unread only
+
+email:
+  abandoned_cart:
+    subject: You left items in your cart
+    title: Your cart is waiting
+    intro: You still have products in your cart.
+    cta: Return to cart
+    opt_out: Do not send reminder emails
+
+account:
+  marketing:
+    opt_out_success: You have been unsubscribed from abandoned cart reminders.

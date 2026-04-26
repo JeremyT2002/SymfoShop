@@ -295,6 +295,10 @@ cleanup-reservations: ## Clean up expired inventory reservations
 	@echo "$(BLUE)Cleaning up expired reservations...$(NC)"
 	php bin/console app:inventory:cleanup-reservations
 
+remind-abandoned-carts: ## Dispatch abandoned cart reminder messages
+	@echo "$(BLUE)Dispatching abandoned cart reminders...$(NC)"
+	php bin/console app:cart:remind-abandoned
+
 # Development Workflow
 dev: server-start ## Start development environment
 	@echo "$(GREEN)Development server started!$(NC)"

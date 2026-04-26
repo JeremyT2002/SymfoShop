@@ -977,3 +977,15 @@ support:
     filter_unread_all: Alle (inkl. gelesen)
     filter_unread_only: Nur ungelesen
 
+email:
+  abandoned_cart:
+    subject: Sie haben Artikel im Warenkorb
+    title: Ihr Warenkorb wartet
+    intro: Sie haben noch Produkte in Ihrem Warenkorb.
+    cta: Zurück zum Warenkorb
+    opt_out: Keine Erinnerungs-E-Mails mehr senden
+
+account:
+  marketing:
+    opt_out_success: Sie wurden von Warenkorb-Erinnerungen abgemeldet.
+
