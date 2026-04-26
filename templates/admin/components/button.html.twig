@@ -1,0 +1,17 @@
+{% set variant = variant|default('primary') %}
+{% set type = type|default('button') %}
+{% set href = href|default(null) %}
+{% set attrs = attrs|default('') %}
+{% set styles = {
+    primary: 'bg-primary-600 text-white hover:bg-primary-700 focus-visible:outline-primary-500',
+    secondary: 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700',
+    danger: 'bg-danger text-white hover:opacity-90 focus-visible:outline-danger',
+    ghost: 'text-slate-600 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+} %}
+{% set css = styles[variant]|default(styles.primary) %}
+{% set base = 'touch-target inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition focus-ring' %}
+{% if href %}
+    <a href="{{ href }}" class="{{ base }} {{ css }}" {{ attrs|raw }}>{{ label|default('') }}</a>
+{% else %}
+    <button type="{{ type }}" class="{{ base }} {{ css }}" {{ attrs|raw }}>{{ label|default('') }}</button>
+{% endif %}

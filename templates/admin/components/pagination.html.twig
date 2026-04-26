@@ -1,0 +1,13 @@
+{% if page is defined and totalPages is defined and totalPages > 1 %}
+    <nav class="mt-4 flex items-center justify-between text-sm" aria-label="{{ 'admin.layout.pagination_aria'|trans }}">
+        <span class="text-slate-500 dark:text-slate-400">{{ 'admin.layout.page_of'|trans({'%page%': page, '%total%': totalPages}) }}</span>
+        <div class="flex items-center gap-2">
+            {% if page > 1 and prevUrl is defined %}
+                <a href="{{ prevUrl }}" class="focus-ring rounded-xl border border-slate-300 px-3 py-2 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">{{ 'common.previous'|trans }}</a>
+            {% endif %}
+            {% if page < totalPages and nextUrl is defined %}
+                <a href="{{ nextUrl }}" class="focus-ring rounded-xl border border-slate-300 px-3 py-2 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">{{ 'common.next'|trans }}</a>
+            {% endif %}
+        </div>
+    </nav>
+{% endif %}

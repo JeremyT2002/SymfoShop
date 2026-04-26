@@ -1,0 +1,12 @@
+<div class="{{ wrapperClass|default('') }}">
+    {% if label is defined %}
+        <label for="{{ id|default(name|default('field')) }}" class="admin-form-label">{{ label }}</label>
+    {% endif %}
+    {{ field|default('')|raw }}
+    {% if error is defined and error %}
+        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ error }}</p>
+    {% endif %}
+    {% if hint is defined and hint %}
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ hint }}</p>
+    {% endif %}
+</div>
