@@ -33,9 +33,13 @@ class ProductController extends AbstractController
     public function index(Request $request): Response
     {
         $page = max(1, (int) $request->query->get('page', 1));
-        $limit = 20;
+        $limit = in_array((int) $request->query->get('perPage', 25), [25, 50, 100], true)
+            ? (int) $request->query->get('perPage', 25)
+            : 25;
         $offset = ($page - 1) * $limit;
-        
+        $sortBy = (string) $request->query->get('sortBy', 'createdAt');
+        $sortDir = strtoupper((string) $request->query->get('sortDir', 'DESC')) === 'ASC' ? 'ASC' : 'DESC';
+
         $status = (string) $request->query->get('status', '');
         $search = trim((string) $request->query->get('search', ''));
 
@@ -45,7 +49,9 @@ class ProductController extends AbstractController
             $statusEnum,
             $search !== '' ? $search : null,
             $limit,
-            $offset
+            $offset,
+            $sortBy,
+            $sortDir
         );
         $total = $this->productRepository->countForAdminList(
             $statusEnum,
@@ -58,6 +64,9 @@ class ProductController extends AbstractController
             'totalPages' => ceil($total / $limit),
             'status' => $statusEnum?->value ?? '',
             'search' => $search,
+            'perPage' => $limit,
+            'sortBy' => $sortBy,
+            'sortDir' => $sortDir,
         ]);
     }
 
@@ -337,6 +346,33 @@ class ProductController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}/status', name: 'update_status', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function updateStatus(int $id, Request $request): Response
+    {
+        $product = $this->findProductOr404($id);
+
+        if (!$this->isCsrfTokenValid('update_product_status_' . $product->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+
+        $status = ProductStatus::tryFrom((string) $request->request->get('status', ''));
+        if ($status === null) {
+            $this->addFlash('error', 'Invalid status value.');
+
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+
+        $product->setStatus($status);
+        $product->setUpdatedAt(new \DateTimeImmutable());
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Product status updated.');
+
+        return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+    }
+
     #[Route('/{id}/delete', name: 'delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function delete(int $id, Request $request): Response
     {
@@ -397,6 +433,35 @@ class ProductController extends AbstractController
         return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
     }
 
+    #[Route('/bulk/status', name: 'bulk_status', methods: ['POST'])]
+    public function bulkStatus(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('bulk_products_status', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+
+            return $this->redirectToRoute('admin_products_index');
+        }
+
+        $ids = $this->parseBulkIds((string) $request->request->get('ids', ''));
+        $status = ProductStatus::tryFrom((string) $request->request->get('status', ''));
+        if ($ids === [] || $status === null) {
+            $this->addFlash('error', 'Invalid bulk action payload.');
+
+            return $this->redirectToRoute('admin_products_index');
+        }
+
+        $products = $this->productRepository->findBy(['id' => $ids]);
+        foreach ($products as $product) {
+            $product->setStatus($status);
+            $product->setUpdatedAt(new \DateTimeImmutable());
+        }
+        $this->entityManager->flush();
+
+        $this->addFlash('success', sprintf('Updated %d product(s).', count($products)));
+
+        return $this->redirectToRoute('admin_products_index');
+    }
+
     private function findProductOr404(int $id): Product
     {
         $product = $this->productRepository->find($id);
@@ -449,6 +514,16 @@ class ProductController extends AbstractController
         }
 
         return $attributes;
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function parseBulkIds(string $raw): array
+    {
+        $parts = array_filter(array_map('trim', explode(',', $raw)), static fn (string $value): bool => $value !== '');
+
+        return array_values(array_map('intval', $parts));
     }
 }
 

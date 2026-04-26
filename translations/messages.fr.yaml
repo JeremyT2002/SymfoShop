@@ -503,6 +503,22 @@ admin:
   layout:
     title_default: Panneau d’administration
     panel_subtitle: Panneau d’administration
+    navigation_aria: Navigation d'administration
+    breadcrumb_aria: Fil d'ariane
+    pagination_aria: Pagination
+    open_sidebar: Ouvrir la barre latérale
+    close_sidebar: Fermer la barre latérale
+    search_aria: Recherche dans l'admin
+    search_placeholder: Rechercher produits, commandes, utilisateurs...
+    notifications_placeholder_aria: Ouvrir les notifications (placeholder)
+    notifications_aria: Ouvrir les notifications
+    notifications_title: Notifications
+    notifications_view_all: Ouvrir le journal d'audit
+    notifications_mark_read: Tout marquer comme lu
+    notifications_empty: Aucune notification pour le moment.
+    table_empty: Aucune entrée trouvée.
+    page_of: Page %page% sur %total%
+    empty_title: Rien à afficher pour le moment
     view_storefront: Voir la boutique
     view_storefront_aria: Ouvrir la boutique dans un nouvel onglet
     logout: Déconnexion
@@ -527,6 +543,31 @@ admin:
     api_documentation: Documentation API
     api_keys: Clés API
     reviews: Avis
+    audit_log: Journal d'audit
+  audit:
+    title: Journal d'audit
+    subtitle: Activité récente pertinente pour l'administration.
+    open: Ouvrir
+    empty: Aucun événement d'audit pour le moment.
+  search:
+    title: Recherche admin
+    subtitle: Trouvez rapidement produits, commandes et utilisateurs.
+    placeholder: Rechercher par nom de produit, numéro de commande, e-mail...
+    submit: Rechercher
+    type:
+      all: Tous
+      products: Produits
+      orders: Commandes
+      users: Utilisateurs
+    empty:
+      initial_title: Lancez une recherche pour voir des résultats.
+      initial_hint: Essayez un nom de produit, un numéro de commande ou un e-mail client.
+      products: Aucun produit trouvé.
+      orders: Aucune commande trouvée.
+      users: Aucun utilisateur trouvé.
+    pagination:
+      previous: Précédent
+      next: Suivant
   settings:
     title: Paramètres système
     subtitle: Options générales de la boutique et des intégrations.
@@ -576,6 +617,8 @@ admin:
       invalid_charla_id: Identifiant projet Charla invalide.
   dashboard:
     title: Tableau de bord
+    heading: Vue d'ensemble commerciale
+    conversion_formula_note: La conversion utilise Commandes / Nouveaux utilisateurs sur la période.
     no_widgets: Aucun widget configuré. Utilisez « Personnaliser le tableau de bord » pour en ajouter.
     app_update_title: Mise à jour de l’application
     app_update_up_to_date: À jour.
@@ -583,12 +626,38 @@ admin:
     app_update_n_commits: Mise à jour disponible (%count% commits).
     app_update_failed: Échec de la vérification des mises à jour
     app_update_now: Mettre à jour
+    period:
+      today: Aujourd'hui
+      7d: 7 derniers jours
+      30d: 30 derniers jours
+      12m: 12 derniers mois
+    kpi:
+      revenue: Chiffre d'affaires
+      orders: Commandes
+      aov: Panier moyen
+      new_customers: Nouveaux clients
+      conversion: Taux de conversion
     chart:
+      revenue: Tendance du chiffre d'affaires
+      revenue_dataset: Chiffre d'affaires
+      top_products: Top produits par chiffre d'affaires
+      top_products_dataset: Chiffre d'affaires (EUR)
+      status: Commandes par statut
       series_orders: Commandes
       series_revenue: Chiffre d’affaires
       yaxis_orders: Commandes
       yaxis_revenue: Chiffre d’affaires
       no_orders: Pas encore de commandes
+    widget:
+      recent_orders: Dernières commandes
+      low_stock: Stock faible
+      pending_reviews: Avis en attente
+      no_orders: Aucune commande sur la période.
+      no_low_stock: Aucun article en stock faible.
+      no_pending_reviews: Aucun avis en attente.
+      view_all: Voir tout
+      threshold: basé sur seuil
+      available: Disponible
     settings_teaser: Vitrine, fournisseur de support, widgets de chat et options associées.
     support_provider: Fournisseur de support
     provider_label: Fournisseur
@@ -724,6 +793,26 @@ admin:
     create_first: Créer un produit
     delete_confirm: Supprimer ce produit ?
     pagination_showing: Page %page% sur %total%
+  coupons:
+    page_title: Coupons
+    heading: Coupons
+    subtitle: Gérer les codes promo et campagnes de coupons.
+    new: Nouveau coupon
+    expired: Expiré
+    no_expiration: Sans expiration
+    delete_confirm: Supprimer ce coupon ?
+    empty: Aucun coupon trouvé.
+    kpi:
+      total: Total coupons
+      active: Coupons actifs
+      expiring_soon: Expire sous 14 jours
+    table:
+      code: Code
+      type: Type
+      value: Valeur
+      expires: Expiration
+      status: Statut
+      actions: Actions
   categories:
     page_title: Catégories
     heading: Catégories
@@ -786,6 +875,7 @@ admin:
       previous: Précédent
       next: Suivant
     status:
+      all: Tous les statuts
       new: Nouveau
       payment_pending: Paiement en attente
       payment_confirmed: Paiement confirmé
@@ -828,6 +918,42 @@ admin:
       regenerate_success: '%count% PDF de facture(s) régénéré(s) avec succès.'
       regenerate_partial: '%success% PDF de facture(s) régénéré(s) avec succès, %failed% échec(s).'
       status_updated: Statut de la commande mis à jour.
+  users:
+    page_title: Utilisateurs
+    heading: Utilisateurs
+    subtitle: Gérer les comptes utilisateurs
+    new: Nouvel utilisateur
+    search_placeholder: Rechercher par e-mail ou nom...
+    all_roles: Tous les rôles
+    role_admin: Admin
+    role_user: Utilisateur
+    active: Actif
+    inactive: Inactif
+    empty: Aucun utilisateur trouvé
+    table:
+      id: ID
+      email: E-mail
+      roles: Rôles
+      status: Statut
+      created: Créé le
+      actions: Actions
+    pagination:
+      showing: Page %page% sur %total%
+  table:
+    per_page: Par page
+    page: page
+    apply_filters: Appliquer
+    clear_filters: Effacer
+    selected: sélectionné(s)
+    clear_selection: Effacer la sélection
+    bulk_publish: Publier
+    bulk_archive: Archiver
+    bulk_mark_processing: Marquer en traitement
+    bulk_mark_shipped: Marquer expédié
+    bulk_activate: Activer
+    bulk_apply: Appliquer
+    bulk_revoke: Révoquer
+    bulk_deactivate: Désactiver
   return_requests:
     nav: Demandes de retour
     page_title: Demandes de retour

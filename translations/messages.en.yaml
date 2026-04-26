@@ -503,6 +503,22 @@ admin:
   layout:
     title_default: Admin Panel
     panel_subtitle: Admin Panel
+    navigation_aria: Admin navigation
+    breadcrumb_aria: Breadcrumb
+    pagination_aria: Pagination
+    open_sidebar: Open sidebar
+    close_sidebar: Close sidebar
+    search_aria: Search in admin
+    search_placeholder: Search products, orders, users...
+    notifications_placeholder_aria: Open notifications (placeholder)
+    notifications_aria: Open notifications
+    notifications_title: Notifications
+    notifications_view_all: Open audit log
+    notifications_mark_read: Mark all as read
+    notifications_empty: No notifications right now.
+    table_empty: No entries found.
+    page_of: Page %page% of %total%
+    empty_title: Nothing to display yet
     view_storefront: View storefront
     view_storefront_aria: Open storefront in a new tab
     logout: Logout
@@ -527,6 +543,31 @@ admin:
     api_documentation: API documentation
     api_keys: API keys
     reviews: Reviews
+    audit_log: Audit log
+  audit:
+    title: Audit log
+    subtitle: Recent admin-relevant platform activity.
+    open: Open
+    empty: No audit entries yet.
+  search:
+    title: Admin search
+    subtitle: Find products, orders and users quickly.
+    placeholder: Search by product name, order number, email...
+    submit: Search
+    type:
+      all: All
+      products: Products
+      orders: Orders
+      users: Users
+    empty:
+      initial_title: Start a search to see results.
+      initial_hint: Try a product name, order number, or customer email.
+      products: No products found.
+      orders: No orders found.
+      users: No users found.
+    pagination:
+      previous: Previous
+      next: Next
   settings:
     title: System settings
     subtitle: General options for the shop and integrations.
@@ -576,6 +617,8 @@ admin:
       invalid_charla_id: Invalid Charla project id.
   dashboard:
     title: Dashboard
+    heading: Business overview
+    conversion_formula_note: Conversion uses Orders / New users for this period.
     no_widgets: No widgets configured. Use "Customize Dashboard" to add widgets.
     app_update_title: App update
     app_update_up_to_date: Up to date.
@@ -583,12 +626,38 @@ admin:
     app_update_n_commits: Update available (%count% commits).
     app_update_failed: Update check failed
     app_update_now: Update now
+    period:
+      today: Today
+      7d: Last 7 days
+      30d: Last 30 days
+      12m: Last 12 months
+    kpi:
+      revenue: Revenue
+      orders: Orders
+      aov: Average order value
+      new_customers: New customers
+      conversion: Conversion rate
     chart:
+      revenue: Revenue trend
+      revenue_dataset: Revenue
+      top_products: Top products by revenue
+      top_products_dataset: Revenue (EUR)
+      status: Orders by status
       series_orders: Orders
       series_revenue: Revenue
       yaxis_orders: Orders
       yaxis_revenue: Revenue
       no_orders: No orders yet
+    widget:
+      recent_orders: Latest orders
+      low_stock: Low stock
+      pending_reviews: Pending reviews
+      no_orders: No orders in this period.
+      no_low_stock: No low stock items.
+      no_pending_reviews: No pending reviews.
+      view_all: View all
+      threshold: threshold based
+      available: Available
     settings_teaser: Storefront, support provider, chat widgets, and related options.
     support_provider: Support provider
     provider_label: Provider
@@ -724,6 +793,26 @@ admin:
     create_first: Create product
     delete_confirm: Are you sure you want to delete this product?
     pagination_showing: Showing page %page% of %total%
+  coupons:
+    page_title: Coupons
+    heading: Coupons
+    subtitle: Manage discount codes and coupon campaigns.
+    new: New coupon
+    expired: Expired
+    no_expiration: No expiration
+    delete_confirm: Are you sure you want to delete this coupon?
+    empty: No coupons found.
+    kpi:
+      total: Total coupons
+      active: Active coupons
+      expiring_soon: Expiring in 14 days
+    table:
+      code: Code
+      type: Type
+      value: Value
+      expires: Expires
+      status: Status
+      actions: Actions
   categories:
     page_title: Categories
     heading: Categories
@@ -786,6 +875,7 @@ admin:
       previous: Previous
       next: Next
     status:
+      all: All statuses
       new: New
       payment_pending: Payment pending
       payment_confirmed: Payment confirmed
@@ -828,6 +918,42 @@ admin:
       regenerate_success: '%count% invoice PDF(s) regenerated successfully.'
       regenerate_partial: '%success% invoice PDF(s) regenerated successfully, %failed% failed.'
       status_updated: Order status updated successfully.
+  users:
+    page_title: Users
+    heading: Users
+    subtitle: Manage user accounts
+    new: New user
+    search_placeholder: Search by email or name...
+    all_roles: All roles
+    role_admin: Admin
+    role_user: User
+    active: Active
+    inactive: Inactive
+    empty: No users found
+    table:
+      id: ID
+      email: Email
+      roles: Roles
+      status: Status
+      created: Created
+      actions: Actions
+    pagination:
+      showing: Showing page %page% of %total%
+  table:
+    per_page: Per page
+    page: page
+    apply_filters: Apply
+    clear_filters: Clear
+    selected: selected
+    clear_selection: Clear selection
+    bulk_publish: Publish
+    bulk_archive: Archive
+    bulk_mark_processing: Mark processing
+    bulk_mark_shipped: Mark shipped
+    bulk_activate: Activate
+    bulk_apply: Apply
+    bulk_revoke: Revoke
+    bulk_deactivate: Deactivate
   return_requests:
     nav: Return requests
     page_title: Return requests

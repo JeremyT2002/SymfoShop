@@ -11,6 +11,9 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class OrderRepository extends ServiceEntityRepository
 {
+    /** @var list<string> */
+    public const DASHBOARD_COMPLETED_STATUSES = ['paid', 'processing', 'shipped', 'completed'];
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Order::class);
@@ -43,10 +46,15 @@ class OrderRepository extends ServiceEntityRepository
         ?string $status,
         ?string $search,
         int $limit,
-        int $offset
+        int $offset,
+        string $sortBy = 'createdAt',
+        string $sortDir = 'DESC'
     ): array {
+        $sortBy = $this->resolveAdminSortField($sortBy);
+        $sortDir = strtoupper($sortDir) === 'ASC' ? 'ASC' : 'DESC';
+
         $qb = $this->createAdminListQueryBuilder($status, $search)
-            ->orderBy('o.createdAt', 'DESC')
+            ->orderBy('o.' . $sortBy, $sortDir)
             ->setFirstResult($offset)
             ->setMaxResults($limit);
 
@@ -131,6 +139,111 @@ class OrderRepository extends ServiceEntityRepository
         ], $result);
     }
 
+    /**
+     * @return array{revenue:int, orders:int}
+     */
+    public function getRevenueAndOrderCountBetween(\DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        $row = $this->createQueryBuilder('o')
+            ->select('COALESCE(SUM(o.grandTotal), 0) AS revenue', 'COUNT(o.id) AS orders')
+            ->where('o.createdAt >= :from')
+            ->andWhere('o.createdAt < :to')
+            ->andWhere('o.status IN (:statuses)')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->setParameter('statuses', self::DASHBOARD_COMPLETED_STATUSES)
+            ->getQuery()
+            ->getSingleResult();
+
+        return [
+            'revenue' => (int) ($row['revenue'] ?? 0),
+            'orders' => (int) ($row['orders'] ?? 0),
+        ];
+    }
+
+    /**
+     * @return list<array{name:string,revenue:int}>
+     */
+    public function getTopProductsByRevenueBetween(\DateTimeImmutable $from, \DateTimeImmutable $to, int $limit = 10): array
+    {
+        $rows = $this->getEntityManager()->createQueryBuilder()
+            ->from('App\Entity\OrderItem', 'oi')
+            ->join('oi.order', 'o')
+            ->select('oi.nameSnapshot AS name', 'COALESCE(SUM(oi.totalAmount), 0) AS revenue')
+            ->where('o.createdAt >= :from')
+            ->andWhere('o.createdAt < :to')
+            ->andWhere('o.status IN (:statuses)')
+            ->groupBy('oi.nameSnapshot')
+            ->orderBy('revenue', 'DESC')
+            ->setMaxResults($limit)
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->setParameter('statuses', self::DASHBOARD_COMPLETED_STATUSES)
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(static fn (array $row): array => [
+            'name' => (string) ($row['name'] ?? ''),
+            'revenue' => (int) ($row['revenue'] ?? 0),
+        ], $rows);
+    }
+
+    /**
+     * @return list<array{status:string,count:int}>
+     */
+    public function getOrdersByStatusBetween(\DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        $rows = $this->createQueryBuilder('o')
+            ->select('o.status AS status', 'COUNT(o.id) AS cnt')
+            ->where('o.createdAt >= :from')
+            ->andWhere('o.createdAt < :to')
+            ->groupBy('o.status')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(static fn (array $row): array => [
+            'status' => (string) ($row['status'] ?? 'unknown'),
+            'count' => (int) ($row['cnt'] ?? 0),
+        ], $rows);
+    }
+
+    /**
+     * @return list<array{createdAt:\DateTimeImmutable,grandTotal:int}>
+     */
+    public function getRevenueRowsBetween(\DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        $rows = $this->createQueryBuilder('o')
+            ->select('o.createdAt AS createdAt', 'o.grandTotal AS grandTotal')
+            ->where('o.createdAt >= :from')
+            ->andWhere('o.createdAt < :to')
+            ->andWhere('o.status IN (:statuses)')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->setParameter('statuses', self::DASHBOARD_COMPLETED_STATUSES)
+            ->orderBy('o.createdAt', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(static fn (array $row): array => [
+            'createdAt' => $row['createdAt'],
+            'grandTotal' => (int) ($row['grandTotal'] ?? 0),
+        ], $rows);
+    }
+
+    /**
+     * @return list<Order>
+     */
+    public function findRecentForDashboard(int $limit = 10): array
+    {
+        return $this->createQueryBuilder('o')
+            ->orderBy('o.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     private function createAdminListQueryBuilder(?string $status, ?string $search): \Doctrine\ORM\QueryBuilder
     {
         $qb = $this->createQueryBuilder('o');
@@ -147,6 +260,13 @@ class OrderRepository extends ServiceEntityRepository
         }
 
         return $qb;
+    }
+
+    private function resolveAdminSortField(string $requested): string
+    {
+        $allowed = ['id', 'orderNumber', 'email', 'grandTotal', 'status', 'createdAt'];
+
+        return in_array($requested, $allowed, true) ? $requested : 'createdAt';
     }
 }
 
