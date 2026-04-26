@@ -17,6 +17,7 @@ framework:
         routing:
             # Route your messages to the transports
             'App\Message\SendOrderConfirmationEmail': async
+            'App\Message\ProcessStockNotificationsMessage': async
 
 # when@test:
 #    framework:

@@ -20,7 +20,8 @@ class InventoryService
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly StockItemRepository $stockItemRepository,
-        private readonly OrderReservationRepository $reservationRepository
+        private readonly OrderReservationRepository $reservationRepository,
+        private readonly StockRestockNotifier $stockRestockNotifier
     ) {
     }
 
@@ -113,12 +114,17 @@ class InventoryService
                     continue;
                 }
 
+                $beforeAvailable = $stockItem->getAvailable();
                 // Reduce on-hand and reserved quantities
                 $stockItem->setOnHand($stockItem->getOnHand() - $reservation->getQuantity());
                 $stockItem->setReserved($stockItem->getReserved() - $reservation->getQuantity());
+                $afterAvailable = $stockItem->getAvailable();
 
                 $this->entityManager->persist($stockItem);
                 $this->entityManager->remove($reservation);
+                if ($variant->getId() !== null) {
+                    $this->stockRestockNotifier->dispatchIfRestocked($beforeAvailable, $afterAvailable, $variant->getId());
+                }
             }
 
             $this->entityManager->flush();
@@ -147,11 +153,16 @@ class InventoryService
                     continue;
                 }
 
+                $beforeAvailable = $stockItem->getAvailable();
                 // Release reserved quantity
                 $stockItem->setReserved($stockItem->getReserved() - $reservation->getQuantity());
+                $afterAvailable = $stockItem->getAvailable();
 
                 $this->entityManager->persist($stockItem);
                 $this->entityManager->remove($reservation);
+                if ($variant->getId() !== null) {
+                    $this->stockRestockNotifier->dispatchIfRestocked($beforeAvailable, $afterAvailable, $variant->getId());
+                }
             }
 
             $this->entityManager->flush();
@@ -180,8 +191,13 @@ class InventoryService
                 $stockItem = $this->stockItemRepository->findOneByVariantForUpdate($variant);
 
                 if ($stockItem) {
+                    $beforeAvailable = $stockItem->getAvailable();
                     $stockItem->setReserved($stockItem->getReserved() - $reservation->getQuantity());
+                    $afterAvailable = $stockItem->getAvailable();
                     $this->entityManager->persist($stockItem);
+                    if ($variant->getId() !== null) {
+                        $this->stockRestockNotifier->dispatchIfRestocked($beforeAvailable, $afterAvailable, $variant->getId());
+                    }
                 }
 
                 $this->entityManager->remove($reservation);
