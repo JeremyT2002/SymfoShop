@@ -26,6 +26,10 @@ class Order
     #[ORM\Column(type: Types::STRING, length: 255)]
     private string $email;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?User $user = null;
+
     /** Request locale at checkout (ISO language, e.g. en, de, fr) for transactional emails */
     #[ORM\Column(type: Types::STRING, length: 10, options: ['default' => 'en'])]
     private string $locale = 'en';
@@ -104,6 +108,17 @@ class Order
     public function setEmail(string $email): self
     {
         $this->email = $email;
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
         return $this;
     }
 

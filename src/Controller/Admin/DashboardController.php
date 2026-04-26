@@ -7,6 +7,7 @@ use App\Dashboard\Widget\WidgetRegistry;
 use App\Dashboard\Widget\WidgetRenderer;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
+use App\Repository\ProductReviewRepository;
 use App\Repository\UserRepository;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
@@ -28,6 +29,7 @@ class DashboardController extends AbstractController
         private readonly ProductRepository $productRepository,
         private readonly OrderRepository $orderRepository,
         private readonly UserRepository $userRepository,
+        private readonly ProductReviewRepository $productReviewRepository,
         private readonly AdminDashboardConfigService $dashboardConfigService,
         private readonly WidgetRenderer $widgetRenderer,
         private readonly WidgetRegistry $widgetRegistry,
@@ -69,6 +71,7 @@ class DashboardController extends AbstractController
             'widgets' => $widgets,
             'dashboardConfig' => $config,
             'app_update' => $this->appUpdateService->checkForUpdates(),
+            'pendingReviewsCount' => $this->productReviewRepository->countPending(),
         ]);
     }
 

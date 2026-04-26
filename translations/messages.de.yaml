@@ -394,6 +394,9 @@ pagination:
   previous: Zurück
   next: Weiter
 
+recently_viewed:
+  title: Zuletzt angesehene Produkte
+
 wishlist:
   title: Mein Wunschzettel
   subtitle: Sie haben %count% Artikel in Ihrem Wunschzettel
@@ -491,6 +494,8 @@ account:
       invalid_email: Bitte gib eine gültige E-Mail-Adresse ein.
       email_in_use: Diese E-Mail-Adresse wird bereits verwendet.
       profile_updated: Deine Profildaten wurden aktualisiert.
+  marketing:
+    opt_out_success: Sie wurden von Warenkorb-Erinnerungen abgemeldet.
 
 admin:
   brand:
@@ -521,6 +526,7 @@ admin:
     theme_editor: Theme-Editor
     api_documentation: API-Dokumentation
     api_keys: API-Schlüssel
+    reviews: Bewertungen
   settings:
     title: Systemeinstellungen
     subtitle: Allgemeine Optionen für Shop und Integrationen.
@@ -593,6 +599,36 @@ admin:
     support_option_tawk: tawk.to
     support_option_charla: Charla
     support_option_tawk_charla: Tawk + Charla
+  reviews:
+    title: Produktbewertungen
+    subtitle: '%count% Bewertung(en) warten auf Moderation.'
+    filter: Filter
+    filters:
+      pending: Offen
+      approved: Freigegeben
+      all: Alle
+    table:
+      product: Produkt
+      user: Benutzer
+      rating: Bewertung
+      status: Status
+      created_at: Erstellt
+      actions: Aktionen
+    status:
+      pending: Offen
+      approved: Freigegeben
+    actions:
+      approve: Freigeben
+      reject: Ablehnen
+    flash:
+      approved: Bewertung freigegeben.
+      rejected: Bewertung auf offen gesetzt.
+      deleted: Bewertung gelöscht.
+    empty: Keine Bewertungen für diesen Filter gefunden.
+    pagination: 'Seite %page% von %pages%'
+    pending_title: Bewertungsmoderation
+    pending_description: '%count% Bewertung(en) warten auf Moderation.'
+    open: Bewertungen öffnen
   payment_methods:
     nav: Zahlungsmethoden
     title: Zahlungsmethoden
@@ -862,6 +898,38 @@ email:
     support: Bei Fragen wenden Sie sich bitte an unseren Support.
     closing: "Mit freundlichen Grüßen\nIhr SymfoShop-Team"
     automated: Diese E-Mail wurde automatisch erstellt. Bitte antworten Sie nicht darauf.
+  stock_notification:
+    available_subject: '%product% ist wieder auf Lager'
+    confirm_title: Lagerbenachrichtigung bestätigen
+    confirm_intro: 'Bitte bestätige deine Lagerbenachrichtigung für %product%.'
+    confirm_cta: Benachrichtigung bestätigen
+    confirm_footer: Falls du das nicht angefordert hast, ignoriere diese Nachricht.
+    available_title: Produkt wieder verfügbar
+    available_intro: '%product% ist wieder auf Lager.'
+    available_cta: Zum Produkt
+    available_footer: Diese Nachricht wurde gesendet, weil du eine Lagerbenachrichtigung angefordert hast.
+
+stock_notification:
+  out_of_stock: Diese Variante ist aktuell nicht auf Lager.
+  cta: Benachrichtige mich
+  email_placeholder: deine@email.de
+  privacy_consent: Ich stimme zu, eine einmalige E-Mail zur Verfügbarkeit zu erhalten.
+  flash:
+    invalid_csrf: Ungültiges Formular-Token. Bitte erneut versuchen.
+    invalid_email: Bitte gib eine gültige E-Mail-Adresse ein.
+    privacy_required: Bitte stimme dem Datenschutz-Hinweis zu.
+    already_subscribed: Du bist für diese Variante bereits eingetragen.
+    rate_limited: Zu viele Anfragen. Bitte versuche es später erneut.
+    subscribed: Du wirst benachrichtigt, sobald das Produkt wieder verfügbar ist.
+    confirm_email_sent: Bitte bestätige deine Anfrage über den Link in deiner E-Mail.
+    invalid_token: Dieser Bestätigungslink ist ungültig oder abgelaufen.
+    confirmed: Lagerbenachrichtigung bestätigt.
+  abandoned_cart:
+    subject: Sie haben Artikel im Warenkorb
+    title: Ihr Warenkorb wartet
+    intro: Sie haben noch Produkte in Ihrem Warenkorb.
+    cta: Zurück zum Warenkorb
+    opt_out: Keine Erinnerungs-E-Mails mehr senden
 
 contact:
   meta_title: Kontakt
@@ -976,4 +1044,26 @@ support:
     send_reply: Antwort senden
     filter_unread_all: Alle (inkl. gelesen)
     filter_unread_only: Nur ungelesen
+
+review:
+  section_title: Bewertungen
+  summary: '%rating%/5 aus %count% Bewertungen'
+  no_reviews_yet: Noch keine Bewertungen.
+  verified_purchase: Verifizierter Kauf
+  pagination: 'Seite %page% von %pages%'
+  form:
+    login_to_review: Melde dich an, um eine Bewertung zu schreiben.
+    verified_purchase_only: Nur Kunden mit gekauftem Produkt können bewerten.
+    already_reviewed: Du hast dieses Produkt bereits bewertet.
+    rating: Bewertung
+    title: Titel
+    body: Bewertungstext
+    submit: Bewertung absenden
+  flash:
+    login_required: Bitte melde dich an, um eine Bewertung zu senden.
+    invalid_csrf: Ungültiges Formular-Token. Bitte erneut versuchen.
+    already_exists: Du hast dieses Produkt bereits bewertet.
+    verified_purchase_required: Nur verifizierte Käufer können dieses Produkt bewerten.
+    invalid_payload: Bitte Bewertung, Titel und Text ausfüllen.
+    submitted: Bewertung wurde eingereicht und wartet auf Freigabe.
 

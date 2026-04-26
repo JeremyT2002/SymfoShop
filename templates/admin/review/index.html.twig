@@ -1,0 +1,98 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}{{ 'admin.reviews.title'|trans }}{% endblock %}
+
+{% block body %}
+    <section class="admin-page-header">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">{{ 'admin.reviews.title'|trans }}</h2>
+            <p class="text-gray-500 mt-1">{{ 'admin.reviews.subtitle'|trans({'%count%': pendingCount}) }}</p>
+        </div>
+    </section>
+
+    <form method="get" class="mb-4">
+        <div class="flex items-center gap-3">
+            <label for="filter" class="text-sm text-gray-700">{{ 'admin.reviews.filter'|trans }}</label>
+            <select id="filter" name="filter" class="admin-form-input max-w-xs">
+                <option value="pending" {% if filter == 'pending' %}selected{% endif %}>{{ 'admin.reviews.filters.pending'|trans }}</option>
+                <option value="approved" {% if filter == 'approved' %}selected{% endif %}>{{ 'admin.reviews.filters.approved'|trans }}</option>
+                <option value="all" {% if filter == 'all' %}selected{% endif %}>{{ 'admin.reviews.filters.all'|trans }}</option>
+            </select>
+            <button class="px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-semibold">{{ 'common.filter'|trans }}</button>
+        </div>
+    </form>
+
+    <div class="admin-card admin-table-wrap">
+        <table class="min-w-full admin-table text-sm">
+            <thead class="bg-gray-50 text-gray-600 uppercase tracking-wide text-xs">
+                <tr>
+                    <th class="px-4 py-3 text-left">{{ 'admin.reviews.table.product'|trans }}</th>
+                    <th class="px-4 py-3 text-left">{{ 'admin.reviews.table.user'|trans }}</th>
+                    <th class="px-4 py-3 text-left">{{ 'admin.reviews.table.rating'|trans }}</th>
+                    <th class="px-4 py-3 text-left">{{ 'admin.reviews.table.status'|trans }}</th>
+                    <th class="px-4 py-3 text-left">{{ 'admin.reviews.table.created_at'|trans }}</th>
+                    <th class="px-4 py-3 text-right">{{ 'admin.reviews.table.actions'|trans }}</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+            {% for review in reviews %}
+                <tr>
+                    <td class="px-4 py-3">
+                        <div class="font-medium">{{ review.product.name }}</div>
+                        <div class="text-xs text-gray-500">{{ review.title }}</div>
+                    </td>
+                    <td class="px-4 py-3">{{ review.user.email }}</td>
+                    <td class="px-4 py-3">{{ review.rating }}/5</td>
+                    <td class="px-4 py-3">
+                        {% if review.isApproved %}
+                            <span class="px-2 py-1 rounded bg-green-100 text-green-700 text-xs">{{ 'admin.reviews.status.approved'|trans }}</span>
+                        {% else %}
+                            <span class="px-2 py-1 rounded bg-amber-100 text-amber-700 text-xs">{{ 'admin.reviews.status.pending'|trans }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">{{ review.createdAt|date('Y-m-d H:i') }}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex justify-end gap-2">
+                            <form method="post" action="{{ path('admin_reviews_approve', {'id': review.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('admin_review_approve_' ~ review.id) }}">
+                                <input type="hidden" name="filter" value="{{ filter }}">
+                                <input type="hidden" name="page" value="{{ page }}">
+                                <button class="px-3 py-1 rounded bg-green-600 text-white text-xs">{{ 'admin.reviews.actions.approve'|trans }}</button>
+                            </form>
+                            <form method="post" action="{{ path('admin_reviews_reject', {'id': review.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('admin_review_reject_' ~ review.id) }}">
+                                <input type="hidden" name="filter" value="{{ filter }}">
+                                <input type="hidden" name="page" value="{{ page }}">
+                                <button class="px-3 py-1 rounded bg-yellow-600 text-white text-xs">{{ 'admin.reviews.actions.reject'|trans }}</button>
+                            </form>
+                            <form method="post" action="{{ path('admin_reviews_delete', {'id': review.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('admin_review_delete_' ~ review.id) }}">
+                                <input type="hidden" name="filter" value="{{ filter }}">
+                                <input type="hidden" name="page" value="{{ page }}">
+                                <button class="px-3 py-1 rounded bg-red-600 text-white text-xs">{{ 'common.delete'|trans }}</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6" class="px-4 py-6 text-center text-gray-500">{{ 'admin.reviews.empty'|trans }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4 flex justify-between items-center text-sm text-gray-600">
+        <span>{{ 'admin.reviews.pagination'|trans({'%page%': page, '%pages%': totalPages}) }}</span>
+        <div class="flex gap-2">
+            {% if page > 1 %}
+                <a href="{{ path('admin_reviews_index', {filter: filter, page: page - 1}) }}" class="px-3 py-2 rounded border border-gray-300">{{ 'common.previous'|trans }}</a>
+            {% endif %}
+            {% if page < totalPages %}
+                <a href="{{ path('admin_reviews_index', {filter: filter, page: page + 1}) }}" class="px-3 py-2 rounded border border-gray-300">{{ 'common.next'|trans }}</a>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+

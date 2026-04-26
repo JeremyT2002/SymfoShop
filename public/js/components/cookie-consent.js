@@ -3,6 +3,12 @@
  * Values: "essential" | "all". Dispatches window event symfoshop:cookie-consent for optional analytics hooks.
  */
 const STORAGE_KEY = 'symfoshop-cookie-consent';
+const CONSENT_COOKIE = 'symfoshop_cookie_consent';
+
+function setConsentCookie(value) {
+    const maxAge = 60 * 60 * 24 * 180; // 180 days
+    document.cookie = `${CONSENT_COOKIE}=${value};path=/;max-age=${maxAge};SameSite=Lax`;
+}
 
 function hideBanner(banner, value) {
     try {
@@ -13,6 +19,7 @@ function hideBanner(banner, value) {
     window.dispatchEvent(
         new CustomEvent('symfoshop:cookie-consent', { detail: { level: value } })
     );
+    setConsentCookie(value);
     banner.classList.add('hidden');
     banner.setAttribute('hidden', '');
 }
@@ -42,6 +49,10 @@ export function init() {
 
     try {
         if (localStorage.getItem(STORAGE_KEY)) {
+            const level = localStorage.getItem(STORAGE_KEY);
+            if (level) {
+                setConsentCookie(level);
+            }
             banner.classList.add('hidden');
             banner.setAttribute('hidden', '');
             return;

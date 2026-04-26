@@ -195,8 +195,14 @@ make db-fixtures
 ```bash
 php bin/console messenger:consume async
 make cleanup-reservations
+make remind-abandoned-carts
 php bin/console app:security:cleanup-expired-reset-tokens
 ```
+
+### Cron jobs
+
+- Run `make remind-abandoned-carts` every hour to enqueue abandoned-cart reminder emails.
+- Keep a Messenger worker running (`php bin/console messenger:consume async`) to process reminder mails.
 
 ---
 

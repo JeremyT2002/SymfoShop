@@ -5,6 +5,7 @@ namespace App\Controller\Catalog;
 use App\Catalog\CatalogFilters;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
+use App\Service\Catalog\RecentlyViewedService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,7 +16,8 @@ class CategoryController extends AbstractController
 {
     public function __construct(
         private readonly CategoryRepository $categoryRepository,
-        private readonly ProductRepository $productRepository
+        private readonly ProductRepository $productRepository,
+        private readonly RecentlyViewedService $recentlyViewedService
     ) {
     }
 
@@ -30,6 +32,7 @@ class CategoryController extends AbstractController
             'categories' => $categories,
             'categoryChildrenCounts' => $categoryChildrenCounts,
             'featuredProducts' => $featuredProducts,
+            'recentlyViewedProducts' => $this->recentlyViewedService->getRecentlyViewedProducts(limit: 8),
         ]);
     }
 
