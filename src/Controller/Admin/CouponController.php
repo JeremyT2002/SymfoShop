@@ -132,5 +132,81 @@ class CouponController extends AbstractController
         
         return $this->redirectToRoute('admin_coupons_index');
     }
+
+    #[Route('/{id}/active', name: 'update_active', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function updateActive(int $id, Request $request): Response
+    {
+        $coupon = $this->couponRepository->find($id);
+        if (!$coupon) {
+            throw $this->createNotFoundException('Coupon not found');
+        }
+
+        if (!$this->isCsrfTokenValid('update_coupon_active_' . $coupon->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+
+            return $this->redirectToRoute('admin_coupons_show', ['id' => $coupon->getId()]);
+        }
+
+        $active = match ((string) $request->request->get('active', '')) {
+            '1' => true,
+            '0' => false,
+            default => null,
+        };
+
+        if ($active === null) {
+            $this->addFlash('error', 'Invalid active value.');
+
+            return $this->redirectToRoute('admin_coupons_show', ['id' => $coupon->getId()]);
+        }
+
+        $coupon->setIsActive($active);
+        $coupon->setUpdatedAt(new \DateTimeImmutable());
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Coupon status updated.');
+
+        return $this->redirectToRoute('admin_coupons_show', ['id' => $coupon->getId()]);
+    }
+
+    #[Route('/bulk/active', name: 'bulk_active', methods: ['POST'])]
+    public function bulkActive(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('bulk_coupons_active', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+
+            return $this->redirectToRoute('admin_coupons_index');
+        }
+
+        $ids = $this->parseBulkIds((string) $request->request->get('ids', ''));
+        $active = match ((string) $request->request->get('active', '')) {
+            '1' => true,
+            '0' => false,
+            default => null,
+        };
+        if ($ids === [] || $active === null) {
+            $this->addFlash('error', 'Invalid bulk action payload.');
+
+            return $this->redirectToRoute('admin_coupons_index');
+        }
+
+        $coupons = $this->couponRepository->findBy(['id' => $ids]);
+        foreach ($coupons as $coupon) {
+            $coupon->setIsActive($active);
+            $coupon->setUpdatedAt(new \DateTimeImmutable());
+        }
+        $this->entityManager->flush();
+        $this->addFlash('success', sprintf('Updated %d coupon(s).', count($coupons)));
+
+        return $this->redirectToRoute('admin_coupons_index');
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function parseBulkIds(string $raw): array
+    {
+        $parts = array_filter(array_map('trim', explode(',', $raw)), static fn (string $value): bool => $value !== '');
+
+        return array_values(array_map('intval', $parts));
+    }
 }
 

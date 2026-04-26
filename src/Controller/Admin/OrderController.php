@@ -40,14 +40,20 @@ class OrderController extends AbstractController
         $status = (string) $filterForm->get('status')->getData();
 
         $page = max(1, (int) $request->query->get('page', 1));
-        $limit = 20;
+        $limit = in_array((int) $request->query->get('perPage', 25), [25, 50, 100], true)
+            ? (int) $request->query->get('perPage', 25)
+            : 25;
         $offset = ($page - 1) * $limit;
+        $sortBy = (string) $request->query->get('sortBy', 'createdAt');
+        $sortDir = strtoupper((string) $request->query->get('sortDir', 'DESC')) === 'ASC' ? 'ASC' : 'DESC';
 
         $orders = $this->orderRepository->findForAdminList(
             $status !== '' ? $status : null,
             $search !== '' ? $search : null,
             $limit,
-            $offset
+            $offset,
+            $sortBy,
+            $sortDir
         );
         $total = $this->orderRepository->countForAdminList(
             $status !== '' ? $status : null,
@@ -61,6 +67,9 @@ class OrderController extends AbstractController
             'status' => $status,
             'search' => $search,
             'filterForm' => $filterForm->createView(),
+            'perPage' => $limit,
+            'sortBy' => $sortBy,
+            'sortDir' => $sortDir,
         ]);
     }
 
@@ -145,6 +154,45 @@ class OrderController extends AbstractController
         }
         
         return $this->redirectToRoute('admin_orders_show', ['id' => $order->getId()]);
+    }
+
+    #[Route('/bulk/status', name: 'bulk_status', methods: ['POST'])]
+    public function bulkStatus(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('bulk_orders_status', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', $this->translator->trans('admin.orders.flash.invalid_csrf'));
+
+            return $this->redirectToRoute('admin_orders_index');
+        }
+
+        $ids = $this->parseBulkIds((string) $request->request->get('ids', ''));
+        $status = (string) $request->request->get('status', '');
+        $allowedStatuses = ['new', 'payment_pending', 'paid', 'processing', 'shipped', 'completed', 'cancelled'];
+        if ($ids === [] || !in_array($status, $allowedStatuses, true)) {
+            $this->addFlash('error', 'Invalid bulk action payload.');
+
+            return $this->redirectToRoute('admin_orders_index');
+        }
+
+        $orders = $this->orderRepository->findBy(['id' => $ids]);
+        foreach ($orders as $order) {
+            $order->setStatus($status);
+        }
+        $this->entityManager->flush();
+
+        $this->addFlash('success', sprintf('Updated %d order(s).', count($orders)));
+
+        return $this->redirectToRoute('admin_orders_index');
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function parseBulkIds(string $raw): array
+    {
+        $parts = array_filter(array_map('trim', explode(',', $raw)), static fn (string $value): bool => $value !== '');
+
+        return array_values(array_map('intval', $parts));
     }
 }
 

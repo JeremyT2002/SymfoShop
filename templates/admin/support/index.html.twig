@@ -25,10 +25,12 @@
         </div>
     </div>
 
+    <div x-data="{ selectedIds: [], clearSelection(){ this.selectedIds=[]; } }" class="space-y-4">
     <div class="admin-card admin-table-wrap">
         <table class="min-w-full divide-y divide-gray-200 text-sm">
             <thead>
                 <tr>
+                    <th class="px-4 py-3"></th>
                     <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'support.admin.table.updated'|trans }}</th>
                     <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'support.admin.table.customer'|trans }}</th>
                     <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'support.admin.table.subject'|trans }}</th>
@@ -42,6 +44,7 @@
             <tbody class="divide-y divide-gray-100">
                 {% for c in conversations %}
                     <tr class="support-admin-row hover:bg-gray-50/60 cursor-pointer" data-href="{{ path('admin_support_show', {id: c.id}) }}" data-status="{{ c.status }}" data-unread="{{ c.supporterUnreadCount }}" data-customer="{{ c.customer ? c.customer.email|lower : '' }}" data-subject="{{ c.subject|lower }}">
+                        <td class="px-4 py-3"><input type="checkbox" @click.stop @change="$event.target.checked ? selectedIds.push({{ c.id }}) : selectedIds = selectedIds.filter(id => id !== {{ c.id }})" class="h-4 w-4 rounded border-gray-300"></td>
                         <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ c.updatedAt|date('Y-m-d H:i') }}</td>
                         <td class="px-4 py-3">{{ c.customer ? c.customer.email : 'support.common.na'|trans }}</td>
                         <td class="px-4 py-3 font-medium text-gray-900">{{ c.subject }}</td>
@@ -65,11 +68,18 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="8" class="px-4 py-8 text-center text-gray-500">{{ 'support.admin.empty'|trans }}</td>
+                        <td colspan="9" class="px-4 py-8 text-center text-gray-500">{{ 'support.admin.empty'|trans }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+    <div x-show="selectedIds.length > 0" class="sticky bottom-4">
+        <div class="flex items-center justify-between rounded-2xl border border-primary-200 bg-primary-50 p-3">
+            <p class="text-sm font-medium text-primary-700"><span x-text="selectedIds.length"></span> {{ 'admin.table.selected'|trans }}</p>
+            <button type="button" @click="clearSelection()" class="rounded-xl border border-gray-300 px-3 py-2 text-xs font-semibold">{{ 'admin.table.clear_selection'|trans }}</button>
+        </div>
+    </div>
     </div>
 {% endblock %}
 

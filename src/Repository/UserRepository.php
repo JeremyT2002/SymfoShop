@@ -59,5 +59,64 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    /**
+     * @return list<User>
+     */
+    public function findForAdminList(
+        ?string $search,
+        ?string $role,
+        int $limit,
+        int $offset,
+        string $sortBy = 'createdAt',
+        string $sortDir = 'DESC'
+    ): array {
+        $sortBy = $this->resolveAdminSortField($sortBy);
+        $sortDir = strtoupper($sortDir) === 'ASC' ? 'ASC' : 'DESC';
+
+        $qb = $this->createQueryBuilder('u')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->orderBy('u.' . $sortBy, $sortDir);
+
+        if ($search !== null && trim($search) !== '') {
+            $term = '%' . mb_strtolower(trim($search)) . '%';
+            $qb->andWhere('LOWER(u.email) LIKE :term OR LOWER(u.firstName) LIKE :term OR LOWER(u.lastName) LIKE :term')
+                ->setParameter('term', $term);
+        }
+
+        if ($role !== null && $role !== '') {
+            $qb->andWhere('u.roles LIKE :roleLike')
+                ->setParameter('roleLike', '%"' . $role . '"%');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function countForAdminList(?string $search, ?string $role): int
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)');
+
+        if ($search !== null && trim($search) !== '') {
+            $term = '%' . mb_strtolower(trim($search)) . '%';
+            $qb->andWhere('LOWER(u.email) LIKE :term OR LOWER(u.firstName) LIKE :term OR LOWER(u.lastName) LIKE :term')
+                ->setParameter('term', $term);
+        }
+
+        if ($role !== null && $role !== '') {
+            $qb->andWhere('u.roles LIKE :roleLike')
+                ->setParameter('roleLike', '%"' . $role . '"%');
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    private function resolveAdminSortField(string $requested): string
+    {
+        $allowed = ['id', 'email', 'isActive', 'createdAt', 'lastLoginAt'];
+
+        return in_array($requested, $allowed, true) ? $requested : 'createdAt';
+    }
 }
 

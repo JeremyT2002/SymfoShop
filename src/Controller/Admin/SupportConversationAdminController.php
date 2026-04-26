@@ -13,6 +13,7 @@ use App\Theme\ShopContextResolver;
 use App\Theme\ThemeResolver;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
@@ -35,7 +36,9 @@ final class SupportConversationAdminController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
-        $this->denyUnlessSelfcodedSupportEnabled();
+        if (($redirect = $this->redirectUnlessSelfcodedSupportEnabled()) !== null) {
+            return $redirect;
+        }
 
         return $this->render('admin/support/index.html.twig', [
             'conversations' => $this->conversationRepository->findForAdminInbox(300),
@@ -45,7 +48,9 @@ final class SupportConversationAdminController extends AbstractController
     #[Route('/{id}', name: 'show', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function show(SupportConversation $conversation, Request $request): Response
     {
-        $this->denyUnlessSelfcodedSupportEnabled();
+        if (($redirect = $this->redirectUnlessSelfcodedSupportEnabled()) !== null) {
+            return $redirect;
+        }
 
         if ($request->isMethod('POST')) {
             $body = trim((string) $request->request->get('body', ''));
@@ -87,14 +92,18 @@ final class SupportConversationAdminController extends AbstractController
         ]);
     }
 
-    private function denyUnlessSelfcodedSupportEnabled(): void
+    private function redirectUnlessSelfcodedSupportEnabled(): ?RedirectResponse
     {
         $shop = $this->shopContextResolver->resolve();
         $themeConfig = $this->themeResolver->resolveConfig($shop);
         $provider = (string) (($themeConfig['support']['provider'] ?? 'disabled'));
         if ($provider !== 'selfcoded') {
-            throw $this->createNotFoundException('Support is not available.');
+            $this->addFlash('warning', 'Support is currently disabled. Switch provider to "Selfcoded" in settings.');
+
+            return $this->redirectToRoute('admin_settings');
         }
+
+        return null;
     }
 }
 

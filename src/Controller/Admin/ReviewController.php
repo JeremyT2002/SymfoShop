@@ -80,6 +80,31 @@ class ReviewController extends AbstractController
         return $this->redirectToRoute('admin_reviews_index', $this->getRedirectQuery($request));
     }
 
+    #[Route('/bulk', name: 'bulk', methods: ['POST'])]
+    public function bulk(Request $request): RedirectResponse
+    {
+        if (!$this->isCsrfTokenValid('bulk_reviews', (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
+        $ids = $this->parseBulkIds((string) $request->request->get('ids', ''));
+        $action = (string) $request->request->get('action', '');
+        if ($ids === [] || !in_array($action, ['approve', 'reject'], true)) {
+            $this->addFlash('error', 'Invalid bulk action payload.');
+
+            return $this->redirectToRoute('admin_reviews_index', $this->getRedirectQuery($request));
+        }
+
+        $reviews = $this->productReviewRepository->findBy(['id' => $ids]);
+        foreach ($reviews as $review) {
+            $review->setIsApproved($action === 'approve');
+        }
+        $this->entityManager->flush();
+        $this->addFlash('success', sprintf('Updated %d review(s).', count($reviews)));
+
+        return $this->redirectToRoute('admin_reviews_index', $this->getRedirectQuery($request));
+    }
+
     private function assertCsrf(Request $request, string $tokenId): void
     {
         if (!$this->isCsrfTokenValid($tokenId, (string) $request->request->get('_token'))) {
@@ -96,6 +121,16 @@ class ReviewController extends AbstractController
             'filter' => (string) $request->request->get('filter', 'pending'),
             'page' => max(1, (int) $request->request->get('page', 1)),
         ];
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function parseBulkIds(string $raw): array
+    {
+        $parts = array_filter(array_map('trim', explode(',', $raw)), static fn (string $value): bool => $value !== '');
+
+        return array_values(array_map('intval', $parts));
     }
 }
 
