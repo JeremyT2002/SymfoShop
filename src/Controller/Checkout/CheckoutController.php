@@ -119,7 +119,8 @@ class CheckoutController extends AbstractController
                     $order = $this->checkoutService->createOrder(
                         $customerInfo,
                         $shippingAddress,
-                        $selectedShippingMethod !== '' ? $selectedShippingMethod : null
+                        $selectedShippingMethod !== '' ? $selectedShippingMethod : null,
+                        $user instanceof User ? $user : null
                     );
                     if ($selectedPaymentMethod !== '' && !in_array($selectedPaymentMethod, $paymentMethodCodes, true)) {
                         throw new \RuntimeException('checkout.flash.payment_method_unavailable');

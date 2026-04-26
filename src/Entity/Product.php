@@ -60,10 +60,15 @@ class Product
     #[ORM\JoinColumn(name: 'category_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?Category $category = null;
 
+    #[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductReview::class, cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['createdAt' => 'DESC'])]
+    private Collection $reviews;
+
     public function __construct()
     {
         $this->variants = new ArrayCollection();
         $this->media = new ArrayCollection();
+        $this->reviews = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
         $this->taxClass = 'standard';
@@ -255,6 +260,66 @@ class Product
     {
         $this->category = $category;
         return $this;
+    }
+
+    /**
+     * @return Collection<int, ProductReview>
+     */
+    public function getReviews(): Collection
+    {
+        return $this->reviews;
+    }
+
+    public function addReview(ProductReview $review): self
+    {
+        if (!$this->reviews->contains($review)) {
+            $this->reviews->add($review);
+            $review->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReview(ProductReview $review): self
+    {
+        if ($this->reviews->removeElement($review) && $review->getProduct() === $this) {
+            $review->setProduct(null);
+        }
+
+        return $this;
+    }
+
+    public function getAverageRating(): ?float
+    {
+        $sum = 0;
+        $count = 0;
+
+        foreach ($this->reviews as $review) {
+            if (!$review->isApproved()) {
+                continue;
+            }
+
+            $sum += $review->getRating();
+            $count++;
+        }
+
+        if ($count === 0) {
+            return null;
+        }
+
+        return round($sum / $count, 2);
+    }
+
+    public function getReviewCount(): int
+    {
+        $count = 0;
+        foreach ($this->reviews as $review) {
+            if ($review->isApproved()) {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 
     public function getStockOnHand(): int
