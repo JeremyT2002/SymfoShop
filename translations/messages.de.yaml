@@ -503,6 +503,17 @@ admin:
   layout:
     title_default: Admin-Panel
     panel_subtitle: Admin-Panel
+    navigation_aria: Admin-Navigation
+    breadcrumb_aria: Brotkrumen-Navigation
+    pagination_aria: Seitennavigation
+    open_sidebar: Seitenleiste öffnen
+    close_sidebar: Seitenleiste schließen
+    search_aria: Suche im Admin
+    search_placeholder: Produkte, Bestellungen, Benutzer suchen...
+    notifications_placeholder_aria: Benachrichtigungen öffnen (Platzhalter)
+    table_empty: Keine Einträge gefunden.
+    page_of: Seite %page% von %total%
+    empty_title: Noch nichts anzuzeigen
     view_storefront: Shop ansehen
     view_storefront_aria: Schaufenster in neuem Tab öffnen
     logout: Abmelden

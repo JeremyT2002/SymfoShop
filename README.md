@@ -10,7 +10,7 @@ Production-oriented e-commerce on **Symfony 7.4** and **PHP 8.2+**: catalog, car
 
 ## 🌐 Live demo
 
-**Public demo:** [symfoshop-demo.kittyware.io](https://symfoshop-demo.kittyware.io/)
+**Public demo:** [symfoshop-demo.kittyware.io](https://symfoshop-demo.kittyware.io/) Currently offline!!!!
 
 **Admin:** `admin@symfoshop.com` / `admin123`
 

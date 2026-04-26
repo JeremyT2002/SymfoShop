@@ -4,8 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ block('page_title') }} · {{ 'admin.brand.name'|trans }}{% endblock %}</title>
-    
-    <!-- Tailwind CSS -->
+    <script>
+        (function () {
+            var key = 'symfoshop-color-scheme';
+            var legacyKey = 'symfoshop_admin_theme';
+            var stored = localStorage.getItem(key);
+            if (stored !== 'dark' && stored !== 'light') {
+                var legacy = localStorage.getItem(legacyKey);
+                if (legacy === 'dark' || legacy === 'light') {
+                    stored = legacy;
+                    localStorage.setItem(key, legacy);
+                }
+            }
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.classList.toggle('dark', stored === 'dark' || (stored !== 'light' && prefersDark));
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -14,454 +28,304 @@
                 extend: {
                     colors: {
                         primary: {
-                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
-                            400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
-                            800: '#1e40af', 900: '#1e3a8a',
-                        }
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        },
+                        surface: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        success: '#16a34a',
+                        warning: '#d97706',
+                        danger: '#dc2626',
                     },
-                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        admin: '0 1px 2px rgba(2, 6, 23, 0.08), 0 8px 20px rgba(2, 6, 23, 0.06)',
+                    },
                 },
             },
-        }
+        };
     </script>
-    <script>
-    (function () {
-        var k = 'symfoshop-color-scheme';
-        var legacyKey = 'symfoshop_admin_theme';
-        var stored = localStorage.getItem(k);
-        if (stored !== 'dark' && stored !== 'light') {
-            var legacy = localStorage.getItem(legacyKey);
-            if (legacy === 'dark' || legacy === 'light') {
-                stored = legacy;
-                localStorage.setItem(k, legacy);
-            }
-        }
-        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var dark = stored === 'dark' || (stored !== 'light' && prefersDark);
-        document.documentElement.classList.toggle('dark', dark);
-    })();
-    </script>
-    
-    <!-- ApexCharts -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.1/dist/apexcharts.min.js"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
-    <!-- Inter Font -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .admin-page-header {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
+        [x-cloak] { display: none !important; }
+        .focus-ring:focus-visible {
+            outline: 2px solid rgb(99, 102, 241);
+            outline-offset: 2px;
         }
-
-        @media (min-width: 768px) {
-            .admin-page-header {
-                flex-direction: row;
-                align-items: center;
-                justify-content: space-between;
-            }
-        }
-
-        .admin-card {
-            border-radius: 0.75rem;
-            border: 1px solid #e5e7eb;
-            background: #fff;
-            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-        }
-
-        .admin-table-wrap {
-            overflow-x: auto;
-        }
-
-        .admin-table thead th {
-            position: sticky;
-            top: 0;
-            z-index: 1;
-            background: #f9fafb;
-        }
-
-        .admin-form-shell {
-            max-width: 72rem;
-        }
-
-        .admin-form-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-
-        @media (min-width: 1024px) {
-            .admin-form-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-
-        .admin-form-section {
-            border: 1px solid #e5e7eb;
-            border-radius: 0.75rem;
-            background: linear-gradient(180deg, rgba(249, 250, 251, 0.75), #ffffff);
-            padding: 1rem;
-        }
-
+        .touch-target { min-height: 44px; min-width: 44px; }
         .admin-form-label {
             display: block;
+            margin-bottom: 0.35rem;
             font-size: 0.75rem;
             font-weight: 700;
             letter-spacing: 0.04em;
             text-transform: uppercase;
-            color: #6b7280;
-            margin-bottom: 0.35rem;
+            color: rgb(75 85 99);
         }
-
+        .dark .admin-form-label { color: rgb(156 163 175); }
         .admin-form-input {
             width: 100%;
-            border: 1px solid #d1d5db;
-            border-radius: 0.625rem;
-            background: #fff;
-            padding: 0.65rem 0.875rem;
+            border-radius: 0.75rem;
+            border: 1px solid rgb(209 213 219);
+            background: rgb(255 255 255);
+            padding: 0.625rem 0.875rem;
             font-size: 0.875rem;
-            color: #111827;
-            transition: border-color .15s ease, box-shadow .15s ease;
+            color: rgb(17 24 39);
         }
-
-        .admin-form-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        .admin-form-input:focus-visible {
+            outline: 2px solid rgb(99 102 241);
+            outline-offset: 1px;
+            border-color: rgb(99 102 241);
         }
-
-        html.dark .admin-card {
-            border-color: #374151;
-            background: #1f2937;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-        }
-
-        html.dark .admin-table thead th {
-            background: #111827;
-        }
-
-        html.dark .admin-form-section {
-            border-color: #374151;
-            background: linear-gradient(180deg, rgba(17, 24, 39, 0.9), #1f2937);
-        }
-
-        html.dark .admin-form-input {
-            border-color: #4b5563;
-            background: #111827;
-            color: #f3f4f6;
-        }
-
-        /* List/detail pages: tables & filters align with dark main area */
-        html.dark main tbody.bg-white {
-            background-color: rgb(31 41 55) !important;
-        }
-        html.dark main thead.bg-gray-50 {
-            background-color: rgb(17 24 39) !important;
-        }
-        html.dark main thead.bg-gray-50 th {
-            color: #9ca3af !important;
-        }
-        html.dark main .admin-table tbody tr:hover,
-        html.dark main tbody tr.hover\:bg-gray-50:hover {
-            background-color: rgb(55 65 81) !important;
-        }
-        html.dark main tr.bg-gray-50 {
-            background-color: rgba(31, 41, 55, 0.65) !important;
-        }
-        html.dark main .admin-page-header h2 {
-            color: #f9fafb !important;
-        }
-        html.dark main .admin-page-header p {
-            color: #9ca3af !important;
-        }
-        html.dark main h1.text-gray-900,
-        html.dark main h2.text-gray-900,
-        html.dark main h3.text-gray-900 {
-            color: #f9fafb !important;
-        }
-        html.dark main .admin-card .text-gray-900,
-        html.dark main .admin-table .text-gray-900 {
-            color: #f3f4f6 !important;
-        }
-        html.dark main .admin-card .text-gray-500,
-        html.dark main .admin-table .text-gray-500 {
-            color: #9ca3af !important;
-        }
-        html.dark main .text-gray-700 {
-            color: #d1d5db !important;
-        }
-        html.dark main input[type="text"],
-        html.dark main input[type="search"],
-        html.dark main input[type="email"],
-        html.dark main input[type="number"],
-        html.dark main input[type="password"],
-        html.dark main select,
-        html.dark main textarea {
-            background-color: #111827 !important;
-            border-color: #4b5563 !important;
-            color: #f3f4f6 !important;
-        }
-        html.dark main input::placeholder,
-        html.dark main textarea::placeholder {
-            color: #6b7280 !important;
-        }
-        html.dark main a.text-gray-600 {
-            color: #9ca3af !important;
-        }
-        html.dark main a.text-gray-600:hover {
-            color: #f3f4f6 !important;
-        }
-        html.dark main a.border-gray-300:hover {
-            background-color: #374151 !important;
-        }
-        html.dark main a.border-gray-300 {
-            border-color: #4b5563 !important;
-            color: #e5e7eb !important;
-        }
-        html.dark main .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
-            border-color: rgb(55 65 81) !important;
-        }
-
-        /* New/Edit form intro cards (used across admin forms) */
-        html.dark main .bg-gradient-to-br.from-gray-50.to-white {
-            background: linear-gradient(135deg, #111827, #1f2937) !important;
-            border-color: #374151 !important;
-        }
-        html.dark main .bg-gradient-to-br.from-gray-50.to-white .text-gray-900 {
-            color: #f3f4f6 !important;
-        }
-        html.dark main .bg-gradient-to-br.from-gray-50.to-white .text-gray-600 {
-            color: #d1d5db !important;
-        }
-
-        /* Generic utility cards used in forms */
-        html.dark main .border-gray-200 {
-            border-color: #374151 !important;
-        }
-        html.dark main .bg-white {
-            background-color: #1f2937 !important;
-        }
-        html.dark main .hover\:bg-gray-50:hover {
-            background-color: #374151 !important;
+        .dark .admin-form-input {
+            border-color: rgb(75 85 99);
+            background: rgb(15 23 42);
+            color: rgb(226 232 240);
         }
     </style>
-    
     {% block stylesheets %}{% endblock %}
 </head>
-<body class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 admin font-sans antialiased">
-    <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-gray-900 text-white flex flex-col">
-            <!-- Logo -->
-            <div class="p-6 border-b border-gray-800">
-                <a href="{{ path('admin') }}" class="flex items-center gap-2">
-                    <i class="fas fa-shopping-bag text-2xl text-blue-400"></i>
-                    <span class="text-xl font-bold">{{ 'admin.brand.name'|trans }}</span>
+<body
+    class="admin font-sans antialiased bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100"
+    x-data="{ sidebarOpen: false, sidebarCollapsed: false, userMenuOpen: false }"
+    @keydown.escape.window="sidebarOpen = false; userMenuOpen = false"
+>
+    {% from 'admin/components/_icons.html.twig' import icon %}
+    {% set currentRoute = app.request.attributes.get('_route')|default('') %}
+    {% set navItems = [
+        { route: 'admin', key: 'admin.nav.dashboard', icon: 'home' },
+        { route: 'admin_products_index', key: 'admin.nav.products', icon: 'box' },
+        { route: 'admin_categories_index', key: 'admin.nav.categories', icon: 'tag' },
+        { route: 'admin_orders_index', key: 'admin.nav.orders', icon: 'shopping-cart' },
+        { route: 'admin_coupons_index', key: 'admin.nav.coupons', icon: 'ticket' },
+        { route: 'admin_users_index', key: 'admin.nav.users', icon: 'users' },
+        { route: 'admin_reviews_index', key: 'admin.nav.reviews', icon: 'star' },
+        { route: 'admin_support_index', key: 'admin.nav.support_inbox', icon: 'life-buoy' },
+        { route: 'admin_settings', key: 'admin.settings.nav', icon: 'settings' },
+        { route: 'admin_api_docs', key: 'admin.nav.api_documentation', icon: 'book-open' }
+    ] %}
+
+    <div class="flex min-h-screen">
+        <div
+            x-cloak
+            x-show="sidebarOpen"
+            x-transition.opacity
+            class="fixed inset-0 z-30 bg-slate-900/50 md:hidden"
+            aria-hidden="true"
+            @click="sidebarOpen = false"
+        ></div>
+
+        <aside
+            class="fixed inset-y-0 left-0 z-40 w-72 border-r border-slate-200 bg-white p-4 transition-transform dark:border-slate-800 dark:bg-slate-900 md:sticky md:top-0 md:h-screen"
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
+            role="navigation"
+            aria-label="{{ 'admin.layout.navigation_aria'|trans }}"
+        >
+            <div class="mb-4 flex items-center justify-between gap-2">
+                <a href="{{ path('admin') }}" class="focus-ring inline-flex items-center gap-3 rounded-lg px-2 py-1">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary-600 text-white">
+                        {{ icon('shopping-bag', 'h-5 w-5') }}
+                    </span>
+                    <span>
+                        <span class="block text-sm font-semibold">{{ 'admin.brand.name'|trans }}</span>
+                        <span class="block text-xs text-slate-500 dark:text-slate-400">{{ 'admin.layout.panel_subtitle'|trans }}</span>
+                    </span>
                 </a>
-                <p class="text-sm text-gray-400 mt-1">{{ 'admin.layout.panel_subtitle'|trans }}</p>
+                <button
+                    type="button"
+                    class="touch-target focus-ring inline-flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 md:hidden"
+                    @click="sidebarOpen = false"
+                    aria-label="{{ 'admin.layout.close_sidebar'|trans }}"
+                >
+                    {{ icon('x-mark', 'h-5 w-5') }}
+                </button>
             </div>
-            
-            <!-- Navigation -->
-            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-                <a href="{{ path('admin') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if app.request.attributes.get('_route') == 'admin' %}bg-gray-800{% endif %}">
-                    <i class="fas fa-home w-5"></i>
-                    <span>{{ 'admin.nav.dashboard'|trans }}</span>
-                </a>
-                
-                <div class="pt-4">
-                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{{ 'admin.nav.catalog'|trans }}</p>
-                    <a href="{{ path('admin_products_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_products' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
-                        <i class="fas fa-box w-5"></i>
-                        <span>{{ 'admin.nav.products'|trans }}</span>
+
+            <nav class="space-y-1 overflow-y-auto pb-4" style="max-height: calc(100vh - 180px);">
+                {% for item in navItems %}
+                    {% set isActive = currentRoute == item.route or currentRoute starts with (item.route|replace({'_index': ''})) %}
+                    <a
+                        href="{{ path(item.route) }}"
+                        class="focus-ring touch-target group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                            {{ isActive
+                                ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-200'
+                                : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800' }}"
+                    >
+                        <span class="text-slate-500 dark:text-slate-400 group-hover:text-current">{{ icon(item.icon, 'h-5 w-5') }}</span>
+                        <span>{{ item.key|trans }}</span>
                     </a>
-                    <a href="{{ path('admin_categories_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_categories' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
-                        <i class="fas fa-tags w-5"></i>
-                        <span>{{ 'admin.nav.categories'|trans }}</span>
-                    </a>
-                </div>
-                
-                <div class="pt-4">
-                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{{ 'admin.nav.sales'|trans }}</p>
-                    <a href="{{ path('admin_orders_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_orders' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
-                        <i class="fas fa-shopping-cart w-5"></i>
-                        <span>{{ 'admin.nav.orders'|trans }}</span>
-                    </a>
-                    <a href="{{ path('admin_coupons_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_coupons' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
-                        <i class="fas fa-gift w-5"></i>
-                        <span>{{ 'admin.nav.coupons'|trans }}</span>
-                    </a>
-                    <a href="{{ path('admin_payment_methods_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_payment_methods' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
-                        <i class="fas fa-credit-card w-5"></i>
-                        <span>{{ 'admin.payment_methods.nav'|trans }}</span>
-                    </a>
-                    <a href="{{ path('admin_shipping_methods_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_shipping_methods' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
-                        <i class="fas fa-truck w-5"></i>
-                        <span>{{ 'admin.shipping_methods.nav'|trans }}</span>
-                    </a>
-                    <a href="{{ path('admin_return_requests_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_return_requests' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
-                        <i class="fas fa-undo-alt w-5"></i>
-                        <span>{{ 'admin.return_requests.nav'|trans }}</span>
-                    </a>
-                    <a href="{{ path('admin_support_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_support' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
-                        <i class="fas fa-headset w-5"></i>
-                        <span>{{ 'admin.nav.support_inbox'|trans }}</span>
-                    </a>
-                    <a href="{{ path('admin_reviews_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_reviews' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
-                        <i class="fas fa-star w-5"></i>
-                        <span>{{ 'admin.nav.reviews'|trans }}</span>
-                    </a>
-                </div>
-                
-                <div class="pt-4">
-                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{{ 'admin.nav.users'|trans }}</p>
-                    <a href="{{ path('admin_users_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_users' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
-                        <i class="fas fa-users w-5"></i>
-                        <span>{{ 'admin.nav.users'|trans }}</span>
-                    </a>
-                    <a href="{{ path('admin_api_keys_index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_api_keys' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
-                        <i class="fas fa-key w-5"></i>
-                        <span>{{ 'admin.nav.api_keys'|trans }}</span>
-                    </a>
-                </div>
-                
-                <div class="pt-4">
-                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{{ 'admin.nav.appearance'|trans }}</p>
-                    <a href="{{ path('admin_theme_editor') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_theme' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
-                        <i class="fas fa-palette w-5"></i>
-                        <span>{{ 'admin.nav.theme_editor'|trans }}</span>
-                    </a>
-                </div>
-                
-                <div class="pt-4">
-                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{{ 'admin.nav.system'|trans }}</p>
-                    <a href="{{ path('admin_settings') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if app.request.attributes.get('_route') == 'admin_settings' %}bg-gray-800{% endif %}">
-                        <i class="fas fa-sliders-h w-5"></i>
-                        <span>{{ 'admin.settings.nav'|trans }}</span>
-                    </a>
-                    <a href="{{ path('admin_api_docs') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if 'admin_api_docs' in app.request.attributes.get('_route') %}bg-gray-800{% endif %}">
-                        <i class="fas fa-book w-5"></i>
-                        <span>{{ 'admin.nav.api_documentation'|trans }}</span>
-                    </a>
-                </div>
+                {% endfor %}
             </nav>
-            
-            <!-- User Section -->
-            <div class="p-4 border-t border-gray-800">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center shrink-0">
-                        <i class="fas fa-user text-white"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium truncate">
-                            {% if app.user %}
-                                {{ app.user.email }}
-                            {% else %}
-                                {{ 'admin.layout.guest'|trans }}
-                            {% endif %}
-                        </p>
-                        <p class="text-xs text-gray-400 truncate">{{ 'admin.layout.administrator'|trans }}</p>
-                    </div>
-                </div>
-                <a href="{{ path('logout') }}" class="mt-3 flex items-center space-x-2 text-sm text-gray-400 hover:text-white transition-colors">
-                    <i class="fas fa-sign-out-alt"></i>
+
+            <div class="mt-auto rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
+                <p class="text-xs text-slate-500 dark:text-slate-400">{{ app.user ? app.user.email : 'admin.layout.guest'|trans }}</p>
+                <a href="{{ path('logout') }}" class="focus-ring mt-2 inline-flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700">
+                    {{ icon('arrow-left-on-rectangle', 'h-4 w-4') }}
                     <span>{{ 'admin.layout.logout'|trans }}</span>
                 </a>
             </div>
         </aside>
-        
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Top Bar -->
-            <header class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4">
-                <div class="flex items-center justify-end gap-4">
-                    <div class="flex items-center space-x-2 sm:space-x-3">
+
+        <div class="min-w-0 flex-1">
+            <header class="sticky top-0 z-20 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90 sm:px-6">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <button
+                            type="button"
+                            class="touch-target focus-ring inline-flex items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 md:hidden"
+                            @click="sidebarOpen = true"
+                            aria-label="{{ 'admin.layout.open_sidebar'|trans }}"
+                        >
+                            {{ icon('bars-3', 'h-5 w-5') }}
+                        </button>
+                        <form action="{{ path('admin_products_index') }}" method="get" class="hidden items-center md:flex">
+                            <label for="admin-search" class="sr-only">{{ 'admin.layout.search_aria'|trans }}</label>
+                            <div class="relative">
+                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                    {{ icon('magnifying-glass', 'h-4 w-4') }}
+                                </span>
+                                <input
+                                    id="admin-search"
+                                    name="q"
+                                    type="search"
+                                    class="focus-ring h-11 w-72 rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm dark:border-slate-700 dark:bg-slate-800"
+                                    placeholder="{{ 'admin.layout.search_placeholder'|trans }}"
+                                    autocomplete="off"
+                                >
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <label for="admin-language-switcher" class="sr-only">{{ 'nav.language'|trans }}</label>
+                        <select
+                            id="admin-language-switcher"
+                            class="focus-ring h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                            aria-label="{{ 'nav.language'|trans }}"
+                        >
+                            <option value="en" {% if app.request.locale == 'en' %}selected{% endif %}>EN</option>
+                            <option value="de" {% if app.request.locale == 'de' %}selected{% endif %}>DE</option>
+                            <option value="fr" {% if app.request.locale == 'fr' %}selected{% endif %}>FR</option>
+                        </select>
+
+                        <button
+                            type="button"
+                            id="admin-theme-toggle"
+                            class="touch-target focus-ring inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                            aria-pressed="false"
+                            aria-label="{{ 'admin.layout.theme_toggle_aria'|trans }}"
+                        >
+                            <span class="inline dark:hidden">{{ icon('moon', 'h-5 w-5') }}</span>
+                            <span class="hidden dark:inline">{{ icon('sun', 'h-5 w-5') }}</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            class="touch-target focus-ring inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                            aria-label="{{ 'admin.layout.notifications_placeholder_aria'|trans }}"
+                        >
+                            {{ icon('bell', 'h-5 w-5') }}
+                        </button>
+
                         <div class="relative">
-                            <select id="admin-language-switcher"
-                                    class="appearance-none bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 pr-8 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors cursor-pointer"
-                                    aria-label="{{ 'nav.language'|trans }}">
-                                <option value="en" {% if app.request.locale == 'en' %}selected{% endif %}>🇬🇧 EN</option>
-                                <option value="de" {% if app.request.locale == 'de' %}selected{% endif %}>🇩🇪 DE</option>
-                                <option value="fr" {% if app.request.locale == 'fr' %}selected{% endif %}>🇫🇷 FR</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                                <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                            <button
+                                type="button"
+                                class="focus-ring inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                @click="userMenuOpen = !userMenuOpen"
+                                :aria-expanded="userMenuOpen.toString()"
+                                aria-haspopup="true"
+                            >
+                                <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary-600 text-xs font-semibold text-white">
+                                    {{ app.user and app.user.email ? app.user.email|slice(0, 1)|upper : 'A' }}
+                                </span>
+                                <span class="hidden sm:inline">{{ app.user ? app.user.email : 'admin.layout.guest'|trans }}</span>
+                                {{ icon('chevron-down', 'h-4 w-4') }}
+                            </button>
+                            <div
+                                x-cloak
+                                x-show="userMenuOpen"
+                                x-transition
+                                @click.outside="userMenuOpen = false"
+                                class="absolute right-0 z-30 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-1 shadow-admin dark:border-slate-700 dark:bg-slate-800"
+                            >
+                                <a href="{{ path('catalog_home') }}" target="_blank" rel="noopener noreferrer" class="focus-ring flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700">
+                                    {{ icon('arrow-top-right-on-square', 'h-4 w-4') }}
+                                    <span>{{ 'admin.layout.view_storefront'|trans }}</span>
+                                </a>
+                                <a href="{{ path('logout') }}" class="focus-ring flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700">
+                                    {{ icon('arrow-left-on-rectangle', 'h-4 w-4') }}
+                                    <span>{{ 'admin.layout.logout'|trans }}</span>
+                                </a>
                             </div>
                         </div>
-                        <button type="button" id="admin-theme-toggle" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-pressed="false" title="{{ 'admin.layout.theme_toggle_aria'|trans }}" aria-label="{{ 'admin.layout.theme_toggle_aria'|trans }}">
-                            <i class="fas fa-moon inline dark:hidden" aria-hidden="true"></i>
-                            <i class="fas fa-sun hidden dark:inline" aria-hidden="true"></i>
-                        </button>
-                        <a href="{{ path('catalog_home') }}" target="_blank" rel="noopener noreferrer" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors" title="{{ 'admin.layout.view_storefront'|trans }}" aria-label="{{ 'admin.layout.view_storefront_aria'|trans }}">
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
                     </div>
                 </div>
             </header>
-            
-            <!-- Page Content -->
-            <main class="flex-1 overflow-y-auto p-6">
-                <!-- Flash Messages -->
-                {% for label, messages in app.flashes %}
-                    {% for message in messages %}
-                        <div class="mb-4 p-4 rounded-lg {% if label == 'success' %}bg-green-50 text-green-800 border border-green-200{% elseif label == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
-                            <div class="flex items-center gap-2">
-                                <i class="fas {% if label == 'success' %}fa-check-circle{% elseif label == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
-                                <span>{{ message|trans }}</span>
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% endfor %}
+
+            <main class="px-4 py-5 sm:px-6">
+                {% include 'admin/components/flash.html.twig' %}
+                {% include 'admin/components/breadcrumb.html.twig' with {
+                    items: breadcrumbs|default([
+                        { label: 'admin.nav.dashboard'|trans, url: path('admin') },
+                        { label: block('page_title') }
+                    ])
+                } %}
                 {% block body %}{% endblock %}
             </main>
         </div>
     </div>
-    
+
     {% block javascripts %}
-    <!-- Application JavaScript -->
-    <script type="module" src="{{ asset('js/app.js') }}"></script>
-    <script>
-    (function () {
-        var btn = document.getElementById('admin-theme-toggle');
-        var localeSelect = document.getElementById('admin-language-switcher');
+        <script type="module" src="{{ asset('js/app.js') }}"></script>
+        <script>
+            (function () {
+                var themeToggle = document.getElementById('admin-theme-toggle');
+                var localeSelect = document.getElementById('admin-language-switcher');
+                var storageKey = 'symfoshop-color-scheme';
 
-        if (localeSelect) {
-            var currentRoute = '{{ app.request.attributes.get('_route') }}';
-            var localeToken = '__LOCALE__';
-            var routeUrlTemplate = '{{ path(app.request.attributes.get('_route') ?: 'admin', app.request.attributes.get('_route_params')|default({})|merge({'_locale': '__LOCALE__'})) }}';
-            var adminFallbackTemplate = '{{ path('admin', {'_locale': '__LOCALE__'}) }}';
-
-            localeSelect.addEventListener('change', function () {
-                var targetLocale = localeSelect.value;
-                var targetUrl = adminFallbackTemplate.replace(localeToken, targetLocale);
-
-                if (currentRoute) {
-                    targetUrl = routeUrlTemplate.replace(localeToken, targetLocale);
+                function syncPressed() {
+                    if (!themeToggle) {
+                        return;
+                    }
+                    themeToggle.setAttribute('aria-pressed', document.documentElement.classList.contains('dark') ? 'true' : 'false');
                 }
 
-                window.location.href = targetUrl;
-            });
-        }
-
-        if (btn) {
-            var k = 'symfoshop-color-scheme';
-            function syncPressed() {
-                btn.setAttribute('aria-pressed', document.documentElement.classList.contains('dark') ? 'true' : 'false');
-            }
-            syncPressed();
-            btn.addEventListener('click', function () {
-                var next = !document.documentElement.classList.contains('dark');
-                document.documentElement.classList.toggle('dark', next);
-                localStorage.setItem(k, next ? 'dark' : 'light');
                 syncPressed();
-            });
-        }
-    })();
-    </script>
+                if (themeToggle) {
+                    themeToggle.addEventListener('click', function () {
+                        var next = !document.documentElement.classList.contains('dark');
+                        document.documentElement.classList.toggle('dark', next);
+                        localStorage.setItem(storageKey, next ? 'dark' : 'light');
+                        syncPressed();
+                    });
+                }
+
+                if (localeSelect) {
+                    var routeUrlTemplate = '{{ path(app.request.attributes.get('_route') ?: 'admin', app.request.attributes.get('_route_params')|default({})|merge({'_locale': '__LOCALE__'})) }}';
+                    localeSelect.addEventListener('change', function () {
+                        window.location.href = routeUrlTemplate.replace('__LOCALE__', localeSelect.value);
+                    });
+                }
+            })();
+        </script>
     {% endblock %}
 </body>
 </html>
