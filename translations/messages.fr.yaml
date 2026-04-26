@@ -394,6 +394,9 @@ pagination:
   previous: Précédent
   next: Suivant
 
+recently_viewed:
+  title: Produits récemment consultés
+
 wishlist:
   title: Ma liste de souhaits
   subtitle: Vous avez %count% article(s) dans votre liste de souhaits
