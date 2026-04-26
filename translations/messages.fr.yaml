@@ -491,6 +491,8 @@ account:
       invalid_email: Veuillez saisir une adresse e-mail valide.
       email_in_use: Cette adresse e-mail est déjà utilisée.
       profile_updated: Vos informations de profil ont été mises à jour.
+  marketing:
+    opt_out_success: Vous êtes désinscrit des rappels de panier abandonné.
 
 admin:
   brand:
@@ -862,6 +864,12 @@ email:
     support: Pour toute question, contactez notre support.
     closing: "Cordialement,\nL’équipe SymfoShop"
     automated: Cet e-mail est généré automatiquement. Merci de ne pas y répondre.
+  abandoned_cart:
+    subject: Vous avez laissé des articles dans votre panier
+    title: Votre panier vous attend
+    intro: Vous avez encore des produits dans votre panier.
+    cta: Retourner au panier
+    opt_out: Ne plus recevoir de rappels panier
 
 contact:
   meta_title: Contact
@@ -976,16 +984,4 @@ support:
     send_reply: Envoyer la réponse
     filter_unread_all: Toutes (y compris lues)
     filter_unread_only: Non lues uniquement
-
-email:
-  abandoned_cart:
-    subject: Vous avez laissé des articles dans votre panier
-    title: Votre panier vous attend
-    intro: Vous avez encore des produits dans votre panier.
-    cta: Retourner au panier
-    opt_out: Ne plus recevoir de rappels panier
-
-account:
-  marketing:
-    opt_out_success: Vous êtes désinscrit des rappels de panier abandonné.
 

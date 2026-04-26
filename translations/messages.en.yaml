@@ -491,6 +491,8 @@ account:
       invalid_email: Please enter a valid email address.
       email_in_use: This email address is already in use.
       profile_updated: Your profile data has been updated.
+  marketing:
+    opt_out_success: You have been unsubscribed from abandoned cart reminders.
 
 admin:
   brand:
@@ -862,6 +864,12 @@ email:
     support: If you have any questions, please contact our support team.
     closing: "Best regards,\nSymfoShop team"
     automated: This is an automated email. Please do not reply to this message.
+  abandoned_cart:
+    subject: You left items in your cart
+    title: Your cart is waiting
+    intro: You still have products in your cart.
+    cta: Return to cart
+    opt_out: Do not send reminder emails
 
 contact:
   meta_title: Contact
@@ -976,15 +984,3 @@ support:
     send_reply: Send reply
     filter_unread_all: All (including read)
     filter_unread_only: Unread only
-
-email:
-  abandoned_cart:
-    subject: You left items in your cart
-    title: Your cart is waiting
-    intro: You still have products in your cart.
-    cta: Return to cart
-    opt_out: Do not send reminder emails
-
-account:
-  marketing:
-    opt_out_success: You have been unsubscribed from abandoned cart reminders.
