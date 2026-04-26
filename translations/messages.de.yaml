@@ -530,6 +530,9 @@ admin:
     section_support_intro: Legen Sie fest, wie Kunden im Shop Support erreichen.
     section_storefront: Schaufenster
     section_storefront_intro: Shop-Name, Katalog-Layout und Produktseite (werden im Theme gespeichert und veröffentlicht).
+    section_seo: SEO
+    seo_enable_indexing: Indexierung aktivieren
+    seo_enable_indexing_help: Wenn deaktiviert, sendet der Shop robots-Meta direktiven, um das Indexieren durch Suchmaschinen zu verhindern (Produkte/Kategorien können weiterhin per „No indexing“ überschreiben).
     theme_editor_link: Theme-Editor (Farben, Startseite, …)
     brand_site_name: Seitenname
     brand_tagline: Untertitel

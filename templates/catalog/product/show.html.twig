@@ -1,15 +1,29 @@
 {% extends 'catalog/base.html.twig' %}
 
-{% block title %}{{ product.name|escape }} - SymfoShop{% endblock %}
-{% block meta_description %}{{ product.description|default(product.name)|escape|slice(0, 160) }}{% endblock %}
+{% block robots_meta %}
+    {% set globalNoIndex = theme_config().seo.defaultNoIndex|default(false) %}
+    {% set pageNoIndex = product.seoNoIndex|default(false) %}
+    {% set noIndex = globalNoIndex or pageNoIndex %}
+    <meta name="robots" content="{{ noIndex ? 'noindex,nofollow' : 'index,follow' }}">
+{% endblock %}
+
+{% block title %}{{ product.seoTitle|default(product.name)|escape }} - SymfoShop{% endblock %}
+{% block meta_description %}{{ product.seoDescription|default(product.description|default(product.name))|escape|slice(0, 160) }}{% endblock %}
 {% block js_page %}product{% endblock %}
 
 {% block meta_tags %}
-    <meta property="og:title" content="{{ product.name|escape }} - SymfoShop">
-    <meta property="og:description" content="{{ product.description|default(product.name)|escape|slice(0, 160) }}">
+    {% set seoTitle = product.seoTitle|default(product.name) %}
+    {% set seoDescription = product.seoDescription|default(product.description|default(product.name))|slice(0, 160) %}
+
+    <meta property="og:title" content="{{ seoTitle|escape }} - SymfoShop">
+    <meta property="og:description" content="{{ seoDescription|escape }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ seoTitle|escape }} - SymfoShop">
+    <meta name="twitter:description" content="{{ seoDescription|escape }}">
     {% if product.media|length > 0 %}
         {% set firstMedia = product.media|first %}
         <meta property="og:image" content="{{ firstMedia.path|escape }}">
+        <meta name="twitter:image" content="{{ firstMedia.path|escape }}">
     {% endif %}
 {% endblock %}
 

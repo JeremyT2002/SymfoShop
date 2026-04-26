@@ -530,6 +530,9 @@ admin:
     section_support_intro: Choose how customers reach support on the storefront.
     section_storefront: Storefront
     section_storefront_intro: Site name, catalog layout, and product page options (stored in the theme and published).
+    section_seo: SEO
+    seo_enable_indexing: Enable indexing
+    seo_enable_indexing_help: If disabled, the shop will send robots meta directives to prevent search engine indexing (products/categories can still override with “No indexing”).
     theme_editor_link: Theme editor (colors, homepage, …)
     brand_site_name: Site name
     brand_tagline: Tagline

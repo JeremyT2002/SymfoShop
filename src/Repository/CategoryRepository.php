@@ -64,6 +64,8 @@ class CategoryRepository extends ServiceEntityRepository
     {
         $rows = $this->createQueryBuilder('c')
             ->select('c.slug')
+            ->where('c.seoNoIndex = :noIndex')
+            ->setParameter('noIndex', false)
             ->orderBy('c.name', 'ASC')
             ->getQuery()
             ->getScalarResult();

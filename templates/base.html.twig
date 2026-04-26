@@ -21,6 +21,20 @@
     </script>
     <title>{% block title %}{{ theme_config().brand.siteName|default('SymfoShop') }}{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}{{ theme_config().brand.siteName|default('SymfoShop') }} - Your online shopping destination{% endblock %}">
+
+    {# Canonical URL (current path, no query string) #}
+    <link rel="canonical" href="{{ app.request.getSchemeAndHttpHost() }}{{ app.request.getPathInfo() }}">
+
+    {% block robots_meta %}
+        {# robots meta = global SEO default AND per-page override (seo_noindex) #}
+        {% set globalNoIndex = theme_config().seo.defaultNoIndex|default(false) %}
+        {% set pageNoIndex = seo_noindex|default(false) %}
+        {% set noIndex = globalNoIndex or pageNoIndex %}
+        <meta name="robots" content="{{ noIndex ? 'noindex,nofollow' : 'index,follow' }}">
+    {% endblock %}
+
+    {% block meta_tags %}{% endblock %}
+
     {% if theme_config().brand.faviconUrl is defined and theme_config().brand.faviconUrl %}
     <link rel="icon" href="{{ theme_config().brand.faviconUrl }}">
     {% endif %}
@@ -139,13 +153,6 @@
                             <i class="fas fa-home text-sm"></i>
                             <span>{{ 'nav.home'|trans }}</span>
                         </a>
-                        {% if app.user %}
-                            <a href="{{ path('account_wishlist_show') }}" 
-                               class="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-all duration-200 {% if app.request.attributes.get('_route') == 'account_wishlist_show' %}text-primary-600 bg-primary-50{% endif %}">
-                                <i class="fas fa-heart text-sm"></i>
-                                <span>{{ 'footer.wishlist'|trans }}</span>
-                            </a>
-                        {% endif %}
                     </div>
                 </div>
                 
@@ -229,11 +236,6 @@
                                         <i class="fas fa-user-circle w-5 text-center"></i>
                                         <span>{{ 'nav.dashboard'|trans }}</span>
                                     </a>
-                                    <a href="{{ path('account_wishlist_show') }}" 
-                                       class="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">
-                                        <i class="fas fa-heart w-5 text-center"></i>
-                                        <span>{{ 'footer.wishlist'|trans }}</span>
-                                    </a>
                                     {% if (theme_config().support.provider|default('selfcoded')) == 'selfcoded' %}
                                         <a href="{{ path('account_support_index') }}"
                                            class="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">
@@ -294,11 +296,6 @@
                 </a>
                 
                 {% if app.user %}
-                    <a href="{{ path('account_wishlist_show') }}" 
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors {% if app.request.attributes.get('_route') == 'account_wishlist_show' %}text-primary-600 bg-primary-50{% endif %}">
-                        <i class="fas fa-heart w-5 text-center"></i>
-                        <span>{{ 'footer.wishlist'|trans }}</span>
-                    </a>
                     <a href="{{ path('account_dashboard') }}" 
                        class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors {% if app.request.attributes.get('_route') starts with 'account_' and app.request.attributes.get('_route') != 'account_wishlist_show' %}text-primary-600 bg-primary-50{% endif %}">
                         <i class="fas fa-user-circle w-5 text-center"></i>
