@@ -14,6 +14,8 @@ parameters:
     paypal.default_base_url: 'https://api-m.sandbox.paypal.com'
     # default::ENV alone yields null when unset/empty; use named fallback for string-typed constructor args
     app.paypal_client_id_fallback: ''
+    admin.low_stock_threshold_default: 5
+    admin.low_stock_threshold: '%env(int:default:admin.low_stock_threshold_default:ADMIN_LOW_STOCK_THRESHOLD)%'
 
 services:
     # default configuration for services in *this* file
@@ -125,6 +127,11 @@ services:
     App\Service\Api\ApiCartService:
         arguments:
             $apiCartCache: '@api_cart'
+
+    App\Service\Admin\DashboardMetricsService:
+        arguments:
+            $cache: '@cache.app.taggable'
+            $lowStockThreshold: '%admin.low_stock_threshold%'
 
     # Product image upload service
     App\Service\Product\ImageUploadService:

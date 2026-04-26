@@ -35,5 +35,22 @@ class StockItemRepository extends ServiceEntityRepository
             ->setLockMode(\Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE)
             ->getOneOrNullResult();
     }
+
+    /**
+     * @return list<StockItem>
+     */
+    public function findLowStockItems(int $threshold, int $limit = 10): array
+    {
+        return $this->createQueryBuilder('s')
+            ->join('s.variant', 'v')->addSelect('v')
+            ->join('v.product', 'p')->addSelect('p')
+            ->where('(s.onHand - s.reserved) < :threshold')
+            ->setParameter('threshold', $threshold)
+            ->orderBy('(s.onHand - s.reserved)', 'ASC')
+            ->addOrderBy('v.updatedAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }
 

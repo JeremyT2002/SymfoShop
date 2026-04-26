@@ -587,6 +587,8 @@ admin:
       invalid_charla_id: Identifiant projet Charla invalide.
   dashboard:
     title: Tableau de bord
+    heading: Vue d'ensemble commerciale
+    conversion_formula_note: La conversion utilise Commandes / Nouveaux utilisateurs sur la période.
     no_widgets: Aucun widget configuré. Utilisez « Personnaliser le tableau de bord » pour en ajouter.
     app_update_title: Mise à jour de l’application
     app_update_up_to_date: À jour.
@@ -594,12 +596,38 @@ admin:
     app_update_n_commits: Mise à jour disponible (%count% commits).
     app_update_failed: Échec de la vérification des mises à jour
     app_update_now: Mettre à jour
+    period:
+      today: Aujourd'hui
+      7d: 7 derniers jours
+      30d: 30 derniers jours
+      12m: 12 derniers mois
+    kpi:
+      revenue: Chiffre d'affaires
+      orders: Commandes
+      aov: Panier moyen
+      new_customers: Nouveaux clients
+      conversion: Taux de conversion
     chart:
+      revenue: Tendance du chiffre d'affaires
+      revenue_dataset: Chiffre d'affaires
+      top_products: Top produits par chiffre d'affaires
+      top_products_dataset: Chiffre d'affaires (EUR)
+      status: Commandes par statut
       series_orders: Commandes
       series_revenue: Chiffre d’affaires
       yaxis_orders: Commandes
       yaxis_revenue: Chiffre d’affaires
       no_orders: Pas encore de commandes
+    widget:
+      recent_orders: Dernières commandes
+      low_stock: Stock faible
+      pending_reviews: Avis en attente
+      no_orders: Aucune commande sur la période.
+      no_low_stock: Aucun article en stock faible.
+      no_pending_reviews: Aucun avis en attente.
+      view_all: Voir tout
+      threshold: basé sur seuil
+      available: Disponible
     settings_teaser: Vitrine, fournisseur de support, widgets de chat et options associées.
     support_provider: Fournisseur de support
     provider_label: Fournisseur
