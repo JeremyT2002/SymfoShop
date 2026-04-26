@@ -156,5 +156,41 @@ class ApiKeyController extends AbstractController
         
         return $this->redirectToRoute('admin_api_keys_index');
     }
+
+    #[Route('/bulk/revoke', name: 'bulk_revoke', methods: ['POST'])]
+    public function bulkRevoke(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('bulk_api_keys_revoke', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+
+            return $this->redirectToRoute('admin_api_keys_index');
+        }
+
+        $ids = $this->parseBulkIds((string) $request->request->get('ids', ''));
+        if ($ids === []) {
+            $this->addFlash('error', 'Invalid bulk action payload.');
+
+            return $this->redirectToRoute('admin_api_keys_index');
+        }
+
+        $keys = $this->apiKeyRepository->findBy(['id' => $ids, 'isActive' => true]);
+        foreach ($keys as $key) {
+            $this->apiKeyService->revokeApiKey($key);
+        }
+        $this->entityManager->flush();
+        $this->addFlash('success', sprintf('Revoked %d API key(s).', count($keys)));
+
+        return $this->redirectToRoute('admin_api_keys_index');
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function parseBulkIds(string $raw): array
+    {
+        $parts = array_filter(array_map('trim', explode(',', $raw)), static fn (string $value): bool => $value !== '');
+
+        return array_values(array_map('intval', $parts));
+    }
 }
 

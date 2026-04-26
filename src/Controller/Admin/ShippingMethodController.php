@@ -106,4 +106,45 @@ class ShippingMethodController extends AbstractController
 
         return $this->redirectToRoute('admin_shipping_methods_index');
     }
+
+    #[Route('/bulk/active', name: 'bulk_active', methods: ['POST'])]
+    public function bulkActive(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('bulk_shipping_methods_active', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+
+            return $this->redirectToRoute('admin_shipping_methods_index');
+        }
+
+        $ids = $this->parseBulkIds((string) $request->request->get('ids', ''));
+        $active = match ((string) $request->request->get('active', '')) {
+            '1' => true,
+            '0' => false,
+            default => null,
+        };
+        if ($ids === [] || $active === null) {
+            $this->addFlash('error', 'Invalid bulk action payload.');
+
+            return $this->redirectToRoute('admin_shipping_methods_index');
+        }
+
+        $methods = $this->shippingMethodRepository->findBy(['id' => $ids]);
+        foreach ($methods as $method) {
+            $method->setIsActive($active);
+        }
+        $this->entityManager->flush();
+        $this->addFlash('success', sprintf('Updated %d shipping method(s).', count($methods)));
+
+        return $this->redirectToRoute('admin_shipping_methods_index');
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function parseBulkIds(string $raw): array
+    {
+        $parts = array_filter(array_map('trim', explode(',', $raw)), static fn (string $value): bool => $value !== '');
+
+        return array_values(array_map('intval', $parts));
+    }
 }

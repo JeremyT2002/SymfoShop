@@ -46,10 +46,15 @@ class OrderRepository extends ServiceEntityRepository
         ?string $status,
         ?string $search,
         int $limit,
-        int $offset
+        int $offset,
+        string $sortBy = 'createdAt',
+        string $sortDir = 'DESC'
     ): array {
+        $sortBy = $this->resolveAdminSortField($sortBy);
+        $sortDir = strtoupper($sortDir) === 'ASC' ? 'ASC' : 'DESC';
+
         $qb = $this->createAdminListQueryBuilder($status, $search)
-            ->orderBy('o.createdAt', 'DESC')
+            ->orderBy('o.' . $sortBy, $sortDir)
             ->setFirstResult($offset)
             ->setMaxResults($limit);
 
@@ -255,6 +260,13 @@ class OrderRepository extends ServiceEntityRepository
         }
 
         return $qb;
+    }
+
+    private function resolveAdminSortField(string $requested): string
+    {
+        $allowed = ['id', 'orderNumber', 'email', 'grandTotal', 'status', 'createdAt'];
+
+        return in_array($requested, $allowed, true) ? $requested : 'createdAt';
     }
 }
 

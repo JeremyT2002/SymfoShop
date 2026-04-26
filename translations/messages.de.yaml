@@ -511,6 +511,11 @@ admin:
     search_aria: Suche im Admin
     search_placeholder: Produkte, Bestellungen, Benutzer suchen...
     notifications_placeholder_aria: Benachrichtigungen öffnen (Platzhalter)
+    notifications_aria: Benachrichtigungen öffnen
+    notifications_title: Benachrichtigungen
+    notifications_view_all: Audit-Log öffnen
+    notifications_mark_read: Alle als gelesen markieren
+    notifications_empty: Aktuell keine Benachrichtigungen.
     table_empty: Keine Einträge gefunden.
     page_of: Seite %page% von %total%
     empty_title: Noch nichts anzuzeigen
@@ -538,6 +543,31 @@ admin:
     api_documentation: API-Dokumentation
     api_keys: API-Schlüssel
     reviews: Bewertungen
+    audit_log: Audit-Log
+  audit:
+    title: Audit-Log
+    subtitle: Letzte admin-relevante Plattformaktivitäten.
+    open: Öffnen
+    empty: Noch keine Audit-Einträge.
+  search:
+    title: Admin-Suche
+    subtitle: Produkte, Bestellungen und Benutzer schnell finden.
+    placeholder: Nach Produktname, Bestellnummer, E-Mail suchen...
+    submit: Suchen
+    type:
+      all: Alle
+      products: Produkte
+      orders: Bestellungen
+      users: Benutzer
+    empty:
+      initial_title: Starte eine Suche, um Ergebnisse zu sehen.
+      initial_hint: Versuche einen Produktnamen, eine Bestellnummer oder eine Kunden-E-Mail.
+      products: Keine Produkte gefunden.
+      orders: Keine Bestellungen gefunden.
+      users: Keine Benutzer gefunden.
+    pagination:
+      previous: Zurück
+      next: Weiter
   settings:
     title: Systemeinstellungen
     subtitle: Allgemeine Optionen für Shop und Integrationen.
@@ -763,6 +793,26 @@ admin:
     create_first: Produkt anlegen
     delete_confirm: Dieses Produkt wirklich löschen?
     pagination_showing: Seite %page% von %total%
+  coupons:
+    page_title: Gutscheine
+    heading: Gutscheine
+    subtitle: Rabattcodes und Gutscheinaktionen verwalten.
+    new: Neuer Gutschein
+    expired: Abgelaufen
+    no_expiration: Kein Ablaufdatum
+    delete_confirm: Soll dieser Gutschein wirklich gelöscht werden?
+    empty: Keine Gutscheine gefunden.
+    kpi:
+      total: Gesamtzahl Gutscheine
+      active: Aktive Gutscheine
+      expiring_soon: Läuft in 14 Tagen ab
+    table:
+      code: Code
+      type: Typ
+      value: Wert
+      expires: Ablauf
+      status: Status
+      actions: Aktionen
   categories:
     page_title: Kategorien
     heading: Kategorien
@@ -825,6 +875,7 @@ admin:
       previous: Zurück
       next: Weiter
     status:
+      all: Alle Status
       new: Neu
       payment_pending: Zahlung ausstehend
       payment_confirmed: Zahlung bestätigt
@@ -867,6 +918,42 @@ admin:
       regenerate_success: '%count% Rechnungs-PDF(s) erfolgreich neu erzeugt.'
       regenerate_partial: '%success% Rechnungs-PDF(s) erfolgreich neu erzeugt, %failed% fehlgeschlagen.'
       status_updated: Bestellstatus wurde aktualisiert.
+  users:
+    page_title: Benutzer
+    heading: Benutzer
+    subtitle: Benutzerkonten verwalten
+    new: Neuer Benutzer
+    search_placeholder: Nach E-Mail oder Name suchen...
+    all_roles: Alle Rollen
+    role_admin: Admin
+    role_user: Benutzer
+    active: Aktiv
+    inactive: Inaktiv
+    empty: Keine Benutzer gefunden
+    table:
+      id: ID
+      email: E-Mail
+      roles: Rollen
+      status: Status
+      created: Erstellt
+      actions: Aktionen
+    pagination:
+      showing: Seite %page% von %total%
+  table:
+    per_page: Pro Seite
+    page: Seite
+    apply_filters: Anwenden
+    clear_filters: Zurücksetzen
+    selected: ausgewählt
+    clear_selection: Auswahl aufheben
+    bulk_publish: Veröffentlichen
+    bulk_archive: Archivieren
+    bulk_mark_processing: Als in Bearbeitung markieren
+    bulk_mark_shipped: Als versendet markieren
+    bulk_activate: Aktivieren
+    bulk_apply: Anwenden
+    bulk_revoke: Widerrufen
+    bulk_deactivate: Deaktivieren
   return_requests:
     nav: Rücksendeanfragen
     page_title: Rücksendeanfragen

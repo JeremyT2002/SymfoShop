@@ -3,44 +3,45 @@
 {% block page_title %}{{ 'admin.settings.title'|trans }}{% endblock %}
 
 {% block body %}
-    <div class="admin-page-header">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-            <h2 class="text-2xl font-bold text-gray-900">{{ 'admin.settings.title'|trans }}</h2>
-            <p class="text-gray-600 mt-1">{{ 'admin.settings.subtitle'|trans }}</p>
+            <h2 class="text-2xl font-bold">{{ 'admin.settings.title'|trans }}</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ 'admin.settings.subtitle'|trans }}</p>
         </div>
-        <a href="{{ path('admin_theme_editor') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50">
+        <a href="{{ path('admin_theme_editor') }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
             <i class="fas fa-palette"></i>
             {{ 'admin.settings.theme_editor_link'|trans }}
         </a>
     </div>
 
-    <div class="admin-form-shell space-y-6">
-        <section class="admin-card p-6">
-            <h3 class="text-sm font-semibold text-gray-800 mb-1">{{ 'admin.settings.section_storefront'|trans }}</h3>
-            <p class="text-xs text-gray-500 mb-4">{{ 'admin.settings.section_storefront_intro'|trans }}</p>
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
+        <div class="space-y-6">
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+            <h3 class="mb-1 text-sm font-semibold text-slate-800 dark:text-slate-100">{{ 'admin.settings.section_storefront'|trans }}</h3>
+            <p class="mb-4 text-xs text-slate-500">{{ 'admin.settings.section_storefront_intro'|trans }}</p>
 
             <form method="post" action="{{ path('admin_settings_storefront_save') }}" class="space-y-6">
                 <input type="hidden" name="_token" value="{{ csrf_token('admin_storefront_settings') }}">
 
                 <div class="grid gap-4 sm:grid-cols-2 max-w-4xl">
                     <div class="sm:col-span-2">
-                        <label class="block text-sm text-gray-700 mb-1">{{ 'admin.settings.brand_site_name'|trans }}</label>
+                        <label class="block text-sm text-slate-700 dark:text-slate-300 mb-1">{{ 'admin.settings.brand_site_name'|trans }}</label>
                         <input type="text" name="brand_siteName" value="{{ storefront.brand_siteName }}" maxlength="120" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="block text-sm text-gray-700 mb-1">{{ 'admin.settings.brand_tagline'|trans }}</label>
+                        <label class="block text-sm text-slate-700 dark:text-slate-300 mb-1">{{ 'admin.settings.brand_tagline'|trans }}</label>
                         <input type="text" name="brand_tagline" value="{{ storefront.brand_tagline }}" maxlength="200" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="block text-sm text-gray-700 mb-1">{{ 'admin.settings.footer_copyright'|trans }}</label>
+                        <label class="block text-sm text-slate-700 dark:text-slate-300 mb-1">{{ 'admin.settings.footer_copyright'|trans }}</label>
                         <input type="text" name="footer_copyright" value="{{ storefront.footer_copyright }}" maxlength="280" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="{{ 'admin.settings.footer_copyright_placeholder'|trans }}">
                     </div>
                 </div>
 
                 <div>
-                    <p class="text-xs font-medium text-gray-700 mb-2">{{ 'admin.settings.section_seo'|trans }}</p>
+                    <p class="text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">{{ 'admin.settings.section_seo'|trans }}</p>
                     <div class="flex flex-wrap gap-x-6 gap-y-2">
-                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                        <label class="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                             <input type="checkbox"
                                    name="seo_enableIndexing"
                                    value="1"
@@ -49,21 +50,21 @@
                             {{ 'admin.settings.seo_enable_indexing'|trans }}
                         </label>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2 leading-relaxed max-w-3xl">{{ 'admin.settings.seo_enable_indexing_help'|trans }}</p>
+                    <p class="text-xs text-slate-500 mt-2 leading-relaxed max-w-3xl">{{ 'admin.settings.seo_enable_indexing_help'|trans }}</p>
                 </div>
 
                 <div>
-                    <p class="text-xs font-medium text-gray-700 mb-2">{{ 'admin.settings.section_header'|trans }}</p>
+                    <p class="text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">{{ 'admin.settings.section_header'|trans }}</p>
                     <div class="flex flex-wrap gap-x-6 gap-y-2">
-                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                        <label class="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                             <input type="checkbox" name="header_sticky" value="1" class="rounded border-gray-300" {% if storefront.header_sticky %}checked{% endif %}>
                             {{ 'admin.settings.header_sticky'|trans }}
                         </label>
-                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                        <label class="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                             <input type="checkbox" name="header_showCart" value="1" class="rounded border-gray-300" {% if storefront.header_showCart %}checked{% endif %}>
                             {{ 'admin.settings.header_show_cart'|trans }}
                         </label>
-                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                        <label class="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                             <input type="checkbox" name="header_showLanguageSwitcher" value="1" class="rounded border-gray-300" {% if storefront.header_showLanguageSwitcher %}checked{% endif %}>
                             {{ 'admin.settings.header_show_language'|trans }}
                         </label>
@@ -71,21 +72,21 @@
                 </div>
 
                 <div>
-                    <p class="text-xs font-medium text-gray-700 mb-2">{{ 'admin.settings.section_catalog'|trans }}</p>
+                    <p class="text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">{{ 'admin.settings.section_catalog'|trans }}</p>
                     <div class="space-y-3 max-w-xl">
-                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                        <label class="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                             <input type="checkbox" name="catalog_showFilters" value="1" class="rounded border-gray-300" {% if storefront.catalog_showFilters %}checked{% endif %}>
                             {{ 'admin.settings.catalog_show_filters'|trans }}
                         </label>
                         <div>
-                            <label class="block text-sm text-gray-700 mb-1">{{ 'admin.settings.catalog_filter_position'|trans }}</label>
+                            <label class="block text-sm text-slate-700 dark:text-slate-300 mb-1">{{ 'admin.settings.catalog_filter_position'|trans }}</label>
                             <select name="catalog_filterPosition" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                                 <option value="sidebar" {% if storefront.catalog_filterPosition == 'sidebar' %}selected{% endif %}>{{ 'admin.settings.catalog_filter_sidebar'|trans }}</option>
                                 <option value="top" {% if storefront.catalog_filterPosition == 'top' %}selected{% endif %}>{{ 'admin.settings.catalog_filter_top'|trans }}</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm text-gray-700 mb-1">{{ 'admin.settings.catalog_badge_style'|trans }}</label>
+                            <label class="block text-sm text-slate-700 dark:text-slate-300 mb-1">{{ 'admin.settings.catalog_badge_style'|trans }}</label>
                             <select name="catalog_badgeStyle" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                                 <option value="pill" {% if storefront.catalog_badgeStyle == 'pill' %}selected{% endif %}>{{ 'admin.settings.catalog_badge_pill'|trans }}</option>
                                 <option value="square" {% if storefront.catalog_badgeStyle == 'square' %}selected{% endif %}>{{ 'admin.settings.catalog_badge_square'|trans }}</option>
@@ -93,15 +94,15 @@
                         </div>
                         <div class="grid grid-cols-3 gap-3 max-w-lg">
                             <div>
-                                <label class="block text-xs text-gray-600 mb-1">{{ 'admin.settings.catalog_grid_mobile'|trans }}</label>
+                                <label class="block text-xs text-slate-600 mb-1">{{ 'admin.settings.catalog_grid_mobile'|trans }}</label>
                                 <input type="number" name="catalog_grid_mobile" value="{{ storefront.catalog_grid_mobile }}" min="1" max="2" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs text-gray-600 mb-1">{{ 'admin.settings.catalog_grid_tablet'|trans }}</label>
+                                <label class="block text-xs text-slate-600 mb-1">{{ 'admin.settings.catalog_grid_tablet'|trans }}</label>
                                 <input type="number" name="catalog_grid_tablet" value="{{ storefront.catalog_grid_tablet }}" min="1" max="4" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs text-gray-600 mb-1">{{ 'admin.settings.catalog_grid_desktop'|trans }}</label>
+                                <label class="block text-xs text-slate-600 mb-1">{{ 'admin.settings.catalog_grid_desktop'|trans }}</label>
                                 <input type="number" name="catalog_grid_desktop" value="{{ storefront.catalog_grid_desktop }}" min="1" max="6" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                             </div>
                         </div>
@@ -109,21 +110,21 @@
                 </div>
 
                 <div>
-                    <p class="text-xs font-medium text-gray-700 mb-2">{{ 'admin.settings.section_product'|trans }}</p>
+                    <p class="text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">{{ 'admin.settings.section_product'|trans }}</p>
                     <div class="space-y-3 max-w-xl">
                         <div>
-                            <label class="block text-sm text-gray-700 mb-1">{{ 'admin.settings.product_gallery_style'|trans }}</label>
+                            <label class="block text-sm text-slate-700 dark:text-slate-300 mb-1">{{ 'admin.settings.product_gallery_style'|trans }}</label>
                             <select name="product_galleryStyle" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                                 <option value="thumbnails" {% if storefront.product_galleryStyle == 'thumbnails' %}selected{% endif %}>{{ 'admin.settings.product_gallery_thumbnails'|trans }}</option>
                                 <option value="carousel" {% if storefront.product_galleryStyle == 'carousel' %}selected{% endif %}>{{ 'admin.settings.product_gallery_carousel'|trans }}</option>
                             </select>
                         </div>
-                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                        <label class="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                             <input type="checkbox" name="product_stickyAddToCart" value="1" class="rounded border-gray-300" {% if storefront.product_stickyAddToCart %}checked{% endif %}>
                             {{ 'admin.settings.product_sticky_add_to_cart'|trans }}
                         </label>
                         <div>
-                            <label class="block text-sm text-gray-700 mb-1">{{ 'admin.settings.product_tabs_layout'|trans }}</label>
+                            <label class="block text-sm text-slate-700 dark:text-slate-300 mb-1">{{ 'admin.settings.product_tabs_layout'|trans }}</label>
                             <select name="product_tabsLayout" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                                 <option value="accordion" {% if storefront.product_tabsLayout == 'accordion' %}selected{% endif %}>{{ 'admin.settings.product_tabs_accordion'|trans }}</option>
                                 <option value="tabs" {% if storefront.product_tabsLayout == 'tabs' %}selected{% endif %}>{{ 'admin.settings.product_tabs_horizontal'|trans }}</option>
@@ -133,7 +134,7 @@
                 </div>
 
                 <div>
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700">
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">
                         <i class="fas fa-save"></i>
                         {{ 'common.save'|trans }}
                     </button>
@@ -141,15 +142,15 @@
             </form>
         </section>
 
-        <section class="admin-card p-6">
-            <h3 class="text-sm font-semibold text-gray-800 mb-1">{{ 'admin.settings.section_support'|trans }}</h3>
-            <p class="text-xs text-gray-500 mb-4">{{ 'admin.settings.section_support_intro'|trans }}</p>
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+            <h3 class="mb-1 text-sm font-semibold text-slate-800 dark:text-slate-100">{{ 'admin.settings.section_support'|trans }}</h3>
+            <p class="mb-4 text-xs text-slate-500">{{ 'admin.settings.section_support_intro'|trans }}</p>
 
             <form method="post" action="{{ path('admin_support_provider_save') }}" class="space-y-4" id="support-provider-form">
                 <input type="hidden" name="_token" value="{{ csrf_token('admin_support_provider') }}">
                 <div>
-                    <label class="block text-sm text-gray-700 mb-1">{{ 'admin.dashboard.provider_label'|trans }}</label>
-                    <select name="provider" id="support-provider-select" class="w-full max-w-xl rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                    <label class="block text-sm text-slate-700 dark:text-slate-300 mb-1">{{ 'admin.dashboard.provider_label'|trans }}</label>
+                    <select name="provider" id="support-provider-select" class="w-full max-w-xl rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800">
                         <option value="disabled" {% if support_provider.provider == 'disabled' %}selected{% endif %}>{{ 'admin.dashboard.support_option_disabled'|trans }}</option>
                         <option value="selfcoded" {% if support_provider.provider == 'selfcoded' %}selected{% endif %}>{{ 'admin.dashboard.support_option_selfcoded'|trans }}</option>
                         <option value="tawkto" {% if support_provider.provider == 'tawkto' %}selected{% endif %}>{{ 'admin.dashboard.support_option_tawk'|trans }}</option>
@@ -160,30 +161,45 @@
 
                 <div id="support-provider-tawk" class="space-y-3 {% if support_provider.provider not in ['tawkto', 'tawk_charla'] %}hidden{% endif %}">
                     <div>
-                        <label class="block text-sm text-gray-700 mb-1">{{ 'admin.dashboard.tawk_embed_path'|trans }}</label>
-                        <input type="text" name="tawkEmbedPath" value="{{ support_provider.tawkEmbedPath }}" class="w-full max-w-xl rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="{{ 'admin.settings.placeholder_tawk_embed_path'|trans }}">
-                        <p class="text-xs text-gray-500 mt-1.5 leading-relaxed max-w-3xl">{{ 'support.provider_help.tawk_where'|trans }}</p>
+                        <label class="block text-sm text-slate-700 dark:text-slate-300 mb-1">{{ 'admin.dashboard.tawk_embed_path'|trans }}</label>
+                        <input type="text" name="tawkEmbedPath" value="{{ support_provider.tawkEmbedPath }}" class="w-full max-w-xl rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800" placeholder="{{ 'admin.settings.placeholder_tawk_embed_path'|trans }}">
+                        <p class="text-xs text-slate-500 mt-1.5 leading-relaxed max-w-3xl">{{ 'support.provider_help.tawk_where'|trans }}</p>
                     </div>
                 </div>
 
                 <div id="support-provider-charla" class="space-y-3 {% if support_provider.provider not in ['charla', 'tawk_charla'] %}hidden{% endif %}">
                     <div>
-                        <label class="block text-sm text-gray-700 mb-1">{{ 'admin.dashboard.charla_project_id'|trans }}</label>
-                        <input type="text" name="charlaProjectId" value="{{ support_provider.charlaProjectId }}" class="w-full max-w-xl rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="{{ 'admin.settings.placeholder_charla_project_id'|trans }}">
-                        <p class="text-xs text-gray-500 mt-1.5 leading-relaxed max-w-3xl">{{ 'support.provider_help.charla_where'|trans }}</p>
+                        <label class="block text-sm text-slate-700 dark:text-slate-300 mb-1">{{ 'admin.dashboard.charla_project_id'|trans }}</label>
+                        <input type="text" name="charlaProjectId" value="{{ support_provider.charlaProjectId }}" class="w-full max-w-xl rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800" placeholder="{{ 'admin.settings.placeholder_charla_project_id'|trans }}">
+                        <p class="text-xs text-slate-500 mt-1.5 leading-relaxed max-w-3xl">{{ 'support.provider_help.charla_where'|trans }}</p>
                     </div>
                 </div>
 
-                <p class="text-xs text-gray-500 leading-relaxed max-w-3xl">{{ 'support.provider_help.footer'|trans }}</p>
+                <p class="text-xs text-slate-500 leading-relaxed max-w-3xl">{{ 'support.provider_help.footer'|trans }}</p>
 
                 <div>
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700">
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">
                         <i class="fas fa-save"></i>
                         {{ 'common.save'|trans }}
                     </button>
                 </div>
             </form>
         </section>
+        </div>
+        <aside class="space-y-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+                <h4 class="text-sm font-semibold text-slate-800 dark:text-slate-100">UX Tips</h4>
+                <ul class="mt-3 space-y-2 text-xs text-slate-500">
+                    <li>- Storefront settings are published immediately after save.</li>
+                    <li>- Keep support provider credentials environment-safe.</li>
+                    <li>- Use Theme Editor for visual polish after structural settings.</li>
+                </ul>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+                <h4 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Current Provider</h4>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{{ support_provider.provider }}</p>
+            </div>
+        </aside>
     </div>
 {% endblock %}
 

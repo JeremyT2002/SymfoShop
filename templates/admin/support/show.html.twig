@@ -3,34 +3,34 @@
 {% block page_title %}{{ 'support.admin.conversation_page_title'|trans }}{% endblock %}
 
 {% block body %}
-    <div class="admin-page-header">
+    <div class="mb-6 flex items-center justify-between gap-3">
         <div>
-            <h2 class="text-2xl font-bold text-gray-900">{{ conversation.subject }}</h2>
-            <p class="text-gray-600 mt-1">
+            <h2 class="text-2xl font-bold">{{ conversation.subject }}</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 {{ 'support.admin.customer_label'|trans }}: {{ conversation.customer ? conversation.customer.email : 'support.common.na'|trans }}
                 · {{ 'support.admin.status_label'|trans }}: {{ ('support.status.' ~ conversation.status)|trans }}
                 · {{ 'support.admin.category_label'|trans }}: {{ ('support.category.' ~ conversation.category)|trans }}
                 {% if conversation.relatedOrderNumber %} · {{ 'support.admin.order_label'|trans }}: {{ conversation.relatedOrderNumber }}{% endif %}
             </p>
         </div>
-        <a href="{{ path('admin_support_index') }}" class="inline-flex items-center gap-2 text-primary-700 hover:text-primary-800 font-medium">
-            <i class="fas fa-arrow-left"></i>{{ 'support.admin.back_to_inbox'|trans }}
+        <a href="{{ path('admin_support_index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-primary-700 hover:text-primary-800">
+            <span>←</span>{{ 'support.admin.back_to_inbox'|trans }}
         </a>
     </div>
 
-    <div class="admin-card overflow-hidden shadow-sm">
-        <div id="support-admin-thread" class="p-5 space-y-3 max-h-[62vh] overflow-y-auto bg-gray-50/60" data-conversation-id="{{ conversation.id }}">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-admin dark:border-slate-800 dark:bg-slate-900">
+        <div id="support-admin-thread" class="max-h-[62vh] space-y-3 overflow-y-auto bg-slate-50/60 p-5 dark:bg-slate-950/30" data-conversation-id="{{ conversation.id }}">
             {% for m in messages %}
-                <article class="rounded-xl px-4 py-3 shadow-sm {{ m.senderType == 'support' ? 'bg-indigo-50 border border-indigo-100 ml-8' : 'bg-white border border-gray-200 mr-8' }}" data-message-id="{{ m.id }}">
-                    <div class="text-xs text-gray-500 mb-1">
+                <article class="rounded-xl px-4 py-3 shadow-sm {{ m.senderType == 'support' ? 'ml-8 border border-indigo-200 bg-indigo-50 dark:border-indigo-900/50 dark:bg-indigo-900/20' : 'mr-8 border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900' }}" data-message-id="{{ m.id }}">
+                    <div class="mb-1 text-xs text-slate-500">
                         {{ m.senderType == 'support' ? 'support.sender.support'|trans : 'support.sender.customer'|trans }} · {{ m.senderUser ? m.senderUser.email : 'support.common.anonymous'|trans }} · {{ m.createdAt|date('Y-m-d H:i:s') }}
                     </div>
-                    <p class="text-sm text-gray-800 whitespace-pre-wrap">{{ m.body }}</p>
+                    <p class="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200">{{ m.body }}</p>
                     {% if m.attachments|length > 0 %}
                         <div class="mt-2 space-y-1">
                             {% for a in m.attachments %}
                                 <a href="{{ path('support_attachment_download', {id: a.id}) }}" class="inline-flex items-center gap-1 text-xs text-primary-700 hover:text-primary-800 hover:underline">
-                                    <i class="fas fa-paperclip"></i>{{ a.originalName }}
+                                    {{ a.originalName }}
                                 </a>
                             {% endfor %}
                         </div>
@@ -41,8 +41,8 @@
             {% endfor %}
         </div>
 
-        <form id="support-admin-form" method="post" enctype="multipart/form-data" class="p-5 border-t border-gray-200 bg-white space-y-3 sticky bottom-0">
-            <textarea id="support-admin-body" name="body" rows="3" required class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500" placeholder="{{ 'support.admin.reply_placeholder'|trans }}"></textarea>
+        <form id="support-admin-form" method="post" enctype="multipart/form-data" class="sticky bottom-0 space-y-3 border-t border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+            <textarea id="support-admin-body" name="body" rows="3" required class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 dark:border-slate-700 dark:bg-slate-800" placeholder="{{ 'support.admin.reply_placeholder'|trans }}"></textarea>
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="space-y-1">
@@ -93,7 +93,7 @@
             let attachmentsHtml = '';
             if (msg.attachments && msg.attachments.length > 0) {
                 attachmentsHtml = '<div class="mt-2 space-y-1">' + msg.attachments.map((a) =>
-                    `<a class="inline-flex items-center gap-1 text-xs text-primary-700 hover:text-primary-800 hover:underline" href="/support/attachment/${a.id}/download"><i class="fas fa-paperclip"></i>${a.name}</a>`
+                    `<a class="inline-flex items-center gap-1 text-xs text-primary-700 hover:text-primary-800 hover:underline" href="/support/attachment/${a.id}/download">${a.name}</a>`
                 ).join('') + '</div>';
             }
             article.innerHTML =

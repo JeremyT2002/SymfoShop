@@ -1,0 +1,32 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}{{ 'admin.audit.title'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold">{{ 'admin.audit.title'|trans }}</h2>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ 'admin.audit.subtitle'|trans }}</p>
+    </div>
+
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-admin dark:border-slate-800 dark:bg-slate-900">
+        <div class="divide-y divide-slate-200 dark:divide-slate-800">
+            {% for entry in entries %}
+                <div class="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ entry.title }}</p>
+                        <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ entry.detail }}</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-slate-500 dark:text-slate-400">{{ entry.at|date('Y-m-d H:i') }}</span>
+                        <a href="{{ path(entry.route, entry.routeParams|default({})) }}" class="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">
+                            {{ 'admin.audit.open'|trans }}
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="px-4 py-6 text-sm text-slate-500 dark:text-slate-400">{{ 'admin.audit.empty'|trans }}</div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+

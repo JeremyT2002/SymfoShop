@@ -10,10 +10,12 @@
         </div>
     </div>
 
+    <div x-data="{ selectedIds: [], clearSelection(){ this.selectedIds=[]; } }" class="space-y-4">
     <div class="admin-card admin-table-wrap">
         <table class="min-w-full divide-y divide-gray-200 text-sm">
             <thead>
                 <tr>
+                    <th class="px-4 py-3"></th>
                     <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'admin.return_requests.col_date'|trans }}</th>
                     <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'admin.return_requests.col_order'|trans }}</th>
                     <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ 'admin.return_requests.col_email'|trans }}</th>
@@ -24,6 +26,7 @@
             <tbody class="divide-y divide-gray-100">
                 {% for r in requests %}
                     <tr class="align-top">
+                        <td class="px-4 py-3"><input type="checkbox" @change="$event.target.checked ? selectedIds.push({{ r.id }}) : selectedIds = selectedIds.filter(id => id !== {{ r.id }})" class="h-4 w-4 rounded border-gray-300"></td>
                         <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ r.createdAt|date('Y-m-d H:i') }}</td>
                         <td class="px-4 py-3 font-mono text-xs">{{ r.orderNumber }}</td>
                         <td class="px-4 py-3">{{ r.email }}</td>
@@ -32,10 +35,17 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">{{ 'admin.return_requests.empty'|trans }}</td>
+                        <td colspan="6" class="px-4 py-8 text-center text-gray-500">{{ 'admin.return_requests.empty'|trans }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+    <div x-show="selectedIds.length > 0" class="sticky bottom-4">
+        <div class="flex items-center justify-between rounded-2xl border border-primary-200 bg-primary-50 p-3">
+            <p class="text-sm font-medium text-primary-700"><span x-text="selectedIds.length"></span> {{ 'admin.table.selected'|trans }}</p>
+            <button type="button" @click="clearSelection()" class="rounded-xl border border-gray-300 px-3 py-2 text-xs font-semibold">{{ 'admin.table.clear_selection'|trans }}</button>
+        </div>
+    </div>
     </div>
 {% endblock %}

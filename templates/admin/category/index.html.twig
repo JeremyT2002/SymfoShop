@@ -3,75 +3,89 @@
 {% block page_title %}{{ 'admin.categories.page_title'|trans }}{% endblock %}
 
 {% block body %}
-    <div class="admin-page-header">
+    {% from 'admin/components/_icons.html.twig' import icon %}
+    {% set rootCount = categories|filter(c => c.parent is null)|length %}
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-            <h2 class="text-2xl font-bold text-gray-900">{{ 'admin.categories.heading'|trans }}</h2>
-            <p class="text-gray-600 mt-1">{{ 'admin.categories.subtitle'|trans }}</p>
+            <h2 class="text-2xl font-bold">{{ 'admin.categories.heading'|trans }}</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ 'admin.categories.subtitle'|trans }}</p>
         </div>
-        <a href="{{ path('admin_categories_new') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
-            <i class="fas fa-plus"></i>
+        <a href="{{ path('admin_categories_new') }}" class="focus-ring inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-700">
+            {{ icon('plus', 'h-4 w-4') }}
             <span>{{ 'admin.categories.new'|trans }}</span>
         </a>
     </div>
 
-    <div class="admin-card admin-table-wrap">
-        <table class="admin-table min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+    <div class="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total</p>
+            <p class="mt-1 text-2xl font-bold">{{ categories|length }}</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Root</p>
+            <p class="mt-1 text-2xl font-bold">{{ rootCount }}</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+            <label for="category-search" class="text-xs font-semibold uppercase tracking-wide text-slate-500">Quick search</label>
+            <input id="category-search" type="search" placeholder="Name or slug..."
+                   class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800">
+        </div>
+    </div>
+
+    <div x-data="{ selectedIds: [], clearSelection(){ this.selectedIds=[]; } }" class="space-y-4">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-admin dark:border-slate-800 dark:bg-slate-900">
+        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+            <thead class="bg-slate-50 dark:bg-slate-950/60">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'admin.categories.table.id'|trans }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'admin.categories.table.name'|trans }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'admin.categories.table.slug'|trans }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'admin.categories.table.parent'|trans }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'admin.categories.table.children'|trans }}</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'admin.categories.table.actions'|trans }}</th>
+                    <th class="px-4 py-3"></th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.categories.table.id'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.categories.table.name'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.categories.table.parent'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.categories.table.children'|trans }}</th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.categories.table.actions'|trans }}</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900">
                 {% if categories|length > 0 %}
                     {% for category in categories %}
-                        <tr class="hover:bg-gray-50 {% if category.parent %}bg-gray-50{% endif %}">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <tr class="category-row hover:bg-slate-50 dark:hover:bg-slate-800/70" data-search="{{ (category.name ~ ' ' ~ category.slug)|lower }}">
+                            <td class="px-4 py-4"><input type="checkbox" @change="$event.target.checked ? selectedIds.push({{ category.id }}) : selectedIds = selectedIds.filter(id => id !== {{ category.id }})" class="h-4 w-4 rounded border-gray-300"></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                 #{{ category.id }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900 {% if category.parent %}pl-4{% endif %}">
-                                    {% if category.parent %}<i class="fas fa-level-up-alt text-gray-400 mr-2"></i>{% endif %}
+                                <div class="text-sm font-medium text-slate-900 dark:text-slate-100 {% if category.parent %}pl-4{% endif %}">
+                                    {% if category.parent %}
+                                        <span class="mr-2 text-slate-400">└</span>
+                                    {% endif %}
                                     {{ category.name }}
                                 </div>
+                                <div class="text-xs text-slate-500">{{ category.slug }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ category.slug }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                 {% if category.parent %}
-                                    <a href="{{ path('admin_categories_show', {id: category.parent.id}) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                                    <a href="{{ path('admin_categories_show', {id: category.parent.id}) }}" class="text-primary-600 hover:text-primary-700 dark:text-primary-300">
                                         {{ category.parent.name }}
                                     </a>
                                 {% else %}
-                                    <span class="text-gray-400">—</span>
+                                    <span class="text-slate-400">—</span>
                                 {% endif %}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                 {% set n = category.children|length %}
-                                {% if n == 0 %}
-                                    {{ 'admin.categories.children_0'|trans }}
-                                {% elseif n == 1 %}
-                                    {{ 'admin.categories.children_1'|trans }}
-                                {% else %}
-                                    {{ 'admin.categories.children_n'|trans({'%count%': n}) }}
-                                {% endif %}
+                                <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">{{ n }}</span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                <a href="{{ path('admin_categories_show', {id: category.id}) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                                    <i class="fas fa-eye"></i>
+                                <a href="{{ path('admin_categories_show', {id: category.id}) }}" class="text-primary-600 hover:text-primary-700 dark:text-primary-300">
+                                    {{ 'common.view'|trans }}
                                 </a>
-                                <a href="{{ path('admin_categories_edit', {id: category.id}) }}" class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300">
-                                    <i class="fas fa-edit"></i>
+                                <a href="{{ path('admin_categories_edit', {id: category.id}) }}" class="text-amber-600 hover:text-amber-700 dark:text-amber-300">
+                                    {{ 'common.edit'|trans }}
                                 </a>
                                 <form method="post" action="{{ path('admin_categories_delete', {id: category.id}) }}" class="inline" onsubmit="return confirm({{ 'admin.categories.delete_confirm'|trans|json_encode|raw }});">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete_category_' ~ category.id) }}">
-                                    <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                        <i class="fas fa-trash"></i>
+                                    <button type="submit" class="text-red-600 hover:text-red-700 dark:text-red-300">
+                                        {{ 'common.delete'|trans }}
                                     </button>
                                 </form>
                             </td>
@@ -79,7 +93,7 @@
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
                             <i class="fas fa-tags text-4xl mb-4 text-gray-300 dark:text-gray-600"></i>
                             <p class="text-lg font-medium">{{ 'admin.categories.empty'|trans }}</p>
                             <p class="text-sm mt-2">{{ 'admin.categories.empty_hint'|trans }}</p>
@@ -92,4 +106,24 @@
             </tbody>
         </table>
     </div>
+    <div x-show="selectedIds.length > 0" class="sticky bottom-4">
+        <div class="flex items-center justify-between rounded-2xl border border-primary-200 bg-primary-50 p-3">
+            <p class="text-sm font-medium text-primary-700"><span x-text="selectedIds.length"></span> {{ 'admin.table.selected'|trans }}</p>
+            <button type="button" @click="clearSelection()" class="rounded-xl border border-gray-300 px-3 py-2 text-xs font-semibold">{{ 'admin.table.clear_selection'|trans }}</button>
+        </div>
+    </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('category-search');
+            const rows = Array.from(document.querySelectorAll('.category-row'));
+            if (!input || rows.length === 0) return;
+            input.addEventListener('input', function () {
+                const term = input.value.trim().toLowerCase();
+                rows.forEach((row) => {
+                    row.style.display = term === '' || (row.getAttribute('data-search') || '').includes(term) ? '' : 'none';
+                });
+            });
+        });
+    </script>
 {% endblock %}

@@ -105,10 +105,11 @@
 </head>
 <body
     class="admin font-sans antialiased bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100"
-    x-data="{ sidebarOpen: false, sidebarCollapsed: false, userMenuOpen: false }"
-    @keydown.escape.window="sidebarOpen = false; userMenuOpen = false"
+    x-data="{ sidebarOpen: false, sidebarCollapsed: false, userMenuOpen: false, notificationsOpen: false }"
+    @keydown.escape.window="sidebarOpen = false; userMenuOpen = false; notificationsOpen = false"
 >
     {% from 'admin/components/_icons.html.twig' import icon %}
+    {% set adminNotifications = admin_notifications() %}
     {% set currentRoute = app.request.attributes.get('_route')|default('') %}
     {% set navItems = [
         { route: 'admin', key: 'admin.nav.dashboard', icon: 'home' },
@@ -119,6 +120,7 @@
         { route: 'admin_users_index', key: 'admin.nav.users', icon: 'users' },
         { route: 'admin_reviews_index', key: 'admin.nav.reviews', icon: 'star' },
         { route: 'admin_support_index', key: 'admin.nav.support_inbox', icon: 'life-buoy' },
+        { route: 'admin_audit_log', key: 'admin.nav.audit_log', icon: 'book-open' },
         { route: 'admin_settings', key: 'admin.settings.nav', icon: 'settings' },
         { route: 'admin_api_docs', key: 'admin.nav.api_documentation', icon: 'book-open' }
     ] %}
@@ -196,7 +198,7 @@
                         >
                             {{ icon('bars-3', 'h-5 w-5') }}
                         </button>
-                        <form action="{{ path('admin_products_index') }}" method="get" class="hidden items-center md:flex">
+                        <form action="{{ path('admin_search') }}" method="get" class="hidden items-center md:flex">
                             <label for="admin-search" class="sr-only">{{ 'admin.layout.search_aria'|trans }}</label>
                             <div class="relative">
                                 <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
@@ -208,6 +210,7 @@
                                     type="search"
                                     class="focus-ring h-11 w-72 rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm dark:border-slate-700 dark:bg-slate-800"
                                     placeholder="{{ 'admin.layout.search_placeholder'|trans }}"
+                                    value="{{ app.request.query.get('q')|default('') }}"
                                     autocomplete="off"
                                 >
                             </div>
@@ -237,13 +240,62 @@
                             <span class="hidden dark:inline">{{ icon('sun', 'h-5 w-5') }}</span>
                         </button>
 
-                        <button
-                            type="button"
-                            class="touch-target focus-ring inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                            aria-label="{{ 'admin.layout.notifications_placeholder_aria'|trans }}"
-                        >
-                            {{ icon('bell', 'h-5 w-5') }}
-                        </button>
+                        <div class="relative">
+                            <button
+                                type="button"
+                                class="touch-target focus-ring inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                aria-label="{{ 'admin.layout.notifications_aria'|trans }}"
+                                @click="notificationsOpen = !notificationsOpen"
+                                :aria-expanded="notificationsOpen.toString()"
+                                aria-haspopup="true"
+                            >
+                                {{ icon('bell', 'h-5 w-5') }}
+                                {% if adminNotifications.unreadCount > 0 %}
+                                    <span class="absolute -right-1 -top-1 inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-danger px-1 text-[10px] font-semibold text-white">
+                                        {{ adminNotifications.unreadCount > 9 ? '9+' : adminNotifications.unreadCount }}
+                                    </span>
+                                {% endif %}
+                            </button>
+                            <div
+                                x-cloak
+                                x-show="notificationsOpen"
+                                x-transition
+                                @click.outside="notificationsOpen = false"
+                                class="absolute right-0 z-30 mt-2 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-admin dark:border-slate-700 dark:bg-slate-800"
+                            >
+                                <div class="flex items-center justify-between border-b border-slate-200 px-3 py-2 dark:border-slate-700">
+                                    <p class="text-sm font-semibold">{{ 'admin.layout.notifications_title'|trans }}</p>
+                                    <div class="flex items-center gap-3">
+                                        {% if adminNotifications.unreadCount > 0 %}
+                                            <form action="{{ path('admin_notifications_mark_seen') }}" method="post">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('admin_notifications_mark_seen') }}">
+                                                <input type="hidden" name="redirect_to" value="{{ app.request.uri }}">
+                                                <button type="submit" class="text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-100">
+                                                    {{ 'admin.layout.notifications_mark_read'|trans }}
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                        <a href="{{ path('admin_audit_log') }}" class="text-xs font-medium text-primary-600 hover:text-primary-700">{{ 'admin.layout.notifications_view_all'|trans }}</a>
+                                    </div>
+                                </div>
+                                <div class="max-h-80 overflow-y-auto">
+                                    {% for item in adminNotifications.items %}
+                                        <a href="{{ path(item.url, item.routeParams|default({})) }}" class="block border-b border-slate-100 px-3 py-2 last:border-0 hover:bg-slate-50 dark:border-slate-700/70 dark:hover:bg-slate-700/40 {{ item.isRead ? 'opacity-75' : '' }}">
+                                            <p class="flex items-center gap-2 text-sm font-medium text-slate-900 dark:text-slate-100">
+                                                {% if not item.isRead %}
+                                                    <span class="inline-flex h-1.5 w-1.5 rounded-full bg-primary-600"></span>
+                                                {% endif %}
+                                                <span>{{ item.title }}</span>
+                                            </p>
+                                            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ item.detail }}</p>
+                                            <p class="mt-1 text-[11px] text-slate-400 dark:text-slate-500">{{ item.at|date('Y-m-d H:i') }}</p>
+                                        </a>
+                                    {% else %}
+                                        <p class="px-3 py-4 text-sm text-slate-500 dark:text-slate-400">{{ 'admin.layout.notifications_empty'|trans }}</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="relative">
                             <button

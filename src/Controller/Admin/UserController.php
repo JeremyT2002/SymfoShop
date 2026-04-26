@@ -25,28 +25,28 @@ class UserController extends AbstractController
     public function index(Request $request): Response
     {
         $page = max(1, (int) $request->query->get('page', 1));
-        $limit = 20;
+        $limit = in_array((int) $request->query->get('perPage', 25), [25, 50, 100], true)
+            ? (int) $request->query->get('perPage', 25)
+            : 25;
         $offset = ($page - 1) * $limit;
         
-        $search = $request->query->get('search');
-        $role = $request->query->get('role');
-        
-        $users = $this->userRepository->findBy([], ['createdAt' => 'DESC'], $limit, $offset);
-        
-        // Apply filters
-        if ($search) {
-            $users = array_filter($users, function(User $user) use ($search) {
-                return stripos($user->getEmail(), $search) !== false;
-            });
-        }
-        
-        if ($role) {
-            $users = array_filter($users, function(User $user) use ($role) {
-                return in_array($role, $user->getRoles());
-            });
-        }
-        
-        $total = $this->userRepository->count([]);
+        $search = trim((string) $request->query->get('search', ''));
+        $role = (string) $request->query->get('role', '');
+        $sortBy = (string) $request->query->get('sortBy', 'createdAt');
+        $sortDir = strtoupper((string) $request->query->get('sortDir', 'DESC')) === 'ASC' ? 'ASC' : 'DESC';
+
+        $users = $this->userRepository->findForAdminList(
+            $search !== '' ? $search : null,
+            $role !== '' ? $role : null,
+            $limit,
+            $offset,
+            $sortBy,
+            $sortDir
+        );
+        $total = $this->userRepository->countForAdminList(
+            $search !== '' ? $search : null,
+            $role !== '' ? $role : null
+        );
         
         return $this->render('admin/user/index.html.twig', [
             'users' => $users,
@@ -54,6 +54,9 @@ class UserController extends AbstractController
             'totalPages' => ceil($total / $limit),
             'search' => $search,
             'role' => $role,
+            'perPage' => $limit,
+            'sortBy' => $sortBy,
+            'sortDir' => $sortDir,
         ]);
     }
 
@@ -175,6 +178,93 @@ class UserController extends AbstractController
         }
         
         return $this->redirectToRoute('admin_users_index');
+    }
+
+    #[Route('/{id}/active', name: 'update_active', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function updateActive(int $id, Request $request): Response
+    {
+        $user = $this->userRepository->find($id);
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        if (!$this->isCsrfTokenValid('update_user_active_' . $user->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+
+            return $this->redirectToRoute('admin_users_show', ['id' => $user->getId()]);
+        }
+
+        $active = match ((string) $request->request->get('active', '')) {
+            '1' => true,
+            '0' => false,
+            default => null,
+        };
+        if ($active === null) {
+            $this->addFlash('error', 'Invalid active value.');
+
+            return $this->redirectToRoute('admin_users_show', ['id' => $user->getId()]);
+        }
+
+        if (!$active && $user->getId() === $this->getUser()?->getId()) {
+            $this->addFlash('error', 'You cannot deactivate your own account.');
+
+            return $this->redirectToRoute('admin_users_show', ['id' => $user->getId()]);
+        }
+
+        $user->setIsActive($active);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'User status updated.');
+
+        return $this->redirectToRoute('admin_users_show', ['id' => $user->getId()]);
+    }
+
+    #[Route('/bulk/active', name: 'bulk_active', methods: ['POST'])]
+    public function bulkActive(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('bulk_users_active', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+
+            return $this->redirectToRoute('admin_users_index');
+        }
+
+        $ids = $this->parseBulkIds((string) $request->request->get('ids', ''));
+        $active = match ((string) $request->request->get('active', '')) {
+            '1' => true,
+            '0' => false,
+            default => null,
+        };
+
+        if ($ids === [] || $active === null) {
+            $this->addFlash('error', 'Invalid bulk action payload.');
+
+            return $this->redirectToRoute('admin_users_index');
+        }
+
+        $users = $this->userRepository->findBy(['id' => $ids]);
+        $selfId = $this->getUser()?->getId();
+        $updated = 0;
+        foreach ($users as $user) {
+            if (!$active && $selfId !== null && $user->getId() === $selfId) {
+                continue;
+            }
+
+            $user->setIsActive($active);
+            $updated++;
+        }
+        $this->entityManager->flush();
+        $this->addFlash('success', sprintf('Updated %d user(s).', $updated));
+
+        return $this->redirectToRoute('admin_users_index');
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function parseBulkIds(string $raw): array
+    {
+        $parts = array_filter(array_map('trim', explode(',', $raw)), static fn (string $value): bool => $value !== '');
+
+        return array_values(array_map('intval', $parts));
     }
 }
 

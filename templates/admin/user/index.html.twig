@@ -1,132 +1,134 @@
 {% extends 'admin/base.html.twig' %}
 
-{% block page_title %}Users{% endblock %}
+{% block page_title %}{{ 'admin.users.page_title'|trans }}{% endblock %}
 
 {% block body %}
-    <div class="admin-page-header">
+    {% from 'admin/components/_icons.html.twig' import icon %}
+    {% set baseQuery = {search: search, role: role, perPage: perPage, sortBy: sortBy, sortDir: sortDir} %}
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-            <h2 class="text-2xl font-bold text-gray-900">Users</h2>
-            <p class="text-gray-600 mt-1">Manage user accounts</p>
+            <h2 class="text-2xl font-bold">{{ 'admin.users.heading'|trans }}</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ 'admin.users.subtitle'|trans }}</p>
         </div>
-        <a href="{{ path('admin_users_new') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
-            <i class="fas fa-plus"></i>
-            <span>New User</span>
+        <a href="{{ path('admin_users_new') }}" class="focus-ring inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-700">
+            {{ icon('plus', 'h-4 w-4') }}
+            <span>{{ 'admin.users.new'|trans }}</span>
         </a>
     </div>
-    
-    <!-- Filters -->
-    <div class="admin-card p-4 mb-6">
-        <form method="get" class="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto_auto_auto] md:items-center">
-            <div>
-                <input type="text" name="search" value="{{ search }}" placeholder="Search by email..." 
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            </div>
-            <div class="min-w-[160px]">
-                <select name="role" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">All Roles</option>
-                    <option value="ROLE_ADMIN" {% if role == 'ROLE_ADMIN' %}selected{% endif %}>Admin</option>
-                    <option value="ROLE_USER" {% if role == 'ROLE_USER' %}selected{% endif %}>User</option>
-                </select>
-            </div>
-            <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-                <i class="fas fa-filter"></i> Filter
-            </button>
-            {% if search or role %}
-                <a href="{{ path('admin_users_index') }}" class="text-gray-600 hover:text-gray-900 px-4 py-2">
-                    Clear
-                </a>
-            {% endif %}
-        </form>
-    </div>
-    
-    <!-- Users Table -->
-    <div class="admin-card admin-table-wrap">
-        <table class="admin-table min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+
+    {% include 'admin/components/table-toolbar.html.twig' with {
+        search: search,
+        searchLabel: 'admin.users.search_placeholder'|trans,
+        searchPlaceholder: 'admin.users.search_placeholder'|trans,
+        filters: [{
+            name: 'role',
+            label: 'admin.users.table.roles'|trans,
+            value: role,
+            options: [
+                { value: '', label: 'admin.users.all_roles'|trans },
+                { value: 'ROLE_ADMIN', label: 'admin.users.role_admin'|trans },
+                { value: 'ROLE_USER', label: 'admin.users.role_user'|trans }
+            ]
+        }],
+        perPage: perPage,
+        sortBy: sortBy,
+        sortDir: sortDir,
+        hasActiveFilters: search or role,
+        clearUrl: path('admin_users_index')
+    } %}
+
+    <div x-data="{ selectedIds: [], clearSelection(){this.selectedIds=[];} }" class="space-y-4">
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-admin dark:border-slate-800 dark:bg-slate-900">
+            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                <thead class="bg-slate-50 dark:bg-slate-950/60">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roles</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-4 py-3"><input type="checkbox" class="h-4 w-4 rounded border-slate-300"></th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.users.table.id'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.users.table.email'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.users.table.roles'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.users.table.status'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.users.table.created'|trans }}</th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.users.table.actions'|trans }}</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900">
                 {% if users|length > 0 %}
                     {% for user in users %}
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/70">
+                            <td class="px-4 py-4"><input type="checkbox" @change="$event.target.checked ? selectedIds.push({{ user.id }}) : selectedIds = selectedIds.filter(id => id !== {{ user.id }})" class="h-4 w-4 rounded border-slate-300"></td>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
                                 #{{ user.id }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ user.email }}</div>
+                            <td class="whitespace-nowrap px-6 py-4">
+                                <div class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ user.email }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="whitespace-nowrap px-6 py-4">
                                 <div class="flex flex-wrap gap-1">
                                     {% for role in user.roles %}
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        <span class="rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
                                             {{ role }}
                                         </span>
                                     {% endfor %}
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    {% if user.isActive %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-                                    {{ user.isActive ? 'Active' : 'Inactive' }}
+                            <td class="whitespace-nowrap px-6 py-4">
+                                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {% if user.isActive %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ user.isActive ? 'admin.users.active'|trans : 'admin.users.inactive'|trans }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
                                 {{ user.createdAt|date('Y-m-d') }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                <a href="{{ path('admin_users_show', {id: user.id}) }}" class="text-blue-600 hover:text-blue-900">
-                                    <i class="fas fa-eye"></i>
+                            <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                                <a href="{{ path('admin_users_show', {id: user.id}) }}" class="text-primary-600 hover:text-primary-700 dark:text-primary-300">
+                                    {{ 'admin.orders.view'|trans }}
                                 </a>
-                                <a href="{{ path('admin_users_edit', {id: user.id}) }}" class="text-yellow-600 hover:text-yellow-900">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                {% if user.id != app.user.id %}
-                                    <form method="post" action="{{ path('admin_users_delete', {id: user.id}) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this user?');">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ user.id) }}">
-                                        <button type="submit" class="text-red-600 hover:text-red-900">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                            <i class="fas fa-users text-4xl mb-4 text-gray-300"></i>
-                            <p class="text-lg font-medium">No users found</p>
+                        <td colspan="7" class="px-6 py-8 text-center text-slate-500">
+                            <p class="text-lg font-medium">{{ 'admin.users.empty'|trans }}</p>
                         </td>
                     </tr>
                 {% endif %}
             </tbody>
-        </table>
+            </table>
+        </div>
+        <div x-show="selectedIds.length > 0" class="sticky bottom-4">
+            <div class="flex items-center justify-between rounded-2xl border border-primary-200 bg-primary-50 p-3 dark:border-primary-800 dark:bg-primary-900/30">
+                <p class="text-sm font-medium text-primary-700 dark:text-primary-300"><span x-text="selectedIds.length"></span> {{ 'admin.table.selected'|trans }}</p>
+                <form method="post" action="{{ path('admin_users_bulk_active') }}" class="flex items-center gap-2">
+                    <input type="hidden" name="_token" value="{{ csrf_token('bulk_users_active') }}">
+                    <input type="hidden" name="ids" :value="selectedIds.join(',')">
+                    <select name="active" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800">
+                        <option value="1">{{ 'admin.table.bulk_activate'|trans }}</option>
+                        <option value="0">{{ 'admin.table.bulk_deactivate'|trans }}</option>
+                    </select>
+                    <button type="submit" class="rounded-xl bg-white px-3 py-2 text-xs font-semibold dark:bg-slate-800">{{ 'admin.table.bulk_apply'|trans }}</button>
+                    <button type="button" @click="clearSelection()" class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold dark:border-slate-700">{{ 'admin.table.clear_selection'|trans }}</button>
+                </form>
+            </div>
+        </div>
     </div>
-    
-    <!-- Pagination -->
+
     {% if totalPages > 1 %}
-        <div class="mt-6 flex items-center justify-between">
-            <div class="text-sm text-gray-700">
-                Showing page {{ currentPage }} of {{ totalPages }}
+        <div class="mt-6 flex items-center justify-between text-sm">
+            <div class="text-slate-600 dark:text-slate-400">
+                {{ 'admin.users.pagination.showing'|trans({'%page%': currentPage, '%total%': totalPages}) }}
             </div>
             <div class="flex space-x-2">
                 {% if currentPage > 1 %}
-                    <a href="{{ path('admin_users_index', {page: currentPage - 1, role: role, search: search}) }}" 
-                       class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Previous
+                    <a href="{{ path('admin_users_index', baseQuery|merge({page: currentPage - 1})) }}"
+                       class="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">
+                        {{ 'common.previous'|trans }}
                     </a>
                 {% endif %}
                 {% if currentPage < totalPages %}
-                    <a href="{{ path('admin_users_index', {page: currentPage + 1, role: role, search: search}) }}" 
-                       class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Next
+                    <a href="{{ path('admin_users_index', baseQuery|merge({page: currentPage + 1})) }}"
+                       class="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">
+                        {{ 'common.next'|trans }}
                     </a>
                 {% endif %}
             </div>
