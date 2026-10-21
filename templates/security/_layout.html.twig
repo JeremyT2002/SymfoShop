@@ -1,0 +1,29 @@
+{# Centered layout for login, registration and password reset #}
+{% extends 'base.html.twig' %}
+
+{% block robots_meta %}<meta name="robots" content="noindex,follow">{% endblock %}
+
+{% block body %}
+<div class="flex flex-1 items-center justify-center px-4 py-12 sm:py-20">
+    <div class="w-full max-w-md">
+        <div class="text-center">
+            <span class="mx-auto flex size-12 items-center justify-center rounded-full bg-subtle text-fg">
+                {{ ux_icon(auth_icon|default('lucide:user-round'), {class: 'size-6'}) }}
+            </span>
+            <h1 class="mt-5 text-2xl font-semibold sm:text-3xl">{% block auth_title %}{% endblock %}</h1>
+            {# block() output is already escaped template output, hence |raw #}
+            {% if block('auth_subtitle') is defined %}
+                <p class="mt-2 text-sm text-fg-muted">{{ block('auth_subtitle')|raw }}</p>
+            {% endif %}
+        </div>
+
+        <div class="card mt-8 p-6 sm:p-8">
+            {% block auth_content %}{% endblock %}
+        </div>
+
+        {% if block('auth_footer') is defined %}
+            <p class="mt-6 text-center text-sm text-fg-muted">{{ block('auth_footer')|raw }}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,62 +1,28 @@
-{% extends 'catalog/base.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block page_title %}{{ theme_config().brand.siteName|default('SymfoShop') }} - Your Modern Shopping Destination{% endblock %}
-{% block page_meta_description %}Discover amazing products across multiple categories. Shop with confidence and enjoy fast shipping.{% endblock %}
+{% block meta_description %}{{ theme_config().brand.tagline|default('home.hero.subtitle'|trans) }}{% endblock %}
 
-{% block catalog_body %}
-    {% set themeSections = theme_config().homepage.sections|default([]) %}
-    {% if themeSections|length > 0 %}
-        {# Theme-driven homepage: render sections from theme config #}
-        {% set sectionContext = {
-            categories: categories|default([]),
-            featuredProducts: featuredProducts|default([])
-        } %}
-        {% for section in themeSections %}
-            {{ render_section(section, sectionContext) }}
+{% block body %}
+    {%- set section_context = {
+        categories: categories|default([]),
+        categoryChildrenCounts: categoryChildrenCounts|default({}),
+        featuredProducts: featuredProducts|default([]),
+    } -%}
+    {%- set theme_sections = theme_config().homepage.sections|default([]) -%}
+
+    {% if theme_sections is not empty %}
+        {# Layout configured in the admin theme editor #}
+        {% for section in theme_sections %}
+            {{ render_section(section, section_context) }}
         {% endfor %}
     {% else %}
-        {# Default homepage layout when no theme sections configured #}
-        {# Hero #}
-        <section class="relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white overflow-hidden">
-            <div class="absolute inset-0 bg-black opacity-10"></div>
-            <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.05\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
-                <div class="text-center">
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in">{{ 'home.hero.title'|trans|default('Welcome to SymfoShop') }}</h1>
-                    <p class="text-xl sm:text-2xl text-primary-100 mb-8 max-w-3xl mx-auto animate-slide-up" style="animation-delay: 0.1s">{{ 'home.hero.subtitle'|trans|default('Discover amazing products, shop with confidence, and enjoy fast shipping.') }}</p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up" style="animation-delay: 0.2s">
-                        <a href="#categories" class="bg-white text-primary-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-50 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
-                            <i class="fas fa-shopping-bag mr-2"></i>{{ 'home.hero.browse_categories'|trans|default('Browse Categories') }}
-                        </a>
-                        <a href="#featured" class="bg-primary-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-400 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 border-2 border-white">
-                            <i class="fas fa-star mr-2"></i>{{ 'home.hero.view_featured'|trans|default('Featured Products') }}
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-        {% include 'theme/sections/_benefits.html.twig' %}
-        {% if featuredProducts is defined and featuredProducts|length > 0 %}
-            {{ render_section({ type: 'featured_products', enabled: true, settings: { limit: 8 } }, { categories: categories|default([]), featuredProducts: featuredProducts }) }}
+        {{ render_section({type: 'hero', settings: {}}, section_context) }}
+        {{ render_section({type: 'category_grid', settings: {}}, section_context) }}
+        {{ render_section({type: 'featured_products', settings: {limit: 8}}, section_context) }}
+        {% if not app.user %}
+            {{ render_section({type: 'newsletter', settings: {}}, section_context) }}
         {% endif %}
-        {{ render_section({ type: 'category_grid', enabled: true, settings: {} }, { categories: categories|default([]) }) }}
-        <section class="bg-gradient-to-r from-primary-600 to-primary-700 text-white py-16">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h2 class="text-3xl sm:text-4xl font-bold mb-4">{{ 'home.cta.title'|trans|default('Ready to Start Shopping?') }}</h2>
-                <p class="text-xl text-primary-100 mb-8">{{ 'home.cta.subtitle'|trans|default('Join thousands of satisfied customers and discover amazing products today.') }}</p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{{ path('catalog_products') }}" class="bg-white text-primary-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-50 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
-                        <i class="fas fa-shopping-bag mr-2"></i>{{ 'home.cta.start_shopping'|trans|default('Start Shopping') }}
-                    </a>
-                    {% if not app.user %}
-                    <a href="{{ path('register') }}" class="bg-primary-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-400 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 border-2 border-white">
-                        <i class="fas fa-user-plus mr-2"></i>{{ 'home.cta.create_account'|trans|default('Create Account') }}
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
-        </section>
     {% endif %}
 
-    {% include 'components/recently_viewed_products.html.twig' with { recentlyViewedProducts: recentlyViewedProducts|default([]) } %}
+    {% include 'components/recently_viewed_products.html.twig' with {recentlyViewedProducts: recentlyViewedProducts|default([])} %}
 {% endblock %}

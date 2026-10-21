@@ -1,341 +1,272 @@
-{% extends 'catalog/base.html.twig' %}
+{% extends 'base.html.twig' %}
+
+{%- set seo_title = product.seoTitle|default(product.name) -%}
+{%- set seo_description = product.seoDescription|default(product.description|default(product.name))|striptags|slice(0, 160) -%}
+{%- set images = product.media|map(m => {src: m.path, alt: m.alt|default(product.name)}) -%}
+{%- set variant_data = variants|map(v => {
+    id: v.id,
+    label: v.attributes is not empty ? v.attributes|map((value, key) => key|capitalize ~ ': ' ~ value)|join(' · ') : 'product.default_variant'|trans,
+    price: v.priceAmount,
+    currency: v.currency,
+    sku: v.sku,
+    available: max(0, v.stockItem ? v.stockItem.available : 0),
+}) -%}
+{%- set default_available = defaultVariant and defaultVariant.stockItem ? defaultVariant.stockItem.available : 0 -%}
+
+{% block page_title %}{{ seo_title }}{% endblock %}
+{% block meta_description %}{{ seo_description }}{% endblock %}
+{% block js_page %}product{% endblock %}
 
 {% block robots_meta %}
-    {% set globalNoIndex = theme_config().seo.defaultNoIndex|default(false) %}
-    {% set pageNoIndex = product.seoNoIndex|default(false) %}
-    {% set noIndex = globalNoIndex or pageNoIndex %}
+    {%- set noIndex = theme_config().seo.defaultNoIndex|default(false) or product.seoNoIndex|default(false) -%}
     <meta name="robots" content="{{ noIndex ? 'noindex,nofollow' : 'index,follow' }}">
 {% endblock %}
 
-{% block title %}{{ product.seoTitle|default(product.name)|escape }} - SymfoShop{% endblock %}
-{% block meta_description %}{{ product.seoDescription|default(product.description|default(product.name))|escape|slice(0, 160) }}{% endblock %}
-{% block js_page %}product{% endblock %}
-
 {% block meta_tags %}
-    {% set seoTitle = product.seoTitle|default(product.name) %}
-    {% set seoDescription = product.seoDescription|default(product.description|default(product.name))|slice(0, 160) %}
-
-    <meta property="og:title" content="{{ seoTitle|escape }} - SymfoShop">
-    <meta property="og:description" content="{{ seoDescription|escape }}">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ seoTitle|escape }} - SymfoShop">
-    <meta name="twitter:description" content="{{ seoDescription|escape }}">
-    {% if product.media|length > 0 %}
-        {% set firstMedia = product.media|first %}
-        <meta property="og:image" content="{{ firstMedia.path|escape }}">
-        <meta name="twitter:image" content="{{ firstMedia.path|escape }}">
+    <meta property="og:type" content="product">
+    <meta property="og:title" content="{{ seo_title }}">
+    <meta property="og:description" content="{{ seo_description }}">
+    <meta name="twitter:card" content="{{ images is not empty ? 'summary_large_image' : 'summary' }}">
+    <meta name="twitter:title" content="{{ seo_title }}">
+    <meta name="twitter:description" content="{{ seo_description }}">
+    {% if images is not empty %}
+        <meta property="og:image" content="{{ absolute_url(images[0].src) }}">
     {% endif %}
+    {% if defaultVariant %}
+        <meta property="product:price:amount" content="{{ (defaultVariant.priceAmount / 100)|number_format(2, '.', '') }}">
+        <meta property="product:price:currency" content="{{ defaultVariant.currency }}">
+    {% endif %}
+    {# Structured data for rich results #}
+    <script type="application/ld+json">
+        {{- {
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: product.name,
+            description: seo_description,
+            image: images|map(i => absolute_url(i.src)),
+            sku: defaultVariant ? defaultVariant.sku : null,
+            offers: variants|map(v => {
+                '@type': 'Offer',
+                sku: v.sku,
+                price: (v.priceAmount / 100)|number_format(2, '.', ''),
+                priceCurrency: v.currency,
+                availability: (v.stockItem and v.stockItem.available > 0) ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                url: url('catalog_product', {slug: product.slug}),
+            }),
+        }|merge(product.averageRating and reviewCount > 0 ? {aggregateRating: {'@type': 'AggregateRating', ratingValue: product.averageRating|round(1), reviewCount: reviewCount}} : {})
+        |json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_UNESCAPED_UNICODE'))|raw -}}
+    </script>
 {% endblock %}
 
-{% block catalog_body %}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        {% include 'components/breadcrumbs.html.twig' with {
-            items: [
-                {label: 'nav.home'|trans, url: path('catalog_home')},
-                {label: product.name|escape, url: null}
-            ]
-        } %}
+{% block body %}
+<div class="container-page py-6 lg:py-10" x-data="productPage" data-initial-variant="{{ defaultVariant ? defaultVariant.id : '' }}"
+     @keydown.escape.window="zoomOpen = false">
+    <script type="application/json" data-variants>{{ variant_data|json_encode(constant('JSON_HEX_TAG'))|raw }}</script>
+    <script type="application/json" data-images>{{ images|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_UNESCAPED_SLASHES'))|raw }}</script>
 
-        <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-            <div class="lg:col-span-7 space-y-4">
-                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                    <div class="aspect-square">
-                        {% if product.media|length > 0 %}
-                            {% set firstMedia = product.media|first %}
-                            <img id="main-product-image"
-                                 src="{{ firstMedia.path|escape }}"
-                                 alt="{{ firstMedia.alt|default(product.name)|escape }}"
-                                 class="h-full w-full object-cover cursor-zoom-in"
-                                 data-js="product-image-modal">
-                        {% else %}
-                            <div class="h-full w-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-                                <i class="fas fa-image text-7xl text-gray-400 dark:text-gray-600"></i>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
+    {%- set crumbs = [{label: 'nav.home'|trans, url: path('catalog_home')}] -%}
+    {%- if product.category -%}
+        {%- set crumbs = crumbs|merge([{label: product.category.name, url: path('catalog_category', {slug: product.category.slug})}]) -%}
+    {%- endif -%}
+    {% include 'components/breadcrumbs.html.twig' with {items: crumbs|merge([{label: product.name, url: null}])} only %}
 
-                {% if product.media|length > 1 %}
-                    <div class="grid grid-cols-4 sm:grid-cols-6 gap-3">
-                        {% for media in product.media %}
-                            <button type="button"
-                                    class="aspect-square overflow-hidden rounded-xl border-2 transition-all duration-200 {% if loop.first %}border-primary-600 ring-2 ring-primary-200 dark:ring-primary-900{% else %}border-gray-200 hover:border-primary-400 dark:border-gray-700 dark:hover:border-primary-500{% endif %}"
-                                    data-js="product-thumbnail"
-                                    data-image-src="{{ media.path|escape }}">
-                                <img src="{{ media.path|escape }}"
-                                     alt="{{ media.alt|default(product.name)|escape }}"
-                                     class="h-full w-full object-cover">
-                            </button>
-                        {% endfor %}
-                    </div>
+    <div class="grid gap-8 lg:grid-cols-12 lg:gap-12">
+        {# Gallery #}
+        <div class="lg:col-span-7">
+            <div class="relative aspect-square overflow-hidden rounded-2xl bg-subtle sm:aspect-[4/5] lg:aspect-square">
+                {% if images is not empty %}
+                    {% for image in images %}
+                        <img src="{{ image.src }}" alt="{{ image.alt }}"
+                             x-show="activeImage === {{ loop.index0 }}" {% if not loop.first %}x-cloak loading="lazy"{% else %}fetchpriority="high"{% endif %}
+                             class="absolute inset-0 size-full cursor-zoom-in object-cover" @click="zoomOpen = true">
+                    {% endfor %}
+                    {% if images|length > 1 %}
+                        <button type="button" class="btn btn-icon absolute top-1/2 left-3 -translate-y-1/2 rounded-full bg-panel/90 shadow backdrop-blur hover:bg-panel" @click="previous()" aria-label="{{ 'ui.gallery.previous'|trans }}">
+                            {{ ux_icon('lucide:chevron-left', {class: 'size-5'}) }}
+                        </button>
+                        <button type="button" class="btn btn-icon absolute top-1/2 right-3 -translate-y-1/2 rounded-full bg-panel/90 shadow backdrop-blur hover:bg-panel" @click="next()" aria-label="{{ 'ui.gallery.next'|trans }}">
+                            {{ ux_icon('lucide:chevron-right', {class: 'size-5'}) }}
+                        </button>
+                        <span class="absolute right-3 bottom-3 rounded-full bg-panel/90 px-2.5 py-1 text-xs font-medium tabular-nums backdrop-blur"
+                              x-text="(activeImage + 1) + ' / {{ images|length }}'">1 / {{ images|length }}</span>
+                    {% endif %}
+                    <button type="button" class="btn btn-icon absolute top-3 right-3 rounded-full bg-panel/90 shadow backdrop-blur hover:bg-panel" @click="zoomOpen = true" aria-label="{{ 'ui.gallery.zoom'|trans }}">
+                        {{ ux_icon('lucide:maximize-2', {class: 'size-4'}) }}
+                    </button>
+                {% else %}
+                    <div class="flex size-full items-center justify-center text-fg-subtle">{{ ux_icon('lucide:image', {class: 'size-16 opacity-50'}) }}</div>
                 {% endif %}
             </div>
 
-            <div class="lg:col-span-5 space-y-5">
-                <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-5 sm:p-6 shadow-sm dark:border-gray-700 dark:from-gray-900 dark:to-gray-900">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="min-w-0">
-                            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{{ product.name|escape }}</h1>
-                            <div class="mt-3 flex items-center gap-2">
-                                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {% if product.status.value == 'active' %}bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200{% else %}bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300{% endif %}">
-                                    {{ ('product.status.' ~ product.status.value)|trans }}
-                                </span>
-                            </div>
-                        </div>
-                        {% if app.user %}
-                            <button type="button"
-                                    class="wishlist-toggle shrink-0 rounded-full border-2 border-gray-200 bg-white p-3 shadow-sm transition-all hover:border-red-400 dark:border-gray-700 dark:bg-gray-900"
-                                    data-js="wishlist-toggle"
-                                    data-product-id="{{ product.id }}"
-                                    aria-label="{{ 'wishlist.toggle'|trans }}">
-                                <i class="fas fa-heart text-gray-400 wishlist-icon transition-colors duration-200" data-in-wishlist="false"></i>
-                            </button>
-                        {% endif %}
-                    </div>
+            {% if images|length > 1 %}
+                <div class="mt-3 grid grid-cols-5 gap-3 sm:grid-cols-6" role="tablist" aria-label="{{ 'ui.gallery.thumbnails'|trans }}">
+                    {% for image in images %}
+                        <button type="button" role="tab" @click="show({{ loop.index0 }})" :aria-selected="activeImage === {{ loop.index0 }}"
+                                class="aspect-square overflow-hidden rounded-lg bg-subtle ring-2 ring-transparent ring-offset-2 ring-offset-canvas transition aria-selected:ring-fg">
+                            <img src="{{ image.src }}" alt="" loading="lazy" class="size-full object-cover">
+                        </button>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        {# Purchase panel #}
+        <div class="lg:col-span-5">
+            <div class="lg:sticky lg:top-28">
+                <div class="flex items-start justify-between gap-4">
+                    <h1 class="text-2xl font-semibold sm:text-3xl">{{ product.name }}</h1>
+                    {% if app.user %}
+                        {%- set wished = in_wishlist(product.id) -%}
+                        <button type="button" data-wishlist-toggle data-product-id="{{ product.id }}" aria-pressed="{{ wished ? 'true' : 'false' }}"
+                                aria-label="{{ 'wishlist.toggle'|trans }}"
+                                class="group/wish btn btn-secondary btn-icon shrink-0 rounded-full aria-pressed:text-red-500">
+                            {{ ux_icon('lucide:heart', {class: 'size-5 group-aria-pressed/wish:fill-current'}) }}
+                        </button>
+                    {% endif %}
                 </div>
 
-                {% if variants|length > 0 %}
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                        {% if variants|length > 1 %}
-                            <div class="mb-5">
-                                <label for="variant-select" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">{{ 'product.select_variant'|trans }}</label>
-                                <select id="variant-select"
-                                        name="variant"
-                                        data-js="product-variant-select"
-                                        class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-                                    {% for variant in variants %}
-                                        <option value="{{ variant.id }}"
-                                                data-price="{{ variant.priceAmount }}"
-                                                data-currency="{{ variant.currency|escape }}"
-                                                data-sku="{{ variant.sku|escape }}"
-                                                {% if variant == defaultVariant %}selected{% endif %}>
-                                            {% if variant.attributes|length > 0 %}
-                                                {{ variant.attributes|map((v, k) => "#{k}: #{v}")|join(', ')|escape }} -
-                                            {% endif %}
-                                            {{ (variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ variant.currency|escape }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        {% endif %}
-
-                        <div class="rounded-xl border border-primary-100 bg-primary-50/70 px-4 py-4 dark:border-primary-900/50 dark:bg-primary-900/20">
-                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ 'product.price'|trans }}</div>
-                            <div class="mt-1 text-3xl sm:text-4xl font-bold tracking-tight text-primary-700 dark:text-primary-300" id="price-display">
-                                {{ (defaultVariant.priceAmount / 100)|number_format(2, '.', ',') }} {{ defaultVariant.currency|escape }}
-                            </div>
-                            <div class="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400" id="sku-display">SKU: {{ defaultVariant.sku|escape }}</div>
-                        </div>
-
-                        <div class="mt-5 space-y-3">
-                            {% set availableStock = defaultVariant.stockItem ? defaultVariant.stockItem.available : 0 %}
-                            {% if availableStock > 0 %}
-                                <button type="button"
-                                        id="add-to-cart-btn"
-                                        class="w-full inline-flex items-center justify-center gap-3 rounded-xl bg-primary-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
-                                        data-js="add-to-cart"
-                                        data-variant-id="{{ defaultVariant.id }}">
-                                    <i class="fas fa-shopping-cart"></i>
-                                    <span>{{ 'product.add_to_cart'|trans }}</span>
-                                </button>
-                            {% else %}
-                                <div class="rounded-xl border border-amber-300 bg-amber-50 p-4">
-                                    <p class="text-sm text-amber-800 font-medium">{{ 'stock_notification.out_of_stock'|trans }}</p>
-                                    <form method="post" action="{{ path('stock_notification_subscribe') }}" class="mt-3 space-y-3">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('stock_notification_' ~ defaultVariant.id) }}">
-                                        <input type="hidden" name="variant_id" value="{{ defaultVariant.id }}">
-                                        {% if app.user %}
-                                            <input type="email" class="admin-form-input" value="{{ app.user.email }}" disabled>
-                                        {% else %}
-                                            <input type="email" name="email" class="admin-form-input" placeholder="{{ 'stock_notification.email_placeholder'|trans }}" required>
-                                            <label class="inline-flex items-start gap-2 text-xs text-gray-700">
-                                                <input type="checkbox" name="privacy_consent" value="1" class="mt-0.5">
-                                                <span>{{ 'stock_notification.privacy_consent'|trans }}</span>
-                                            </label>
-                                        {% endif %}
-                                        <button type="submit" class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-white font-semibold text-sm hover:bg-primary-700">
-                                            {{ 'stock_notification.cta'|trans }}
-                                        </button>
-                                    </form>
-                                </div>
-                            {% endif %}
-                            <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-gray-600 dark:text-gray-400">
-                                <span class="inline-flex items-center gap-1.5"><i class="fas fa-shield-alt text-primary-600 dark:text-primary-400"></i>{{ 'product.secure_payment'|trans }}</span>
-                                <span class="inline-flex items-center gap-1.5"><i class="fas fa-truck text-primary-600 dark:text-primary-400"></i>{{ 'product.fast_shipping'|trans }}</span>
-                            </div>
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-3 text-yellow-800 dark:border-yellow-700/60 dark:bg-yellow-900/20 dark:text-yellow-200">
-                        {{ 'product.no_variants'|trans }}
-                    </div>
+                {% if product.averageRating %}
+                    <a href="#reviews" class="mt-2 inline-flex items-center gap-2 text-sm text-fg-muted hover:text-fg">
+                        <span class="flex text-amber-400">
+                            {% for i in 1..5 %}{{ ux_icon('lucide:star', {class: 'size-4 ' ~ (i <= product.averageRating|round ? 'fill-current' : 'text-line-strong')}) }}{% endfor %}
+                        </span>
+                        {{ 'review.summary'|trans({'%rating%': product.averageRating|number_format(1), '%count%': reviewCount}) }}
+                    </a>
                 {% endif %}
 
-                <div class="rounded-2xl border border-gray-200 bg-gray-50/70 p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800/60">
-                    <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ 'product.details'|trans }}</h2>
-                    <dl class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                        <div>
-                            <dt class="text-gray-500 dark:text-gray-400">{{ 'product.status'|trans }}</dt>
-                            <dd class="mt-0.5 text-gray-900 capitalize dark:text-gray-100">{{ product.status.value|escape }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-gray-500 dark:text-gray-400">{{ 'product.tax_class'|trans }}</dt>
-                            <dd class="mt-0.5 text-gray-900 dark:text-gray-100">{{ product.taxClass|escape }}</dd>
-                        </div>
-                        {% if variants|length > 0 %}
-                            <div>
-                                <dt class="text-gray-500 dark:text-gray-400">{{ 'product.variants_count'|trans }}</dt>
-                                <dd class="mt-0.5 text-gray-900 dark:text-gray-100">{{ variants|length }}</dd>
+                {% if defaultVariant %}
+                    <p class="mt-5 text-2xl font-semibold tabular-nums" x-text="price">{{ defaultVariant.priceAmount|money(defaultVariant.currency) }}</p>
+                    <p class="mt-1 text-xs text-fg-subtle">{{ 'ui.product.price_note'|trans }}</p>
+
+                    {# Variant picker #}
+                    {% if variants|length > 1 %}
+                        <fieldset class="mt-8">
+                            <legend class="text-sm font-semibold">{{ 'product.select_variant'|trans }}</legend>
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                {% for v in variant_data %}
+                                    <label class="relative cursor-pointer">
+                                        <input type="radio" name="variant" value="{{ v.id }}" class="peer sr-only" @change="select({{ v.id }})"
+                                               {{ defaultVariant.id == v.id ? 'checked' }}>
+                                        <span class="flex min-h-11 items-center rounded-lg border border-line-strong px-4 py-2 text-sm font-medium transition peer-checked:border-fg peer-checked:ring-1 peer-checked:ring-fg peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary-500 hover:border-fg {{ v.available == 0 ? 'text-fg-subtle line-through decoration-1' }}">
+                                            {{ v.label }}
+                                        </span>
+                                    </label>
+                                {% endfor %}
                             </div>
-                        {% endif %}
+                        </fieldset>
+                    {% endif %}
+
+                    {# Stock state #}
+                    <p class="mt-6 flex items-center gap-2 text-sm font-medium">
+                        <span class="size-2 rounded-full" :class="inStock ? (lowStock ? 'bg-amber-500' : 'bg-emerald-500') : 'bg-red-500'"></span>
+                        <span x-show="inStock && !lowStock" {{ default_available > 5 ? '' : 'x-cloak' }}>{{ 'product.in_stock'|trans }}</span>
+                        <span x-show="lowStock" x-cloak x-text="'{{ 'ui.product.only_n_left'|trans({'%count%': '__N__'})|e('js') }}'.replace('__N__', variant.available)"></span>
+                        <span x-show="!inStock" {{ default_available > 0 ? 'x-cloak' : '' }}>{{ 'product.out_of_stock'|trans }}</span>
+                    </p>
+
+                    {# Add to cart #}
+                    <div class="mt-4 flex gap-3" x-show="inStock" {{ default_available > 0 ? '' : 'x-cloak' }}>
+                        <div class="flex items-center rounded-lg border border-line-strong" x-data="{ qty: 1 }">
+                            <button type="button" class="btn btn-ghost btn-icon h-12 rounded-r-none" @click="qty = Math.max(1, qty - 1)" aria-label="{{ 'ui.quantity.decrease'|trans }}">{{ ux_icon('lucide:minus', {class: 'size-4'}) }}</button>
+                            <label for="product-qty" class="sr-only">{{ 'cart.quantity'|trans }}</label>
+                            <input id="product-qty" type="number" min="1" :max="variant?.available || 1" x-model.number="qty"
+                                   class="h-12 w-12 border-0 bg-transparent text-center text-sm font-semibold tabular-nums focus:ring-0 focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none" value="1">
+                            <button type="button" class="btn btn-ghost btn-icon h-12 rounded-l-none" @click="qty = Math.min(variant?.available || 1, qty + 1)" aria-label="{{ 'ui.quantity.increase'|trans }}">{{ ux_icon('lucide:plus', {class: 'size-4'}) }}</button>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-lg h-12 flex-1" data-add-to-cart data-quantity-input="#product-qty"
+                                data-variant-id="{{ defaultVariant.id }}" :data-variant-id="selectedId">
+                            {{ ux_icon('lucide:shopping-bag', {class: 'size-5'}) }}<span data-label>{{ 'product.add_to_cart'|trans }}</span>
+                        </button>
+                    </div>
+
+                    {# Back-in-stock notification, one form per variant (CSRF token is per variant) #}
+                    {% for v in variants %}
+                        <form method="post" action="{{ path('stock_notification_subscribe') }}" class="card mt-4 space-y-3 p-4"
+                              x-show="!inStock && selectedId === {{ v.id }}" {{ v.id == defaultVariant.id and default_available == 0 ? '' : 'x-cloak' }}>
+                            <p class="flex items-center gap-2 text-sm font-semibold">{{ ux_icon('lucide:bell', {class: 'size-4'}) }}{{ 'stock_notification.cta'|trans }}</p>
+                            <input type="hidden" name="_token" value="{{ csrf_token('stock_notification_' ~ v.id) }}">
+                            <input type="hidden" name="variant_id" value="{{ v.id }}">
+                            {% if app.user %}
+                                <p class="text-sm text-fg-muted">{{ 'ui.stock.notify_account'|trans({'%email%': app.user.email}) }}</p>
+                            {% else %}
+                                <label for="stock-email-{{ v.id }}" class="sr-only">{{ 'checkout.fields.email'|trans }}</label>
+                                <input id="stock-email-{{ v.id }}" type="email" name="email" required autocomplete="email" class="input" placeholder="{{ 'stock_notification.email_placeholder'|trans }}">
+                                <label class="flex items-start gap-2 text-xs text-fg-muted">
+                                    <input type="checkbox" name="privacy_consent" value="1" required class="checkbox mt-0.5">
+                                    <span>{{ 'stock_notification.privacy_consent'|trans }}</span>
+                                </label>
+                            {% endif %}
+                            <button type="submit" class="btn btn-secondary w-full">{{ 'stock_notification.cta'|trans }}</button>
+                        </form>
+                    {% endfor %}
+
+                    <dl class="mt-8 divide-y divide-line border-y border-line text-sm">
+                        <div class="flex items-center gap-3 py-3">{{ ux_icon('lucide:truck', {class: 'size-5 text-fg-muted'}) }}<dt class="sr-only">{{ 'home.benefits.fast_shipping'|trans }}</dt><dd>{{ 'ui.product.shipping_note'|trans }}</dd></div>
+                        <div class="flex items-center gap-3 py-3">{{ ux_icon('lucide:rotate-ccw', {class: 'size-5 text-fg-muted'}) }}<dt class="sr-only">{{ 'home.benefits.easy_returns'|trans }}</dt><dd><a href="{{ path('legal_returns') }}" class="hover:underline">{{ 'ui.product.returns_note'|trans }}</a></dd></div>
+                        <div class="flex items-center gap-3 py-3">{{ ux_icon('lucide:shield-check', {class: 'size-5 text-fg-muted'}) }}<dt class="sr-only">{{ 'product.secure_payment'|trans }}</dt><dd>{{ 'ui.product.payment_note'|trans }}</dd></div>
                     </dl>
+                {% else %}
+                    <div class="alert alert-warning mt-6">{{ ux_icon('lucide:triangle-alert', {class: 'mt-0.5 size-4'}) }}<p>{{ 'product.no_variants'|trans }}</p></div>
+                {% endif %}
+
+                {# Details accordion #}
+                <div class="mt-8 divide-y divide-line border-b border-line">
+                    {% if product.description %}
+                        <div x-data="{ open: true }">
+                            <h2>
+                                <button type="button" class="flex w-full items-center justify-between py-4 text-left font-semibold" @click="open = !open" :aria-expanded="open">
+                                    {{ 'product.description'|trans }}
+                                    <span class="inline-flex shrink-0 transition" :class="open && 'rotate-180'">{{ ux_icon('lucide:chevron-down', {class: 'size-5 transition'}) }}</span>
+                                </button>
+                            </h2>
+                            <div x-show="open" x-collapse>
+                                <div class="pb-6 text-sm leading-7 text-fg-muted">{{ product.description|nl2br }}</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if defaultVariant %}
+                        <div x-data="{ open: false }">
+                            <h2>
+                                <button type="button" class="flex w-full items-center justify-between py-4 text-left font-semibold" @click="open = !open" :aria-expanded="open">
+                                    {{ 'product.details'|trans }}
+                                    <span class="inline-flex shrink-0 transition" :class="open && 'rotate-180'">{{ ux_icon('lucide:chevron-down', {class: 'size-5 transition'}) }}</span>
+                                </button>
+                            </h2>
+                            <div x-show="open" x-collapse x-cloak>
+                                <dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 pb-6 text-sm">
+                                    <dt class="text-fg-subtle">{{ 'product.sku'|trans }}</dt>
+                                    <dd class="font-mono text-fg-muted" x-text="variant?.sku">{{ defaultVariant.sku }}</dd>
+                                    {% for key, value in defaultVariant.attributes %}
+                                        <dt class="text-fg-subtle">{{ key|capitalize }}</dt><dd class="text-fg-muted">{{ value }}</dd>
+                                    {% endfor %}
+                                    {% if product.category %}
+                                        <dt class="text-fg-subtle">{{ 'ui.product.category'|trans }}</dt>
+                                        <dd><a href="{{ path('catalog_category', {slug: product.category.slug}) }}" class="link">{{ product.category.name }}</a></dd>
+                                    {% endif %}
+                                </dl>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
-
-        {% if product.description %}
-            <section class="rounded-2xl border border-gray-200 bg-white shadow-sm p-6 mt-8 dark:border-gray-700 dark:bg-gray-900">
-                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">{{ 'product.description'|trans }}</h2>
-                <div class="prose prose-gray dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
-                    {{ product.description|escape|nl2br|raw }}
-                </div>
-            </section>
-        {% endif %}
-
-        {% if variants|length > 1 %}
-            <section class="rounded-2xl border border-gray-200 bg-white shadow-sm p-6 mt-8 dark:border-gray-700 dark:bg-gray-900">
-                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-5">{{ 'product.all_variants'|trans }}</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-800/80">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">{{ 'product.variant'|trans }}</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">{{ 'product.sku'|trans }}</th>
-                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">{{ 'product.price'|trans }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            {% for variant in variants %}
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors">
-                                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                                        {% if variant.attributes|length > 0 %}
-                                            {{ variant.attributes|map((v, k) => "#{k}: #{v}")|join(', ')|escape }}
-                                        {% else %}
-                                            {{ 'product.default_variant'|trans }}
-                                        {% endif %}
-                                    </td>
-                                    <td class="px-4 py-3 text-sm font-mono text-gray-600 dark:text-gray-300">{{ variant.sku|escape }}</td>
-                                    <td class="px-4 py-3 text-sm font-semibold text-primary-700 dark:text-primary-300 text-right">
-                                        {{ (variant.priceAmount / 100)|number_format(2, '.', ',') }} {{ variant.currency|escape }}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        {% endif %}
-
-        <section class="rounded-2xl border border-gray-200 bg-white shadow-sm p-6 mt-8 dark:border-gray-700 dark:bg-gray-900">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ 'review.section_title'|trans }}</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {% if product.averageRating is not null %}
-                            {{ 'review.summary'|trans({'%rating%': product.averageRating|number_format(1, '.', ','), '%count%': reviewCount}) }}
-                        {% else %}
-                            {{ 'review.no_reviews_yet'|trans }}
-                        {% endif %}
-                    </p>
-                </div>
-                {% if product.averageRating is not null %}
-                    <div class="flex items-center gap-1 text-yellow-500">
-                        {% for i in 1..5 %}
-                            <i class="fa{% if i <= product.averageRating %}s{% else %}r{% endif %} fa-star"></i>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-
-            {% if app.user %}
-                {% if canReview %}
-                    <form method="post" action="{{ path('catalog_product', {slug: product.slug}) }}" class="mt-6 border rounded-xl p-4 space-y-3 border-gray-200 dark:border-gray-700">
-                        <input type="hidden" name="_token" value="{{ csrf_token('product_review_' ~ product.id) }}">
-                        <div>
-                            <label for="review_rating" class="admin-form-label">{{ 'review.form.rating'|trans }}</label>
-                            <select id="review_rating" name="rating" class="admin-form-input" required>
-                                {% for r in 5..1 %}
-                                    <option value="{{ r }}">{{ r }}/5</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div>
-                            <label for="review_title" class="admin-form-label">{{ 'review.form.title'|trans }}</label>
-                            <input id="review_title" name="title" class="admin-form-input" maxlength="120" required>
-                        </div>
-                        <div>
-                            <label for="review_body" class="admin-form-label">{{ 'review.form.body'|trans }}</label>
-                            <textarea id="review_body" name="body" class="admin-form-input resize-y" rows="4" maxlength="2000" required></textarea>
-                        </div>
-                        <button type="submit" class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-white font-semibold text-sm hover:bg-primary-700">
-                            {{ 'review.form.submit'|trans }}
-                        </button>
-                    </form>
-                {% elseif hasExistingReview %}
-                    <p class="mt-6 text-sm text-gray-600 dark:text-gray-300">{{ 'review.form.already_reviewed'|trans }}</p>
-                {% else %}
-                    <p class="mt-6 text-sm text-gray-600 dark:text-gray-300">{{ 'review.form.verified_purchase_only'|trans }}</p>
-                {% endif %}
-            {% else %}
-                <p class="mt-6 text-sm text-gray-600 dark:text-gray-300">{{ 'review.form.login_to_review'|trans }}</p>
-            {% endif %}
-
-            <div class="mt-6 space-y-4">
-                {% for review in approvedReviews %}
-                    <article class="border rounded-xl p-4 border-gray-200 dark:border-gray-700">
-                        <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ review.title }}</h3>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    {{ review.user.fullName is not empty ? review.user.fullName : review.user.email }}
-                                    · {{ review.createdAt|date('Y-m-d') }}
-                                </p>
-                            </div>
-                            <div class="text-yellow-500 text-sm">{{ review.rating }}/5</div>
-                        </div>
-                        {% if review.verifiedPurchase %}
-                            <span class="inline-flex mt-2 text-xs px-2 py-1 rounded bg-green-100 text-green-700">{{ 'review.verified_purchase'|trans }}</span>
-                        {% endif %}
-                        <p class="mt-3 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{{ review.body|escape|nl2br|raw }}</p>
-                    </article>
-                {% else %}
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ 'review.no_reviews_yet'|trans }}</p>
-                {% endfor %}
-            </div>
-
-            {% if reviewPages > 1 %}
-                <div class="mt-4 flex items-center justify-between text-sm">
-                    <span class="text-gray-500">{{ 'review.pagination'|trans({'%page%': reviewPage, '%pages%': reviewPages}) }}</span>
-                    <div class="flex gap-2">
-                        {% if reviewPage > 1 %}
-                            <a href="{{ path('catalog_product', {slug: product.slug, reviewPage: reviewPage - 1}) }}" class="px-3 py-2 rounded border border-gray-300">{{ 'common.previous'|trans }}</a>
-                        {% endif %}
-                        {% if reviewPage < reviewPages %}
-                            <a href="{{ path('catalog_product', {slug: product.slug, reviewPage: reviewPage + 1}) }}" class="px-3 py-2 rounded border border-gray-300">{{ 'common.next'|trans }}</a>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endif %}
-        </section>
-        
-        {% include 'components/recently_viewed_products.html.twig' with { recentlyViewedProducts: recentlyViewedProducts|default([]) } %}
     </div>
-    
-    {# Image Modal #}
-    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden items-center justify-center p-4" onclick="closeImageModal()">
-        <button type="button" class="absolute top-4 right-4 text-white hover:text-gray-300 text-3xl" onclick="closeImageModal()" aria-label="Close">
-            <i class="fas fa-times"></i>
-        </button>
-        <img id="modal-image" src="" alt="" class="max-w-full max-h-full object-contain">
-    </div>
+
+    {% include 'catalog/product/_reviews.html.twig' %}
+
+    {# Image zoom #}
+    {% if images is not empty %}
+        <div x-cloak x-show="zoomOpen" x-transition.opacity class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 p-4"
+             role="dialog" aria-modal="true" aria-label="{{ 'ui.gallery.zoom'|trans }}" x-trap.noscroll="zoomOpen" @click.self="zoomOpen = false">
+            <img :src="images[activeImage]?.src" :alt="images[activeImage]?.alt" class="max-h-full max-w-full object-contain">
+            <button type="button" class="btn btn-icon absolute top-4 right-4 rounded-full bg-white/10 text-white hover:bg-white/20" @click="zoomOpen = false" aria-label="{{ 'common.close'|trans }}">{{ ux_icon('lucide:x', {class: 'size-6'}) }}</button>
+            {% if images|length > 1 %}
+                <button type="button" class="btn btn-icon absolute left-4 rounded-full bg-white/10 text-white hover:bg-white/20" @click="previous()" aria-label="{{ 'ui.gallery.previous'|trans }}">{{ ux_icon('lucide:chevron-left', {class: 'size-6'}) }}</button>
+                <button type="button" class="btn btn-icon absolute right-4 rounded-full bg-white/10 text-white hover:bg-white/20" @click="next()" aria-label="{{ 'ui.gallery.next'|trans }}">{{ ux_icon('lucide:chevron-right', {class: 'size-6'}) }}</button>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+{% include 'components/recently_viewed_products.html.twig' with {recentlyViewedProducts: recentlyViewedProducts|default([])} only %}
 {% endblock %}

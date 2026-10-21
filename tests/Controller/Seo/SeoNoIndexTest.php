@@ -69,7 +69,7 @@ final class SeoNoIndexTest extends WebTestCase
         $html = (string) $client->getResponse()->getContent();
         $this->assertStringContainsString('content="noindex,nofollow"', $html);
         $this->assertStringContainsString('twitter:title', $html);
-        $this->assertStringContainsString('SEO NoIndex Product - SymfoShop', $html);
+        $this->assertStringContainsString('SEO NoIndex Product · SymfoShop', $html);
 
         // Product: indexable variant
         $client->request('GET', '/product/' . $productIndex->getSlug());
@@ -83,7 +83,7 @@ final class SeoNoIndexTest extends WebTestCase
         $html = (string) $client->getResponse()->getContent();
         $this->assertStringContainsString('content="noindex,nofollow"', $html);
         $this->assertStringContainsString('twitter:title', $html);
-        $this->assertStringContainsString('SEO NoIndex Category - SymfoShop', $html);
+        $this->assertStringContainsString('SEO NoIndex Category · SymfoShop', $html);
 
         // Category: indexable variant
         $client->request('GET', '/category/' . $categoryIndex->getSlug());

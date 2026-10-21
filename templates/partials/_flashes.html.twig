@@ -1,0 +1,24 @@
+{%- set flash_styles = {
+    success: {class: 'alert-success', icon: 'lucide:circle-check'},
+    error: {class: 'alert-error', icon: 'lucide:circle-alert'},
+    danger: {class: 'alert-error', icon: 'lucide:circle-alert'},
+    warning: {class: 'alert-warning', icon: 'lucide:triangle-alert'},
+    info: {class: 'alert-info', icon: 'lucide:info'},
+} -%}
+{%- set flashes = app.flashes -%}
+{% if flashes is not empty %}
+    <div class="container-page mt-4 space-y-2" role="status">
+        {% for label, messages in flashes %}
+            {%- set style = flash_styles[label]|default(flash_styles.info) -%}
+            {% for message in messages %}
+                <div class="alert {{ style.class }} animate-rise" x-data="{ show: true }" x-show="show" x-transition.opacity>
+                    {{ ux_icon(style.icon, {class: 'mt-0.5 size-4'}) }}
+                    <p class="flex-1">{{ message|trans }}</p>
+                    <button type="button" class="-m-1 rounded-md p-1 opacity-60 hover:opacity-100" @click="show = false" aria-label="{{ 'common.close'|trans }}">
+                        {{ ux_icon('lucide:x', {class: 'size-4'}) }}
+                    </button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+{% endif %}

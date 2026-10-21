@@ -18,6 +18,7 @@ use App\Service\Payment\Provider\PaymentResolution;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -131,6 +132,7 @@ class CheckoutController extends AbstractController
         }
 
         return $this->render('checkout/index.html.twig', [
+            'items' => $this->cartService->getDetailedItems(),
             'customerForm' => $customerForm,
             'addressForm' => $addressForm,
             'totals' => $totals,
@@ -139,6 +141,25 @@ class CheckoutController extends AbstractController
             'shippingMethods' => $shippingMethods,
             'selectedShippingMethod' => $selectedShippingMethod,
         ]);
+    }
+
+    /**
+     * Live totals for the checkout summary when the shipping method or country changes.
+     */
+    #[Route('/checkout/totals', name: 'checkout_totals', methods: ['GET'])]
+    public function totals(Request $request): JsonResponse
+    {
+        $shipping = trim((string) $request->query->get('shipping_method', ''));
+        $country = strtoupper(trim((string) $request->query->get('country', '')));
+        $user = $this->getUser();
+
+        $totals = $this->checkoutService->calculateTotals(
+            $shipping !== '' ? $shipping : null,
+            $country !== '' ? $country : null,
+            $user instanceof User ? $user : null
+        );
+
+        return new JsonResponse(['success' => true, 'totals' => $totals]);
     }
 
     #[Route('/checkout/payment/{orderId}/{paymentIntentId}', name: 'checkout_payment', methods: ['GET'])]

@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/account/wishlist', name: 'account_wishlist_')]
 #[IsGranted('ROLE_USER')]
@@ -21,7 +22,8 @@ class WishlistController extends AbstractController
     public function __construct(
         private readonly WishlistRepository $wishlistRepository,
         private readonly ProductRepository $productRepository,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -69,7 +71,7 @@ class WishlistController extends AbstractController
             return new JsonResponse([
                 'success' => true,
                 'inWishlist' => false,
-                'message' => 'Product removed from wishlist',
+                'message' => $this->translator->trans('wishlist.removed'),
             ]);
         } else {
             // Add to wishlist
@@ -83,7 +85,7 @@ class WishlistController extends AbstractController
             return new JsonResponse([
                 'success' => true,
                 'inWishlist' => true,
-                'message' => 'Product added to wishlist',
+                'message' => $this->translator->trans('wishlist.added'),
             ]);
         }
     }

@@ -1,58 +1,57 @@
-{% extends 'catalog/base.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block title %}{{ 'checkout.payment_page_title'|trans }} - SymfoShop{% endblock %}
+{% block page_title %}{{ 'checkout.payment_page_title'|trans }}{% endblock %}
 {% block meta_description %}{{ 'checkout.payment_meta_description'|trans }}{% endblock %}
-{% set is_simulated_provider = simulatePaymentUi|default(false) %}
-{% block js_page %}{% if is_simulated_provider %}payment-simulator{% else %}payment{% endif %}{% endblock %}
+{% block js_page %}{{ simulatePaymentUi|default(false) ? '' : 'payment' }}{% endblock %}
+{% block robots_meta %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+
+{% block stylesheets %}
+    {% if paymentProvider == 'stripe' and not simulatePaymentUi|default(false) %}
+        <script src="https://js.stripe.com/v3/" defer></script>
+    {% endif %}
+{% endblock %}
 
 {% block body %}
-    <div class="max-w-xl mx-auto px-4 py-8">
-        <h1 class="text-2xl font-bold text-gray-900 mb-6">{{ 'checkout.complete_payment'|trans }}</h1>
+<div class="container-page max-w-xl py-10 lg:py-16">
+    <h1 class="text-3xl font-semibold">{{ 'checkout.complete_payment'|trans }}</h1>
 
-        <div class="bg-white rounded-lg shadow p-6">
-            <p class="text-gray-700 mb-1">
-                <strong>{{ 'checkout.order_number'|trans }}:</strong> {{ order.orderNumber|escape }}
-            </p>
-            <p class="text-gray-700 mb-6">
-                <strong>{{ 'checkout.total'|trans }}:</strong> {{ (order.grandTotal / 100)|number_format(2, '.', ',') }} {{ order.currency|escape }}
-            </p>
-
-            {% if is_simulated_provider %}
-                <div class="border border-amber-200 rounded-lg p-4 bg-amber-50" data-js-page="payment-simulator" role="region" aria-label="{{ 'checkout.dev_simulator'|trans }}">
-                    <h2 class="text-lg font-semibold text-amber-900 mb-2">{{ 'checkout.dev_simulator'|trans }}</h2>
-                    <p class="text-sm text-amber-800 mb-4">{{ 'checkout.dev_simulator_hint'|trans }}</p>
-                    <div class="flex flex-wrap gap-2">
-                        <a href="{{ path('dev_payment_simulate', { referenceId: paymentIntentId, outcome: 'success' }) }}"
-                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium bg-green-600 text-white hover:bg-green-700 transition-colors">
-                            {{ 'checkout.simulate_success'|trans }}
-                        </a>
-                        <a href="{{ path('dev_payment_simulate', { referenceId: paymentIntentId, outcome: 'failure' }) }}"
-                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium bg-red-600 text-white hover:bg-red-700 transition-colors">
-                            {{ 'checkout.simulate_failure'|trans }}
-                        </a>
-                        <a href="{{ path('dev_payment_simulate', { referenceId: paymentIntentId, outcome: 'pending' }) }}"
-                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium bg-gray-600 text-white hover:bg-gray-700 transition-colors">
-                            {{ 'checkout.simulate_pending'|trans }}
-                        </a>
-                    </div>
-                </div>
-            {% else %}
-                <div id="payment-element" class="mb-4">
-                    <!-- Stripe Elements mount here -->
-                </div>
-                <button type="button" id="submit-payment" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50">
-                    {{ 'checkout.pay_now'|trans }}
-                </button>
-                <div id="payment-message" class="mt-4 p-3 rounded hidden" role="alert"></div>
-            {% endif %}
+    <dl class="card mt-6 grid grid-cols-2 gap-4 p-5 text-sm">
+        <div>
+            <dt class="text-fg-subtle">{{ 'checkout.order_number'|trans }}</dt>
+            <dd class="mt-1 font-mono font-medium">{{ order.orderNumber }}</dd>
         </div>
-    </div>
+        <div class="text-right">
+            <dt class="text-fg-subtle">{{ 'checkout.total'|trans }}</dt>
+            <dd class="mt-1 text-lg font-semibold tabular-nums">{{ order.grandTotal|money(order.currency) }}</dd>
+        </div>
+    </dl>
 
-    {% if paymentProvider == 'stripe' %}
-        <script src="https://js.stripe.com/v3/"></script>
-        <div data-stripe-key="{{ stripePublishableKey|escape }}"
-             data-client-secret="{{ clientSecret|escape }}"
-             data-return-url="{{ url('checkout_success', {orderNumber: order.orderNumber})|escape }}"
-             class="hidden" aria-hidden="true"></div>
+    {% if simulatePaymentUi|default(false) %}
+        <section class="mt-6 rounded-2xl border border-dashed border-amber-400 bg-amber-50 p-5 dark:bg-amber-500/10" aria-labelledby="simulator-heading">
+            <h2 id="simulator-heading" class="flex items-center gap-2 font-semibold text-amber-900 dark:text-amber-200">{{ ux_icon('lucide:flask-conical', {class: 'size-4'}) }}{{ 'checkout.dev_simulator'|trans }}</h2>
+            <p class="mt-1 text-sm text-amber-800 dark:text-amber-300">{{ 'checkout.dev_simulator_hint'|trans }}</p>
+            <div class="mt-4 flex flex-wrap gap-2">
+                <a href="{{ path('dev_payment_simulate', {referenceId: paymentIntentId, outcome: 'success'}) }}" class="btn btn-primary">{{ 'checkout.simulate_success'|trans }}</a>
+                <a href="{{ path('dev_payment_simulate', {referenceId: paymentIntentId, outcome: 'failure'}) }}" class="btn btn-danger">{{ 'checkout.simulate_failure'|trans }}</a>
+                <a href="{{ path('dev_payment_simulate', {referenceId: paymentIntentId, outcome: 'pending'}) }}" class="btn btn-secondary">{{ 'checkout.simulate_pending'|trans }}</a>
+            </div>
+        </section>
+    {% else %}
+        <section class="card card-body mt-6">
+            <div id="payment-element" class="min-h-40"></div>
+            <p class="alert alert-error mt-4" data-payment-message role="alert" hidden></p>
+            <button type="button" class="btn btn-primary btn-lg mt-6 w-full" data-pay>
+                {{ ux_icon('lucide:lock', {class: 'size-4'}) }}<span data-label>{{ 'checkout.pay_now'|trans }} · {{ order.grandTotal|money(order.currency) }}</span>
+            </button>
+            <p class="mt-4 flex items-center justify-center gap-2 text-xs text-fg-subtle">{{ ux_icon('lucide:shield-check', {class: 'size-4'}) }}{{ 'ui.payment.secure_note'|trans }}</p>
+        </section>
+
+        {% if paymentProvider == 'stripe' %}
+            <div hidden data-stripe
+                 data-stripe-key="{{ stripePublishableKey }}"
+                 data-client-secret="{{ clientSecret }}"
+                 data-return-url="{{ url('checkout_success', {orderNumber: order.orderNumber}) }}"></div>
+        {% endif %}
     {% endif %}
+</div>
 {% endblock %}

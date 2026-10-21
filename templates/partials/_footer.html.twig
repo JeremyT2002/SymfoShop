@@ -1,0 +1,96 @@
+{%- set site_name = theme_config().brand.siteName|default('SymfoShop') -%}
+{%- set footer = theme_config().footer|default({}) -%}
+{%- set columns = footer.columns|default([]) -%}
+{%- set social_icons = {
+    facebook: 'simple-icons:facebook', instagram: 'simple-icons:instagram', twitter: 'simple-icons:x', x: 'simple-icons:x',
+    youtube: 'simple-icons:youtube', tiktok: 'simple-icons:tiktok', linkedin: 'lucide:linkedin', pinterest: 'simple-icons:pinterest',
+    github: 'simple-icons:github',
+} -%}
+{%- if columns is empty -%}
+    {%- set columns = [
+        {title: 'footer.shop'|trans, links: [
+            {label: 'ui.nav.all_products'|trans, url: path('catalog_products')},
+            {label: 'footer.cart'|trans, url: path('cart_show')},
+            {label: 'footer.wishlist'|trans, url: path('account_wishlist_show')},
+        ]},
+        {title: 'footer.support'|trans, links: [
+            {label: 'footer.contact'|trans, url: path('contact')},
+            {label: 'footer.faq'|trans, url: path('legal_faq')},
+            {label: 'footer.returns'|trans, url: path('legal_returns')},
+            {label: 'footer.return_request'|trans, url: path('return_request')},
+        ]},
+        {title: 'footer.legal_column'|trans, links: [
+            {label: 'footer.terms'|trans, url: path('legal_terms')},
+            {label: 'footer.privacy'|trans, url: path('legal_privacy')},
+            {label: 'footer.cookies'|trans, url: path('legal_cookies')},
+            {label: 'footer.imprint'|trans, url: path('legal_imprint')},
+        ]},
+    ] -%}
+{%- endif -%}
+
+<footer class="mt-auto border-t border-line bg-panel">
+    {# Service promises #}
+    <div class="border-b border-line">
+        <div class="container-page grid grid-cols-1 gap-6 py-8 sm:grid-cols-3">
+            {% for item in [
+                {icon: 'lucide:truck', title: 'home.benefits.fast_shipping', text: 'home.benefits.fast_shipping_desc'},
+                {icon: 'lucide:rotate-ccw', title: 'home.benefits.easy_returns', text: 'home.benefits.easy_returns_desc'},
+                {icon: 'lucide:shield-check', title: 'home.benefits.secure_payment', text: 'home.benefits.secure_payment_desc'},
+            ] %}
+                <div class="flex items-start gap-3">
+                    <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-subtle text-fg">{{ ux_icon(item.icon, {class: 'size-5'}) }}</span>
+                    <div>
+                        <p class="text-sm font-semibold">{{ item.title|trans }}</p>
+                        <p class="text-sm text-fg-muted">{{ item.text|trans }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="container-page grid grid-cols-2 gap-x-6 gap-y-10 py-12 lg:grid-cols-12">
+        <div class="col-span-2 lg:col-span-4">
+            <a href="{{ path('catalog_home') }}" class="inline-flex items-center gap-2.5">
+                <span class="flex size-8 items-center justify-center rounded-lg bg-fg text-canvas">{{ ux_icon('lucide:shopping-bag', {class: 'size-4'}) }}</span>
+                <span class="text-lg font-semibold tracking-tight">{{ site_name }}</span>
+            </a>
+            <p class="mt-4 max-w-sm text-sm leading-6 text-fg-muted">{{ theme_config().brand.tagline|default('footer.description'|trans) }}</p>
+
+            {% if footer.socialLinks|default([]) is not empty %}
+                <div class="mt-6 flex gap-2">
+                    {% for link in footer.socialLinks %}
+                        {%- set platform = link.platform|default('')|lower -%}
+                        <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ platform|capitalize }}"
+                           class="flex size-9 items-center justify-center rounded-lg border border-line text-fg-muted transition-colors hover:border-line-strong hover:text-fg">
+                            {{ ux_icon(social_icons[platform]|default('lucide:link'), {class: 'size-4'}) }}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        {% for column in columns %}
+            <div class="lg:col-span-2 {{ loop.first ? 'lg:col-start-6' : '' }}">
+                <h2 class="text-sm font-semibold">{{ column.title|default('') }}</h2>
+                <ul class="mt-4 space-y-3 text-sm">
+                    {% for link in column.links|default([]) %}
+                        <li>
+                            <a href="{{ link.url }}" class="text-fg-muted transition-colors hover:text-fg"
+                               {% if link.external|default(false) %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ link.label }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if loop.last %}
+                        <li><button type="button" data-open-cookie-preferences class="text-fg-muted transition-colors hover:text-fg">{{ 'footer.cookie_settings'|trans }}</button></li>
+                    {% endif %}
+                </ul>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="border-t border-line">
+        <div class="container-page flex flex-col gap-2 py-6 text-xs text-fg-subtle sm:flex-row sm:items-center sm:justify-between">
+            <p>{{ footer.copyright|default('© ' ~ 'now'|date('Y') ~ ' ' ~ site_name ~ '. ' ~ 'footer.rights'|trans) }}</p>
+            <p>{{ 'ui.footer.prices_excl_vat'|trans }}</p>
+        </div>
+    </div>
+</footer>

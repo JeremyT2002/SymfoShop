@@ -64,6 +64,8 @@ common:
   info: Info
   yes: Ja
   no: Nein
+  close: Schließen
+  view: Ansehen
   
 cart:
   title: Warenkorb
@@ -379,11 +381,11 @@ home:
     view_featured: Empfohlene Produkte
   benefits:
     fast_shipping: Schneller Versand
-    fast_shipping_desc: Kostenloser Versand bei Bestellungen über 50€
+    fast_shipping_desc: Versand mit Sendungsverfolgung
     secure_payment: Sichere Zahlung
     secure_payment_desc: 100% sicherer Checkout
     easy_returns: Einfache Rückgabe
-    easy_returns_desc: 30-tägige Rückgaberecht
+    easy_returns_desc: Retouren einfach online anmelden
     support: 24/7 Support
     support_desc: Wir sind für Sie da
   featured:
@@ -1200,3 +1202,111 @@ review:
     invalid_payload: Bitte Bewertung, Titel und Text ausfüllen.
     submitted: Bewertung wurde eingereicht und wartet auf Freigabe.
 
+ui:
+  a11y:
+    skip_to_content: Zum Inhalt springen
+    breadcrumb: Brotkrumen-Navigation
+    pagination: Seitennavigation
+  nav:
+    main: Hauptnavigation
+    menu: Menü
+    open_menu: Menü öffnen
+    home_aria: '%shop% Startseite'
+    all_products: Alle Produkte
+    account_menu: Konto
+    my_account: Mein Konto
+    toggle_theme: Dunkelmodus umschalten
+  search:
+    label: Suche
+    placeholder: Produkte suchen…
+    results_for: 'Ergebnisse für „%query%“'
+    no_results: 'Keine Produkte für „%query%“ gefunden'
+    no_results_hint: Prüfen Sie die Schreibweise oder versuchen Sie einen allgemeineren Begriff.
+  footer:
+    prices_excl_vat: Alle Preise zzgl. MwSt. und Versand. Die MwSt. wird im Checkout ausgewiesen.
+  product:
+    from: ab
+    sold_out: Ausverkauft
+    choose_options: Optionen wählen
+    price_note: zzgl. MwSt. und Versand
+    only_n_left: 'Nur noch %count% verfügbar'
+    shipping_note: Versand mit Sendungsverfolgung
+    returns_note: Einfache Rücksendung — zu unseren Rückgabebedingungen
+    payment_note: Sicher bezahlen mit verschlüsseltem Checkout
+    category: Kategorie
+  quantity:
+    decrease: Menge verringern
+    increase: Menge erhöhen
+  gallery:
+    previous: Vorheriges Bild
+    next: Nächstes Bild
+    zoom: Bild vergrößern
+    thumbnails: Produktbilder
+  reviews:
+    count: '{0} Keine Bewertungen|{1} 1 Bewertung|]1,Inf[ %count% Bewertungen'
+    rating_aria: '%rating% von 5 Sternen'
+    anonymous: Kunde
+  stock:
+    notify_account: 'Wir benachrichtigen %email%, sobald diese Variante wieder verfügbar ist.'
+  cart:
+    added: Hinzugefügt
+    view_cart: Zum Warenkorb
+    calculated_at_checkout: Wird im Checkout berechnet
+    tax_note: MwSt. und Versand werden im Checkout berechnet.
+    invalid_request: Die Anfrage konnte nicht verarbeitet werden.
+    product_unavailable: Dieses Produkt ist nicht mehr verfügbar.
+    out_of_stock: Dieser Artikel ist ausverkauft.
+    only_n_available: 'Nur noch %count% weitere verfügbar.'
+    item_not_found: Dieser Artikel ist nicht mehr in Ihrem Warenkorb.
+  coupon:
+    have_code: Haben Sie einen Gutscheincode?
+    code_required: Bitte geben Sie einen Gutscheincode ein.
+    invalid: Dieser Gutscheincode ist für Ihren Warenkorb nicht gültig.
+    applied: Gutscheincode eingelöst.
+    removed: Gutscheincode entfernt.
+    remove: Gutscheincode entfernen
+  checkout:
+    back_to_cart: Zurück zum Warenkorb
+    have_account: Sie haben bereits ein Konto?
+    no_payment_methods: Derzeit ist keine Zahlungsart verfügbar. Bitte kontaktieren Sie uns.
+    payment_next_step: Die Zahlung schließen Sie im nächsten Schritt ab.
+    place_order_binding: Zahlungspflichtig bestellen
+    placing_order: Bestellung wird aufgegeben…
+    view_orders: Meine Bestellungen
+  payment:
+    processing: Zahlung wird verarbeitet…
+    failed: Die Zahlung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.
+    secure_note: Zahlungen werden sicher über unseren Zahlungsdienstleister abgewickelt.
+  account:
+    items_count: '{1} 1 Artikel|]1,Inf[ %count% Artikel'
+  auth:
+    show_password: Passwort anzeigen
+    register_benefits: Bestellungen verfolgen, Wunschliste speichern und schneller bestellen.
+    password_hint: Mindestens 6 Zeichen.
+    agree_terms: 'Ich akzeptiere die <a href="%terms%" class="link" target="_blank">AGB</a> und habe die <a href="%privacy%" class="link" target="_blank">Datenschutzerklärung</a> gelesen.'
+    reset_title: Passwort zurücksetzen
+    reset_request_intro: Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Link, mit dem Sie ein neues Passwort festlegen können.
+    reset_request_submit: Link anfordern
+    reset_intro: Legen Sie ein neues Passwort für Ihr Konto fest.
+    new_password: Neues Passwort
+    reset_submit: Neues Passwort speichern
+    back_to_login: Zurück zur Anmeldung
+  category:
+    meta_description: '%category% — alle Produkte dieser Kategorie entdecken.'
+  filters:
+    remove: Filter entfernen
+  signup:
+    title: Mehr aus Ihrem Einkauf machen
+    text: Bestellungen verfolgen, Favoriten auf der Wunschliste speichern und beim nächsten Mal schneller bestellen.
+  testimonials:
+    title: Das sagen unsere Kunden
+  faq:
+    more_questions: Noch Fragen?
+  contact:
+    faq_hint: Antworten auf die häufigsten Fragen
+    returns_hint: Rücksendung für eine Bestellung anmelden
+  support:
+    attach: Dateien anhängen
+  api:
+    title: API-Dokumentation
+    intro: Interaktive Referenz der SymfoShop-REST-API. Authentifizieren Sie sich über „Authorize“ mit Ihrem API-Schlüssel.

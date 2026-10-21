@@ -1,141 +1,48 @@
-{% extends 'base.html.twig' %}
+{% extends 'security/_layout.html.twig' %}
 
-{% block title %}{{ 'security.login.title'|trans }} - SymfoShop{% endblock %}
+{%- set auth_icon = 'lucide:log-in' -%}
 
-{% block body %}
-<div class="min-h-[calc(100vh-4rem)] flex">
-    {# Left panel - brand / decorative #}
-    <div class="hidden lg:flex lg:w-1/2 xl:w-2/5 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10">
-            <div class="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl"></div>
-            <div class="absolute bottom-20 right-20 w-96 h-96 bg-primary-300 rounded-full blur-3xl"></div>
+{% block page_title %}{{ 'security.login.submit'|trans }}{% endblock %}
+{% block auth_title %}{{ 'security.login.title'|trans }}{% endblock %}
+
+{% block auth_content %}
+    {% if error %}
+        <div class="alert alert-error mb-6" role="alert">
+            {{ ux_icon('lucide:circle-alert', {class: 'mt-0.5 size-4'}) }}
+            <p>{{ error.messageKey|trans(error.messageData, 'security') }}</p>
         </div>
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
-        <div class="relative z-10 flex flex-col justify-center px-12 xl:px-20">
-            <a href="{{ path('catalog_home') }}" class="inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors mb-16">
-                <div class="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
-                    <i class="fas fa-shopping-bag text-lg"></i>
-                </div>
-                <span class="text-xl font-bold">SymfoShop</span>
-            </a>
-            <h1 class="text-4xl xl:text-5xl font-bold text-white leading-tight">
-                Welcome back
-            </h1>
-            <p class="mt-4 text-lg text-primary-100 max-w-sm">
-                Sign in to manage your orders, wishlist, and account settings.
-            </p>
-            <div class="mt-12 flex gap-6">
-                <div class="flex items-center gap-3 text-white/80">
-                    <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
-                        <i class="fas fa-truck"></i>
-                    </div>
-                    <span class="text-sm font-medium">Fast delivery</span>
-                </div>
-                <div class="flex items-center gap-3 text-white/80">
-                    <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <span class="text-sm font-medium">Secure checkout</span>
-                </div>
+    {% endif %}
+
+    <form method="post" class="space-y-5" x-data="{ busy: false, show: false }" @submit="busy = true">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+        <div>
+            <label for="inputEmail" class="label">{{ 'security.login.email'|trans }}</label>
+            <input id="inputEmail" name="_username" type="email" autocomplete="email" required autofocus value="{{ last_username }}" class="input">
+        </div>
+
+        <div>
+            <div class="mb-1.5 flex items-center justify-between">
+                <label for="inputPassword" class="text-sm font-medium">{{ 'security.login.password'|trans }}</label>
+                <a href="{{ path('reset_password_request') }}" class="text-sm font-medium text-fg-muted hover:text-fg">{{ 'security.login.forgot_password'|trans }}</a>
+            </div>
+            <div class="relative">
+                <input id="inputPassword" name="_password" :type="show ? 'text' : 'password'" type="password" autocomplete="current-password" required class="input pr-11">
+                <button type="button" class="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-fg-subtle hover:text-fg" @click="show = !show"
+                        :aria-pressed="show" aria-label="{{ 'ui.auth.show_password'|trans }}">
+                    <span x-show="!show">{{ ux_icon('lucide:eye', {class: 'size-4'}) }}</span>
+                    <span x-show="show" x-cloak>{{ ux_icon('lucide:eye-off', {class: 'size-4'}) }}</span>
+                </button>
             </div>
         </div>
-    </div>
 
-    {# Right panel - form #}
-    <div class="flex-1 flex items-center justify-center p-6 sm:p-8 lg:p-12 bg-gray-50">
-        <div class="w-full max-w-md">
-            {# Mobile logo #}
-            <div class="lg:hidden text-center mb-8">
-                <a href="{{ path('catalog_home') }}" class="inline-flex items-center gap-2 text-gray-900 hover:text-primary-600 transition-colors">
-                    <div class="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-shopping-bag text-white"></i>
-                    </div>
-                    <span class="text-xl font-bold">SymfoShop</span>
-                </a>
-            </div>
+        <button type="submit" class="btn btn-primary btn-lg w-full" :disabled="busy">
+            <span x-show="busy" x-cloak class="spinner"></span>{{ 'security.login.submit'|trans }}
+        </button>
+    </form>
+{% endblock %}
 
-            <div class="bg-white rounded-2xl shadow-xl shadow-gray-200/50 p-8 sm:p-10">
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl font-bold text-gray-900">{{ 'security.login.title'|trans }}</h2>
-                    <p class="mt-2 text-sm text-gray-500">
-                        {{ 'security.login.or'|trans }}
-                        <a href="{{ path('register') }}" class="font-medium text-primary-600 hover:text-primary-500 transition-colors">
-                            {{ 'security.login.create_account'|trans }}
-                        </a>
-                    </p>
-                </div>
-
-                {% if error %}
-                    <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 flex items-start gap-3" role="alert">
-                        <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
-                        <p class="text-sm text-red-700">{{ error.messageKey|trans(error.messageData, 'security') }}</p>
-                    </div>
-                {% endif %}
-
-                <form method="post" class="space-y-5">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-
-                    <div>
-                        <label for="inputEmail" class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                                <i class="fas fa-envelope"></i>
-                            </div>
-                            <input id="inputEmail" name="_username" type="email" autocomplete="email" required autofocus
-                                value="{{ last_username }}"
-                                class="block w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors"
-                                placeholder="you@example.com">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="inputPassword" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                                <i class="fas fa-lock"></i>
-                            </div>
-                            <input id="inputPassword" name="_password" type="password" autocomplete="current-password" required
-                                class="block w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors"
-                                placeholder="••••••••">
-                        </div>
-                        <div class="mt-2 text-right">
-                            <a href="{{ path('reset_password_request') }}" class="text-sm font-medium text-primary-600 hover:text-primary-500 transition-colors">
-                                {{ 'security.login.forgot_password'|trans }}
-                            </a>
-                        </div>
-                    </div>
-
-                    <button type="submit" id="login-submit-btn"
-                        class="w-full inline-flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-600 border border-primary-600 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-primary-500/40 hover:shadow-primary-600/50">
-                        <i class="fas fa-sign-in-alt login-icon"></i>
-                        <span class="login-text">{{ 'security.login.submit'|trans }}</span>
-                    </button>
-                </form>
-
-                <p class="mt-6 text-center text-sm text-gray-500">
-                    {{ 'security.login.dont_have_account'|trans }}
-                    <a href="{{ path('register') }}" class="font-medium text-primary-600 hover:text-primary-500 transition-colors">
-                        {{ 'security.login.register_here'|trans }}
-                    </a>
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const btn = document.getElementById('login-submit-btn');
-    if (form && btn) {
-        form.addEventListener('submit', function() {
-            btn.disabled = true;
-            const icon = btn.querySelector('.login-icon');
-            const text = btn.querySelector('.login-text');
-            if (icon) { icon.className = 'fas fa-spinner fa-spin'; }
-            if (text) { text.textContent = '{{ 'common.loading'|trans|e('js') }}...'; }
-        });
-    }
-});
-</script>
+{% block auth_footer %}
+    {{ 'security.login.dont_have_account'|trans }}
+    <a href="{{ path('register') }}" class="link">{{ 'security.login.register_here'|trans }}</a>
 {% endblock %}

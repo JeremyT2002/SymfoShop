@@ -1,59 +1,39 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}API Documentation - SymfoShop{% endblock %}
+{% block page_title %}{{ 'ui.api.title'|trans }}{% endblock %}
+{% block robots_meta %}<meta name="robots" content="noindex,follow">{% endblock %}
 
 {% block stylesheets %}
-    {{ parent() }}
-    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.17.14/swagger-ui.css">
     <style>
         .swagger-ui .topbar { display: none; }
-        #swagger-ui { padding: 20px 0; }
     </style>
 {% endblock %}
 
 {% block body %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-6">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">SymfoShop API Documentation</h1>
-        <p class="text-gray-600">Interactive API documentation with Swagger UI</p>
-    </div>
-    <div id="swagger-ui"></div>
+<div class="container-page py-10">
+    <h1 class="text-3xl font-semibold">{{ 'ui.api.title'|trans }}</h1>
+    <p class="mt-2 text-fg-muted">{{ 'ui.api.intro'|trans }}</p>
+    {# Swagger UI ships its own light theme — keep it on a light surface in dark mode too #}
+    <div id="swagger-ui" class="mt-8 overflow-hidden rounded-2xl border border-line bg-white p-2 text-zinc-900"></div>
 </div>
+{% endblock %}
 
 {% block javascripts %}
-    {{ parent() }}
-    <script src="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui-bundle.js"></script>
-    <script src="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui-standalone-preset.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.17.14/swagger-ui-bundle.js" defer></script>
+    <script type="application/json" id="openapi-spec">{{ openApiSpec|raw }}</script>
     <script>
-        window.onload = function() {
-            const spec = {{ openApiSpec|raw }};
-            
-            // Configure Swagger UI
-            const ui = SwaggerUIBundle({
-                spec: spec,
+        window.addEventListener('load', function () {
+            window.ui = SwaggerUIBundle({
+                spec: JSON.parse(document.getElementById('openapi-spec').textContent),
                 dom_id: '#swagger-ui',
                 deepLinking: true,
-                presets: [
-                    SwaggerUIBundle.presets.apis,
-                    SwaggerUIStandalonePreset
-                ],
-                plugins: [
-                    SwaggerUIBundle.plugins.DownloadUrl
-                ],
-                layout: "StandaloneLayout",
-                tryItOutEnabled: true,
-                supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
                 persistAuthorization: true,
+                tryItOutEnabled: true,
                 filter: true,
                 docExpansion: 'list',
                 defaultModelsExpandDepth: 1,
-                defaultModelExpandDepth: 1
             });
-            
-            // Add API key input helper
-            window.ui = ui;
-        };
+        });
     </script>
 {% endblock %}
-{% endblock %}
-
