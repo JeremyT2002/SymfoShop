@@ -8,6 +8,7 @@ use App\Form\Admin\OrderStatusType;
 use App\Repository\InvoiceRepository;
 use App\Repository\OrderRepository;
 use App\Service\Invoice\InvoiceService;
+use App\Service\Order\OrderNotifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class OrderController extends AbstractController
 {
     public function __construct(
+        private readonly OrderNotifier $orderNotifier,
         private readonly OrderRepository $orderRepository,
         private readonly InvoiceRepository $invoiceRepository,
         private readonly InvoiceService $invoiceService,
@@ -122,7 +124,11 @@ class OrderController extends AbstractController
         return $this->render('admin/order/show.html.twig', [
             'order' => $order,
             'invoice' => $invoice,
-            'statusForm' => $this->createForm(OrderStatusType::class, ['status' => $order->getStatus()], [
+            'statusForm' => $this->createForm(OrderStatusType::class, [
+                'status' => $order->getStatus(),
+                'carrier' => $order->getCarrier(),
+                'trackingNumber' => $order->getTrackingNumber(),
+            ], [
                 'action' => $this->generateUrl('admin_orders_update_status', ['id' => $order->getId()]),
                 'method' => 'POST',
                 'csrf_token_id' => 'update_status_' . $order->getId(),
@@ -146,7 +152,13 @@ class OrderController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $newStatus = (string) $form->get('status')->getData();
+            $wasShipped = $order->getStatus() === 'shipped';
             $order->setStatus($newStatus);
+            $order->setCarrier(trim((string) $form->get('carrier')->getData()) ?: null);
+            $order->setTrackingNumber(trim((string) $form->get('trackingNumber')->getData()) ?: null);
+            if ($newStatus === 'shipped' && !$wasShipped) {
+                $this->orderNotifier->orderShipped($order);
+            }
             $this->entityManager->flush();
             $this->addFlash('success', $this->translator->trans('admin.orders.flash.status_updated'));
         } else {
@@ -176,7 +188,11 @@ class OrderController extends AbstractController
 
         $orders = $this->orderRepository->findBy(['id' => $ids]);
         foreach ($orders as $order) {
+            $wasShipped = $order->getStatus() === 'shipped';
             $order->setStatus($status);
+            if ($status === 'shipped' && !$wasShipped) {
+                $this->orderNotifier->orderShipped($order);
+            }
         }
         $this->entityManager->flush();
 

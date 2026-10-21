@@ -107,6 +107,7 @@
                                 {% if order.shippingStreet %}
                                     <p class="mt-3 text-sm leading-6 text-fg-muted"><span class="block text-xs font-medium text-fg-subtle">{{ 'ui.order.shipping_address'|trans }}</span>{% include 'components/_address.html.twig' with {order: order} only %}</p>
                                 {% endif %}
+                                <a href="{{ path('order_status', {number: order.orderNumber}) }}" class="link mt-3 inline-flex items-center gap-1 text-sm">{{ 'ui.order_status.view_status'|trans }}{{ ux_icon('lucide:arrow-right', {class: 'size-3.5'}) }}</a>
                                 {% if order.trackingNumber %}
                                     <p class="mt-3 flex items-center gap-2 text-sm text-fg-muted">{{ ux_icon('lucide:truck', {class: 'size-4'}) }}{{ order.carrier }} · <span class="font-mono">{{ order.trackingNumber }}</span></p>
                                 {% endif %}

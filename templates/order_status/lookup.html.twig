@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}{{ 'ui.order_status.title'|trans }}{% endblock %}
+{% block robots_meta %}<meta name="robots" content="noindex,follow">{% endblock %}
+
+{% block body %}
+<div class="container-page max-w-lg py-12 lg:py-20">
+    <span class="flex size-12 items-center justify-center rounded-full bg-subtle">{{ ux_icon('lucide:package-search', {class: 'size-6'}) }}</span>
+    <h1 class="mt-5 text-3xl font-semibold">{{ 'ui.order_status.title'|trans }}</h1>
+    <p class="mt-2 text-fg-muted">{{ 'ui.order_status.intro'|trans }}</p>
+
+    <form method="post" action="{{ path('order_status_lookup') }}" class="card card-body mt-8 space-y-5">
+        <input type="hidden" name="_token" value="{{ csrf_token('order_status_lookup') }}">
+        <div>
+            <label for="order-number" class="label">{{ 'checkout.order_number'|trans }}</label>
+            <input id="order-number" name="number" value="{{ number }}" required class="input font-mono uppercase" placeholder="ORD-…" autocomplete="off">
+        </div>
+        <div>
+            <label for="order-email" class="label">{{ 'checkout.fields.email'|trans }}</label>
+            <input id="order-email" type="email" name="email" value="{{ email }}" required class="input" autocomplete="email">
+        </div>
+        <button type="submit" class="btn btn-primary w-full">{{ 'ui.order_status.submit'|trans }}</button>
+    </form>
+
+    {% if not app.user %}
+        <p class="mt-6 text-center text-sm text-fg-muted">
+            {{ 'ui.order_status.have_account'|trans }} <a href="{{ path('login') }}" class="link">{{ 'nav.login'|trans }}</a>
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

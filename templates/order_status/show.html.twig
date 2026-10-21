@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}{{ 'ui.order_status.title'|trans }} {{ order.orderNumber }}{% endblock %}
+{% block robots_meta %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+
+{% block body %}
+{%- set steps = [
+    {key: 'new', label: 'ui.order_status.step_placed', icon: 'lucide:receipt', date: order.createdAt},
+    {key: 'paid', label: 'ui.order_status.step_paid', icon: 'lucide:credit-card', date: null},
+    {key: 'processing', label: 'ui.order_status.step_processing', icon: 'lucide:package', date: null},
+    {key: 'shipped', label: 'ui.order_status.step_shipped', icon: 'lucide:truck', date: order.shippedAt},
+    {key: 'completed', label: 'ui.order_status.step_completed', icon: 'lucide:circle-check', date: null},
+] -%}
+{%- set position = {new: 0, payment_pending: 0, paid: 1, processing: 2, shipped: 3, completed: 4}[order.status]|default(0) -%}
+
+<div class="container-page max-w-3xl py-10 lg:py-16">
+    <p class="eyebrow">{{ 'ui.order_status.title'|trans }}</p>
+    <h1 class="mt-2 font-mono text-2xl font-semibold sm:text-3xl">{{ order.orderNumber }}</h1>
+    <p class="mt-1 text-sm text-fg-muted">{{ 'ui.order_status.placed_on'|trans({'%date%': order.createdAt|date('d.m.Y')}) }}</p>
+
+    {% if order.status == 'cancelled' %}
+        <div class="alert alert-error mt-8">{{ ux_icon('lucide:circle-x', {class: 'mt-0.5 size-4'}) }}<p>{{ 'ui.order_status.cancelled'|trans }}</p></div>
+    {% else %}
+        <ol class="card mt-8 grid gap-6 p-6 sm:grid-cols-5 sm:gap-2" aria-label="{{ 'ui.order_status.progress'|trans }}">
+            {% for step in steps %}
+                {%- set done = loop.index0 <= position -%}
+                <li class="flex items-center gap-3 sm:flex-col sm:text-center" {% if loop.index0 == position %}aria-current="step"{% endif %}>
+                    <span class="flex size-10 shrink-0 items-center justify-center rounded-full {{ done ? 'bg-fg text-canvas' : 'bg-subtle text-fg-subtle' }}">
+                        {{ ux_icon(step.icon, {class: 'size-5'}) }}
+                    </span>
+                    <span>
+                        <span class="block text-sm font-medium {{ done ? 'text-fg' : 'text-fg-subtle' }}">{{ step.label|trans }}</span>
+                        {% if done and step.date %}<span class="block text-xs text-fg-subtle">{{ step.date|date('d.m.Y') }}</span>{% endif %}
+                    </span>
+                </li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+
+    {% if order.trackingNumber %}
+        <section class="card card-body mt-6 flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <p class="text-sm text-fg-muted">{{ 'ui.order_status.tracking'|trans }}</p>
+                <p class="mt-0.5 font-medium">{{ order.carrier ? order.carrier ~ ' · ' }}<span class="font-mono">{{ order.trackingNumber }}</span></p>
+            </div>
+            {% if trackingUrl %}
+                <a href="{{ trackingUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                    {{ ux_icon('lucide:truck', {class: 'size-4'}) }}{{ 'ui.order_status.track_parcel'|trans }}
+                </a>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    <div class="mt-6 grid gap-6 sm:grid-cols-5">
+        <section class="card card-body sm:col-span-3">
+            <h2 class="font-semibold">{{ 'cart.items'|trans }}</h2>
+            <ul class="mt-4 divide-y divide-line text-sm" role="list">
+                {% for item in order.items %}
+                    <li class="flex justify-between gap-4 py-2.5">
+                        <span><span class="text-fg-subtle tabular-nums">{{ item.quantity }} ×</span> {{ item.nameSnapshot }}</span>
+                        <span class="tabular-nums">{{ item.totalAmount|money(order.currency) }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+            <p class="mt-4 flex justify-between border-t border-line pt-4 font-semibold">
+                {{ 'checkout.total'|trans }} <span class="tabular-nums">{{ order.grandTotal|money(order.currency) }}</span>
+            </p>
+        </section>
+        {% if order.shippingStreet %}
+            <section class="card card-body sm:col-span-2">
+                <h2 class="font-semibold">{{ 'ui.order.shipping_address'|trans }}</h2>
+                <p class="mt-3 text-sm leading-6 text-fg-muted">{% include 'components/_address.html.twig' with {order: order} only %}</p>
+            </section>
+        {% endif %}
+    </div>
+
+    <p class="mt-8 text-sm text-fg-muted">
+        {{ 'ui.order_status.questions'|trans }}
+        <a href="{{ path('contact') }}" class="link">{{ 'footer.contact'|trans }}</a> ·
+        <a href="{{ path('return_request') }}" class="link">{{ 'footer.return_request'|trans }}</a>
+    </p>
+</div>
+{% endblock %}
