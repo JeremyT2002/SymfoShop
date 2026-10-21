@@ -120,6 +120,10 @@
                         <input type="number" name="price_amount" min="0" required class="w-full px-3 py-2 border border-line-strong rounded-lg text-sm" placeholder="1999">
                     </div>
                     <div>
+                        <label class="block text-xs font-medium text-fg-muted mb-1">Compare-at price (struck through, optional)</label>
+                        <input type="number" name="compare_at_price_amount" min="0" class="w-full px-3 py-2 border border-line-strong rounded-lg text-sm" placeholder="2499">
+                    </div>
+                    <div>
                         <label class="block text-xs font-medium text-fg-muted mb-1">Currency *</label>
                         <input type="text" name="currency" value="EUR" maxlength="3" required class="w-full px-3 py-2 border border-line-strong rounded-lg text-sm">
                     </div>
@@ -165,6 +169,7 @@
                                                 <input form="variant-edit-{{ variant.id }}" type="number" name="price_amount" min="0" value="{{ variant.priceAmount }}" required class="w-full px-3 py-2 border border-line-strong rounded-lg text-sm">
                                                 <input form="variant-edit-{{ variant.id }}" type="text" name="currency" maxlength="3" value="{{ variant.currency }}" required class="w-full px-3 py-2 border border-line-strong rounded-lg text-sm">
                                             </div>
+                                            <input form="variant-edit-{{ variant.id }}" type="number" name="compare_at_price_amount" min="0" value="{{ variant.compareAtPriceAmount }}" placeholder="Compare-at" title="Compare-at price (struck through)" class="mt-2 w-full px-3 py-2 border border-line-strong rounded-lg text-sm">
                                         </td>
                                         <td class="px-4 py-3 align-top">
                                             <div class="grid grid-cols-2 gap-2">

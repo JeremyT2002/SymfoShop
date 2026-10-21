@@ -47,6 +47,7 @@ final class StorefrontSmokeTest extends WebTestCase
         $this->client->request('GET', '/product/' . $product->getSlug());
         self::assertSelectorExists('[data-add-to-cart][data-variant-id="' . $variant->getId() . '"]');
         self::assertSelectorExists('script[type="application/ld+json"]');
+        self::assertSelectorTextContains('main', '−26 %', 'sale badge for the compare-at price');
 
         $this->client->request('GET', '/cart');
         self::assertSelectorTextContains('main', $this->trans('cart.empty'));
@@ -122,6 +123,7 @@ final class StorefrontSmokeTest extends WebTestCase
         $this->em->persist($category);
 
         $product = $this->createProduct('Smoke Product ' . $suffix, $category, stock: 5, price: 2599);
+        $product->getVariants()->first()->setCompareAtPriceAmount(3499);
         $soldOut = $this->createProduct('Smoke Sold Out ' . $suffix, $category, stock: 0, price: 1000);
 
         $this->em->flush();

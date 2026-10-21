@@ -1230,6 +1230,8 @@ ui:
   product:
     from: from
     sold_out: Sold out
+    sale_badge: '−%percent% %'
+    was_price: "Original price"
     choose_options: Choose options
     price_note: Incl. VAT, plus shipping
     only_n_left: 'Only %count% left'

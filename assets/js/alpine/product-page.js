@@ -31,6 +31,10 @@ export default () => ({
         return this.variant ? formatMoney(this.variant.price, this.variant.currency) : '';
     },
 
+    get compareAtPrice() {
+        return this.variant?.compareAt ? formatMoney(this.variant.compareAt, this.variant.currency) : '';
+    },
+
     get inStock() {
         return (this.variant?.available ?? 0) > 0;
     },

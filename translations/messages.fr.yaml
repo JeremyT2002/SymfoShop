@@ -1230,6 +1230,8 @@ ui:
   product:
     from: à partir de
     sold_out: Épuisé
+    sale_badge: '−%percent% %'
+    was_price: "Prix d'origine"
     choose_options: Choisir les options
     price_note: TTC, frais de port en sus
     only_n_left: 'Plus que %count% en stock'

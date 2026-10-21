@@ -7,6 +7,8 @@
     id: v.id,
     label: v.attributes is not empty ? v.attributes|map((value, key) => key|capitalize ~ ': ' ~ value)|join(' · ') : 'product.default_variant'|trans,
     price: v.priceAmount,
+    compareAt: v.onSale ? v.compareAtPriceAmount : null,
+    discountPercent: v.discountPercent,
     currency: v.currency,
     sku: v.sku,
     available: max(0, v.stockItem ? v.stockItem.available : 0),
@@ -135,7 +137,12 @@
                 {% endif %}
 
                 {% if defaultVariant %}
-                    <p class="mt-5 text-2xl font-semibold tabular-nums" x-text="price">{{ defaultVariant.priceAmount|money(defaultVariant.currency) }}</p>
+                    <p class="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                        <span class="text-2xl font-semibold tabular-nums" :class="variant?.compareAt && 'text-red-600 dark:text-red-400'" x-text="price">{{ defaultVariant.priceAmount|money(defaultVariant.currency) }}</span>
+                        <s class="text-base text-fg-subtle tabular-nums" x-show="variant?.compareAt" x-text="compareAtPrice" {{ defaultVariant.onSale ? '' : 'x-cloak' }} aria-label="{{ 'ui.product.was_price'|trans }}">{{ defaultVariant.onSale ? defaultVariant.compareAtPriceAmount|money(defaultVariant.currency) }}</s>
+                        <span class="badge bg-red-600 font-semibold text-white ring-0" x-show="variant?.compareAt" {{ defaultVariant.onSale ? '' : 'x-cloak' }}
+                              x-text="'{{ 'ui.product.sale_badge'|trans({'%percent%': '__P__'})|e('js') }}'.replace('__P__', variant?.discountPercent)">{{ defaultVariant.onSale ? 'ui.product.sale_badge'|trans({'%percent%': defaultVariant.discountPercent}) }}</span>
+                    </p>
                     <p class="mt-1 text-xs text-fg-subtle">{{ 'ui.product.price_note'|trans }}</p>
 
                     {# Variant picker #}

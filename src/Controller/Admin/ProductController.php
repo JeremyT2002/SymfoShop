@@ -155,6 +155,8 @@ class ProductController extends AbstractController
 
             $sku = trim((string) $request->request->get('sku', ''));
             $priceAmount = (int) $request->request->get('price_amount', 0);
+            $compareAtRaw = trim((string) $request->request->get('compare_at_price_amount', ''));
+            $compareAt = $compareAtRaw !== '' ? (int) $compareAtRaw : null;
             $currency = strtoupper(trim((string) $request->request->get('currency', 'EUR')));
             $onHand = max(0, (int) $request->request->get('on_hand', 0));
             $reserved = max(0, (int) $request->request->get('reserved', 0));
@@ -166,6 +168,10 @@ class ProductController extends AbstractController
         }
         if ($priceAmount < 0) {
             $this->addFlash('error', 'Price must be 0 or higher.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+        if ($compareAt !== null && $compareAt <= $priceAmount) {
+            $this->addFlash('error', 'The compare-at price must be higher than the price (or empty).');
             return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
         }
         if (!preg_match('/^[A-Z]{3}$/', $currency)) {
@@ -185,6 +191,7 @@ class ProductController extends AbstractController
             $variant->setProduct($product);
             $variant->setSku($sku);
             $variant->setPriceAmount($priceAmount);
+            $variant->setCompareAtPriceAmount($compareAt);
             $variant->setCurrency($currency);
             $variant->setAttributes($this->parseAttributesInput($attributesRaw));
             $variant->setUpdatedAt(new \DateTimeImmutable());
@@ -216,6 +223,8 @@ class ProductController extends AbstractController
 
         $sku = trim((string) $request->request->get('sku', ''));
         $priceAmount = (int) $request->request->get('price_amount', 0);
+        $compareAtRaw = trim((string) $request->request->get('compare_at_price_amount', ''));
+        $compareAt = $compareAtRaw !== '' ? (int) $compareAtRaw : null;
         $currency = strtoupper(trim((string) $request->request->get('currency', 'EUR')));
         $onHand = max(0, (int) $request->request->get('on_hand', 0));
         $reserved = max(0, (int) $request->request->get('reserved', 0));
@@ -227,6 +236,10 @@ class ProductController extends AbstractController
         }
         if ($priceAmount < 0) {
             $this->addFlash('error', 'Price must be 0 or higher.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+        if ($compareAt !== null && $compareAt <= $priceAmount) {
+            $this->addFlash('error', 'The compare-at price must be higher than the price (or empty).');
             return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
         }
         if (!preg_match('/^[A-Z]{3}$/', $currency)) {
@@ -246,6 +259,7 @@ class ProductController extends AbstractController
 
         $variant->setSku($sku);
         $variant->setPriceAmount($priceAmount);
+        $variant->setCompareAtPriceAmount($compareAt);
         $variant->setCurrency($currency);
         $variant->setAttributes($this->parseAttributesInput($attributesRaw));
         $variant->setUpdatedAt(new \DateTimeImmutable());

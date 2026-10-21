@@ -10,6 +10,8 @@
 {%- set has_price_range = prices is not empty and min(prices) != max(prices) -%}
 {%- set available = product.variants|reduce((sum, v) => sum + max(0, v.stockItem ? v.stockItem.available : 0), 0) -%}
 {%- set single_variant = product.variants|length == 1 -%}
+{%- set sale_variant = product.variants|filter(v => v.onSale)|sort((a, b) => b.discountPercent <=> a.discountPercent)|first -%}
+{%- set cheapest = product.variants|sort((a, b) => a.priceAmount <=> b.priceAmount)|first -%}
 
 <article class="group relative flex flex-col">
     <div class="relative aspect-[4/5] overflow-hidden rounded-xl bg-subtle">
@@ -28,6 +30,8 @@
 
         {% if available == 0 %}
             <span class="badge badge-neutral absolute top-3 left-3 bg-panel/90 backdrop-blur">{{ 'ui.product.sold_out'|trans }}</span>
+        {% elseif sale_variant %}
+            <span class="badge absolute top-3 left-3 bg-red-600 font-semibold text-white ring-0">{{ 'ui.product.sale_badge'|trans({'%percent%': sale_variant.discountPercent}) }}</span>
         {% endif %}
 
         {% if app.user %}
@@ -66,7 +70,10 @@
         {% if min_price is not null %}
             <p class="mt-1 text-sm font-semibold text-fg tabular-nums">
                 {% if has_price_range %}<span class="font-normal text-fg-muted">{{ 'ui.product.from'|trans }}</span> {% endif %}
-                {{- min_price|money(variant.currency) -}}
+                <span class="{{ cheapest and cheapest.onSale ? 'text-red-600 dark:text-red-400' }}">{{- min_price|money(variant.currency) -}}</span>
+                {% if cheapest and cheapest.onSale %}
+                    <s class="ml-1 text-xs font-normal text-fg-subtle" aria-label="{{ 'ui.product.was_price'|trans }}">{{ cheapest.compareAtPriceAmount|money(variant.currency) }}</s>
+                {% endif %}
             </p>
         {% endif %}
         {% if product.variants|length > 1 %}

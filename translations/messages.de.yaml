@@ -1230,6 +1230,8 @@ ui:
   product:
     from: ab
     sold_out: Ausverkauft
+    sale_badge: '−%percent% %'
+    was_price: "Ursprünglicher Preis"
     choose_options: Optionen wählen
     price_note: inkl. MwSt., zzgl. Versand
     only_n_left: 'Nur noch %count% verfügbar'
