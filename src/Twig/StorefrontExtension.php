@@ -8,6 +8,7 @@ use App\Entity\Category;
 use App\Entity\User;
 use App\Repository\CategoryRepository;
 use App\Repository\WishlistRepository;
+use App\Service\Media\ResponsiveImages;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Intl\Countries;
@@ -34,6 +35,7 @@ final class StorefrontExtension extends AbstractExtension
         private readonly Security $security,
         private readonly WishlistRepository $wishlistRepository,
         private readonly CategoryRepository $categoryRepository,
+        private readonly ResponsiveImages $responsiveImages,
     ) {
     }
 
@@ -51,6 +53,8 @@ final class StorefrontExtension extends AbstractExtension
         return [
             new TwigFunction('in_wishlist', $this->isInWishlist(...)),
             new TwigFunction('nav_categories', $this->navCategories(...)),
+            new TwigFunction('image_url', $this->responsiveImages->url(...)),
+            new TwigFunction('image_srcset', $this->responsiveImages->srcset(...)),
         ];
     }
 

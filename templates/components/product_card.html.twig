@@ -17,10 +17,10 @@
     <div class="relative aspect-[4/5] overflow-hidden rounded-xl bg-subtle">
         <a href="{{ url }}" class="absolute inset-0" tabindex="-1" aria-hidden="true">
             {% if images|length > 0 %}
-                <img src="{{ images[0].path }}" alt="" loading="{{ eager|default(false) ? 'eager' : 'lazy' }}" decoding="async"
+                <img src="{{ image_url(images[0].path, 640) }}" srcset="{{ image_srcset(images[0].path, [320, 480, 640, 960]) }}" sizes="(min-width: 1280px) 300px, (min-width: 1024px) 25vw, 50vw" alt="" loading="{{ eager|default(false) ? 'eager' : 'lazy' }}" decoding="async"
                      class="size-full object-cover transition duration-500 ease-out group-hover:scale-[1.03] {{ images|length > 1 ? 'group-hover:opacity-0' : '' }}">
                 {% if images|length > 1 %}
-                    <img src="{{ images[1].path }}" alt="" loading="lazy" decoding="async"
+                    <img src="{{ image_url(images[1].path, 640) }}" srcset="{{ image_srcset(images[1].path, [320, 480, 640, 960]) }}" sizes="(min-width: 1280px) 300px, (min-width: 1024px) 25vw, 50vw" alt="" loading="lazy" decoding="async"
                          class="absolute inset-0 size-full object-cover opacity-0 transition duration-500 ease-out group-hover:scale-[1.03] group-hover:opacity-100">
                 {% endif %}
             {% else %}

@@ -46,7 +46,7 @@
                             {%- set placement = collage|length == 1 ? 'col-span-6 row-span-6' : ['col-span-4 row-span-6', 'col-span-2 row-span-3', 'col-span-2 row-span-3'][loop.index0] -%}
                             <a href="{{ path('catalog_product', {slug: product.slug}) }}" tabindex="-1"
                                class="{{ placement }} overflow-hidden rounded-2xl bg-subtle">
-                                <img src="{{ (product.media|first).path }}" alt="" class="size-full object-cover transition duration-700 hover:scale-105"
+                                <img src="{{ image_url((product.media|first).path, 960) }}" srcset="{{ image_srcset((product.media|first).path, [480, 640, 960, 1280]) }}" sizes="(min-width: 1024px) 34vw, 100vw" alt="" class="size-full object-cover transition duration-700 hover:scale-105"
                                      {% if loop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}>
                             </a>
                         {% endfor %}

@@ -39,7 +39,7 @@
                         <li class="flex gap-4 py-6 transition-opacity aria-busy:opacity-60 sm:gap-6" data-cart-line="{{ variant.id }}">
                             <a href="{{ path('catalog_product', {slug: product.slug}) }}" class="size-24 shrink-0 overflow-hidden rounded-xl bg-subtle sm:size-32">
                                 {% if image %}
-                                    <img src="{{ image.path }}" alt="{{ image.alt|default(product.name) }}" class="size-full object-cover">
+                                    <img src="{{ image_url(image.path, 320) }}" alt="{{ image.alt|default(product.name) }}" loading="lazy" class="size-full object-cover">
                                 {% else %}
                                     <span class="flex size-full items-center justify-center text-fg-subtle">{{ ux_icon('lucide:image', {class: 'size-8 opacity-50'}) }}</span>
                                 {% endif %}

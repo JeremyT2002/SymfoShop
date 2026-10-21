@@ -93,7 +93,7 @@
                         {%- set image = item.variant.product.media|first -%}
                         <li class="flex items-center gap-4 py-3">
                             <span class="relative size-14 shrink-0 rounded-lg bg-subtle">
-                                {% if image %}<img src="{{ image.path }}" alt="" class="size-full rounded-lg object-cover">{% endif %}
+                                {% if image %}<img src="{{ image_url(image.path, 320) }}" alt="" loading="lazy" class="size-full rounded-lg object-cover">{% endif %}
                                 <span class="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-fg text-[0.6875rem] font-semibold text-canvas tabular-nums">{{ item.quantity }}</span>
                             </span>
                             <span class="min-w-0 flex-1">

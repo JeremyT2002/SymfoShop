@@ -78,7 +78,8 @@
             <div class="relative aspect-square overflow-hidden rounded-2xl bg-subtle sm:aspect-[4/5] lg:aspect-square">
                 {% if images is not empty %}
                     {% for image in images %}
-                        <img src="{{ image.src }}" alt="{{ image.alt }}"
+                        <img src="{{ image_url(image.src, 960) }}" srcset="{{ image_srcset(image.src, [480, 640, 960, 1280, 1600]) }}"
+                             sizes="(min-width: 1024px) 58vw, 100vw" alt="{{ image.alt }}"
                              x-show="activeImage === {{ loop.index0 }}" {% if not loop.first %}x-cloak loading="lazy"{% else %}fetchpriority="high"{% endif %}
                              class="absolute inset-0 size-full cursor-zoom-in object-cover" @click="zoomOpen = true">
                     {% endfor %}
@@ -105,7 +106,7 @@
                     {% for image in images %}
                         <button type="button" role="tab" @click="show({{ loop.index0 }})" :aria-selected="activeImage === {{ loop.index0 }}"
                                 class="aspect-square overflow-hidden rounded-lg bg-subtle ring-2 ring-transparent ring-offset-2 ring-offset-canvas transition aria-selected:ring-fg">
-                            <img src="{{ image.src }}" alt="" loading="lazy" class="size-full object-cover">
+                            <img src="{{ image_url(image.src, 320) }}" alt="" loading="lazy" class="size-full object-cover">
                         </button>
                     {% endfor %}
                 </div>
