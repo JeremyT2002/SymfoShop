@@ -50,14 +50,40 @@
 
         <div class="ml-auto flex items-center gap-1">
             {# Search #}
-            <form action="{{ path('catalog_products') }}" method="get" role="search" class="relative mr-1 hidden md:block">
+            <form action="{{ path('catalog_products') }}" method="get" role="search" class="relative mr-1 hidden md:block"
+                  x-data="searchSuggest" data-url="{{ path('search_suggest') }}" @click.outside="close()" @keydown.escape="close()">
                 <label for="header-search" class="sr-only">{{ 'ui.search.label'|trans }}</label>
                 <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle">
                     {{ ux_icon('lucide:search', {class: 'size-4'}) }}
                 </span>
-                <input id="header-search" type="search" name="q" value="{{ app.request.query.get('q')|default('') }}"
+                <input id="header-search" type="search" name="q" value="{{ app.request.query.get('q')|default('') }}" x-ref="input" x-model="query" autocomplete="off"
+                       role="combobox" aria-autocomplete="list" aria-controls="search-suggestions" :aria-expanded="open"
+                       :aria-activedescendant="active >= 0 ? 'suggestion-' + active : null"
+                       @input.debounce.200ms="fetch()" @focus="query.length >= 2 && fetch()"
+                       @keydown.arrow-down.prevent="move(1)" @keydown.arrow-up.prevent="move(-1)" @keydown.enter="choose($event)"
                        placeholder="{{ 'ui.search.placeholder'|trans }}"
                        class="h-10 w-44 rounded-lg border border-transparent bg-subtle pr-3 pl-9 text-sm text-fg transition-[width,border-color] placeholder:text-fg-subtle focus:w-64 focus:border-primary-500 focus:bg-panel focus:outline-none xl:w-56 xl:focus:w-72">
+
+                <div x-cloak x-show="open" x-transition.origin.top id="search-suggestions" role="listbox" aria-label="{{ 'ui.search.suggestions'|trans }}"
+                     class="absolute right-0 mt-2 w-96 overflow-hidden rounded-xl border border-line bg-panel shadow-xl shadow-black/10">
+                    <template x-for="(option, index) in options" :key="option.url">
+                        <a :href="option.url" :id="'suggestion-' + index" role="option" :aria-selected="active === index"
+                           class="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-subtle aria-selected:bg-subtle" @mouseenter="active = index">
+                            <template x-if="option.price === undefined">
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-subtle text-fg-muted">{{ ux_icon('lucide:layout-grid', {class: 'size-4'}) }}</span>
+                            </template>
+                            <template x-if="option.price !== undefined">
+                                <span class="size-10 shrink-0 overflow-hidden rounded-lg bg-subtle"><img x-show="option.image" :src="option.image" alt="" class="size-full object-cover"></span>
+                            </template>
+                            <span class="min-w-0 flex-1 truncate" x-text="option.name"></span>
+                            <span class="shrink-0 text-fg-muted tabular-nums" x-show="option.price" x-text="option.price"></span>
+                        </a>
+                    </template>
+                    <p x-show="options.length === 0 && !loading" class="px-4 py-4 text-sm text-fg-muted">{{ 'ui.search.no_suggestions'|trans }}</p>
+                    <button type="submit" class="flex w-full items-center justify-between border-t border-line px-4 py-3 text-sm font-semibold hover:bg-subtle">
+                        <span>{{ 'ui.search.all_results'|trans }}</span>{{ ux_icon('lucide:arrow-right', {class: 'size-4'}) }}
+                    </button>
+                </div>
             </form>
 
             {# Colour scheme #}

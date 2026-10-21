@@ -1225,6 +1225,9 @@ ui:
     results_for: 'Ergebnisse für „%query%“'
     no_results: 'Keine Produkte für „%query%“ gefunden'
     no_results_hint: Prüfen Sie die Schreibweise oder versuchen Sie einen allgemeineren Begriff.
+    suggestions: "Suchvorschläge"
+    no_suggestions: "Keine passenden Produkte"
+    all_results: "Alle Ergebnisse anzeigen"
   footer:
     prices_incl_vat: Alle Preise inkl. MwSt., zzgl. Versandkosten.
   product:

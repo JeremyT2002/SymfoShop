@@ -1225,6 +1225,9 @@ ui:
     results_for: 'Résultats pour « %query% »'
     no_results: 'Aucun produit trouvé pour « %query% »'
     no_results_hint: Vérifiez l'orthographe ou essayez un terme plus général.
+    suggestions: "Suggestions de recherche"
+    no_suggestions: "Aucun produit correspondant"
+    all_results: "Voir tous les résultats"
   footer:
     prices_incl_vat: Tous les prix TTC, frais de port en sus.
   product:

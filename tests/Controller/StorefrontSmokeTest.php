@@ -49,6 +49,15 @@ final class StorefrontSmokeTest extends WebTestCase
         self::assertSelectorExists('script[type="application/ld+json"]');
         self::assertSelectorTextContains('main', '−26 %', 'sale badge for the compare-at price');
 
+        // Live search suggestions
+        $this->client->request('GET', '/search/suggest?q=' . urlencode($product->getName()));
+        self::assertResponseIsSuccessful();
+        $suggest = json_decode((string) $this->client->getResponse()->getContent(), true);
+        self::assertSame($product->getName(), $suggest['products'][0]['name']);
+        self::assertStringStartsWith('/media/', $suggest['products'][0]['image']);
+        $this->client->request('GET', '/search/suggest?q=' . urlencode($category->getName()));
+        self::assertSame($category->getName(), json_decode((string) $this->client->getResponse()->getContent(), true)['categories'][0]['name']);
+
         $this->client->request('GET', '/cart');
         self::assertSelectorTextContains('main', $this->trans('cart.empty'));
 
