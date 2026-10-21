@@ -15,6 +15,7 @@
         "sentry/sentry-symfony": "^5.14",
         "stripe/stripe-php": "^19.4.1",
         "symfony/asset": "7.4.*",
+        "symfony/asset-mapper": "7.4.*",
         "symfony/console": "7.4.*",
         "symfony/dotenv": "7.4.*",
         "symfony/flex": "^2.11",
@@ -30,9 +31,11 @@
         "symfony/security-bundle": "7.4.*",
         "symfony/translation": "7.4.*",
         "symfony/twig-bundle": "7.4.*",
+        "symfony/ux-icons": "^2.36.1",
         "symfony/validator": "7.4.*",
         "symfony/workflow": "7.4.*",
-        "symfony/yaml": "7.4.*"
+        "symfony/yaml": "7.4.*",
+        "symfonycasts/tailwind-bundle": "^1.0"
     },
     "config": {
         "allow-plugins": {
@@ -66,7 +69,8 @@
     "scripts": {
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
-            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+            "assets:install %PUBLIC_DIR%": "symfony-cmd",
+            "importmap:install": "symfony-cmd"
         },
         "post-install-cmd": [
             "@auto-scripts"

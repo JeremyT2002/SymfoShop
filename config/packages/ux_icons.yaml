@@ -1,0 +1,45 @@
+# Icons: Lucide (https://lucide.dev) via Symfony UX Icons.
+# Used icons are stored as SVG files in assets/icons/ (run `php bin/console ux:icons:lock` after adding new ones),
+# so production never calls the Iconify API.
+ux_icons:
+    default_icon_attributes:
+        class: 'icon'
+        'aria-hidden': 'true'
+
+    # Short names used by the admin icon macro (templates/admin/components/_icons.html.twig)
+    aliases:
+        home: 'lucide:layout-dashboard'
+        box: 'lucide:package'
+        tag: 'lucide:tag'
+        shopping-cart: 'lucide:shopping-cart'
+        ticket: 'lucide:ticket-percent'
+        users: 'lucide:users'
+        star: 'lucide:star'
+        life-buoy: 'lucide:life-buoy'
+        settings: 'lucide:settings'
+        chart-line: 'lucide:chart-line'
+        book-open: 'lucide:book-open'
+        shopping-bag: 'lucide:shopping-bag'
+        x-mark: 'lucide:x'
+        bars-3: 'lucide:menu'
+        magnifying-glass: 'lucide:search'
+        moon: 'lucide:moon'
+        sun: 'lucide:sun'
+        bell: 'lucide:bell'
+        check-circle: 'lucide:circle-check'
+        plus: 'lucide:plus'
+        chevron-down: 'lucide:chevron-down'
+        arrow-top-right-on-square: 'lucide:external-link'
+        arrow-left-on-rectangle: 'lucide:log-out'
+        history: 'lucide:history'
+        palette: 'lucide:palette'
+        truck: 'lucide:truck'
+        credit-card: 'lucide:credit-card'
+        key: 'lucide:key-round'
+        undo: 'lucide:undo-2'
+
+    ignore_not_found: false
+
+when@prod:
+    ux_icons:
+        ignore_not_found: true

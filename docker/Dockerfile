@@ -34,6 +34,9 @@ COPY . .
 # Create .env.local if it doesn't exist
 RUN if [ ! -f .env.local ]; then cp .env .env.local; fi
 
+# Build frontend assets (Tailwind CSS + AssetMapper) into public/assets
+RUN APP_ENV=prod APP_SECRET=build php -d memory_limit=512M bin/console tailwind:build --minify \n    && APP_ENV=prod APP_SECRET=build php bin/console importmap:install \n    && APP_ENV=prod APP_SECRET=build php bin/console asset-map:compile
+
 # Create necessary directories and set permissions
 RUN mkdir -p var/cache var/log var/sessions \
     && chown -R www-data:www-data /var/www/html \

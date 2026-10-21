@@ -1,4 +1,4 @@
-.PHONY: help install update setup test clean cache-clear db-create db-migrate db-reset fixtures admin-user server-start server-stop lint format check docker-up docker-down docker-build docker-logs docker-exec docker-db-setup docker-db-drop docker-db-reset docker-load-fixture docker-admin-user app-update
+.PHONY: help install update assets assets-watch setup test clean cache-clear db-create db-migrate db-reset fixtures admin-user server-start server-stop lint format check docker-up docker-down docker-build docker-logs docker-exec docker-db-setup docker-db-drop docker-db-reset docker-load-fixture docker-admin-user app-update
 
 # Default target
 .DEFAULT_GOAL := help
@@ -32,7 +32,9 @@ help: ## Show this help message
 	@echo ""
 	@echo "Installation & Setup:"
 	@echo "  install              Install Composer dependencies"
-	@echo "  app-update           Update app from GitHub + migrate + cache (for demo/prod servers)"
+	@echo "  app-update           Update app from GitHub + migrate + assets + cache (for demo/prod servers)"
+	@echo "  assets               Build CSS (Tailwind) and compile assets for production"
+	@echo "  assets-watch         Rebuild CSS on template changes (development)"
 	@echo "  setup                Complete project setup (install, db, migrate, admin user)"
 	@echo ""
 	@echo "Database:"
@@ -99,6 +101,17 @@ update: ## Update Composer dependencies
 	@echo "$(BLUE)Updating Composer dependencies...$(NC)"
 	composer update
 
+# Frontend assets: Tailwind standalone CLI + AssetMapper (no Node.js needed).
+# The first build downloads the Tailwind binary (~110 MB) into var/tailwind, hence the higher memory limit.
+assets: ## Build CSS (Tailwind) and compile assets for production
+	@echo "$(BLUE)Building frontend assets...$(NC)"
+	php -d memory_limit=512M bin/console tailwind:build --minify
+	php bin/console importmap:install
+	php bin/console asset-map:compile
+
+assets-watch: ## Rebuild CSS on template changes (development)
+	php -d memory_limit=512M bin/console tailwind:build --watch
+
 app-update: ## Update app from GitHub (fast-forward only) + migrations + cache for current env
 	@echo "$(BLUE)Updating repository (git pull --ff-only)...$(NC)"
 	git pull --ff-only
@@ -106,6 +119,7 @@ app-update: ## Update app from GitHub (fast-forward only) + migrations + cache f
 	composer install --no-interaction --prefer-dist --optimize-autoloader
 	@echo "$(BLUE)Running database migrations...$(NC)"
 	php bin/console doctrine:migrations:migrate --no-interaction
+	@$(MAKE) assets
 	@echo "$(BLUE)Clearing & warming up cache...$(NC)"
 	php bin/console cache:clear --env=$${APP_ENV:-prod}
 	php bin/console cache:warmup --env=$${APP_ENV:-prod}
@@ -302,6 +316,7 @@ remind-abandoned-carts: ## Dispatch abandoned cart reminder messages
 # Development Workflow
 dev: server-start ## Start development environment
 	@echo "$(GREEN)Development server started!$(NC)"
+	@echo "$(BLUE)CSS: run 'make assets-watch' in a second terminal (symfony serve starts it automatically).$(NC)"
 	@echo "$(BLUE)Access the application at: http://localhost:8000$(NC)"
 	@echo "$(BLUE)Access admin panel at: http://localhost:8000/admin$(NC)"
 
@@ -347,6 +362,7 @@ security-check: ## Check for known security vulnerabilities
 build: install cache-clear ## Prepare for production
 	@echo "$(BLUE)Building for production...$(NC)"
 	composer install --no-dev --optimize-autoloader
+	APP_ENV=prod $(MAKE) assets
 	php bin/console cache:clear --env=prod
 	php bin/console cache:warmup --env=prod
 
