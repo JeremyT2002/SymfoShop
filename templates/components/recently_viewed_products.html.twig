@@ -1,14 +1,6 @@
 {# Recently viewed products row. Params: recentlyViewedProducts #}
-{% if recentlyViewedProducts is defined and recentlyViewedProducts is not empty %}
-    <section class="container-page py-16" aria-labelledby="recently-viewed-heading">
-        <h2 id="recently-viewed-heading" class="text-xl font-semibold sm:text-2xl">{{ 'recently_viewed.title'|trans }}</h2>
-        {# Horizontal scroller on small screens, grid from lg #}
-        <div class="-mx-4 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible lg:px-0">
-            {% for product in recentlyViewedProducts|slice(0, 8) %}
-                <div class="w-[44%] shrink-0 snap-start sm:w-[30%] lg:w-auto {{ loop.index > 4 ? 'lg:hidden' : '' }}">
-                    {% include 'components/product_card.html.twig' with {product: product} only %}
-                </div>
-            {% endfor %}
-        </div>
-    </section>
-{% endif %}
+{% include 'components/product_row.html.twig' with {
+    id: 'recently-viewed-heading',
+    title: 'recently_viewed.title'|trans,
+    products: recentlyViewedProducts|default([]),
+} only %}

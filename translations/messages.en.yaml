@@ -1364,3 +1364,6 @@ ui:
     shipped_subject: "Your order %number% is on its way"
     shipped_heading: "Your order is on its way"
     shipped_text: "Hi %name%, good news: your order %number% has been shipped."
+  recommendations:
+    product: "Customers also bought"
+    cart: "Goes well with your order"

@@ -1364,3 +1364,6 @@ ui:
     shipped_subject: "Ihre Bestellung %number% ist unterwegs"
     shipped_heading: "Ihre Bestellung ist unterwegs"
     shipped_text: "Hallo %name%, gute Nachrichten: Ihre Bestellung %number% wurde versendet."
+  recommendations:
+    product: "Kunden kauften auch"
+    cart: "Passt dazu"

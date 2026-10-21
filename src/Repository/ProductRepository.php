@@ -179,6 +179,17 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     /**
+     * Products for cards in the given id order (variants, stock and media loaded).
+     *
+     * @param list<int> $ids
+     * @return list<Product>
+     */
+    public function findForCardsByIds(array $ids): array
+    {
+        return $this->hydrateForCards($ids);
+    }
+
+    /**
      * Loads products with everything a product card needs (variants, stock, media) in one query,
      * keeping the order of $ids. Avoids one stock query per variant (inverse one-to-one).
      *

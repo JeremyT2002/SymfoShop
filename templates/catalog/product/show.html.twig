@@ -272,5 +272,6 @@
     {% endif %}
 </div>
 
+{% include 'components/product_row.html.twig' with {id: 'recommendations-heading', title: 'ui.recommendations.product'|trans, products: recommendations|default([])} only %}
 {% include 'components/recently_viewed_products.html.twig' with {recentlyViewedProducts: recentlyViewedProducts|default([])} only %}
 {% endblock %}

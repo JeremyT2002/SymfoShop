@@ -159,4 +159,8 @@
         </div>
     {% endif %}
 </div>
+
+{% if items is not empty %}
+    {% include 'components/product_row.html.twig' with {id: 'cart-recommendations-heading', title: 'ui.recommendations.cart'|trans, products: recommendations|default([])} only %}
+{% endif %}
 {% endblock %}

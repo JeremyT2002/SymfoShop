@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Repository\ProductRepository;
 use App\Service\Catalog\RecentlyViewedService;
 use App\Repository\ProductReviewRepository;
+use App\Service\Catalog\RecommendationService;
 use App\Service\Review\VerifiedPurchaseChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,7 +24,8 @@ class ProductController extends AbstractController
         private readonly RecentlyViewedService $recentlyViewedService,
         private readonly ProductReviewRepository $productReviewRepository,
         private readonly VerifiedPurchaseChecker $verifiedPurchaseChecker,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
+        private readonly RecommendationService $recommendationService,
     ) {
     }
 
@@ -64,6 +66,7 @@ class ProductController extends AbstractController
             'variants' => $variants,
             'defaultVariant' => $defaultVariant,
             'recentlyViewedProducts' => $this->recentlyViewedService->getRecentlyViewedProducts($product->getId(), 8),
+            'recommendations' => $this->recommendationService->forProducts([$product], 4),
             'approvedReviews' => $approvedReviews,
             'reviewCount' => $approvedReviewCount,
             'reviewPage' => $reviewPage,

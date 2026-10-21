@@ -7,6 +7,7 @@ use App\Repository\ProductVariantRepository;
 use App\Repository\ShippingMethodRepository;
 use App\Service\Cart\CartService;
 use App\Service\Cart\CouponService;
+use App\Service\Catalog\RecommendationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,6 +23,7 @@ class CartController extends AbstractController
         private readonly ProductVariantRepository $variantRepository,
         private readonly TranslatorInterface $translator,
         private readonly ShippingMethodRepository $shippingMethodRepository,
+        private readonly RecommendationService $recommendationService,
     ) {
     }
 
@@ -33,6 +35,7 @@ class CartController extends AbstractController
 
         return $this->render('cart/show.html.twig', [
             'items' => $items,
+            'recommendations' => $this->recommendationService->forProducts(array_map(static fn (array $item) => $item['variant']->getProduct(), $items), 4),
             'totals' => $totals,
             'coupon' => $coupon,
         ]);
