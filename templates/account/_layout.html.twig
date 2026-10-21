@@ -26,6 +26,17 @@
         </div>
     </header>
 
+    {% if not app.user.verified %}
+        <div class="alert alert-warning mt-6 flex-wrap">
+            {{ ux_icon('lucide:mail-warning', {class: 'mt-0.5 size-4'}) }}
+            <p class="flex-1">{{ 'ui.verify.banner'|trans({'%email%': app.user.email}) }}</p>
+            <form method="post" action="{{ path('verify_email_resend') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('verify_email_resend') }}">
+                <button type="submit" class="btn btn-secondary btn-sm">{{ 'ui.verify.resend'|trans }}</button>
+            </form>
+        </div>
+    {% endif %}
+
     <div class="mt-8 grid gap-8 lg:grid-cols-[14rem_1fr] lg:gap-12">
         <nav aria-label="{{ 'account.dashboard.tabs.aria_label'|trans }}" class="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
             <ul class="flex gap-1 lg:flex-col" role="list">

@@ -69,6 +69,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
     private bool $marketingOptIn = false;
 
+    /** E-mail address confirmed via the verification link */
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $isVerified = false;
+
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
@@ -292,6 +296,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         ]);
 
         return implode(', ', $lines);
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): self
+    {
+        $this->isVerified = $isVerified;
+        return $this;
     }
 
     public function isActive(): bool

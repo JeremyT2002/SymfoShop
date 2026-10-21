@@ -8,6 +8,7 @@ use App\Repository\InvoiceRepository;
 use App\Repository\OrderRepository;
 use App\Repository\UserRepository;
 use App\Service\Invoice\PdfInvoiceGenerator;
+use App\Service\Security\EmailVerifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -28,6 +30,7 @@ class DashboardController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly PdfInvoiceGenerator $pdfInvoiceGenerator,
+        private readonly EmailVerifier $emailVerifier,
     ) {
     }
 
@@ -60,6 +63,7 @@ class DashboardController extends AbstractController
             throw $this->createAccessDeniedException('Invalid user session.');
         }
 
+        $previousEmail = $user->getEmail();
         $form = $this->createForm(AccountProfileType::class, $user, [
             'action' => $this->generateUrl('account_profile_update'),
             'method' => 'POST',
@@ -93,8 +97,22 @@ class DashboardController extends AbstractController
         $user->setState($user->getState() !== '' ? $user->getState() : null);
         $user->setCountryCode($user->getCountryCode() !== '' ? $user->getCountryCode() : null);
 
+        $emailChanged = mb_strtolower((string) $previousEmail) !== mb_strtolower((string) $user->getEmail());
+        if ($emailChanged) {
+            $user->setIsVerified(false);
+        }
+
         $this->entityManager->flush();
         $this->addFlash('success', 'account.dashboard.flash.profile_updated');
+
+        if ($emailChanged) {
+            try {
+                $this->emailVerifier->sendVerification($user);
+                $this->addFlash('info', 'ui.verify.flash_sent');
+            } catch (TransportExceptionInterface) {
+                // The banner in the account offers to resend the link.
+            }
+        }
 
         return $this->redirectToRoute('account_dashboard');
     }

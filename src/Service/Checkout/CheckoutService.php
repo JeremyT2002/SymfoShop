@@ -11,6 +11,7 @@ use App\Entity\ShippingMethod;
 use App\Entity\User;
 use App\Repository\OrderRepository;
 use App\Repository\ShippingMethodRepository;
+use App\Repository\UserRepository;
 use App\Service\Cart\CartService;
 use App\Service\Cart\CouponService;
 use App\Service\Inventory\InventoryService;
@@ -33,6 +34,7 @@ class CheckoutService
         private readonly ShippingMethodRepository $shippingMethodRepository,
         private readonly RequestStack $requestStack,
         private readonly TaxCalculator $taxCalculator,
+        private readonly UserRepository $userRepository,
         #[Autowire('%kernel.default_locale%')]
         private readonly string $defaultLocale,
     ) {
@@ -273,6 +275,12 @@ class CheckoutService
         $order->setShippingMethodLabel($totals['shippingMethodLabel']);
         if ($user instanceof User) {
             $order->setUser($user);
+        } else {
+            // Guest checkout with the address of a verified account: the order belongs to that account
+            $owner = $this->userRepository->findOneBy(['email' => $customerInfo->email]);
+            if ($owner instanceof User && $owner->isVerified()) {
+                $order->setUser($owner);
+            }
         }
 
         foreach ($items as $item) {

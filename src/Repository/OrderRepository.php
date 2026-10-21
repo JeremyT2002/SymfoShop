@@ -74,6 +74,28 @@ class OrderRepository extends ServiceEntityRepository
      * @return list<Order>
      */
     /**
+     * Attach guest orders placed with the (verified) e-mail address of this account.
+     *
+     * @return int number of orders assigned
+     */
+    public function assignGuestOrdersToUser(User $user): int
+    {
+        if (!$user->isVerified() || $user->getEmail() === null) {
+            return 0;
+        }
+
+        return (int) $this->createQueryBuilder('o')
+            ->update()
+            ->set('o.user', ':user')
+            ->where('LOWER(o.email) = :email')
+            ->andWhere('o.user IS NULL')
+            ->setParameter('user', $user)
+            ->setParameter('email', mb_strtolower($user->getEmail()))
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
      * Orders placed by this account. Deliberately not matched by e-mail: addresses are not
      * verified, so an e-mail match would expose guest orders to whoever registers that address.
      *
