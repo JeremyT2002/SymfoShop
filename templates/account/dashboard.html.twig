@@ -148,13 +148,43 @@
                                 <td class="text-right">
                                     <form method="get" action="{{ path('account_invoice_download', {invoiceNumber: invoice.invoiceNumber}) }}" class="inline-flex items-center gap-2">
                                         <label for="invoice-lang-{{ invoice.id }}" class="sr-only">{{ 'account.dashboard.invoices.language'|trans }}</label>
-                                        <select id="invoice-lang-{{ invoice.id }}" name="lang" class="select w-auto py-1.5 text-xs">
+                                        <select id="invoice-lang-{{ invoice.id }}" name="language" class="select w-auto py-1.5 text-xs">
                                             {% for code in ['de', 'en', 'fr'] %}
                                                 <option value="{{ code }}" {{ app.request.locale == code ? 'selected' }}>{{ ('account.dashboard.invoices.lang_' ~ code)|trans }}</option>
                                             {% endfor %}
                                         </select>
                                         <button type="submit" class="btn btn-secondary btn-sm">{{ ux_icon('lucide:download', {class: 'size-4'}) }}PDF</button>
                                     </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+        {% if creditNotes is not empty %}
+            <h2 class="mt-10 text-xl font-semibold">{{ 'ui.refund.credit_notes'|trans }}</h2>
+            <div class="card mt-6 overflow-x-auto">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ 'ui.refund.credit_note_number'|trans }}</th>
+                            <th scope="col">{{ 'account.dashboard.invoices.order_number'|trans }}</th>
+                            <th scope="col">{{ 'account.dashboard.invoices.date'|trans }}</th>
+                            <th scope="col" class="text-right">{{ 'ui.refund.amount'|trans }}</th>
+                            <th scope="col" class="text-right">{{ 'account.dashboard.invoices.action'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for refund in creditNotes %}
+                            <tr>
+                                <td class="font-mono font-medium whitespace-nowrap">{{ refund.creditNoteNumber }}</td>
+                                <td class="font-mono text-fg-muted whitespace-nowrap">{{ refund.order.orderNumber }}</td>
+                                <td class="text-fg-muted whitespace-nowrap">{{ refund.createdAt|date('d.m.Y') }}</td>
+                                <td class="text-right tabular-nums">{{ refund.amount|money(refund.currency) }}</td>
+                                <td class="text-right">
+                                    <a href="{{ path('account_credit_note_download', {number: refund.creditNoteNumber}) }}" class="btn btn-secondary btn-sm">{{ ux_icon('lucide:download', {class: 'size-4'}) }}PDF</a>
                                 </td>
                             </tr>
                         {% endfor %}

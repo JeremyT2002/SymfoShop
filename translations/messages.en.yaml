@@ -893,6 +893,7 @@ admin:
       shipped: Shipped
       completed: Completed
       cancelled: Cancelled
+      refunded: "Refunded"
     show:
       page_title: 'Order: %number%'
       back: Back to orders
@@ -1350,6 +1351,7 @@ ui:
     rate_limited: "Too many attempts. Please try again in a few minutes."
     placed_on: "Placed on %date%"
     cancelled: "This order has been cancelled."
+    refunded: "This order has been refunded."
     progress: "Order progress"
     step_placed: "Placed"
     step_paid: "Paid"
@@ -1393,3 +1395,39 @@ ui:
     status_active: "Active"
     status_unsubscribed: "Unsubscribed"
     status_pending: "Not confirmed"
+  refund:
+    title: "Refunds"
+    amount: "Amount"
+    reason: "Reason"
+    max: "At most %amount% can still be refunded."
+    return_request: "Return request"
+    restock: "Put the items back on stock"
+    restocked: "restocked"
+    hint_provider: "The amount is paid back automatically through the payment provider."
+    hint_manual: "This payment method has no automatic refund: transfer the amount yourself, the credit note is created here."
+    submit: "Refund and create credit note"
+    confirm: "Pay the amount back to the customer now? This cannot be undone."
+    manual: "Manual"
+    pending: "pending"
+    flash_done: "Refund recorded, credit note %number% was sent to the customer."
+    flash_failed: "Refund failed: %error%"
+    credit_notes: "Credit notes"
+    credit_note_number: "Credit note no."
+    return_status_pending: "Open"
+    return_status_refunded: "Refunded"
+    mail_subject: "Refund for your order %number%"
+    mail_heading: "We have refunded your money"
+    mail_text: "Hi %name%, we have refunded %amount% for your order %number%. You will find the credit note attached."
+    mail_provider: "The amount goes back to the payment method you used; depending on your bank it can take a few days to show up."
+    mail_manual: "We will transfer the amount to you. If we do not have your bank details yet, simply reply to this e-mail."
+
+credit_note_pdf:
+  title: "Credit note"
+  details: "Credit note details"
+  date: "Credit note date"
+  for_invoice: "For invoice"
+  items: "Refund"
+  line: "Refund for order %order%"
+  total: "Credit total"
+  paid_back: "The amount is paid back via %method%."
+  paid_back_manual: "The amount will be transferred to you."

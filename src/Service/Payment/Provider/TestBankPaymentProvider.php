@@ -3,9 +3,10 @@
 namespace App\Service\Payment\Provider;
 
 use App\Entity\Order;
+use App\Entity\Payment;
 use Symfony\Component\HttpFoundation\Request;
 
-final class TestBankPaymentProvider implements PaymentProviderInterface
+final class TestBankPaymentProvider implements PaymentProviderInterface, RefundingProviderInterface
 {
     public const NAME = 'testbank';
 
@@ -39,5 +40,10 @@ final class TestBankPaymentProvider implements PaymentProviderInterface
     {
         return null;
     }
-}
 
+    /** Simulated: always succeeds immediately. */
+    public function refund(Payment $payment, int $amount): RefundOutcome
+    {
+        return new RefundOutcome('testbank_re_' . bin2hex(random_bytes(8)));
+    }
+}

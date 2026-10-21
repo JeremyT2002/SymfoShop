@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Form\Account\AccountProfileType;
 use App\Repository\InvoiceRepository;
 use App\Repository\OrderRepository;
+use App\Repository\RefundRepository;
 use App\Repository\UserRepository;
 use App\Service\Invoice\PdfInvoiceGenerator;
 use App\Service\Security\EmailVerifier;
@@ -31,6 +32,7 @@ class DashboardController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly PdfInvoiceGenerator $pdfInvoiceGenerator,
         private readonly EmailVerifier $emailVerifier,
+        private readonly RefundRepository $refundRepository,
     ) {
     }
 
@@ -48,6 +50,7 @@ class DashboardController extends AbstractController
         return $this->render('account/dashboard.html.twig', [
             'orders' => $orders,
             'invoices' => $invoices,
+            'creditNotes' => $this->refundRepository->findByUser($user),
             'profileForm' => $this->createForm(AccountProfileType::class, $user, [
                 'action' => $this->generateUrl('account_profile_update'),
                 'method' => 'POST',
@@ -135,7 +138,7 @@ class DashboardController extends AbstractController
         }
 
         $supportedLocales = ['en', 'de', 'fr'];
-        $selectedLocale = (string) $request->query->get('lang', $request->getLocale());
+        $selectedLocale = (string) $request->query->get('language', $request->getLocale());
         if (!in_array($selectedLocale, $supportedLocales, true)) {
             $selectedLocale = $request->getLocale();
         }
@@ -156,6 +159,30 @@ class DashboardController extends AbstractController
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             'invoice_' . $invoice->getInvoiceNumber() . '_' . $selectedLocale . '.pdf'
         );
+
+        return $response;
+    }
+
+    #[Route('/credit-note/{number}/download', name: 'credit_note_download', methods: ['GET'])]
+    public function downloadCreditNote(string $number): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException('Invalid user session.');
+        }
+
+        $refund = $this->refundRepository->findOneForUserByCreditNoteNumber($number, $user);
+        if (!$refund && $this->isGranted('ROLE_ADMIN')) {
+            $refund = $this->refundRepository->findOneByCreditNoteNumber($number);
+        }
+        if (!$refund) {
+            throw $this->createNotFoundException('Credit note not found.');
+        }
+
+        $invoice = $this->invoiceRepository->findOneByOrderId((int) $refund->getOrder()->getId());
+        $response = new BinaryFileResponse($this->pdfInvoiceGenerator->generateCreditNote($refund, $invoice));
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, 'credit_note_' . $refund->getCreditNoteNumber() . '.pdf');
+        $response->deleteFileAfterSend();
 
         return $response;
     }

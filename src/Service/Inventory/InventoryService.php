@@ -166,6 +166,28 @@ class InventoryService
     }
 
     /**
+     * Put the items of a returned order back on stock (after a refund).
+     */
+    public function restock(Order $order): void
+    {
+        $this->entityManager->wrapInTransaction(function () use ($order): void {
+            foreach ($order->getItems() as $orderItem) {
+                $variant = $orderItem->getProductVariant() ?? $this->findVariantBySku($orderItem->getSku());
+                $stockItem = $variant !== null ? $this->stockItemRepository->findOneByVariantForUpdate($variant) : null;
+                if ($stockItem === null) {
+                    continue;
+                }
+
+                $beforeAvailable = $stockItem->getAvailable();
+                $stockItem->setOnHand($stockItem->getOnHand() + $orderItem->getQuantity());
+                if ($variant->getId() !== null) {
+                    $this->stockRestockNotifier->dispatchIfRestocked($beforeAvailable, $stockItem->getAvailable(), $variant->getId());
+                }
+            }
+        });
+    }
+
+    /**
      * Release reserved inventory back to available stock
      */
     public function release(Order $order): void

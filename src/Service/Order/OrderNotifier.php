@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Service\Order;
 
 use App\Entity\Order;
+use App\Entity\Refund;
+use App\Repository\InvoiceRepository;
+use App\Service\Invoice\PdfInvoiceGenerator;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -23,6 +26,8 @@ final class OrderNotifier
         private readonly Environment $twig,
         private readonly TranslatorInterface $translator,
         private readonly LoggerInterface $logger,
+        private readonly PdfInvoiceGenerator $pdfGenerator,
+        private readonly InvoiceRepository $invoices,
         #[Autowire('%env(default:app.default_mailer_from:MAILER_FROM)%')]
         private readonly string $mailerFrom,
     ) {
@@ -52,6 +57,39 @@ final class OrderNotifier
         } catch (TransportExceptionInterface $e) {
             $this->logger->error('Shipping notification could not be sent', [
                 'order_number' => $order->getOrderNumber(),
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Tells the customer about a refund, with the credit note attached.
+     */
+    public function orderRefunded(Refund $refund): void
+    {
+        $order = $refund->getOrder();
+        $locale = $order->getLocale();
+
+        try {
+            $email = (new Email())
+                ->from($this->mailerFrom)
+                ->to($order->getEmail())
+                ->subject($this->translator->trans('ui.refund.mail_subject', ['%number%' => $order->getOrderNumber()], null, $locale))
+                ->html($this->twig->render('emails/order_refunded.html.twig', [
+                    'order' => $order,
+                    'refund' => $refund,
+                    'locale' => $locale,
+                ]));
+
+            $pdf = $this->pdfGenerator->generateCreditNote($refund, $this->invoices->findOneByOrderId((int) $order->getId()), $locale);
+            $email->attach((string) file_get_contents($pdf), 'credit_note_' . $refund->getCreditNoteNumber() . '.pdf', 'application/pdf');
+            @unlink($pdf);
+
+            $this->mailer->send($email);
+        } catch (\Throwable $e) {
+            $this->logger->error('Refund notification could not be sent', [
+                'order_number' => $order->getOrderNumber(),
+                'credit_note' => $refund->getCreditNoteNumber(),
                 'error' => $e->getMessage(),
             ]);
         }

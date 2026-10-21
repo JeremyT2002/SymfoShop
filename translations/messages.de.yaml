@@ -893,6 +893,7 @@ admin:
       shipped: Versendet
       completed: Abgeschlossen
       cancelled: Storniert
+      refunded: "Erstattet"
     show:
       page_title: 'Bestellung: %number%'
       back: Zurück zu Bestellungen
@@ -1350,6 +1351,7 @@ ui:
     rate_limited: "Zu viele Versuche. Bitte versuchen Sie es in einigen Minuten erneut."
     placed_on: "Bestellt am %date%"
     cancelled: "Diese Bestellung wurde storniert."
+    refunded: "Diese Bestellung wurde erstattet."
     progress: "Bestellfortschritt"
     step_placed: "Bestellt"
     step_paid: "Bezahlt"
@@ -1393,3 +1395,39 @@ ui:
     status_active: "Aktiv"
     status_unsubscribed: "Abgemeldet"
     status_pending: "Nicht bestätigt"
+  refund:
+    title: "Erstattungen"
+    amount: "Betrag"
+    reason: "Grund"
+    max: "Es können noch höchstens %amount% erstattet werden."
+    return_request: "Retourenanfrage"
+    restock: "Artikel wieder einlagern"
+    restocked: "wieder eingelagert"
+    hint_provider: "Der Betrag wird automatisch über den Zahlungsanbieter zurückgezahlt."
+    hint_manual: "Diese Zahlungsart erstattet nicht automatisch: Überweisen Sie den Betrag selbst, die Gutschrift wird hier erstellt."
+    submit: "Erstatten und Gutschrift erstellen"
+    confirm: "Den Betrag jetzt an den Kunden zurückzahlen? Das kann nicht rückgängig gemacht werden."
+    manual: "Manuell"
+    pending: "ausstehend"
+    flash_done: "Erstattung erfasst, Gutschrift %number% wurde an den Kunden gesendet."
+    flash_failed: "Erstattung fehlgeschlagen: %error%"
+    credit_notes: "Gutschriften"
+    credit_note_number: "Gutschrift-Nr."
+    return_status_pending: "Offen"
+    return_status_refunded: "Erstattet"
+    mail_subject: "Erstattung zu Ihrer Bestellung %number%"
+    mail_heading: "Wir haben Ihnen Geld erstattet"
+    mail_text: "Hallo %name%, wir haben Ihnen %amount% für Ihre Bestellung %number% erstattet. Die Gutschrift finden Sie im Anhang."
+    mail_provider: "Der Betrag geht an die verwendete Zahlungsart zurück; je nach Bank kann es einige Tage dauern, bis er sichtbar ist."
+    mail_manual: "Wir überweisen Ihnen den Betrag. Falls uns Ihre Bankverbindung noch fehlt, antworten Sie einfach auf diese E-Mail."
+
+credit_note_pdf:
+  title: "Gutschrift"
+  details: "Gutschriftdetails"
+  date: "Gutschriftdatum"
+  for_invoice: "Zur Rechnung"
+  items: "Erstattung"
+  line: "Erstattung zur Bestellung %order%"
+  total: "Gutschriftbetrag"
+  paid_back: "Der Betrag wird über %method% zurückgezahlt."
+  paid_back_manual: "Der Betrag wird Ihnen überwiesen."

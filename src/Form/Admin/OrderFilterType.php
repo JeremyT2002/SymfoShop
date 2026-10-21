@@ -19,6 +19,7 @@ class OrderFilterType extends AbstractType
         'shipped',
         'completed',
         'cancelled',
+        'refunded',
     ];
 
     public static function statusChoices(): array

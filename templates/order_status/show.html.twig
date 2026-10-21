@@ -18,7 +18,9 @@
     <h1 class="mt-2 font-mono text-2xl font-semibold sm:text-3xl">{{ order.orderNumber }}</h1>
     <p class="mt-1 text-sm text-fg-muted">{{ 'ui.order_status.placed_on'|trans({'%date%': order.createdAt|date('d.m.Y')}) }}</p>
 
-    {% if order.status == 'cancelled' %}
+    {% if order.status == 'refunded' %}
+        <div class="alert alert-info mt-8">{{ ux_icon('lucide:undo-2', {class: 'mt-0.5 size-4'}) }}<p>{{ 'ui.order_status.refunded'|trans }}</p></div>
+    {% elseif order.status == 'cancelled' %}
         <div class="alert alert-error mt-8">{{ ux_icon('lucide:circle-x', {class: 'mt-0.5 size-4'}) }}<p>{{ 'ui.order_status.cancelled'|trans }}</p></div>
     {% else %}
         <ol class="card mt-8 grid gap-6 p-6 sm:grid-cols-5 sm:gap-2" aria-label="{{ 'ui.order_status.progress'|trans }}">

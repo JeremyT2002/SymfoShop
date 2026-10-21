@@ -893,6 +893,7 @@ admin:
       shipped: Expédié
       completed: Terminé
       cancelled: Annulé
+      refunded: "Remboursée"
     show:
       page_title: 'Commande : %number%'
       back: Retour aux commandes
@@ -1350,6 +1351,7 @@ ui:
     rate_limited: "Trop de tentatives. Veuillez réessayer dans quelques minutes."
     placed_on: "Commandée le %date%"
     cancelled: "Cette commande a été annulée."
+    refunded: "Cette commande a été remboursée."
     progress: "Progression de la commande"
     step_placed: "Commandée"
     step_paid: "Payée"
@@ -1393,3 +1395,39 @@ ui:
     status_active: "Actif"
     status_unsubscribed: "Désinscrit"
     status_pending: "Non confirmé"
+  refund:
+    title: "Remboursements"
+    amount: "Montant"
+    reason: "Motif"
+    max: "Au maximum %amount% peuvent encore être remboursés."
+    return_request: "Demande de retour"
+    restock: "Remettre les articles en stock"
+    restocked: "remis en stock"
+    hint_provider: "Le montant est remboursé automatiquement via le prestataire de paiement."
+    hint_manual: "Ce moyen de paiement ne rembourse pas automatiquement : effectuez le virement vous-même, l'avoir est créé ici."
+    submit: "Rembourser et créer un avoir"
+    confirm: "Rembourser ce montant au client maintenant ? Cette action est irréversible."
+    manual: "Manuel"
+    pending: "en attente"
+    flash_done: "Remboursement enregistré, l'avoir %number% a été envoyé au client."
+    flash_failed: "Échec du remboursement : %error%"
+    credit_notes: "Avoirs"
+    credit_note_number: "N° d'avoir"
+    return_status_pending: "Ouverte"
+    return_status_refunded: "Remboursée"
+    mail_subject: "Remboursement de votre commande %number%"
+    mail_heading: "Nous vous avons remboursé"
+    mail_text: "Bonjour %name%, nous vous avons remboursé %amount% pour votre commande %number%. Vous trouverez l'avoir en pièce jointe."
+    mail_provider: "Le montant est reversé sur le moyen de paiement utilisé ; selon votre banque, cela peut prendre quelques jours."
+    mail_manual: "Nous vous virerons le montant. Si nous n'avons pas encore vos coordonnées bancaires, répondez simplement à cet e-mail."
+
+credit_note_pdf:
+  title: "Avoir"
+  details: "Détails de l'avoir"
+  date: "Date de l'avoir"
+  for_invoice: "Pour la facture"
+  items: "Remboursement"
+  line: "Remboursement de la commande %order%"
+  total: "Montant de l'avoir"
+  paid_back: "Le montant est remboursé via %method%."
+  paid_back_manual: "Le montant vous sera viré."

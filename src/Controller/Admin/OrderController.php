@@ -7,6 +7,9 @@ use App\Form\Admin\OrderFilterType;
 use App\Form\Admin\OrderStatusType;
 use App\Repository\InvoiceRepository;
 use App\Repository\OrderRepository;
+use App\Repository\RefundRepository;
+use App\Repository\ReturnRequestRepository;
+use App\Service\Payment\RefundService;
 use App\Service\Invoice\InvoiceService;
 use App\Service\Order\OrderNotifier;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,6 +29,9 @@ class OrderController extends AbstractController
         private readonly InvoiceService $invoiceService,
         private readonly EntityManagerInterface $entityManager,
         private readonly TranslatorInterface $translator,
+        private readonly RefundService $refundService,
+        private readonly RefundRepository $refundRepository,
+        private readonly ReturnRequestRepository $returnRequestRepository,
     ) {
     }
 
@@ -124,6 +130,10 @@ class OrderController extends AbstractController
         return $this->render('admin/order/show.html.twig', [
             'order' => $order,
             'invoice' => $invoice,
+            'refunds' => $this->refundRepository->findByOrder($order),
+            'refundable' => $this->refundService->refundableAmount($order),
+            'refundsAutomatically' => $this->refundService->refundsAutomatically($order),
+            'returnRequests' => $this->returnRequestRepository->findByOrderNumber($order->getOrderNumber()),
             'statusForm' => $this->createForm(OrderStatusType::class, [
                 'status' => $order->getStatus(),
                 'carrier' => $order->getCarrier(),
@@ -199,6 +209,59 @@ class OrderController extends AbstractController
         $this->addFlash('success', sprintf('Updated %d order(s).', count($orders)));
 
         return $this->redirectToRoute('admin_orders_index');
+    }
+
+    #[Route('/{id}/refund', name: 'refund', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function refund(int $id, Request $request): Response
+    {
+        $order = $this->orderRepository->find($id);
+        if (!$order) {
+            throw $this->createNotFoundException('Order not found');
+        }
+
+        if (!$this->isCsrfTokenValid('refund_' . $order->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', $this->translator->trans('admin.orders.flash.invalid_csrf'));
+
+            return $this->redirectToRoute('admin_orders_show', ['id' => $order->getId()]);
+        }
+
+        // "12,50" and "12.50" both mean 1250 cents
+        $amount = (int) round((float) str_replace(',', '.', (string) $request->request->get('amount')) * 100);
+
+        $returnRequest = null;
+        if ($returnRequestId = (int) $request->request->get('return_request')) {
+            $returnRequest = $this->returnRequestRepository->find($returnRequestId);
+            if ($returnRequest !== null && $returnRequest->getOrderNumber() !== $order->getOrderNumber()) {
+                $returnRequest = null;
+            }
+        }
+
+        try {
+            $refund = $this->refundService->refund(
+                $order,
+                $amount,
+                (string) $request->request->get('reason', ''),
+                $request->request->getBoolean('restock'),
+                $returnRequest,
+                $this->getUser()?->getUserIdentifier(),
+            );
+            $this->addFlash('success', $this->translator->trans('ui.refund.flash_done', ['%number%' => $refund->getCreditNoteNumber()]));
+        } catch (\DomainException|\RuntimeException $e) {
+            $this->addFlash('error', $this->translator->trans('ui.refund.flash_failed', ['%error%' => $e->getMessage()]));
+        }
+
+        return $this->redirectToRoute('admin_orders_show', ['id' => $order->getId()]);
+    }
+
+    #[Route('/by-number/{number}', name: 'by_number', methods: ['GET'])]
+    public function byNumber(string $number): Response
+    {
+        $order = $this->orderRepository->findOneBy(['orderNumber' => $number]);
+        if (!$order) {
+            throw $this->createNotFoundException('Order not found');
+        }
+
+        return $this->redirectToRoute('admin_orders_show', ['id' => $order->getId()]);
     }
 
     /**
