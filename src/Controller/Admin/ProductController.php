@@ -8,6 +8,7 @@ use App\Entity\ProductStatus;
 use App\Entity\ProductVariant;
 use App\Entity\StockItem;
 use App\Repository\CategoryRepository;
+use App\Service\Catalog\ProductBulkEditor;
 use App\Repository\ProductRepository;
 use App\Service\Product\ImageUploadService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -477,31 +478,32 @@ class ProductController extends AbstractController
         return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
     }
 
-    #[Route('/bulk/status', name: 'bulk_status', methods: ['POST'])]
-    public function bulkStatus(Request $request): Response
+    #[Route('/bulk/edit', name: 'bulk_edit', methods: ['POST'])]
+    public function bulkEdit(Request $request, ProductBulkEditor $bulkEditor): Response
     {
-        if (!$this->isCsrfTokenValid('bulk_products_status', (string) $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('bulk_products_edit', (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid CSRF token.');
 
             return $this->redirectToRoute('admin_products_index');
         }
 
         $ids = $this->parseBulkIds((string) $request->request->get('ids', ''));
-        $status = ProductStatus::tryFrom((string) $request->request->get('status', ''));
-        if ($ids === [] || $status === null) {
+        if ($ids === []) {
             $this->addFlash('error', 'Invalid bulk action payload.');
 
             return $this->redirectToRoute('admin_products_index');
         }
 
-        $products = $this->productRepository->findBy(['id' => $ids]);
-        foreach ($products as $product) {
-            $product->setStatus($status);
-            $product->setUpdatedAt(new \DateTimeImmutable());
+        try {
+            $count = $bulkEditor->apply(
+                $this->productRepository->findBy(['id' => $ids]),
+                (string) $request->request->get('action'),
+                (string) $request->request->get('value', ''),
+            );
+            $this->addFlash('success', sprintf('Updated %d product(s).', $count));
+        } catch (\InvalidArgumentException $e) {
+            $this->addFlash('error', $e->getMessage());
         }
-        $this->entityManager->flush();
-
-        $this->addFlash('success', sprintf('Updated %d product(s).', count($products)));
 
         return $this->redirectToRoute('admin_products_index');
     }
