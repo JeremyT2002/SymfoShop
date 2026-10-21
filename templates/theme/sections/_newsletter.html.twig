@@ -1,20 +1,13 @@
-{#
-  Sign-up call to action. Settings: title, subtitle, buttonLabel.
-  There is no newsletter backend: the section invites guests to create an account (order updates,
-  wishlist, cart reminders) and is hidden for logged-in customers.
-#}
-{% if not app.user %}
-    <section class="container-page py-16 sm:py-20">
-        <div class="relative isolate overflow-hidden rounded-3xl bg-fg px-6 py-14 text-canvas sm:px-12 lg:flex lg:items-center lg:justify-between lg:gap-12 lg:px-16">
-            <div class="pointer-events-none absolute -top-24 -right-24 -z-10 size-80 rounded-full bg-primary-500/40 blur-3xl"></div>
-            <div class="max-w-xl">
-                <h2 class="text-2xl font-semibold sm:text-3xl">{{ settings.title|default('ui.signup.title'|trans) }}</h2>
-                <p class="mt-3 text-canvas/70">{{ settings.subtitle|default('ui.signup.text'|trans) }}</p>
-            </div>
-            <div class="mt-8 flex shrink-0 flex-wrap gap-3 lg:mt-0">
-                <a href="{{ path('register') }}" class="btn btn-lg bg-canvas text-fg hover:bg-canvas/90">{{ settings.buttonLabel|default('home.cta.create_account'|trans) }}</a>
-                <a href="{{ path('login') }}" class="btn btn-lg text-canvas hover:bg-canvas/10">{{ 'nav.login'|trans }}</a>
-            </div>
+{# Newsletter sign-up with double opt-in. Settings: title, subtitle #}
+<section class="container-page py-16 sm:py-20">
+    <div class="relative isolate overflow-hidden rounded-3xl bg-fg px-6 py-14 text-canvas sm:px-12 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12 lg:px-16">
+        <div class="pointer-events-none absolute -top-24 -right-24 -z-10 size-80 rounded-full bg-primary-500/40 blur-3xl"></div>
+        <div class="max-w-xl">
+            <h2 class="text-2xl font-semibold sm:text-3xl">{{ settings.title|default('ui.newsletter.title'|trans) }}</h2>
+            <p class="mt-3 text-canvas/70">{{ settings.subtitle|default('ui.newsletter.text'|trans) }}</p>
         </div>
-    </section>
-{% endif %}
+        <div class="mt-8 lg:mt-0">
+            {% include 'components/newsletter_form.html.twig' with {inverse: true, id_prefix: 'newsletter-section'} %}
+        </div>
+    </div>
+</section>

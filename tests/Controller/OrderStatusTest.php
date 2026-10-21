@@ -62,7 +62,7 @@ final class OrderStatusTest extends WebTestCase
     private function lookUp(KernelBrowser $client, string $number, string $email): void
     {
         $crawler = $client->request('GET', '/order-status');
-        $client->submit($crawler->filter('form')->last()->form(['number' => $number, 'email' => $email]));
+        $client->submit($crawler->filter('form[action="/order-status"]')->form(['number' => $number, 'email' => $email]));
     }
 
     private function createOrder(KernelBrowser $client, string $email, string $status = 'shipped'): Order

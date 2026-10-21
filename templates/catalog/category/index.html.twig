@@ -19,9 +19,7 @@
         {{ render_section({type: 'hero', settings: {}}, section_context) }}
         {{ render_section({type: 'category_grid', settings: {}}, section_context) }}
         {{ render_section({type: 'featured_products', settings: {limit: 8}}, section_context) }}
-        {% if not app.user %}
-            {{ render_section({type: 'newsletter', settings: {}}, section_context) }}
-        {% endif %}
+        {{ render_section({type: 'newsletter', settings: {}}, section_context) }}
     {% endif %}
 
     {% include 'components/recently_viewed_products.html.twig' with {recentlyViewedProducts: recentlyViewedProducts|default([])} %}

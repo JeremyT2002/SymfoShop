@@ -57,6 +57,11 @@
             </a>
             <p class="mt-4 max-w-sm text-sm leading-6 text-fg-muted">{{ theme_config().brand.tagline|default('footer.description'|trans) }}</p>
 
+            <div class="mt-6 max-w-sm">
+                <p class="mb-2 text-sm font-semibold">{{ 'ui.newsletter.title'|trans }}</p>
+                {% include 'components/newsletter_form.html.twig' with {id_prefix: 'newsletter-footer'} %}
+            </div>
+
             {% if footer.socialLinks|default([]) is not empty %}
                 <div class="mt-6 flex gap-2">
                     {% for link in footer.socialLinks %}

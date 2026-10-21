@@ -36,7 +36,7 @@ final class AdminSmokeTest extends WebTestCase
             '/admin/orders', '/admin/return-requests', '/admin/coupons', '/admin/coupons/new', '/admin/users', '/admin/users/new',
             '/admin/reviews', '/admin/settings', '/admin/theme', '/admin/payment-methods', '/admin/payment-methods/new',
             '/admin/shipping-methods', '/admin/shipping-methods/new', '/admin/api-keys', '/admin/api-keys/new',
-            '/admin/api-docs', '/admin/search?q=test',
+            '/admin/api-docs', '/admin/search?q=test', '/admin/newsletter',
         ] as $url) {
             $client->request('GET', $url);
             self::assertResponseIsSuccessful(sprintf('GET %s failed', $url));
