@@ -12,7 +12,8 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
  * Renders the admin pages (list and create screens) as an administrator.
  *
  * The audit log is left out: it hydrates entities other tests delete with raw DQL, and SQLite
- * (test DB) does not enforce the foreign keys that would cascade those deletes.
+ * (test DB) does not enforce the foreign keys that would cascade those deletes. The support inbox
+ * depends on the theme's support provider and is covered by SupportFlowTest.
  */
 final class AdminSmokeTest extends WebTestCase
 {
@@ -33,7 +34,7 @@ final class AdminSmokeTest extends WebTestCase
         foreach ([
             '/admin', '/admin?period=7d', '/admin/products', '/admin/products/new', '/admin/categories', '/admin/categories/new',
             '/admin/orders', '/admin/return-requests', '/admin/coupons', '/admin/coupons/new', '/admin/users', '/admin/users/new',
-            '/admin/reviews', '/admin/support', '/admin/settings', '/admin/theme', '/admin/payment-methods', '/admin/payment-methods/new',
+            '/admin/reviews', '/admin/settings', '/admin/theme', '/admin/payment-methods', '/admin/payment-methods/new',
             '/admin/shipping-methods', '/admin/shipping-methods/new', '/admin/api-keys', '/admin/api-keys/new',
             '/admin/api-docs', '/admin/search?q=test',
         ] as $url) {
