@@ -502,6 +502,7 @@ account:
       profile_updated: Deine Profildaten wurden aktualisiert.
   marketing:
     opt_out_success: Sie wurden von Warenkorb-Erinnerungen abgemeldet.
+    opt_out_invalid_link: Dieser Abmeldelink ist ungültig. Bitte verwenden Sie den Link aus Ihrer letzten E-Mail.
 
 admin:
   brand:

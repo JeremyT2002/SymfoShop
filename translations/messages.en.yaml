@@ -502,6 +502,7 @@ account:
       profile_updated: Your profile data has been updated.
   marketing:
     opt_out_success: You have been unsubscribed from abandoned cart reminders.
+    opt_out_invalid_link: This unsubscribe link is invalid. Please use the link from your most recent e-mail.
 
 admin:
   brand:

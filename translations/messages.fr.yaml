@@ -502,6 +502,7 @@ account:
       profile_updated: Vos informations de profil ont été mises à jour.
   marketing:
     opt_out_success: Vous êtes désinscrit des rappels de panier abandonné.
+    opt_out_invalid_link: Ce lien de désinscription n'est pas valide. Veuillez utiliser le lien de votre dernier e-mail.
 
 admin:
   brand:
