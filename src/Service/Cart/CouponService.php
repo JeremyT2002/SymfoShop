@@ -4,6 +4,7 @@ namespace App\Service\Cart;
 
 use App\Entity\Coupon;
 use App\Entity\CouponType;
+use App\Entity\Order;
 use App\Entity\User;
 use App\Repository\CouponRepository;
 use App\Repository\CouponUsageRepository;
@@ -132,6 +133,23 @@ class CouponService
     {
         if ($user) {
             $this->couponUsageRepository->incrementUsage($coupon, $user);
+        }
+    }
+
+    /**
+     * Count the order's coupon against the customer's per-user limit once the order is paid.
+     * (Total usage is derived from paid orders, see CouponRepository::countUsages.)
+     */
+    public function recordOrderUsage(Order $order): void
+    {
+        $code = $order->getCouponCode();
+        if ($code === null || $code === '') {
+            return;
+        }
+
+        $coupon = $this->couponRepository->findByCode($code);
+        if ($coupon !== null) {
+            $this->recordUsage($coupon, $order->getUser());
         }
     }
 }

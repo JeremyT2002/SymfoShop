@@ -12,38 +12,22 @@ class LocaleController extends AbstractController
     #[Route('/locale/{locale}', name: 'locale_switch', requirements: ['locale' => 'en|de|fr'])]
     public function switchLocale(Request $request, string $locale): Response
     {
-        // Store the locale in the session
         $request->getSession()->set('_locale', $locale);
-        
-        // Get the referer URL or default to home
-        $referer = $request->headers->get('referer');
-        if ($referer) {
-            // Parse the referer URL
-            $parsedUrl = parse_url($referer);
+
+        // Go back to the page the switcher was used on — but only on this host,
+        // otherwise a link from another site would bounce the visitor back there.
+        $referer = (string) $request->headers->get('referer', '');
+        $parsedUrl = $referer !== '' ? parse_url($referer) : false;
+        if (\is_array($parsedUrl) && ($parsedUrl['host'] ?? null) === $request->getHost()) {
             $path = $parsedUrl['path'] ?? '/';
-            
-            // Remove existing locale prefix if present
-            $path = preg_replace('#^/(en|de|fr)(/|$)#', '/', $path);
-            if ($path === '/') {
-                $path = '';
+            if (!str_starts_with($path, '/') || str_starts_with($path, '//')) {
+                $path = '/';
             }
-            
-            // Build the new URL with the same path
-            $newUrl = $parsedUrl['scheme'] ?? 'http';
-            $newUrl .= '://';
-            $newUrl .= $parsedUrl['host'] ?? '';
-            if (isset($parsedUrl['port'])) {
-                $newUrl .= ':' . $parsedUrl['port'];
-            }
-            $newUrl .= $path;
-            if (isset($parsedUrl['query'])) {
-                $newUrl .= '?' . $parsedUrl['query'];
-            }
-            
-            return $this->redirect($newUrl);
+            $query = isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '';
+
+            return $this->redirect($request->getSchemeAndHttpHost() . $path . $query);
         }
-        
+
         return $this->redirectToRoute('catalog_home');
     }
 }
-

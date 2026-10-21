@@ -97,7 +97,11 @@ class InventoryService
     }
 
     /**
-     * Commit reserved inventory (convert reservation to actual stock reduction)
+     * Commit reserved inventory (convert reservation to actual stock reduction).
+     *
+     * Call once per order, when it becomes paid. If the reservations already expired
+     * (slow payment), stock is deducted from the order items directly so a late payment
+     * cannot oversell.
      */
     public function commit(Order $order): void
     {
@@ -105,6 +109,14 @@ class InventoryService
 
         try {
             $reservations = $this->reservationRepository->findByOrder($order);
+
+            if ($reservations === []) {
+                $this->deductWithoutReservation($order);
+                $this->entityManager->flush();
+                $this->entityManager->commit();
+
+                return;
+            }
 
             foreach ($reservations as $reservation) {
                 $variant = $reservation->getVariant();
@@ -132,6 +144,24 @@ class InventoryService
         } catch (\Exception $e) {
             $this->entityManager->rollback();
             throw new \RuntimeException('Failed to commit inventory: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    private function deductWithoutReservation(Order $order): void
+    {
+        foreach ($order->getItems() as $orderItem) {
+            $variant = $orderItem->getProductVariant() ?? $this->findVariantBySku($orderItem->getSku());
+            if (!$variant) {
+                continue;
+            }
+
+            $stockItem = $this->stockItemRepository->findOneByVariantForUpdate($variant);
+            if (!$stockItem) {
+                continue;
+            }
+
+            $stockItem->setOnHand($stockItem->getOnHand() - $orderItem->getQuantity());
+            $this->entityManager->persist($stockItem);
         }
     }
 

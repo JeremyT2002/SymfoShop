@@ -221,6 +221,8 @@ checkout:
   simulate_success: Erfolg simulieren
   simulate_failure: Fehlschlag simulieren
   simulate_pending: Ausstehend lassen
+  dev_simulated_failure: Zahlung wurde als fehlgeschlagen simuliert.
+  dev_simulated_pending: Zahlung bleibt ausstehend.
   skip_payment_dev_notice: "Hinweis: CHECKOUT_SKIP_PAYMENT ist aktiv – die Zahlung wurde nur für lokale Tests automatisch als erfolgreich gesetzt."
   payment_page_title: Zahlung
   payment_meta_description: Schließen Sie Ihre Zahlung ab
@@ -235,6 +237,9 @@ checkout:
     shipping_method_unavailable: Die ausgewählte Versandoption ist nicht verfügbar.
     payment_method_unavailable: Die ausgewählte Zahlungsmethode ist nicht verfügbar.
     order_not_pending: Die Bestellung befindet sich nicht im Status "Zahlung ausstehend".
+    out_of_stock: Einige Artikel in Ihrem Warenkorb sind nicht mehr in der gewünschten Menge verfügbar. Bitte prüfen Sie Ihren Warenkorb.
+    order_failed: Ihre Bestellung konnte nicht aufgegeben werden. Bitte versuchen Sie es erneut.
+    payment_start_failed: Die Zahlung konnte nicht gestartet werden. Bitte versuchen Sie es erneut oder wählen Sie eine andere Zahlungsart.
   not_found:
     order: Bestellung nicht gefunden
     payment: Zahlung nicht gefunden
@@ -355,6 +360,7 @@ security:
     forgot_password: Passwort vergessen?
   register:
     rate_limited: Zu viele Registrierungsversuche von Ihrem Netzwerk. Bitte versuchen Sie es später erneut.
+    flash_success: Ihr Konto wurde erstellt. Sie können sich jetzt anmelden.
     title: Erstellen Sie Ihr Konto
     already_have_account: Haben Sie bereits ein Konto?
     sign_in: Anmelden

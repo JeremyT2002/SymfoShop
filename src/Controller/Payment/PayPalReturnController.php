@@ -5,18 +5,14 @@ declare(strict_types=1);
 namespace App\Controller\Payment;
 
 use App\Repository\PaymentRepository;
-use App\Service\Inventory\InventoryService;
-use App\Service\Invoice\InvoiceService;
+use App\Service\Payment\OrderPaymentFinalizer;
 use App\Service\Payment\Provider\PayPalPaymentProvider;
 use App\Service\Payment\Provider\PaymentResolution;
 use App\Service\Payment\PaymentService;
-use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Workflow\WorkflowInterface;
 
 #[Route('/payment/paypal', name: 'payment_paypal_')]
 final class PayPalReturnController extends AbstractController
@@ -25,11 +21,7 @@ final class PayPalReturnController extends AbstractController
         private readonly PayPalPaymentProvider $payPalPaymentProvider,
         private readonly PaymentService $paymentService,
         private readonly PaymentRepository $paymentRepository,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly WorkflowInterface $orderWorkflow,
-        private readonly InventoryService $inventoryService,
-        private readonly InvoiceService $invoiceService,
-        private readonly LoggerInterface $logger,
+        private readonly OrderPaymentFinalizer $paymentFinalizer,
     ) {
     }
 
@@ -52,22 +44,7 @@ final class PayPalReturnController extends AbstractController
         $this->paymentService->applyResolution($resolution);
 
         if ($resolution->status === PaymentResolution::STATUS_SUCCEEDED) {
-            try {
-                $this->inventoryService->commit($order);
-            } catch (\Exception $e) {
-                $this->logger->error('PayPal return: inventory commit failed', ['error' => $e->getMessage()]);
-            }
-
-            if ($this->orderWorkflow->can($order, 'confirm_payment')) {
-                $this->orderWorkflow->apply($order, 'confirm_payment');
-            }
-            $this->entityManager->flush();
-
-            try {
-                $this->invoiceService->createInvoiceForOrder($order);
-            } catch (\Exception $e) {
-                $this->logger->error('PayPal return: invoice creation failed', ['error' => $e->getMessage()]);
-            }
+            $this->paymentFinalizer->markPaid($order, 'paypal_return');
 
             return $this->redirectToRoute('checkout_success', [
                 'orderNumber' => $order->getOrderNumber(),
@@ -75,15 +52,7 @@ final class PayPalReturnController extends AbstractController
         }
 
         if ($resolution->status === PaymentResolution::STATUS_FAILED) {
-            try {
-                $this->inventoryService->release($order);
-            } catch (\Exception $e) {
-                $this->logger->error('PayPal return: inventory release failed', ['error' => $e->getMessage()]);
-            }
-            if ($this->orderWorkflow->can($order, 'cancel')) {
-                $this->orderWorkflow->apply($order, 'cancel');
-                $this->entityManager->flush();
-            }
+            $this->paymentFinalizer->cancelUnpaid($order, 'paypal_return');
             $this->addFlash('error', 'payment.paypal.flash.capture_failed');
 
             return $this->redirectToRoute('cart_show');
@@ -102,16 +71,8 @@ final class PayPalReturnController extends AbstractController
         if (is_string($token) && $token !== '' && !str_starts_with($token, 'paypal_')) {
             $payment = $this->paymentRepository->findOneByPaymentIntentId($token);
             if ($payment && $payment->getProvider() === PayPalPaymentProvider::NAME) {
-                $order = $payment->getOrder();
-                try {
-                    $this->inventoryService->release($order);
-                } catch (\Exception $e) {
-                    $this->logger->error('PayPal cancel: inventory release failed', ['error' => $e->getMessage()]);
-                }
-                if ($this->orderWorkflow->can($order, 'cancel')) {
-                    $this->orderWorkflow->apply($order, 'cancel');
-                    $this->entityManager->flush();
-                }
+                // Only unpaid orders are cancelled; revisiting this URL after paying is harmless.
+                $this->paymentFinalizer->cancelUnpaid($payment->getOrder(), 'paypal_cancel');
             }
         }
 

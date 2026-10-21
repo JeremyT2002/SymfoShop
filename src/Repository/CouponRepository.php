@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Coupon;
+use App\Entity\Order;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -30,18 +31,20 @@ class CouponRepository extends ServiceEntityRepository
     }
 
     /**
-     * Count total usages of a coupon
+     * Count total usages of a coupon: every paid (or later) order that redeemed it, guests included.
      */
     public function countUsages(Coupon $coupon): int
     {
         return (int) $this->getEntityManager()
             ->createQueryBuilder()
-            ->select('SUM(cu.usageCount)')
-            ->from('App\Entity\CouponUsage', 'cu')
-            ->where('cu.coupon = :coupon')
-            ->setParameter('coupon', $coupon)
+            ->select('COUNT(o.id)')
+            ->from(Order::class, 'o')
+            ->where('UPPER(o.couponCode) = UPPER(:code)')
+            ->andWhere('o.status IN (:redeemedStatuses)')
+            ->setParameter('code', $coupon->getCode())
+            ->setParameter('redeemedStatuses', OrderRepository::DASHBOARD_COMPLETED_STATUSES)
             ->getQuery()
-            ->getSingleScalarResult() ?? 0;
+            ->getSingleScalarResult();
     }
 
     /**

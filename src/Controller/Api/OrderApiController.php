@@ -73,7 +73,7 @@ class OrderApiController extends AbstractController
         $limit = min(100, max(1, (int) $request->query->get('limit', 20)));
         $offset = ($page - 1) * $limit;
 
-        $criteria = ['email' => $user->getEmail()];
+        $criteria = ['user' => $user];
         if (\in_array('ROLE_ADMIN', $user->getRoles(), true)) {
             $criteria = [];
         }
@@ -131,7 +131,7 @@ class OrderApiController extends AbstractController
             return $this->apiError('Order not found', Response::HTTP_NOT_FOUND);
         }
 
-        if (!\in_array('ROLE_ADMIN', $user->getRoles(), true) && $order->getEmail() !== $user->getEmail()) {
+        if (!\in_array('ROLE_ADMIN', $user->getRoles(), true) && $order->getUser()?->getId() !== $user->getId()) {
             return $this->apiError('Access denied', Response::HTTP_FORBIDDEN);
         }
 

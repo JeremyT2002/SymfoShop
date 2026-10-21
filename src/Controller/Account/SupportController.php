@@ -45,7 +45,7 @@ final class SupportController extends AbstractController
         if (!$user instanceof User) {
             throw $this->createAccessDeniedException('Invalid user session.');
         }
-        $customerOrders = $this->orderRepository->findByCustomerEmail($user->getEmail() ?? '', 50);
+        $customerOrders = $this->orderRepository->findByUser($user, 50);
 
         if ($request->isMethod('POST')) {
             $subject = trim((string) $request->request->get('subject', ''));

@@ -221,6 +221,8 @@ checkout:
   simulate_success: Simuler succès
   simulate_failure: Simuler échec
   simulate_pending: Laisser en attente
+  dev_simulated_failure: Le paiement a été simulé comme échoué.
+  dev_simulated_pending: Le paiement reste en attente.
   skip_payment_dev_notice: "Remarque : CHECKOUT_SKIP_PAYMENT est activé — le paiement a été marqué comme réussi uniquement pour les tests locaux."
   payment_page_title: Paiement
   payment_meta_description: Finalisez votre paiement
@@ -235,6 +237,9 @@ checkout:
     shipping_method_unavailable: L'option de livraison sélectionnée n'est pas disponible.
     payment_method_unavailable: Le mode de paiement sélectionné n'est pas disponible.
     order_not_pending: La commande n'est pas en attente de paiement.
+    out_of_stock: Certains articles de votre panier ne sont plus disponibles dans la quantité demandée. Veuillez vérifier votre panier.
+    order_failed: Votre commande n'a pas pu être passée. Veuillez réessayer.
+    payment_start_failed: Le paiement n'a pas pu être lancé. Veuillez réessayer ou choisir un autre moyen de paiement.
   not_found:
     order: Commande introuvable
     payment: Paiement introuvable
@@ -355,6 +360,7 @@ security:
     forgot_password: Mot de passe oublié ?
   register:
     rate_limited: Trop de tentatives d'inscription depuis votre réseau. Veuillez réessayer plus tard.
+    flash_success: Votre compte a été créé. Vous pouvez maintenant vous connecter.
     title: Créez votre compte
     already_have_account: Vous avez déjà un compte ?
     sign_in: Se connecter

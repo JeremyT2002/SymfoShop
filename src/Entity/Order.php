@@ -49,6 +49,14 @@ class Order
     #[ORM\Column(type: Types::INTEGER)]
     private int $grandTotal;
 
+    /** Coupon applied at checkout (snapshot of the code, the coupon itself may change later) */
+    #[ORM\Column(type: Types::STRING, length: 50, nullable: true)]
+    private ?string $couponCode = null;
+
+    /** Discount in minor units, subtracted from the subtotal before shipping and tax */
+    #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
+    private int $discountTotal = 0;
+
     /** Shipping in minor units (excl. VAT), before tax */
     #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
     private int $shippingAmount = 0;
@@ -185,6 +193,28 @@ class Order
     public function setGrandTotal(int $grandTotal): self
     {
         $this->grandTotal = $grandTotal;
+        return $this;
+    }
+
+    public function getCouponCode(): ?string
+    {
+        return $this->couponCode;
+    }
+
+    public function setCouponCode(?string $couponCode): self
+    {
+        $this->couponCode = $couponCode;
+        return $this;
+    }
+
+    public function getDiscountTotal(): int
+    {
+        return $this->discountTotal;
+    }
+
+    public function setDiscountTotal(int $discountTotal): self
+    {
+        $this->discountTotal = $discountTotal;
         return $this;
     }
 

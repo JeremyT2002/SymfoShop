@@ -221,6 +221,8 @@ checkout:
   simulate_success: Simulate success
   simulate_failure: Simulate failure
   simulate_pending: Leave pending
+  dev_simulated_failure: Payment was simulated as failed.
+  dev_simulated_pending: Payment left as pending.
   skip_payment_dev_notice: "Note: CHECKOUT_SKIP_PAYMENT is enabled — payment was auto-completed for local testing only."
   payment_page_title: Payment
   payment_meta_description: Complete your payment
@@ -235,6 +237,9 @@ checkout:
     shipping_method_unavailable: Selected shipping option is not available.
     payment_method_unavailable: Selected payment method is not available.
     order_not_pending: Order is not in payment pending status.
+    out_of_stock: Some items in your cart are no longer available in the requested quantity. Please review your cart.
+    order_failed: We could not place your order. Please try again.
+    payment_start_failed: The payment could not be started. Please try again or choose another payment method.
   not_found:
     order: Order not found
     payment: Payment not found
@@ -355,6 +360,7 @@ security:
     forgot_password: Forgot your password?
   register:
     rate_limited: Too many registration attempts from your network. Please try again later.
+    flash_success: Your account has been created. You can now sign in.
     title: Create your account
     already_have_account: Already have an account?
     sign_in: Sign in
