@@ -24,7 +24,6 @@ class RegistrationFormType extends AbstractType
             ->add('email', EmailType::class, [
                 'label' => 'Email',
                 'attr' => [
-                    'class' => 'form-control',
                     'placeholder' => 'Enter your email',
                     'autocomplete' => 'email',
                 ],
@@ -33,7 +32,6 @@ class RegistrationFormType extends AbstractType
                 'label' => 'First Name',
                 'required' => false,
                 'attr' => [
-                    'class' => 'form-control',
                     'placeholder' => 'Enter your first name',
                 ],
             ])
@@ -41,7 +39,6 @@ class RegistrationFormType extends AbstractType
                 'label' => 'Last Name',
                 'required' => false,
                 'attr' => [
-                    'class' => 'form-control',
                     'placeholder' => 'Enter your last name',
                 ],
             ])
@@ -51,7 +48,6 @@ class RegistrationFormType extends AbstractType
                 'first_options' => [
                     'label' => 'Password',
                     'attr' => [
-                        'class' => 'form-control',
                         'placeholder' => 'Enter your password',
                         'autocomplete' => 'new-password',
                     ],
@@ -59,7 +55,6 @@ class RegistrationFormType extends AbstractType
                 'second_options' => [
                     'label' => 'Repeat Password',
                     'attr' => [
-                        'class' => 'form-control',
                         'placeholder' => 'Repeat your password',
                         'autocomplete' => 'new-password',
                     ],
@@ -83,15 +78,9 @@ class RegistrationFormType extends AbstractType
                         'message' => 'You should agree to our Terms.',
                     ]),
                 ],
-                'attr' => [
-                    'class' => 'form-check-input',
-                ],
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Register',
-                'attr' => [
-                    'class' => 'btn btn-primary w-100',
-                ],
             ]);
     }
 

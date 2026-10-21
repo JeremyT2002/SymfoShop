@@ -17,7 +17,6 @@ class LoginFormType extends AbstractType
             ->add('email', EmailType::class, [
                 'label' => 'Email',
                 'attr' => [
-                    'class' => 'form-control',
                     'placeholder' => 'Enter your email',
                     'autocomplete' => 'email',
                 ],
@@ -25,16 +24,12 @@ class LoginFormType extends AbstractType
             ->add('password', PasswordType::class, [
                 'label' => 'Password',
                 'attr' => [
-                    'class' => 'form-control',
                     'placeholder' => 'Enter your password',
                     'autocomplete' => 'current-password',
                 ],
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Sign In',
-                'attr' => [
-                    'class' => 'btn btn-primary w-100',
-                ],
             ]);
     }
 

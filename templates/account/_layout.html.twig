@@ -1,0 +1,54 @@
+{#
+  Shared account layout: sidebar navigation + content.
+  Child templates set `account_section` (profile|orders|invoices|wishlist|support) and fill `account_content`.
+#}
+{% extends 'base.html.twig' %}
+
+{% block robots_meta %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+
+{% block body %}
+{%- set display_name = app.user.fullName|trim ?: app.user.email -%}
+{%- set nav = [
+    {key: 'profile', label: 'account.dashboard.tabs.profile'|trans, icon: 'lucide:user-round', url: path('account_dashboard')},
+    {key: 'orders', label: 'account.dashboard.tabs.orders'|trans, icon: 'lucide:package', url: path('account_dashboard', {tab: 'orders'})},
+    {key: 'invoices', label: 'account.dashboard.tabs.invoices'|trans, icon: 'lucide:file-text', url: path('account_dashboard', {tab: 'invoices'})},
+    {key: 'wishlist', label: 'footer.wishlist'|trans, icon: 'lucide:heart', url: path('account_wishlist_show')},
+]|merge((theme_config().support.provider|default('selfcoded')) == 'selfcoded' ? [
+    {key: 'support', label: 'footer.support'|trans, icon: 'lucide:message-circle', url: path('account_support_index')},
+] : []) -%}
+
+<div class="container-page py-8 lg:py-12">
+    <header class="flex items-center gap-4">
+        <span class="flex size-12 shrink-0 items-center justify-center rounded-full bg-fg text-lg font-semibold text-canvas" aria-hidden="true">{{ display_name|first|upper }}</span>
+        <div class="min-w-0">
+            <h1 class="truncate text-2xl font-semibold sm:text-3xl">{{ 'account.dashboard.greeting'|trans({'%name%': app.user.firstName|default(display_name)}) }}</h1>
+            <p class="text-sm text-fg-muted">{{ 'account.dashboard.member_since'|trans({'%date%': app.user.createdAt|date('d.m.Y')}) }}</p>
+        </div>
+    </header>
+
+    <div class="mt-8 grid gap-8 lg:grid-cols-[14rem_1fr] lg:gap-12">
+        <nav aria-label="{{ 'account.dashboard.tabs.aria_label'|trans }}" class="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+            <ul class="flex gap-1 lg:flex-col" role="list">
+                {% for item in nav %}
+                    {%- set active = item.key == account_section -%}
+                    <li>
+                        <a href="{{ item.url }}" {% if active %}aria-current="page"{% endif %}
+                           class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors {{ active ? 'bg-subtle text-fg' : 'text-fg-muted hover:bg-subtle hover:text-fg' }}">
+                            {{ ux_icon(item.icon, {class: 'size-4'}) }}{{ item.label }}
+                        </a>
+                    </li>
+                {% endfor %}
+                <li class="lg:mt-4 lg:border-t lg:border-line lg:pt-4">
+                    <a href="{{ path('logout') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap text-fg-muted hover:bg-subtle hover:text-fg">
+                        {{ ux_icon('lucide:log-out', {class: 'size-4'}) }}{{ 'nav.logout'|trans }}
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="min-w-0">
+            {% block account_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}

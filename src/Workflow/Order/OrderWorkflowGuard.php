@@ -9,11 +9,33 @@ use Symfony\Component\Workflow\TransitionBlocker;
 
 class OrderWorkflowGuard
 {
+    /** >0 while a verified payment outcome (webhook, provider return) is being applied. */
+    private int $systemDepth = 0;
+
     public function __construct(
         private readonly AuthorizationCheckerInterface $authorizationChecker,
         private readonly bool $checkoutSkipPayment = false,
         private readonly string $environment = 'prod'
     ) {
+    }
+
+    /**
+     * Run $callback with payment transitions allowed for the system instead of a logged-in admin.
+     * Webhooks and provider return URLs have no admin session, yet must be able to mark orders
+     * paid or cancel unpaid ones. Only OrderPaymentFinalizer should call this.
+     *
+     * @template T
+     * @param callable(): T $callback
+     * @return T
+     */
+    public function asSystem(callable $callback): mixed
+    {
+        ++$this->systemDepth;
+        try {
+            return $callback();
+        } finally {
+            --$this->systemDepth;
+        }
     }
 
     public function guardSubmitPayment(GuardEvent $event): void
@@ -32,6 +54,10 @@ class OrderWorkflowGuard
 
     public function guardConfirmPayment(GuardEvent $event): void
     {
+        if ($this->systemDepth > 0) {
+            return;
+        }
+
         if ($this->checkoutSkipPayment && \in_array($this->environment, ['dev', 'test'], true)) {
             return;
         }
@@ -79,7 +105,7 @@ class OrderWorkflowGuard
         /** @var Order $order */
         $order = $event->getSubject();
 
-        if (!$this->authorizationChecker->isGranted('ROLE_ADMIN')) {
+        if ($this->systemDepth === 0 && !$this->authorizationChecker->isGranted('ROLE_ADMIN')) {
             $event->addTransitionBlocker(new TransitionBlocker(
                 'Only admins can cancel orders',
                 '0'

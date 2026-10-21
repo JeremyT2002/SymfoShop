@@ -3,10 +3,8 @@
 namespace App\Controller\Webhook;
 
 use App\Entity\ProcessedWebhookEvent;
-use App\Repository\OrderRepository;
 use App\Repository\ProcessedWebhookEventRepository;
-use App\Service\Inventory\InventoryService;
-use App\Service\Invoice\InvoiceService;
+use App\Service\Payment\OrderPaymentFinalizer;
 use App\Service\Payment\Provider\PaymentResolution;
 use App\Service\Payment\PaymentService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -16,36 +14,17 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Workflow\WorkflowInterface;
-use Symfony\Contracts\Service\ServiceSubscriberInterface;
-use Symfony\Contracts\Service\ServiceSubscriberTrait;
 
-class StripeWebhookController extends AbstractController implements ServiceSubscriberInterface
+class StripeWebhookController extends AbstractController
 {
-    use ServiceSubscriberTrait;
-
     public function __construct(
         private readonly PaymentService $paymentService,
-        private readonly OrderRepository $orderRepository,
         private readonly ProcessedWebhookEventRepository $webhookEventRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly LoggerInterface $logger,
         private readonly ?string $stripeWebhookSecret,
-        private readonly InventoryService $inventoryService,
-        private readonly InvoiceService $invoiceService
+        private readonly OrderPaymentFinalizer $paymentFinalizer,
     ) {
-    }
-
-    public static function getSubscribedServices(): array
-    {
-        return [
-            'state_machine.order' => '?'.WorkflowInterface::class,
-        ];
-    }
-
-    private function getOrderWorkflow(): WorkflowInterface
-    {
-        return $this->container->get('state_machine.order');
     }
 
     #[Route('/webhook/stripe', name: 'webhook_stripe', methods: ['POST'])]
@@ -184,71 +163,29 @@ class StripeWebhookController extends AbstractController implements ServiceSubsc
             default => null,
         };
         if ($status !== null) {
-            $resolution = new PaymentResolution(
-                $paymentIntentId,
-                $status,
-                $order->getId()
-            );
-            $this->paymentService->applyResolution($resolution);
+            $this->paymentService->applyResolution(new PaymentResolution($paymentIntentId, $status, $order->getId()));
         }
 
         switch ($event->type) {
             case 'payment_intent.succeeded':
-
-                // Commit inventory (convert reservation to actual stock reduction)
-                try {
-                    $this->inventoryService->commit($order);
-                } catch (\Exception $e) {
-                    $this->logger->error('Failed to commit inventory for order', [
-                        'order_id' => $order->getId(),
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-
-                // Transition order to paid
-                if ($this->getOrderWorkflow()->can($order, 'confirm_payment')) {
-                    $this->getOrderWorkflow()->apply($order, 'confirm_payment');
-                    $this->entityManager->flush();
+                if ($this->paymentFinalizer->markPaid($order, 'stripe_webhook')) {
                     $this->logger->info('Order payment confirmed via webhook', [
-                        'order_id' => $order->getId(),
                         'order_number' => $order->getOrderNumber(),
                     ]);
-                }
-
-                // Generate invoice and send email (only after payment confirmed)
-                try {
-                    $this->invoiceService->createInvoiceForOrder($order);
-                    $this->logger->info('Invoice created and email queued for order', [
-                        'order_id' => $order->getId(),
-                        'order_number' => $order->getOrderNumber(),
-                    ]);
-                } catch (\Exception $e) {
-                    $this->logger->error('Failed to create invoice for order', [
-                        'order_id' => $order->getId(),
-                        'error' => $e->getMessage(),
-                    ]);
-                    // Don't fail the webhook if invoice generation fails
                 }
                 break;
 
             case 'payment_intent.payment_failed':
-            case 'payment_intent.canceled':
-                // Release inventory reservation
-                try {
-                    $this->inventoryService->release($order);
-                } catch (\Exception $e) {
-                    $this->logger->error('Failed to release inventory for order', [
-                        'order_id' => $order->getId(),
-                        'error' => $e->getMessage(),
-                    ]);
-                }
+                // A declined attempt is not final: the customer can retry with the same PaymentIntent.
+                // Stock stays reserved until the intent is cancelled or the reservation expires.
+                $this->logger->info('Stripe payment attempt failed', [
+                    'order_number' => $order->getOrderNumber(),
+                ]);
+                break;
 
-                // Cancel order if still in payment_pending or paid state
-                if ($this->getOrderWorkflow()->can($order, 'cancel')) {
-                    $this->getOrderWorkflow()->apply($order, 'cancel');
-                    $this->entityManager->flush();
-                    $this->logger->info('Order cancelled due to payment failure', [
-                        'order_id' => $order->getId(),
+            case 'payment_intent.canceled':
+                if ($this->paymentFinalizer->cancelUnpaid($order, 'stripe_webhook')) {
+                    $this->logger->info('Order cancelled because its payment intent was cancelled', [
                         'order_number' => $order->getOrderNumber(),
                     ]);
                 }

@@ -1,12 +1,16 @@
-{% from 'admin/components/_icons.html.twig' import icon %}
+{%- set styles = {
+    success: {class: 'alert-success', icon: 'lucide:circle-check'},
+    error: {class: 'alert-error', icon: 'lucide:circle-alert'},
+    danger: {class: 'alert-error', icon: 'lucide:circle-alert'},
+    warning: {class: 'alert-warning', icon: 'lucide:triangle-alert'},
+} -%}
 {% for label, messages in app.flashes %}
+    {%- set style = styles[label]|default({class: 'alert-info', icon: 'lucide:info'}) -%}
     {% for message in messages %}
-        {% set tone = label == 'success' ? 'border-green-200 bg-green-50 text-green-800 dark:border-green-900/60 dark:bg-green-950/50 dark:text-green-300' : (label == 'error' ? 'border-red-200 bg-red-50 text-red-800 dark:border-red-900/60 dark:bg-red-950/50 dark:text-red-300' : 'border-primary-200 bg-primary-50 text-primary-800 dark:border-primary-900/60 dark:bg-primary-950/50 dark:text-primary-300') %}
-        <div class="mb-4 rounded-xl border px-4 py-3 {{ tone }}">
-            <div class="flex items-start gap-2 text-sm">
-                <span class="mt-0.5">{{ label == 'success' ? icon('check-circle', 'h-4 w-4') : (label == 'error' ? icon('x-mark', 'h-4 w-4') : icon('bell', 'h-4 w-4')) }}</span>
-                <span>{{ message|trans }}</span>
-            </div>
+        <div class="alert {{ style.class }} mb-4" role="status" x-data="{ show: true }" x-show="show">
+            {{ ux_icon(style.icon, {class: 'mt-0.5 size-4'}) }}
+            <p class="flex-1">{{ message|trans }}</p>
+            <button type="button" class="-m-1 rounded-md p-1 opacity-60 hover:opacity-100" @click="show = false" aria-label="{{ 'common.close'|trans }}">{{ ux_icon('lucide:x', {class: 'size-4'}) }}</button>
         </div>
     {% endfor %}
 {% endfor %}

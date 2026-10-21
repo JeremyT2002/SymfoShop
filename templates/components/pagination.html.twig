@@ -1,91 +1,42 @@
 {#
-  Pagination Component
-  ====================
-  
-  Displays pagination controls.
-  
-  Parameters:
-  - currentPage: int
-  - totalPages: int
-  - route: string (route name)
-  - routeParams: array (additional route parameters)
-  - maxPages: int (max pages to show, default: 7)
+  Pagination. Params: currentPage, totalPages, route, routeParams (optional), maxPages (optional, default 5)
 #}
-
-{% set maxPages = maxPages|default(7) %}
-{% set routeParams = routeParams|default({}) %}
-
+{%- set routeParams = routeParams|default({}) -%}
+{%- set maxPages = maxPages|default(5) -%}
 {% if totalPages > 1 %}
-    <nav aria-label="Pagination" class="flex items-center justify-center gap-2 mt-8">
-        {# Previous Button #}
+    {%- set start = max(1, currentPage - (maxPages // 2)) -%}
+    {%- set end = min(totalPages, start + maxPages - 1) -%}
+    {%- set start = max(1, end - maxPages + 1) -%}
+    {%- set item = 'flex h-10 min-w-10 items-center justify-center rounded-lg px-3 text-sm font-medium transition-colors' -%}
+    <nav aria-label="{{ 'ui.a11y.pagination'|trans }}" class="mt-12 flex items-center justify-center gap-1">
         {% if currentPage > 1 %}
-            <a href="{{ path(route, routeParams|merge({page: currentPage - 1})) }}" 
-               class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-primary-500 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
-                <i class="fas fa-chevron-left mr-1"></i>
-                <span class="sr-only sm:not-sr-only">{{ 'pagination.previous'|trans }}</span>
+            <a href="{{ path(route, routeParams|merge({page: currentPage - 1})) }}" rel="prev" class="{{ item }} text-fg-muted hover:bg-subtle hover:text-fg" aria-label="{{ 'pagination.previous'|trans }}">
+                {{ ux_icon('lucide:chevron-left', {class: 'size-4'}) }}
             </a>
-        {% else %}
-            <span class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
-                <i class="fas fa-chevron-left mr-1"></i>
-                <span class="sr-only sm:not-sr-only">{{ 'pagination.previous'|trans }}</span>
-            </span>
         {% endif %}
-        
-        {# Page Numbers #}
-        <div class="flex items-center gap-1">
-            {% set startPage = max(1, currentPage - (maxPages // 2)) %}
-            {% set endPage = min(totalPages, startPage + maxPages - 1) %}
-            {% if endPage - startPage < maxPages - 1 %}
-                {% set startPage = max(1, endPage - maxPages + 1) %}
+
+        {% if start > 1 %}
+            <a href="{{ path(route, routeParams|merge({page: 1})) }}" class="{{ item }} text-fg-muted hover:bg-subtle hover:text-fg">1</a>
+            {% if start > 2 %}<span class="px-1 text-fg-subtle" aria-hidden="true">…</span>{% endif %}
+        {% endif %}
+
+        {% for page in start..end %}
+            {% if page == currentPage %}
+                <span class="{{ item }} bg-fg text-canvas" aria-current="page">{{ page }}</span>
+            {% else %}
+                <a href="{{ path(route, routeParams|merge({page: page})) }}" class="{{ item }} text-fg-muted hover:bg-subtle hover:text-fg">{{ page }}</a>
             {% endif %}
-            
-            {% if startPage > 1 %}
-                <a href="{{ path(route, routeParams|merge({page: 1})) }}" 
-                   class="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                    1
-                </a>
-                {% if startPage > 2 %}
-                    <span class="px-2 text-gray-400">...</span>
-                {% endif %}
-            {% endif %}
-            
-            {% for page in startPage..endPage %}
-                {% if page == currentPage %}
-                    <span class="px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold" aria-current="page">
-                        {{ page }}
-                    </span>
-                {% else %}
-                    <a href="{{ path(route, routeParams|merge({page: page})) }}" 
-                       class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-primary-500 transition-colors">
-                        {{ page }}
-                    </a>
-                {% endif %}
-            {% endfor %}
-            
-            {% if endPage < totalPages %}
-                {% if endPage < totalPages - 1 %}
-                    <span class="px-2 text-gray-400">...</span>
-                {% endif %}
-                <a href="{{ path(route, routeParams|merge({page: totalPages})) }}" 
-                   class="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                    {{ totalPages }}
-                </a>
-            {% endif %}
-        </div>
-        
-        {# Next Button #}
+        {% endfor %}
+
+        {% if end < totalPages %}
+            {% if end < totalPages - 1 %}<span class="px-1 text-fg-subtle" aria-hidden="true">…</span>{% endif %}
+            <a href="{{ path(route, routeParams|merge({page: totalPages})) }}" class="{{ item }} text-fg-muted hover:bg-subtle hover:text-fg">{{ totalPages }}</a>
+        {% endif %}
+
         {% if currentPage < totalPages %}
-            <a href="{{ path(route, routeParams|merge({page: currentPage + 1})) }}" 
-               class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-primary-500 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
-                <span class="sr-only sm:not-sr-only">{{ 'pagination.next'|trans }}</span>
-                <i class="fas fa-chevron-right ml-1"></i>
+            <a href="{{ path(route, routeParams|merge({page: currentPage + 1})) }}" rel="next" class="{{ item }} text-fg-muted hover:bg-subtle hover:text-fg" aria-label="{{ 'pagination.next'|trans }}">
+                {{ ux_icon('lucide:chevron-right', {class: 'size-4'}) }}
             </a>
-        {% else %}
-            <span class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
-                <span class="sr-only sm:not-sr-only">{{ 'pagination.next'|trans }}</span>
-                <i class="fas fa-chevron-right ml-1"></i>
-            </span>
         {% endif %}
     </nav>
 {% endif %}
-

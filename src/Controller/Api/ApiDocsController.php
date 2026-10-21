@@ -20,7 +20,9 @@ class ApiDocsController extends AbstractController
     {
         // Get the OpenAPI spec from nelmio
         $openApiSpec = $this->renderOpenApi->render(RenderOpenApi::JSON, 'default');
-        
+        // Embedded in a <script> tag: escape "<" and ">" so the spec cannot close it.
+        $openApiSpec = json_encode(json_decode($openApiSpec), \JSON_HEX_TAG | \JSON_HEX_AMP | \JSON_UNESCAPED_SLASHES);
+
         return $this->render('api/swagger_ui.html.twig', [
             'openApiSpec' => $openApiSpec,
         ]);

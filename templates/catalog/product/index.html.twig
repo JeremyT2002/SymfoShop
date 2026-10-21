@@ -1,40 +1,51 @@
-{% extends 'catalog/base.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block page_title %}{{ 'catalog.all_products.title'|trans }} - SymfoShop{% endblock %}
-{% block page_meta_description %}{{ 'catalog.all_products.meta'|trans }}{% endblock %}
+{% block page_title %}{{ search ? 'ui.search.results_for'|trans({'%query%': search}) : 'catalog.all_products.title'|trans }}{% endblock %}
+{% block meta_description %}{{ 'catalog.all_products.meta'|trans }}{% endblock %}
 
-{% block catalog_body %}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {% include 'components/breadcrumbs.html.twig' with {
-            items: [
-                {label: 'nav.home'|trans, url: path('catalog_home')},
-                {label: 'catalog.all_products.title'|trans|default('All products'), url: null}
-            ]
-        } %}
+{% block robots_meta %}
+    <meta name="robots" content="{{ search or theme_config().seo.defaultNoIndex|default(false) ? 'noindex,follow' : 'index,follow' }}">
+{% endblock %}
 
-        <div class="mb-8">
-            <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ 'catalog.all_products.title'|trans }}</h1>
-            <p class="text-gray-600">{{ 'category.showing'|trans }} {{ products|length }} {{ 'category.of'|trans }} {{ totalProducts }} {{ totalProducts != 1 ? 'category.products'|trans : 'category.product'|trans }}</p>
+{% block body %}
+<div class="container-page py-8 lg:py-12">
+    {% include 'components/breadcrumbs.html.twig' with {items: [
+        {label: 'nav.home'|trans, url: path('catalog_home')},
+        {label: 'catalog.all_products.title'|trans, url: search ? path('catalog_products') : null},
+    ]|merge(search ? [{label: 'ui.search.label'|trans, url: null}] : [])} only %}
+
+    <header class="flex flex-col gap-6 border-b border-line pb-8 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <h1 class="text-3xl font-semibold sm:text-4xl">
+                {% if search %}{{ 'ui.search.results_for'|trans({'%query%': search}) }}{% else %}{{ 'catalog.all_products.title'|trans }}{% endif %}
+            </h1>
+            <p class="mt-2 text-sm text-fg-muted">{{ totalProducts }} {{ totalProducts == 1 ? 'category.product'|trans : 'category.products'|trans }}</p>
         </div>
+        <form action="{{ path('catalog_products') }}" method="get" role="search" class="relative w-full sm:w-80">
+            <label for="listing-search" class="sr-only">{{ 'ui.search.label'|trans }}</label>
+            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle">{{ ux_icon('lucide:search', {class: 'size-4'}) }}</span>
+            <input id="listing-search" type="search" name="q" value="{{ search }}" placeholder="{{ 'ui.search.placeholder'|trans }}" class="input pl-9">
+        </form>
+    </header>
 
-        {% if products|length > 0 %}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                {% for product in products %}
-                    {% include 'components/product_card.html.twig' with { product: product, variant: product.variants|first } %}
-                {% endfor %}
-            </div>
-            {% if totalPages > 1 %}
-                {% include 'components/pagination.html.twig' with {
-                    currentPage: currentPage,
-                    totalPages: totalPages,
-                    route: 'catalog_products',
-                    routeParams: {}
-                } %}
-            {% endif %}
-        {% else %}
-            <div class="bg-white rounded-2xl shadow-lg p-16 text-center text-gray-600">
-                {{ 'catalog.all_products.empty'|trans }}
-            </div>
-        {% endif %}
-    </div>
+    {% if products is not empty %}
+        <div class="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 lg:grid-cols-4">
+            {% for product in products %}
+                {% include 'components/product_card.html.twig' with {product: product, eager: loop.index <= 4} only %}
+            {% endfor %}
+        </div>
+        {% include 'components/pagination.html.twig' with {
+            currentPage: currentPage, totalPages: totalPages, route: 'catalog_products', routeParams: search ? {q: search} : {}
+        } only %}
+    {% else %}
+        <div class="mt-8">
+            {% include 'components/empty_state.html.twig' with {
+                icon: search ? 'lucide:search-x' : 'lucide:package-open',
+                title: search ? 'ui.search.no_results'|trans({'%query%': search}) : 'catalog.all_products.empty'|trans,
+                text: search ? 'ui.search.no_results_hint'|trans : false,
+                action: search ? {label: 'catalog.all_products.title'|trans, url: path('catalog_products')} : false,
+            } only %}
+        </div>
+    {% endif %}
+</div>
 {% endblock %}

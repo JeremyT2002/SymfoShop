@@ -1,31 +1,21 @@
 {% extends 'legal/_layout.html.twig' %}
 
-{% block title %}{{ 'legal.faq.meta_title'|trans }} · {{ theme_config().brand.siteName|default('SymfoShop') }}{% endblock %}
+{% block page_title %}{{ 'legal.faq.meta_title'|trans }}{% endblock %}
 {% block meta_description %}{{ 'legal.faq.meta_description'|trans }}{% endblock %}
 
 {% block legal_heading %}{{ 'legal.faq.heading'|trans }}{% endblock %}
 
 {% block legal_content %}
-    <div class="space-y-8 text-gray-700 dark:text-gray-300 text-base leading-relaxed">
-        <div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ 'legal.faq.q1'|trans }}</h2>
-            <p class="mt-2">{{ 'legal.faq.a1'|trans }}</p>
-        </div>
-        <div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ 'legal.faq.q2'|trans }}</h2>
-            <p class="mt-2">{{ 'legal.faq.a2'|trans }}</p>
-        </div>
-        <div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ 'legal.faq.q3'|trans }}</h2>
-            <p class="mt-2">{{ 'legal.faq.a3'|trans }}</p>
-        </div>
-        <div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ 'legal.faq.q4'|trans }}</h2>
-            <p class="mt-2">{{ 'legal.faq.a4'|trans }}</p>
-        </div>
-        <div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ 'legal.faq.q5'|trans }}</h2>
-            <p class="mt-2">{{ 'legal.faq.a5'|trans }}</p>
-        </div>
+    <div class="not-prose divide-y divide-line border-y border-line">
+        {% for i in 1..5 %}
+            <details class="group py-5" {{ loop.first ? 'open' }}>
+                <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold [&::-webkit-details-marker]:hidden">
+                    {{ ('legal.faq.q' ~ i)|trans }}
+                    {{ ux_icon('lucide:plus', {class: 'size-5 shrink-0 text-fg-subtle transition group-open:rotate-45'}) }}
+                </summary>
+                <p class="mt-3 leading-7 text-fg-muted">{{ ('legal.faq.a' ~ i)|trans }}</p>
+            </details>
+        {% endfor %}
     </div>
+    <p class="mt-8">{{ 'ui.faq.more_questions'|trans }} <a href="{{ path('contact') }}">{{ 'footer.contact'|trans }}</a></p>
 {% endblock %}

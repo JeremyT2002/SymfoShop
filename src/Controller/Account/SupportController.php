@@ -45,9 +45,15 @@ final class SupportController extends AbstractController
         if (!$user instanceof User) {
             throw $this->createAccessDeniedException('Invalid user session.');
         }
-        $customerOrders = $this->orderRepository->findByCustomerEmail($user->getEmail() ?? '', 50);
+        $customerOrders = $this->orderRepository->findByUser($user, 50);
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('support_conversation', (string) $request->request->get('_token'))) {
+                $this->addFlash('error', 'account.dashboard.flash.invalid_csrf');
+
+                return $this->redirectToRoute('account_support_index');
+            }
+
             $subject = trim((string) $request->request->get('subject', ''));
             $message = trim((string) $request->request->get('message', ''));
             $category = trim((string) $request->request->get('category', SupportConversation::CATEGORY_OTHER));
@@ -111,6 +117,12 @@ final class SupportController extends AbstractController
         }
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('support_reply_' . $conversation->getId(), (string) $request->request->get('_token'))) {
+                $this->addFlash('error', 'account.dashboard.flash.invalid_csrf');
+
+                return $this->redirectToRoute('account_support_show', ['id' => $conversation->getId()]);
+            }
+
             $body = trim((string) $request->request->get('body', ''));
             $limiter = $this->supportMessageLimiter->create('support:reply:' . ($user->getId() ?? 'anon'));
             $limit = $limiter->consume(1);

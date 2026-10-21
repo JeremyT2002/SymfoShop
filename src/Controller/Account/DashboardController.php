@@ -39,8 +39,8 @@ class DashboardController extends AbstractController
             throw $this->createAccessDeniedException('Invalid user session.');
         }
 
-        $orders = $this->orderRepository->findByCustomerEmail($user->getEmail() ?? '', 25);
-        $invoices = $this->invoiceRepository->findByOrderEmail($user->getEmail() ?? '');
+        $orders = $this->orderRepository->findByUser($user, 25);
+        $invoices = $this->invoiceRepository->findByUser($user);
 
         return $this->render('account/dashboard.html.twig', [
             'orders' => $orders,
@@ -107,13 +107,13 @@ class DashboardController extends AbstractController
             throw $this->createAccessDeniedException('Invalid user session.');
         }
 
-        $invoice = $this->invoiceRepository->findOneForUserByInvoiceNumber($invoiceNumber, $user->getEmail() ?? '');
+        $invoice = $this->invoiceRepository->findOneForUserByInvoiceNumber($invoiceNumber, $user);
         if (!$invoice && $this->isGranted('ROLE_ADMIN')) {
             $invoice = $this->invoiceRepository->findOneByInvoiceNumber($invoiceNumber);
         }
 
         if (!$invoice) {
-            throw $this->createNotFoundException('Rechnung nicht gefunden.');
+            throw $this->createNotFoundException('Invoice not found.');
         }
 
         $supportedLocales = ['en', 'de', 'fr'];

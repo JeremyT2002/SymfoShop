@@ -12,13 +12,13 @@ use App\Repository\PaymentMethodRepository;
 use App\Repository\ShippingMethodRepository;
 use App\Service\Cart\CartService;
 use App\Service\Checkout\CheckoutService;
-use App\Service\Inventory\InventoryService;
-use App\Service\Invoice\InvoiceService;
+use App\Service\Payment\OrderPaymentFinalizer;
 use App\Service\Payment\PaymentService;
 use App\Service\Payment\Provider\PaymentResolution;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -32,8 +32,7 @@ class CheckoutController extends AbstractController
         private readonly PaymentService $paymentService,
         private readonly EntityManagerInterface $entityManager,
         private readonly WorkflowInterface $orderWorkflow,
-        private readonly InventoryService $inventoryService,
-        private readonly InvoiceService $invoiceService,
+        private readonly OrderPaymentFinalizer $paymentFinalizer,
         private readonly PaymentMethodRepository $paymentMethodRepository,
         private readonly ShippingMethodRepository $shippingMethodRepository,
         private readonly LoggerInterface $logger,
@@ -105,63 +104,35 @@ class CheckoutController extends AbstractController
 
         $totals = $this->checkoutService->calculateTotals(
             $selectedShippingMethod !== '' ? $selectedShippingMethod : null,
-            $countryForTax
+            $countryForTax,
+            $user instanceof User ? $user : null
         );
 
-        if ($request->isMethod('POST')) {
-            if ($customerForm->isSubmitted() && $customerForm->isValid() &&
-                $addressForm->isSubmitted() && $addressForm->isValid()) {
-                try {
-                    if ($selectedShippingMethod !== '' && $shippingCodes !== [] && !in_array($selectedShippingMethod, $shippingCodes, true)) {
-                        throw new \RuntimeException('checkout.flash.shipping_method_unavailable');
-                    }
-
-                    $order = $this->checkoutService->createOrder(
-                        $customerInfo,
-                        $shippingAddress,
-                        $selectedShippingMethod !== '' ? $selectedShippingMethod : null,
-                        $user instanceof User ? $user : null
-                    );
-                    if ($selectedPaymentMethod !== '' && !in_array($selectedPaymentMethod, $paymentMethodCodes, true)) {
-                        throw new \RuntimeException('checkout.flash.payment_method_unavailable');
-                    }
-
-                    if ($this->checkoutSkipPayment && \in_array($this->kernelEnvironment, ['dev', 'test'], true)) {
-                        $paymentIntent = $this->paymentService->createPaymentIntent($order, 'dev');
-                        if ($this->orderWorkflow->can($order, 'submit_payment')) {
-                            $this->orderWorkflow->apply($order, 'submit_payment');
-                            $this->entityManager->flush();
-                        }
-                        $this->finalizeOrderAfterSimulatedPaymentSuccess($order, $paymentIntent['paymentIntentId']);
-                        $this->addFlash('info', 'checkout.skip_payment_dev_notice');
-
-                        return $this->redirectToRoute('checkout_success', [
-                            'orderNumber' => $order->getOrderNumber(),
-                        ]);
-                    }
-
-                    $paymentIntent = $this->paymentService->createPaymentIntent($order, $selectedPaymentMethod !== '' ? $selectedPaymentMethod : null);
-
-                    if ($this->orderWorkflow->can($order, 'submit_payment')) {
-                        $this->orderWorkflow->apply($order, 'submit_payment');
-                        $this->entityManager->flush();
-                    }
-
-                    if (!empty($paymentIntent['redirectUrl'])) {
-                        return $this->redirect($paymentIntent['redirectUrl']);
-                    }
-
-                    return $this->redirectToRoute('checkout_payment', [
-                        'orderId' => $order->getId(),
-                        'paymentIntentId' => $paymentIntent['paymentIntentId'],
-                    ]);
-                } catch (\Exception $e) {
-                    $this->addFlash('error', $e->getMessage());
+        if ($request->isMethod('POST')
+            && $customerForm->isSubmitted() && $customerForm->isValid()
+            && $addressForm->isSubmitted() && $addressForm->isValid()
+        ) {
+            // Reject unknown methods before an order (and its stock reservation) exists.
+            if ($selectedShippingMethod !== '' && $shippingCodes !== [] && !in_array($selectedShippingMethod, $shippingCodes, true)) {
+                $this->addFlash('error', 'checkout.flash.shipping_method_unavailable');
+            } elseif ($selectedPaymentMethod !== '' && !in_array($selectedPaymentMethod, $paymentMethodCodes, true)) {
+                $this->addFlash('error', 'checkout.flash.payment_method_unavailable');
+            } else {
+                $response = $this->placeOrder(
+                    $customerInfo,
+                    $shippingAddress,
+                    $selectedShippingMethod,
+                    $selectedPaymentMethod,
+                    $user instanceof User ? $user : null
+                );
+                if ($response !== null) {
+                    return $response;
                 }
             }
         }
 
         return $this->render('checkout/index.html.twig', [
+            'items' => $this->cartService->getDetailedItems(),
             'customerForm' => $customerForm,
             'addressForm' => $addressForm,
             'totals' => $totals,
@@ -170,6 +141,25 @@ class CheckoutController extends AbstractController
             'shippingMethods' => $shippingMethods,
             'selectedShippingMethod' => $selectedShippingMethod,
         ]);
+    }
+
+    /**
+     * Live totals for the checkout summary when the shipping method or country changes.
+     */
+    #[Route('/checkout/totals', name: 'checkout_totals', methods: ['GET'])]
+    public function totals(Request $request): JsonResponse
+    {
+        $shipping = trim((string) $request->query->get('shipping_method', ''));
+        $country = strtoupper(trim((string) $request->query->get('country', '')));
+        $user = $this->getUser();
+
+        $totals = $this->checkoutService->calculateTotals(
+            $shipping !== '' ? $shipping : null,
+            $country !== '' ? $country : null,
+            $user instanceof User ? $user : null
+        );
+
+        return new JsonResponse(['success' => true, 'totals' => $totals]);
     }
 
     #[Route('/checkout/payment/{orderId}/{paymentIntentId}', name: 'checkout_payment', methods: ['GET'])]
@@ -214,8 +204,80 @@ class CheckoutController extends AbstractController
     }
 
     /**
-     * Same outcome as DevPaymentSimulatorController success path (inventory commit, paid, invoice).
+     * Creates the order and starts the payment. Returns null (with a flash message) when that fails.
      */
+    private function placeOrder(
+        CustomerInfoDTO $customerInfo,
+        AddressDTO $shippingAddress,
+        string $shippingMethod,
+        string $paymentMethod,
+        ?User $user,
+    ): ?Response {
+        try {
+            $order = $this->checkoutService->createOrder(
+                $customerInfo,
+                $shippingAddress,
+                $shippingMethod !== '' ? $shippingMethod : null,
+                $user
+            );
+        } catch (\Throwable $e) {
+            $this->logger->warning('Checkout: order could not be created', ['error' => $e->getMessage()]);
+            $this->addFlash('error', str_contains($e->getMessage(), 'Insufficient stock')
+                ? 'checkout.flash.out_of_stock'
+                : 'checkout.flash.order_failed');
+
+            return null;
+        }
+
+        try {
+            if ($this->checkoutSkipPayment && \in_array($this->kernelEnvironment, ['dev', 'test'], true)) {
+                $paymentIntent = $this->paymentService->createPaymentIntent($order, 'dev');
+                $this->submitPayment($order);
+                $this->paymentService->applyResolution(new PaymentResolution(
+                    $paymentIntent['paymentIntentId'],
+                    PaymentResolution::STATUS_SUCCEEDED,
+                    $order->getId()
+                ));
+                $this->paymentFinalizer->markPaid($order, 'checkout_skip_payment');
+                $this->addFlash('info', 'checkout.skip_payment_dev_notice');
+
+                return $this->redirectToRoute('checkout_success', [
+                    'orderNumber' => $order->getOrderNumber(),
+                ]);
+            }
+
+            $paymentIntent = $this->paymentService->createPaymentIntent($order, $paymentMethod !== '' ? $paymentMethod : null);
+            $this->submitPayment($order);
+        } catch (\Throwable $e) {
+            // The order exists but no payment could be started: give the stock back.
+            $this->logger->error('Checkout: payment could not be started', [
+                'order_number' => $order->getOrderNumber(),
+                'error' => $e->getMessage(),
+            ]);
+            $this->paymentFinalizer->cancelUnpaid($order, 'checkout_payment_start_failed');
+            $this->addFlash('error', 'checkout.flash.payment_start_failed');
+
+            return null;
+        }
+
+        if (!empty($paymentIntent['redirectUrl'])) {
+            return $this->redirect($paymentIntent['redirectUrl']);
+        }
+
+        return $this->redirectToRoute('checkout_payment', [
+            'orderId' => $order->getId(),
+            'paymentIntentId' => $paymentIntent['paymentIntentId'],
+        ]);
+    }
+
+    private function submitPayment(Order $order): void
+    {
+        if ($this->orderWorkflow->can($order, 'submit_payment')) {
+            $this->orderWorkflow->apply($order, 'submit_payment');
+            $this->entityManager->flush();
+        }
+    }
+
     private function isSimulatedPaymentUi(string $provider): bool
     {
         if (in_array($provider, ['dev', 'testbank'], true)) {
@@ -223,28 +285,5 @@ class CheckoutController extends AbstractController
         }
 
         return $provider === 'paypal' && trim($this->paypalClientId) === '';
-    }
-
-    private function finalizeOrderAfterSimulatedPaymentSuccess(Order $order, string $referenceId): void
-    {
-        $resolution = new PaymentResolution($referenceId, PaymentResolution::STATUS_SUCCEEDED, $order->getId());
-        $this->paymentService->applyResolution($resolution);
-
-        try {
-            $this->inventoryService->commit($order);
-        } catch (\Exception $e) {
-            $this->logger->error('Checkout skip payment: inventory commit failed', ['error' => $e->getMessage()]);
-        }
-
-        if ($this->orderWorkflow->can($order, 'confirm_payment')) {
-            $this->orderWorkflow->apply($order, 'confirm_payment');
-        }
-        $this->entityManager->flush();
-
-        try {
-            $this->invoiceService->createInvoiceForOrder($order);
-        } catch (\Exception $e) {
-            $this->logger->error('Checkout skip payment: invoice creation failed', ['error' => $e->getMessage()]);
-        }
     }
 }

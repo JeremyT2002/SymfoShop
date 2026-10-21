@@ -1,24 +1,24 @@
 {% set columns = columns|default([]) %}
 {% set rows = rows|default([]) %}
-<div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-admin dark:border-slate-800 dark:bg-slate-900">
+<div class="overflow-x-auto rounded-2xl border border-line bg-panel shadow-xs">
     <table class="min-w-full text-sm">
-        <thead class="bg-slate-50 dark:bg-slate-800">
+        <thead class="bg-subtle">
         <tr>
             {% for column in columns %}
-                <th class="px-4 py-3 text-left font-semibold text-slate-500 dark:text-slate-300">{{ column }}</th>
+                <th class="px-4 py-3 text-left font-semibold text-fg-subtle">{{ column }}</th>
             {% endfor %}
         </tr>
         </thead>
-        <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+        <tbody class="divide-y divide-line">
             {% for row in rows %}
-                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/70">
+                <tr class="hover:bg-subtle">
                     {% for cell in row %}
-                        <td class="px-4 py-3 text-slate-700 dark:text-slate-200">{{ cell|raw }}</td>
+                        <td class="px-4 py-3 text-fg-muted">{{ cell|raw }}</td>
                     {% endfor %}
                 </tr>
             {% else %}
                 <tr>
-                    <td class="px-4 py-6 text-slate-500 dark:text-slate-400" colspan="{{ columns|length }}">{{ 'admin.layout.table_empty'|trans }}</td>
+                    <td class="px-4 py-6 text-fg-subtle" colspan="{{ columns|length }}">{{ 'admin.layout.table_empty'|trans }}</td>
                 </tr>
             {% endfor %}
         </tbody>

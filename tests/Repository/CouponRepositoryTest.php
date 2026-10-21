@@ -5,6 +5,7 @@ namespace App\Tests\Repository;
 use App\Entity\Coupon;
 use App\Entity\CouponType;
 use App\Entity\CouponUsage;
+use App\Entity\Order;
 use App\Entity\User;
 use App\Repository\CouponRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -37,26 +38,30 @@ final class CouponRepositoryTest extends KernelTestCase
         $this->assertSame($c->getId(), $found->getId());
     }
 
-    public function testCountUsagesSumsUsageCount(): void
+    public function testCountUsagesCountsPaidOrdersIncludingGuests(): void
     {
         $coupon = new Coupon();
         $coupon->setCode('USAGE-' . uniqid());
         $coupon->setType(CouponType::FIXED);
         $coupon->setValue(100);
-        $user = new User();
-        $user->setEmail('u-' . uniqid() . '@example.com');
-        $user->setPassword('x');
         $this->em->persist($coupon);
-        $this->em->persist($user);
+
+        foreach (['paid', 'shipped', 'new', 'cancelled'] as $status) {
+            $order = new Order();
+            $order->setOrderNumber('ORD-CPN-' . $status . '-' . uniqid());
+            $order->setEmail('guest-' . uniqid() . '@example.com');
+            $order->setCurrency('EUR');
+            $order->setStatus($status);
+            $order->setSubtotal(1000);
+            $order->setTaxTotal(0);
+            $order->setGrandTotal(900);
+            $order->setCouponCode(strtolower($coupon->getCode()));
+            $order->setDiscountTotal(100);
+            $this->em->persist($order);
+        }
         $this->em->flush();
 
-        $u1 = new CouponUsage();
-        $u1->setCoupon($coupon);
-        $u1->setUser($user);
-        $u1->setUsageCount(2);
-        $this->em->persist($u1);
-        $this->em->flush();
-
+        // Only redeemed (paid or later) orders count; unpaid and cancelled ones do not.
         $this->assertSame(2, $this->repo->countUsages($coupon));
     }
 

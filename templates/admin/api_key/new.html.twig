@@ -4,17 +4,17 @@
 
 {% block body %}
     <div class="mb-6">
-        <a href="{{ path('admin_api_keys_index') }}" class="text-gray-600 hover:text-gray-900 mb-2 inline-block">
-            <i class="fas fa-arrow-left"></i> Back to API Keys
+        <a href="{{ path('admin_api_keys_index') }}" class="text-fg-muted hover:text-fg mb-2 inline-block">
+            {{ ux_icon('lucide:arrow-left', {class: 'size-4'}) }} Back to API Keys
         </a>
-        <h2 class="text-2xl font-bold text-gray-900">Create New API Key</h2>
+        <h2 class="text-2xl font-bold text-fg">Create New API Key</h2>
     </div>
     
     <div class="admin-card admin-form-shell p-6">
         <form method="post" class="space-y-6">
-            <div class="rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-5">
-                <h3 class="text-base font-semibold text-gray-900">Access key setup</h3>
-                <p class="mt-1 text-sm text-gray-600">Create an API key with owner, expiration and optional scopes.</p>
+            <div class="rounded-xl border border-line bg-gradient-to-br from-gray-50 to-white p-5">
+                <h3 class="text-base font-semibold text-fg">Access key setup</h3>
+                <p class="mt-1 text-sm text-fg-muted">Create an API key with owner, expiration and optional scopes.</p>
             </div>
 
             <div class="admin-form-grid">
@@ -22,7 +22,7 @@
                 <div>
                     <label for="name" class="admin-form-label">API key name *</label>
                     <input type="text" id="name" name="name" required placeholder="e.g., Production API Key, Development Key" class="admin-form-input">
-                    <p class="mt-1 text-xs text-gray-500">Give this API key a descriptive name to identify its purpose</p>
+                    <p class="mt-1 text-xs text-fg-subtle">Give this API key a descriptive name to identify its purpose</p>
                 </div>
                 
                 <div>
@@ -33,7 +33,7 @@
                             <option value="{{ user.id }}">{{ user.email }}</option>
                         {% endfor %}
                     </select>
-                    <p class="mt-1 text-xs text-gray-500">Select the user who will own this API key</p>
+                    <p class="mt-1 text-xs text-fg-subtle">Select the user who will own this API key</p>
                 </div>
                 </section>
                 
@@ -41,8 +41,8 @@
                 <div>
                     <label for="expiresAt" class="admin-form-label">Expiration date (optional)</label>
                     <input type="datetime-local" id="expiresAt" name="expiresAt" class="admin-form-input">
-                    <p class="mt-1 text-xs text-gray-500">
-                        <i class="fas fa-info-circle mr-1"></i>
+                    <p class="mt-1 text-xs text-fg-subtle">
+                        {{ ux_icon('lucide:info', {class: 'size-4 mr-1'}) }}
                         Set an expiration date for security. Leave empty for no expiration.
                     </p>
                 </div>
@@ -50,18 +50,18 @@
                 <div>
                     <label for="scopes" class="admin-form-label">Scopes (optional)</label>
                     <input type="text" id="scopes" name="scopes" placeholder="read, write, delete (comma-separated)" class="admin-form-input">
-                    <p class="mt-1 text-xs text-gray-500">
+                    <p class="mt-1 text-xs text-fg-subtle">
                         Define access scopes for this API key. Separate multiple scopes with commas (e.g., "read, write")
                     </p>
                 </div>
                 </section>
             </div>
                 
-                <div class="flex items-center justify-end space-x-4 border-t border-gray-200 pt-5">
-                    <a href="{{ path('admin_api_keys_index') }}" class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <div class="flex items-center justify-end space-x-4 border-t border-line pt-5">
+                    <a href="{{ path('admin_api_keys_index') }}" class="px-4 py-2 text-fg-muted border border-line-strong rounded-lg hover:bg-subtle">
                         Cancel
                     </a>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
                         Create API Key
                     </button>
                 </div>

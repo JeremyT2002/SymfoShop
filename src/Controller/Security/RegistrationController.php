@@ -24,7 +24,7 @@ class RegistrationController extends AbstractController
         RateLimiterFactory $registrationLimiter,
     ): Response {
         if ($this->getUser()) {
-            return $this->redirectToRoute('admin');
+            return $this->redirectToRoute('account_dashboard');
         }
 
         $user = new User();
@@ -55,7 +55,7 @@ class RegistrationController extends AbstractController
             $entityManager->flush();
 
             // do anything else you need here, like send an email
-            $this->addFlash('success', 'Registration successful! You can now log in.');
+            $this->addFlash('success', 'security.register.flash_success');
 
             return $this->redirectToRoute('login');
         }

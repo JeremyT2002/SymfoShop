@@ -19,10 +19,10 @@ class ShippingMethod
     private ?int $id = null;
 
     #[ORM\Column(type: Types::STRING, length: 50)]
-    private string $code;
+    private string $code = '';
 
     #[ORM\Column(type: Types::STRING, length: 120)]
-    private string $name;
+    private string $name = '';
 
     /** Price in minor units (e.g. cents), added before tax */
     #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]

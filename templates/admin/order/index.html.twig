@@ -7,7 +7,7 @@
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
             <h2 class="text-2xl font-bold">{{ 'admin.orders.heading'|trans }}</h2>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ 'admin.orders.subtitle'|trans }}</p>
+            <p class="mt-1 text-sm text-fg-subtle">{{ 'admin.orders.subtitle'|trans }}</p>
         </div>
         <form method="post" action="{{ path('admin_orders_regenerate_all_invoices') }}"
               class="shrink-0"
@@ -46,44 +46,44 @@
     } %}
 
     <div x-data="{ selectedIds: [], clearSelection(){this.selectedIds=[];} }" class="space-y-4">
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-admin dark:border-slate-800 dark:bg-slate-900">
-            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
-                <thead class="bg-slate-50 dark:bg-slate-950/60">
+        <div class="overflow-hidden rounded-2xl border border-line bg-panel shadow-xs">
+            <table class="min-w-full divide-y divide-line">
+                <thead class="bg-subtle">
                 <tr>
-                    <th class="px-4 py-3"><input type="checkbox" class="h-4 w-4 rounded border-slate-300"></th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.orders.table.order_number'|trans }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.orders.table.customer'|trans }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.orders.table.total'|trans }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.orders.table.status'|trans }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.orders.table.date'|trans }}</th>
-                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.orders.table.actions'|trans }}</th>
+                    <th class="px-4 py-3"><input type="checkbox" class="h-4 w-4 rounded border-line-strong"></th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-fg-subtle">{{ 'admin.orders.table.order_number'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-fg-subtle">{{ 'admin.orders.table.customer'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-fg-subtle">{{ 'admin.orders.table.total'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-fg-subtle">{{ 'admin.orders.table.status'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-fg-subtle">{{ 'admin.orders.table.date'|trans }}</th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-fg-subtle">{{ 'admin.orders.table.actions'|trans }}</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900">
+            <tbody class="divide-y divide-line bg-panel">
                 {% if orders|length > 0 %}
                     {% for order in orders %}
-                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/70">
-                            <td class="px-4 py-4"><input type="checkbox" @change="$event.target.checked ? selectedIds.push({{ order.id }}) : selectedIds = selectedIds.filter(id => id !== {{ order.id }})" class="h-4 w-4 rounded border-slate-300"></td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-900 dark:text-slate-100">
+                        <tr class="hover:bg-subtle">
+                            <td class="px-4 py-4"><input type="checkbox" @change="$event.target.checked ? selectedIds.push({{ order.id }}) : selectedIds = selectedIds.filter(id => id !== {{ order.id }})" class="h-4 w-4 rounded border-line-strong"></td>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-fg">
                                 {{ order.orderNumber }}
                             </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-fg-subtle">
                                 {{ order.email }}
                             </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-900 dark:text-slate-100">
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-fg">
                                 {{ (order.grandTotal / 100)|number_format(2, '.', ',') }} {{ order.currency }}
                             </td>
                             <td class="whitespace-nowrap px-6 py-4">
                                 <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold
                                     {% if order.status == 'completed' %}bg-green-100 text-green-800
-                                    {% elseif order.status == 'shipped' %}bg-blue-100 text-blue-800
+                                    {% elseif order.status == 'shipped' %}bg-blue-100 text-primary-800
                                     {% elseif order.status == 'processing' %}bg-yellow-100 text-yellow-800
                                     {% elseif order.status == 'cancelled' %}bg-red-100 text-red-800
                                     {% else %}bg-gray-100 text-gray-800{% endif %}">
                                     {{ ('admin.orders.status.' ~ order.status)|trans }}
                                 </span>
                             </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-fg-subtle">
                                 {{ order.createdAt|date('Y-m-d H:i') }}
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
@@ -95,7 +95,7 @@
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="7" class="px-6 py-8 text-center text-slate-500">
+                        <td colspan="7" class="px-6 py-8 text-center text-fg-subtle">
                             <p class="text-lg font-medium">{{ 'admin.orders.empty'|trans }}</p>
                         </td>
                     </tr>
@@ -109,14 +109,14 @@
                 <form method="post" action="{{ path('admin_orders_bulk_status') }}" class="flex items-center gap-2">
                     <input type="hidden" name="_token" value="{{ csrf_token('bulk_orders_status') }}">
                     <input type="hidden" name="ids" :value="selectedIds.join(',')">
-                    <select name="status" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800">
+                    <select name="status" class="rounded-xl border border-line-strong bg-panel px-3 py-2 text-xs font-semibold">
                         <option value="processing">{{ 'admin.orders.status.processing'|trans }}</option>
                         <option value="shipped">{{ 'admin.orders.status.shipped'|trans }}</option>
                         <option value="completed">{{ 'admin.orders.status.completed'|trans }}</option>
                         <option value="cancelled">{{ 'admin.orders.status.cancelled'|trans }}</option>
                     </select>
-                    <button type="submit" class="rounded-xl bg-white px-3 py-2 text-xs font-semibold dark:bg-slate-800">{{ 'admin.table.bulk_apply'|trans }}</button>
-                    <button type="button" @click="clearSelection()" class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold dark:border-slate-700">{{ 'admin.table.clear_selection'|trans }}</button>
+                    <button type="submit" class="rounded-xl bg-panel px-3 py-2 text-xs font-semibold">{{ 'admin.table.bulk_apply'|trans }}</button>
+                    <button type="button" @click="clearSelection()" class="rounded-xl border border-line-strong px-3 py-2 text-xs font-semibold">{{ 'admin.table.clear_selection'|trans }}</button>
                 </form>
             </div>
         </div>
@@ -124,19 +124,19 @@
 
     {% if totalPages > 1 %}
         <div class="mt-6 flex items-center justify-between text-sm">
-            <div class="text-slate-600 dark:text-slate-400">
+            <div class="text-fg-muted">
                 {{ 'admin.orders.pagination.showing'|trans({'%page%': currentPage, '%total%': totalPages}) }}
             </div>
             <div class="flex space-x-2">
                 {% if currentPage > 1 %}
                     <a href="{{ path('admin_orders_index', baseQuery|merge({page: currentPage - 1})) }}"
-                       class="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">
+                       class="rounded-xl border border-line-strong px-4 py-2 hover:bg-subtle">
                         {{ 'admin.orders.pagination.previous'|trans }}
                     </a>
                 {% endif %}
                 {% if currentPage < totalPages %}
                     <a href="{{ path('admin_orders_index', baseQuery|merge({page: currentPage + 1})) }}"
-                       class="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">
+                       class="rounded-xl border border-line-strong px-4 py-2 hover:bg-subtle">
                         {{ 'admin.orders.pagination.next'|trans }}
                     </a>
                 {% endif %}

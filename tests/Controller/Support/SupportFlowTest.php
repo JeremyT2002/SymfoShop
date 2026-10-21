@@ -10,6 +10,7 @@ use App\Repository\SupportConversationRepository;
 use App\Theme\ShopContextResolver;
 use App\Theme\ThemeConfigService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class SupportFlowTest extends WebTestCase
@@ -37,10 +38,7 @@ final class SupportFlowTest extends WebTestCase
         $user = $this->createUser('customer');
         $client->loginUser($user);
 
-        $client->request('POST', '/account/support', [
-            'subject' => 'Need help with order',
-            'message' => 'Hello support, I have a question.',
-        ]);
+        $this->createConversation($client, 'Need help with order', 'Hello support, I have a question.');
         $this->assertResponseRedirects();
 
         /** @var SupportConversationRepository $repo */
@@ -64,10 +62,7 @@ final class SupportFlowTest extends WebTestCase
         $intruder = $this->createUser('intruder');
 
         $client->loginUser($owner);
-        $client->request('POST', '/account/support', [
-            'subject' => 'Owner conversation',
-            'message' => 'Private thread',
-        ]);
+        $this->createConversation($client, 'Owner conversation', 'Private thread');
         $this->assertResponseRedirects();
         $client->request('GET', '/account/support');
         $this->assertResponseIsSuccessful();
@@ -83,6 +78,23 @@ final class SupportFlowTest extends WebTestCase
         $this->assertSame(403, $client->getResponse()->getStatusCode());
     }
 
+    public function testConversationWithoutCsrfTokenIsRejected(): void
+    {
+        $client = static::createClient();
+        $user = $this->createUser('csrf');
+        $client->loginUser($user);
+
+        $client->request('POST', '/account/support', [
+            'subject' => 'Forged',
+            'message' => 'Cross-site request',
+        ]);
+        $this->assertResponseRedirects('/account/support');
+
+        /** @var SupportConversationRepository $repo */
+        $repo = static::getContainer()->get(SupportConversationRepository::class);
+        $this->assertSame([], $repo->findForCustomer($user, 10));
+    }
+
     public function testAdminCanOpenSupportInbox(): void
     {
         $client = static::createClient();
@@ -91,6 +103,18 @@ final class SupportFlowTest extends WebTestCase
 
         $client->request('GET', '/admin/support');
         $this->assertResponseIsSuccessful();
+    }
+
+    private function createConversation(KernelBrowser $client, string $subject, string $message): void
+    {
+        $crawler = $client->request('GET', '/account/support');
+        $this->assertResponseIsSuccessful();
+
+        $form = $crawler->filter('form[data-support-new]')->form([
+            'subject' => $subject,
+            'message' => $message,
+        ]);
+        $client->submit($form);
     }
 
     private function createUser(string $prefix, array $roles = ['ROLE_USER']): User

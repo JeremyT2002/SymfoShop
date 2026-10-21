@@ -1,0 +1,222 @@
+{%- set site_name = theme_config().brand.siteName|default('SymfoShop') -%}
+{%- set route = app.request.attributes.get('_route')|default('') -%}
+{%- set header = theme_config().header|default({}) -%}
+{%- set menu_items = header.menuItems|default([]) -%}
+{%- set cart_count = cart_items_count() -%}
+{%- set support_enabled = (theme_config().support.provider|default('selfcoded')) == 'selfcoded' -%}
+{%- set locales = {en: 'English', de: 'Deutsch', fr: 'Français'} -%}
+
+<header class="{{ header.sticky|default(true) ? 'sticky top-0' : 'relative' }} z-40 border-b border-line bg-panel/85 backdrop-blur-lg supports-[backdrop-filter]:bg-panel/75"
+        x-data="{ menuOpen: false }"
+        @keydown.escape.window="menuOpen = false">
+    <div class="container-page flex h-16 items-center gap-4 lg:h-[4.5rem]">
+        {# Mobile menu button #}
+        <button type="button" class="btn btn-ghost btn-icon -ml-2 lg:hidden" @click="menuOpen = true"
+                aria-controls="mobile-menu" :aria-expanded="menuOpen" aria-label="{{ 'ui.nav.open_menu'|trans }}">
+            {{ ux_icon('lucide:menu', {class: 'size-5'}) }}
+        </button>
+
+        {# Logo #}
+        <a href="{{ path('catalog_home') }}" class="flex shrink-0 items-center gap-2.5 rounded-lg" aria-label="{{ 'ui.nav.home_aria'|trans({'%shop%': site_name}) }}">
+            {% if theme_config().brand.logoUrl|default(false) %}
+                <img src="{{ theme_config().brand.logoUrl }}" alt="{{ theme_config().brand.logoAlt|default(site_name) }}" class="h-8 w-auto lg:h-9">
+            {% else %}
+                <span class="flex size-8 items-center justify-center rounded-lg bg-fg text-canvas">
+                    {{ ux_icon('lucide:shopping-bag', {class: 'size-4'}) }}
+                </span>
+                <span class="text-lg font-semibold tracking-tight">{{ site_name }}</span>
+            {% endif %}
+        </a>
+
+        {# Desktop navigation #}
+        <nav class="ml-6 hidden items-center gap-1 lg:flex" aria-label="{{ 'ui.nav.main'|trans }}">
+            {% if menu_items is not empty %}
+                {% for item in menu_items %}
+                    <a href="{{ item.url }}" class="rounded-lg px-3 py-2 text-sm font-medium text-fg-muted transition-colors hover:bg-subtle hover:text-fg"
+                       {% if item.external|default(false) %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ item.label }}</a>
+                {% endfor %}
+            {% else %}
+                <a href="{{ path('catalog_products') }}"
+                   class="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-subtle {{ route == 'catalog_products' ? 'text-fg' : 'text-fg-muted hover:text-fg' }}"
+                   {% if route == 'catalog_products' %}aria-current="page"{% endif %}>{{ 'ui.nav.all_products'|trans }}</a>
+                {% for category in nav_categories(5) %}
+                    {%- set active = route == 'catalog_category' and app.request.attributes.get('slug') == category.slug -%}
+                    <a href="{{ path('catalog_category', {slug: category.slug}) }}"
+                       class="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-subtle {{ active ? 'text-fg' : 'text-fg-muted hover:text-fg' }}"
+                       {% if active %}aria-current="page"{% endif %}>{{ category.name }}</a>
+                {% endfor %}
+            {% endif %}
+        </nav>
+
+        <div class="ml-auto flex items-center gap-1">
+            {# Search #}
+            <form action="{{ path('catalog_products') }}" method="get" role="search" class="relative mr-1 hidden md:block">
+                <label for="header-search" class="sr-only">{{ 'ui.search.label'|trans }}</label>
+                <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle">
+                    {{ ux_icon('lucide:search', {class: 'size-4'}) }}
+                </span>
+                <input id="header-search" type="search" name="q" value="{{ app.request.query.get('q')|default('') }}"
+                       placeholder="{{ 'ui.search.placeholder'|trans }}"
+                       class="h-10 w-44 rounded-lg border border-transparent bg-subtle pr-3 pl-9 text-sm text-fg transition-[width,border-color] placeholder:text-fg-subtle focus:w-64 focus:border-primary-500 focus:bg-panel focus:outline-none xl:w-56 xl:focus:w-72">
+            </form>
+
+            {# Colour scheme #}
+            <button type="button" class="btn btn-ghost btn-icon hidden sm:inline-flex" data-color-scheme-toggle aria-pressed="false"
+                    aria-label="{{ 'ui.nav.toggle_theme'|trans }}" title="{{ 'ui.nav.toggle_theme'|trans }}">
+                {{ ux_icon('lucide:moon', {class: 'size-5 dark:hidden'}) }}
+                {{ ux_icon('lucide:sun', {class: 'hidden size-5 dark:block'}) }}
+            </button>
+
+            {# Language #}
+            {% if header.showLanguageSwitcher|default(true) %}
+                <div class="relative hidden sm:block" x-data="{ open: false }" @click.outside="open = false" @keydown.escape="open = false">
+                    <button type="button" class="btn btn-ghost h-10 gap-1.5 px-2.5 uppercase" @click="open = !open" :aria-expanded="open" aria-haspopup="true"
+                            aria-label="{{ 'nav.language'|trans }}">
+                        {{ ux_icon('lucide:globe', {class: 'size-4'}) }}
+                        <span class="text-xs">{{ app.request.locale }}</span>
+                    </button>
+                    <div x-cloak x-show="open" x-transition.origin.top.right
+                         class="absolute right-0 mt-2 w-40 overflow-hidden rounded-xl border border-line bg-panel p-1 shadow-lg shadow-black/5">
+                        {% for code, label in locales %}
+                            <a href="{{ path('locale_switch', {locale: code}) }}" lang="{{ code }}" hreflang="{{ code }}"
+                               class="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-subtle {{ app.request.locale == code ? 'font-semibold text-fg' : 'text-fg-muted' }}">
+                                {{ label }}
+                                {% if app.request.locale == code %}{{ ux_icon('lucide:check', {class: 'size-4'}) }}{% endif %}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {# Account #}
+            {% if app.user %}
+                <div class="relative hidden sm:block" x-data="{ open: false }" @click.outside="open = false" @keydown.escape="open = false">
+                    <button type="button" class="btn btn-ghost btn-icon" @click="open = !open" :aria-expanded="open" aria-haspopup="true"
+                            aria-label="{{ 'ui.nav.account_menu'|trans }}">
+                        {{ ux_icon('lucide:circle-user-round', {class: 'size-5'}) }}
+                    </button>
+                    <div x-cloak x-show="open" x-transition.origin.top.right
+                         class="absolute right-0 mt-2 w-64 overflow-hidden rounded-xl border border-line bg-panel shadow-lg shadow-black/5">
+                        <div class="border-b border-line px-4 py-3">
+                            <p class="truncate text-sm font-semibold">{{ app.user.fullName|trim ?: 'ui.nav.my_account'|trans }}</p>
+                            <p class="truncate text-xs text-fg-subtle">{{ app.user.email }}</p>
+                        </div>
+                        <div class="p-1">
+                            <a href="{{ path('account_dashboard') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-fg-muted hover:bg-subtle hover:text-fg">
+                                {{ ux_icon('lucide:user-round', {class: 'size-4'}) }}{{ 'nav.dashboard'|trans }}
+                            </a>
+                            <a href="{{ path('account_dashboard', {tab: 'orders'}) }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-fg-muted hover:bg-subtle hover:text-fg">
+                                {{ ux_icon('lucide:package', {class: 'size-4'}) }}{{ 'account.dashboard.tabs.orders'|trans }}
+                            </a>
+                            <a href="{{ path('account_wishlist_show') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-fg-muted hover:bg-subtle hover:text-fg">
+                                {{ ux_icon('lucide:heart', {class: 'size-4'}) }}{{ 'footer.wishlist'|trans }}
+                            </a>
+                            {% if support_enabled %}
+                                <a href="{{ path('account_support_index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-fg-muted hover:bg-subtle hover:text-fg">
+                                    {{ ux_icon('lucide:message-circle', {class: 'size-4'}) }}{{ 'footer.support'|trans }}
+                                </a>
+                            {% endif %}
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <a href="{{ path('admin') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-fg-muted hover:bg-subtle hover:text-fg">
+                                    {{ ux_icon('lucide:layout-dashboard', {class: 'size-4'}) }}{{ 'nav.admin'|trans }}
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="border-t border-line p-1">
+                            <a href="{{ path('logout') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10">
+                                {{ ux_icon('lucide:log-out', {class: 'size-4'}) }}{{ 'nav.logout'|trans }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{{ path('login') }}" class="btn btn-ghost hidden h-10 sm:inline-flex">{{ 'nav.login'|trans }}</a>
+            {% endif %}
+
+            {# Cart #}
+            {% if header.showCart|default(true) %}
+                <a href="{{ path('cart_show') }}" class="btn btn-ghost btn-icon relative -mr-2" aria-label="{{ 'nav.cart'|trans }}">
+                    {{ ux_icon('lucide:shopping-bag', {class: 'size-5'}) }}
+                    <span data-cart-count {% if cart_count == 0 %}hidden{% endif %}
+                          class="absolute top-0.5 right-0.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-primary-600 px-1 text-[0.6875rem] leading-none font-semibold text-white tabular-nums">
+                        {{- cart_count > 99 ? '99+' : cart_count -}}
+                    </span>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Mobile menu drawer #}
+    <div x-cloak x-show="menuOpen" class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="{{ 'ui.nav.menu'|trans }}" id="mobile-menu">
+        <div x-show="menuOpen" x-transition.opacity class="absolute inset-0 bg-black/40" @click="menuOpen = false"></div>
+        <div x-show="menuOpen" x-trap.inert.noscroll="menuOpen"
+             x-transition:enter="transition duration-200 ease-out" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
+             x-transition:leave="transition duration-150 ease-in" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
+             class="absolute inset-y-0 left-0 flex w-[85%] max-w-sm flex-col bg-panel shadow-xl">
+            <div class="flex h-16 items-center justify-between border-b border-line px-4">
+                <span class="font-semibold">{{ site_name }}</span>
+                <button type="button" class="btn btn-ghost btn-icon -mr-2" @click="menuOpen = false" aria-label="{{ 'common.close'|trans }}">
+                    {{ ux_icon('lucide:x', {class: 'size-5'}) }}
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto px-4 py-4">
+                <form action="{{ path('catalog_products') }}" method="get" role="search" class="relative mb-4">
+                    <label for="mobile-search" class="sr-only">{{ 'ui.search.label'|trans }}</label>
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle">{{ ux_icon('lucide:search', {class: 'size-4'}) }}</span>
+                    <input id="mobile-search" type="search" name="q" placeholder="{{ 'ui.search.placeholder'|trans }}" class="input pl-9">
+                </form>
+
+                <nav class="space-y-0.5" aria-label="{{ 'ui.nav.main'|trans }}">
+                    {% if menu_items is not empty %}
+                        {% for item in menu_items %}
+                            <a href="{{ item.url }}" class="block rounded-lg px-3 py-2.5 font-medium hover:bg-subtle"
+                               {% if item.external|default(false) %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ item.label }}</a>
+                        {% endfor %}
+                    {% else %}
+                        <a href="{{ path('catalog_products') }}" class="block rounded-lg px-3 py-2.5 font-medium hover:bg-subtle">{{ 'ui.nav.all_products'|trans }}</a>
+                        {% for category in nav_categories(12) %}
+                            <a href="{{ path('catalog_category', {slug: category.slug}) }}" class="block rounded-lg px-3 py-2.5 font-medium hover:bg-subtle">{{ category.name }}</a>
+                        {% endfor %}
+                    {% endif %}
+                </nav>
+
+                <div class="divider my-4"></div>
+
+                <nav class="space-y-0.5" aria-label="{{ 'ui.nav.account_menu'|trans }}">
+                    {% if app.user %}
+                        <a href="{{ path('account_dashboard') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-fg-muted hover:bg-subtle hover:text-fg">{{ ux_icon('lucide:user-round', {class: 'size-4'}) }}{{ 'nav.dashboard'|trans }}</a>
+                        <a href="{{ path('account_wishlist_show') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-fg-muted hover:bg-subtle hover:text-fg">{{ ux_icon('lucide:heart', {class: 'size-4'}) }}{{ 'footer.wishlist'|trans }}</a>
+                        {% if support_enabled %}
+                            <a href="{{ path('account_support_index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-fg-muted hover:bg-subtle hover:text-fg">{{ ux_icon('lucide:message-circle', {class: 'size-4'}) }}{{ 'footer.support'|trans }}</a>
+                        {% endif %}
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('admin') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-fg-muted hover:bg-subtle hover:text-fg">{{ ux_icon('lucide:layout-dashboard', {class: 'size-4'}) }}{{ 'nav.admin'|trans }}</a>
+                        {% endif %}
+                        <a href="{{ path('logout') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10">{{ ux_icon('lucide:log-out', {class: 'size-4'}) }}{{ 'nav.logout'|trans }}</a>
+                    {% else %}
+                        <a href="{{ path('login') }}" class="btn btn-secondary w-full">{{ 'nav.login'|trans }}</a>
+                        <a href="{{ path('register') }}" class="btn btn-primary mt-2 w-full">{{ 'nav.register'|trans }}</a>
+                    {% endif %}
+                </nav>
+            </div>
+
+            <div class="flex items-center justify-between gap-3 border-t border-line px-4 py-3">
+                {% if header.showLanguageSwitcher|default(true) %}
+                    <div class="flex gap-1" role="group" aria-label="{{ 'nav.language'|trans }}">
+                        {% for code, label in locales %}
+                            <a href="{{ path('locale_switch', {locale: code}) }}" lang="{{ code }}" title="{{ label }}"
+                               class="rounded-lg px-2.5 py-1.5 text-xs font-semibold uppercase {{ app.request.locale == code ? 'bg-fg text-canvas' : 'text-fg-muted hover:bg-subtle' }}">{{ code }}</a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <button type="button" class="btn btn-ghost btn-sm" data-color-scheme-toggle aria-pressed="false">
+                    {{ ux_icon('lucide:moon', {class: 'size-4 dark:hidden'}) }}
+                    {{ ux_icon('lucide:sun', {class: 'hidden size-4 dark:block'}) }}
+                    <span class="dark:hidden">{{ 'nav.theme_enable_dark'|trans }}</span>
+                    <span class="hidden dark:inline">{{ 'nav.theme_enable_light'|trans }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>

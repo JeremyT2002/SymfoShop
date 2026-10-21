@@ -1,0 +1,117 @@
+{#
+  Global form theme (config/packages/twig.yaml): applies the design-system classes from
+  assets/styles/app.css to every Symfony form, storefront and admin alike.
+  Pass attr.class to add classes; the base class is always kept.
+#}
+{% use 'form_div_layout.html.twig' %}
+
+{%- block form_row -%}
+    {%- set widget_attr = {} -%}
+    {%- if help is not empty -%}
+        {%- set widget_attr = {attr: {'aria-describedby': id ~ '_help'}} -%}
+    {%- endif -%}
+    <div{% with {attr: row_attr|merge({class: ('field ' ~ row_attr.class|default(''))|trim})} %}{{ block('attributes') }}{% endwith %}>
+        {{- form_label(form) -}}
+        {{- form_widget(form, widget_attr) -}}
+        {{- form_help(form) -}}
+        {{- form_errors(form) -}}
+    </div>
+{%- endblock form_row -%}
+
+{%- block checkbox_row -%}
+    <div{% with {attr: row_attr|merge({class: ('field ' ~ row_attr.class|default(''))|trim})} %}{{ block('attributes') }}{% endwith %}>
+        <label class="flex items-start gap-3 text-sm text-fg-muted" for="{{ id }}">
+            {{- form_widget(form) -}}
+            {%- set label_text = label is same as(false) ? '' : (translation_domain is same as(false) ? label : label|trans(label_translation_parameters, translation_domain)) -%}
+            <span>{{ label_html ? label_text|raw : label_text }}{% if required %}<span class="text-red-600" aria-hidden="true"> *</span>{% endif %}</span>
+        </label>
+        {{- form_help(form) -}}
+        {{- form_errors(form) -}}
+    </div>
+{%- endblock checkbox_row -%}
+
+{%- block form_label -%}
+    {%- if label is not same as(false) -%}
+        {%- set label_attr = label_attr|merge({class: ('label ' ~ label_attr.class|default(''))|trim}) -%}
+        {{- parent() -}}
+    {%- endif -%}
+{%- endblock form_label -%}
+
+{%- block form_label_content -%}
+    {{- parent() -}}
+    {%- if required|default(false) and label|default(false) is not same as(false) -%}<span class="text-red-600" aria-hidden="true"> *</span>{%- endif -%}
+{%- endblock form_label_content -%}
+
+{%- block form_widget_simple -%}
+    {%- if type|default('text') not in ['hidden', 'file', 'range', 'color'] -%}
+        {%- set attr = attr|merge({class: ('input ' ~ attr.class|default(''))|trim}) -%}
+    {%- endif -%}
+    {%- if errors|length > 0 -%}{%- set attr = attr|merge({'aria-invalid': 'true'}) -%}{%- endif -%}
+    {{- parent() -}}
+{%- endblock form_widget_simple -%}
+
+{%- block textarea_widget -%}
+    {%- set attr = attr|merge({class: ('textarea ' ~ attr.class|default(''))|trim}) -%}
+    {%- if errors|length > 0 -%}{%- set attr = attr|merge({'aria-invalid': 'true'}) -%}{%- endif -%}
+    {{- parent() -}}
+{%- endblock textarea_widget -%}
+
+{%- block choice_widget_collapsed -%}
+    {%- set attr = attr|merge({class: ('select ' ~ attr.class|default(''))|trim}) -%}
+    {%- if errors|length > 0 -%}{%- set attr = attr|merge({'aria-invalid': 'true'}) -%}{%- endif -%}
+    {{- parent() -}}
+{%- endblock choice_widget_collapsed -%}
+
+{%- block choice_widget_expanded -%}
+    <div {{ block('widget_container_attributes') }} class="space-y-2">
+        {%- for child in form %}
+            <label class="flex items-center gap-3 text-sm text-fg" for="{{ child.vars.id }}">
+                {{- form_widget(child) -}}
+                <span>{{ child.vars.label is same as(false) ? '' : (choice_translation_domain is same as(false) ? child.vars.label : child.vars.label|trans({}, choice_translation_domain)) }}</span>
+            </label>
+        {% endfor -%}
+    </div>
+{%- endblock choice_widget_expanded -%}
+
+{%- block checkbox_widget -%}
+    {%- set attr = attr|merge({class: ('checkbox ' ~ attr.class|default(''))|trim}) -%}
+    {{- parent() -}}
+{%- endblock checkbox_widget -%}
+
+{%- block radio_widget -%}
+    {%- set attr = attr|merge({class: ('radio ' ~ attr.class|default(''))|trim}) -%}
+    {{- parent() -}}
+{%- endblock radio_widget -%}
+
+{%- block file_widget -%}
+    {%- set attr = attr|merge({class: ('block w-full text-sm text-fg-muted file:mr-4 file:rounded-lg file:border-0 file:bg-subtle file:px-4 file:py-2 file:text-sm file:font-semibold file:text-fg hover:file:bg-line ' ~ attr.class|default(''))|trim}) -%}
+    {%- set type = 'file' -%}
+    {{- block('form_widget_simple') -}}
+{%- endblock file_widget -%}
+
+{%- block form_help -%}
+    {%- if help is not empty -%}
+        {%- set help_attr = help_attr|merge({class: ('hint ' ~ help_attr.class|default(''))|trim}) -%}
+        {{- parent() -}}
+    {%- endif -%}
+{%- endblock form_help -%}
+
+{%- block form_errors -%}
+    {%- if errors|length > 0 -%}
+        <ul class="form-error space-y-0.5" role="alert">
+            {%- for error in errors -%}
+                <li>{{ error.message }}</li>
+            {%- endfor -%}
+        </ul>
+    {%- endif -%}
+{%- endblock form_errors -%}
+
+{%- block button_widget -%}
+    {%- set attr = attr|merge({class: ('btn ' ~ (attr.class|default('btn-secondary')))|trim}) -%}
+    {{- parent() -}}
+{%- endblock button_widget -%}
+
+{%- block submit_widget -%}
+    {%- set attr = attr|merge({class: attr.class|default('btn-primary')}) -%}
+    {{- parent() -}}
+{%- endblock submit_widget -%}

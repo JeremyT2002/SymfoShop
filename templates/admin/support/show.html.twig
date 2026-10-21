@@ -6,7 +6,7 @@
     <div class="mb-6 flex items-center justify-between gap-3">
         <div>
             <h2 class="text-2xl font-bold">{{ conversation.subject }}</h2>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <p class="mt-1 text-sm text-fg-subtle">
                 {{ 'support.admin.customer_label'|trans }}: {{ conversation.customer ? conversation.customer.email : 'support.common.na'|trans }}
                 · {{ 'support.admin.status_label'|trans }}: {{ ('support.status.' ~ conversation.status)|trans }}
                 · {{ 'support.admin.category_label'|trans }}: {{ ('support.category.' ~ conversation.category)|trans }}
@@ -18,14 +18,14 @@
         </a>
     </div>
 
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-admin dark:border-slate-800 dark:bg-slate-900">
-        <div id="support-admin-thread" class="max-h-[62vh] space-y-3 overflow-y-auto bg-slate-50/60 p-5 dark:bg-slate-950/30" data-conversation-id="{{ conversation.id }}">
+    <div class="overflow-hidden rounded-2xl border border-line bg-panel shadow-xs">
+        <div id="support-admin-thread" class="max-h-[62vh] space-y-3 overflow-y-auto bg-subtle/60 p-5" data-conversation-id="{{ conversation.id }}">
             {% for m in messages %}
-                <article class="rounded-xl px-4 py-3 shadow-sm {{ m.senderType == 'support' ? 'ml-8 border border-indigo-200 bg-indigo-50 dark:border-indigo-900/50 dark:bg-indigo-900/20' : 'mr-8 border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900' }}" data-message-id="{{ m.id }}">
-                    <div class="mb-1 text-xs text-slate-500">
+                <article class="rounded-xl px-4 py-3 shadow-sm {{ m.senderType == 'support' ? 'ml-8 border border-primary-200 bg-primary-50 dark:border-primary-900/50 dark:bg-primary-900/20' : 'mr-8 border border-line bg-panel ' }}" data-message-id="{{ m.id }}">
+                    <div class="mb-1 text-xs text-fg-subtle">
                         {{ m.senderType == 'support' ? 'support.sender.support'|trans : 'support.sender.customer'|trans }} · {{ m.senderUser ? m.senderUser.email : 'support.common.anonymous'|trans }} · {{ m.createdAt|date('Y-m-d H:i:s') }}
                     </div>
-                    <p class="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200">{{ m.body }}</p>
+                    <p class="whitespace-pre-wrap text-sm text-fg">{{ m.body }}</p>
                     {% if m.attachments|length > 0 %}
                         <div class="mt-2 space-y-1">
                             {% for a in m.attachments %}
@@ -37,29 +37,29 @@
                     {% endif %}
                 </article>
             {% else %}
-                <div class="text-sm text-gray-500">{{ 'support.customer.no_messages'|trans }}</div>
+                <div class="text-sm text-fg-subtle">{{ 'support.customer.no_messages'|trans }}</div>
             {% endfor %}
         </div>
 
-        <form id="support-admin-form" method="post" enctype="multipart/form-data" class="sticky bottom-0 space-y-3 border-t border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
-            <textarea id="support-admin-body" name="body" rows="3" required class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 dark:border-slate-700 dark:bg-slate-800" placeholder="{{ 'support.admin.reply_placeholder'|trans }}"></textarea>
+        <form id="support-admin-form" method="post" enctype="multipart/form-data" class="sticky bottom-0 space-y-3 border-t border-line bg-panel p-5">
+            <textarea id="support-admin-body" name="body" rows="3" required class="w-full rounded-xl border border-line-strong bg-panel px-3 py-2 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30" placeholder="{{ 'support.admin.reply_placeholder'|trans }}"></textarea>
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="space-y-1">
                         <input id="support-admin-attachments" type="file" name="attachments[]" multiple class="text-sm">
-                        <p id="support-admin-files" class="text-xs text-gray-500"></p>
+                        <p id="support-admin-files" class="text-xs text-fg-subtle"></p>
                     </div>
-                    <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <label class="inline-flex items-center gap-2 text-sm text-fg-muted">
                         <input type="checkbox" name="closeConversation" value="1">
                         {{ 'support.admin.close_conversation'|trans }}
                     </label>
                 </div>
                 <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 text-white px-4 py-2.5 text-sm font-semibold hover:bg-primary-700">
-                    <i class="fas fa-paper-plane"></i>
+                    {{ ux_icon('lucide:send-horizontal', {class: 'size-4'}) }}
                     {{ 'support.admin.send_reply'|trans }}
                 </button>
             </div>
-            <p class="text-xs text-gray-400">{{ 'support.customer.shortcut_hint'|trans }}</p>
+            <p class="text-xs text-fg-subtle">{{ 'support.customer.shortcut_hint'|trans }}</p>
         </form>
     </div>
 {% endblock %}
@@ -88,8 +88,8 @@
             const article = document.createElement('article');
             article.setAttribute('data-message-id', String(msg.id));
             article.className = 'rounded-xl px-4 py-3 border shadow-sm ' + (msg.senderType === 'support'
-                ? 'bg-indigo-50 border-indigo-100 ml-8'
-                : 'bg-white border-gray-200 mr-8');
+                ? 'bg-primary-50 border-primary-100 ml-8'
+                : 'bg-panel border-line mr-8');
             let attachmentsHtml = '';
             if (msg.attachments && msg.attachments.length > 0) {
                 attachmentsHtml = '<div class="mt-2 space-y-1">' + msg.attachments.map((a) =>
@@ -97,8 +97,8 @@
                 ).join('') + '</div>';
             }
             article.innerHTML =
-                `<div class="text-xs text-gray-500 mb-1">${msg.senderType === 'support' ? '{{ 'support.sender.support'|trans|e('js') }}' : '{{ 'support.sender.customer'|trans|e('js') }}'} · ${msg.senderUser || '{{ 'support.common.na'|trans|e('js') }}'} · ${new Date(msg.createdAt).toLocaleString()}</div>` +
-                `<p class="text-sm text-gray-800 whitespace-pre-wrap"></p>` + attachmentsHtml;
+                `<div class="text-xs text-fg-subtle mb-1">${msg.senderType === 'support' ? '{{ 'support.sender.support'|trans|e('js') }}' : '{{ 'support.sender.customer'|trans|e('js') }}'} · ${msg.senderUser || '{{ 'support.common.na'|trans|e('js') }}'} · ${new Date(msg.createdAt).toLocaleString()}</div>` +
+                `<p class="text-sm text-fg whitespace-pre-wrap"></p>` + attachmentsHtml;
             article.querySelector('p').textContent = msg.body;
             thread.appendChild(article);
             thread.scrollTop = thread.scrollHeight;

@@ -5,11 +5,11 @@
 {% block body %}
     <div class="admin-page-header">
         <div>
-            <h2 class="text-2xl font-bold text-gray-900">API Keys</h2>
-            <p class="text-gray-600 mt-1">Manage API keys for users</p>
+            <h2 class="text-2xl font-bold text-fg">API Keys</h2>
+            <p class="text-fg-muted mt-1">Manage API keys for users</p>
         </div>
-        <a href="{{ path('admin_api_keys_new') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
-            <i class="fas fa-plus"></i>
+        <a href="{{ path('admin_api_keys_new') }}" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors flex items-center space-x-2">
+            {{ ux_icon('lucide:plus', {class: 'size-4'}) }}
             <span>New API Key</span>
         </a>
     </div>
@@ -18,17 +18,17 @@
     <div class="admin-card p-4 mb-6">
         <form method="get" class="grid grid-cols-1 gap-3 sm:grid-cols-[auto_auto_auto] sm:items-center">
             <div class="min-w-[170px]">
-                <select name="isActive" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <select name="isActive" class="px-4 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                     <option value="">All Statuses</option>
                     <option value="1" {% if isActive == '1' %}selected{% endif %}>Active</option>
                     <option value="0" {% if isActive == '0' %}selected{% endif %}>Inactive</option>
                 </select>
             </div>
             <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-                <i class="fas fa-filter"></i> Filter
+                {{ ux_icon('lucide:filter', {class: 'size-4'}) }} Filter
             </button>
             {% if isActive is not null and isActive != '' %}
-                <a href="{{ path('admin_api_keys_index') }}" class="text-gray-600 hover:text-gray-900 px-4 py-2">
+                <a href="{{ path('admin_api_keys_index') }}" class="text-fg-muted hover:text-fg px-4 py-2">
                     Clear
                 </a>
             {% endif %}
@@ -38,31 +38,31 @@
     <!-- API Keys Table -->
     <div x-data="{ selectedIds: [], clearSelection(){ this.selectedIds=[]; } }" class="space-y-4">
     <div class="admin-card admin-table-wrap">
-        <table class="admin-table min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+        <table class="admin-table min-w-full divide-y divide-line">
+            <thead class="bg-subtle">
                 <tr>
-                    <th class="px-4 py-3"><input type="checkbox" class="h-4 w-4 rounded border-gray-300"></th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Used</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-4 py-3"><input type="checkbox" class="h-4 w-4 rounded border-line-strong"></th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-fg-subtle uppercase tracking-wider">ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-fg-subtle uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-fg-subtle uppercase tracking-wider">User</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-fg-subtle uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-fg-subtle uppercase tracking-wider">Created</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-fg-subtle uppercase tracking-wider">Last Used</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-fg-subtle uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-panel divide-y divide-line">
                 {% if apiKeys|length > 0 %}
                     {% for apiKey in apiKeys %}
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-4"><input type="checkbox" @change="$event.target.checked ? selectedIds.push({{ apiKey.id }}) : selectedIds = selectedIds.filter(id => id !== {{ apiKey.id }})" class="h-4 w-4 rounded border-gray-300"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <tr class="hover:bg-subtle">
+                            <td class="px-4 py-4"><input type="checkbox" @change="$event.target.checked ? selectedIds.push({{ apiKey.id }}) : selectedIds = selectedIds.filter(id => id !== {{ apiKey.id }})" class="h-4 w-4 rounded border-line-strong"></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-fg-subtle">
                                 #{{ apiKey.id }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ apiKey.name }}</div>
+                                <div class="text-sm font-medium text-fg">{{ apiKey.name }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-fg-subtle">
                                 {{ apiKey.user.email }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -71,28 +71,28 @@
                                     {{ apiKey.isActive ? 'Active' : 'Inactive' }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-fg-subtle">
                                 {{ apiKey.createdAt|date('Y-m-d') }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-fg-subtle">
                                 {{ apiKey.lastUsedAt ? apiKey.lastUsedAt|date('Y-m-d H:i') : 'Never' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                <a href="{{ path('admin_api_keys_show', {id: apiKey.id}) }}" class="text-blue-600 hover:text-blue-900">
-                                    <i class="fas fa-eye"></i>
+                                <a href="{{ path('admin_api_keys_show', {id: apiKey.id}) }}" class="text-primary-600 hover:text-primary-900">
+                                    {{ ux_icon('lucide:eye', {class: 'size-4'}) }}
                                 </a>
                                 {% if apiKey.isActive %}
                                     <form method="post" action="{{ path('admin_api_keys_revoke', {id: apiKey.id}) }}" class="inline" onsubmit="return confirm('Are you sure you want to revoke this API key?');">
                                         <input type="hidden" name="_token" value="{{ csrf_token('revoke_api_key_' ~ apiKey.id) }}">
                                         <button type="submit" class="text-yellow-600 hover:text-yellow-900">
-                                            <i class="fas fa-ban"></i>
+                                            {{ ux_icon('lucide:ban', {class: 'size-4'}) }}
                                         </button>
                                     </form>
                                 {% endif %}
                                 <form method="post" action="{{ path('admin_api_keys_delete', {id: apiKey.id}) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this API key?');">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete_api_key_' ~ apiKey.id) }}">
                                     <button type="submit" class="text-red-600 hover:text-red-900">
-                                        <i class="fas fa-trash"></i>
+                                        {{ ux_icon('lucide:trash-2', {class: 'size-4'}) }}
                                     </button>
                                 </form>
                             </td>
@@ -100,11 +100,11 @@
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="8" class="px-6 py-8 text-center text-gray-500">
-                            <i class="fas fa-key text-4xl mb-4 text-gray-300"></i>
+                        <td colspan="8" class="px-6 py-8 text-center text-fg-subtle">
+                            {{ ux_icon('lucide:key-round', {class: 'size-9 mb-4 text-gray-300'}) }}
                             <p class="text-lg font-medium">No API keys found</p>
                             <p class="text-sm mt-2">Get started by creating your first API key.</p>
-                            <a href="{{ path('admin_api_keys_new') }}" class="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            <a href="{{ path('admin_api_keys_new') }}" class="mt-4 inline-block bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors">
                                 Create API Key
                             </a>
                         </td>
@@ -119,8 +119,8 @@
             <form method="post" action="{{ path('admin_api_keys_bulk_revoke') }}" class="flex items-center gap-2">
                 <input type="hidden" name="_token" value="{{ csrf_token('bulk_api_keys_revoke') }}">
                 <input type="hidden" name="ids" :value="selectedIds.join(',')">
-                <button type="submit" class="rounded-xl bg-white px-3 py-2 text-xs font-semibold">{{ 'admin.table.bulk_revoke'|trans }}</button>
-                <button type="button" @click="clearSelection()" class="rounded-xl border border-gray-300 px-3 py-2 text-xs font-semibold">{{ 'admin.table.clear_selection'|trans }}</button>
+                <button type="submit" class="rounded-xl bg-panel px-3 py-2 text-xs font-semibold">{{ 'admin.table.bulk_revoke'|trans }}</button>
+                <button type="button" @click="clearSelection()" class="rounded-xl border border-line-strong px-3 py-2 text-xs font-semibold">{{ 'admin.table.clear_selection'|trans }}</button>
             </form>
         </div>
     </div>
@@ -129,19 +129,19 @@
     <!-- Pagination -->
     {% if totalPages > 1 %}
         <div class="mt-6 flex items-center justify-between">
-            <div class="text-sm text-gray-700">
+            <div class="text-sm text-fg-muted">
                 Showing page {{ currentPage }} of {{ totalPages }}
             </div>
             <div class="flex space-x-2">
                 {% if currentPage > 1 %}
                     <a href="{{ path('admin_api_keys_index', {page: currentPage - 1, isActive: isActive}) }}" 
-                       class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                       class="px-4 py-2 border border-line-strong rounded-lg hover:bg-subtle">
                         Previous
                     </a>
                 {% endif %}
                 {% if currentPage < totalPages %}
                     <a href="{{ path('admin_api_keys_index', {page: currentPage + 1, isActive: isActive}) }}" 
-                       class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                       class="px-4 py-2 border border-line-strong rounded-lg hover:bg-subtle">
                         Next
                     </a>
                 {% endif %}

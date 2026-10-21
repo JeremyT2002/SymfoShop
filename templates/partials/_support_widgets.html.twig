@@ -1,0 +1,50 @@
+{%- set support = theme_config().support|default({}) -%}
+{%- set provider = support.provider|default('selfcoded') -%}
+
+{# Built-in support chat: floating shortcut for logged-in customers (not on the chat pages themselves) #}
+{% if provider == 'selfcoded' and app.user and not (app.request.attributes.get('_route')|default('') starts with 'account_support') %}
+    <a href="{{ path('account_support_index') }}"
+       class="fixed right-4 bottom-4 z-30 inline-flex items-center gap-2 rounded-full bg-fg px-4 py-3 text-sm font-semibold text-canvas shadow-lg shadow-black/15 transition-transform hover:-translate-y-0.5 sm:right-6 sm:bottom-6"
+       aria-label="{{ 'footer.support'|trans }}">
+        {{ ux_icon('lucide:message-circle', {class: 'size-5'}) }}
+        <span class="hidden sm:inline">{{ 'footer.support'|trans }}</span>
+    </a>
+{% endif %}
+
+{# Third-party widgets (tawk.to / Charla) #}
+{% if provider in ['tawkto', 'tawk_charla'] %}
+    {%- set tawk_path = support.tawkEmbedPath|default('') -%}
+    {%- if not tawk_path and support.tawkPropertyId|default('') -%}
+        {%- set tawk_path = support.tawkPropertyId ~ (support.tawkWidgetId|default('') ? '/' ~ support.tawkWidgetId : '') -%}
+    {%- endif -%}
+    {% if tawk_path %}
+        <script>
+            window.Tawk_API = window.Tawk_API || {};
+            window.Tawk_LoadStart = new Date();
+            (function () {
+                var s = document.createElement('script');
+                s.async = true;
+                s.src = 'https://embed.tawk.to/{{ tawk_path|e('js') }}';
+                s.charset = 'UTF-8';
+                s.setAttribute('crossorigin', '*');
+                document.head.appendChild(s);
+            })();
+        </script>
+    {% endif %}
+{% endif %}
+
+{% if provider in ['charla', 'tawk_charla'] %}
+    {%- set charla_id = support.charlaProjectId|default(support.charlaWebsiteId|default('')) -%}
+    {% if charla_id %}
+        <script>
+            window.addEventListener('load', function () {
+                var widget = document.createElement('charla-widget');
+                widget.setAttribute('p', '{{ charla_id|e('js') }}');
+                document.body.appendChild(widget);
+                var script = document.createElement('script');
+                script.src = 'https://app.charla.com/widget/widget.js';
+                document.body.appendChild(script);
+            });
+        </script>
+    {% endif %}
+{% endif %}

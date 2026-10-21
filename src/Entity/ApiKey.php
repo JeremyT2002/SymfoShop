@@ -156,7 +156,11 @@ class ApiKey
         return true;
     }
 
-    public function hasScope(string $scope): bool
+    /**
+     * Named "grants…" rather than "has…": PropertyInfo treats has*() methods as accessors of a
+     * "scope" property, which broke the OpenAPI schema generation for /api/v1/docs.
+     */
+    public function grantsScope(string $scope): bool
     {
         if ($this->scopes === null) {
             return true; // No scopes means all access

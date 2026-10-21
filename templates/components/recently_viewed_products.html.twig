@@ -1,24 +1,14 @@
-{% if recentlyViewedProducts is defined and recentlyViewedProducts|length > 0 %}
-    <section class="py-10" x-data="{ limit: 4 }">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-                    {{ 'recently_viewed.title'|trans }}
-                </h2>
-                <div class="hidden sm:flex gap-2">
-                    <button type="button" class="px-3 py-1.5 rounded-lg border border-gray-300 text-sm" @click="limit = Math.max(4, limit - 2)">-</button>
-                    <button type="button" class="px-3 py-1.5 rounded-lg border border-gray-300 text-sm" @click="limit = Math.min({{ recentlyViewedProducts|length }}, limit + 2)">+</button>
+{# Recently viewed products row. Params: recentlyViewedProducts #}
+{% if recentlyViewedProducts is defined and recentlyViewedProducts is not empty %}
+    <section class="container-page py-16" aria-labelledby="recently-viewed-heading">
+        <h2 id="recently-viewed-heading" class="text-xl font-semibold sm:text-2xl">{{ 'recently_viewed.title'|trans }}</h2>
+        {# Horizontal scroller on small screens, grid from lg #}
+        <div class="-mx-4 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible lg:px-0">
+            {% for product in recentlyViewedProducts|slice(0, 8) %}
+                <div class="w-[44%] shrink-0 snap-start sm:w-[30%] lg:w-auto {{ loop.index > 4 ? 'lg:hidden' : '' }}">
+                    {% include 'components/product_card.html.twig' with {product: product} only %}
                 </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {% for product in recentlyViewedProducts %}
-                    <div x-show="{{ loop.index <= 4 ? 'true' : 'limit >= ' ~ loop.index }}" x-transition>
-                        {% include 'components/product_card.html.twig' with { product: product } %}
-                    </div>
-                {% endfor %}
-            </div>
+            {% endfor %}
         </div>
     </section>
 {% endif %}
-

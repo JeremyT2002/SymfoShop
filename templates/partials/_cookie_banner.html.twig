@@ -1,0 +1,19 @@
+{# Shown by assets/js/components/cookie-consent.js until a choice is stored #}
+<div id="cookie-consent-banner" hidden
+     class="fixed inset-x-3 bottom-3 z-[60] mx-auto max-w-2xl rounded-2xl border border-line bg-panel p-5 shadow-xl shadow-black/10 sm:inset-x-6 sm:bottom-6"
+     role="region" aria-label="{{ 'cookie_banner.aria_label'|trans }}">
+    <div class="flex items-start gap-4">
+        <span class="hidden size-10 shrink-0 items-center justify-center rounded-full bg-subtle sm:flex">{{ ux_icon('lucide:cookie', {class: 'size-5'}) }}</span>
+        <div class="flex-1">
+            <p class="font-semibold">{{ 'cookie_banner.title'|trans }}</p>
+            <p class="mt-1 text-sm leading-6 text-fg-muted">
+                {{ 'cookie_banner.text'|trans }}
+                <a href="{{ path('legal_cookies') }}" class="link">{{ 'cookie_banner.learn_more'|trans }}</a>
+            </p>
+            <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                <button type="button" data-cookie-essential-only class="btn btn-secondary">{{ 'cookie_banner.essential_only'|trans }}</button>
+                <button type="button" data-cookie-accept-all class="btn btn-primary">{{ 'cookie_banner.accept_all'|trans }}</button>
+            </div>
+        </div>
+    </div>
+</div>
