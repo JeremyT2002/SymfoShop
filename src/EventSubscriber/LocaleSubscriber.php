@@ -8,15 +8,18 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class LocaleSubscriber implements EventSubscriberInterface
 {
-    private const DEFAULT_LOCALE = 'en';
-    private const SUPPORTED_LOCALES = ['en', 'de', 'fr'];
+    public const DEFAULT_LOCALE = 'en';
+    public const SUPPORTED_LOCALES = ['en', 'de', 'fr'];
+
+    /** Query parameter for language-specific URLs (?lang=de), used by the hreflang alternates. */
+    public const QUERY_PARAMETER = 'lang';
 
     public function onKernelRequest(RequestEvent $event): void
     {
         $request = $event->getRequest();
         
         // Try to see if the locale has been set as a routing parameter
-        $locale = $request->attributes->get('_locale');
+        $locale = $request->attributes->get('_locale') ?? $request->query->get(self::QUERY_PARAMETER);
         
         if (!$locale) {
             // If no locale in the route, try to get it from the session

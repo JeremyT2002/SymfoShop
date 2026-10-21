@@ -33,13 +33,14 @@ final class SearchSuggestController extends AbstractController
             return $this->json(['products' => [], 'categories' => []]);
         }
 
-        $productData = array_map(function (Product $product) use ($images, $format): array {
+        $locale = $request->getLocale();
+        $productData = array_map(function (Product $product) use ($images, $format, $locale): array {
             $prices = $product->getVariants()->map(static fn ($v) => $v->getPriceAmount())->toArray();
             $variant = $product->getVariants()->first() ?: null;
             $image = $product->getMedia()->first() ?: null;
 
             return [
-                'name' => $product->getName(),
+                'name' => $product->translated('name', $locale),
                 'url' => $this->generateUrl('catalog_product', ['slug' => $product->getSlug()]),
                 'price' => $prices !== [] ? $format->formatMoney(min($prices), $variant?->getCurrency()) : null,
                 'image' => $image !== null ? $images->url($image->getPath(), 160) : null,
@@ -49,10 +50,10 @@ final class SearchSuggestController extends AbstractController
         $needle = mb_strtolower($query);
         $categoryData = array_values(array_map(
             fn (Category $category): array => [
-                'name' => $category->getName(),
+                'name' => $category->translated('name', $locale),
                 'url' => $this->generateUrl('catalog_category', ['slug' => $category->getSlug()]),
             ],
-            array_slice(array_filter($categories->findAll(), static fn (Category $c): bool => str_contains(mb_strtolower($c->getName()), $needle)), 0, 3)
+            array_slice(array_filter($categories->findAll(), static fn (Category $c): bool => str_contains(mb_strtolower((string) $c->translated('name', $locale)), $needle)), 0, 3)
         ));
 
         $response = $this->json(['products' => $productData, 'categories' => $categoryData]);

@@ -136,6 +136,8 @@
                     <p class="mt-1 text-xs text-fg-subtle">Optional: Upload additional product images.</p>
                 </section>
                 
+                {% include 'admin/components/_translations.html.twig' with {entity: product|default(null), with_description: true} only %}
+
                 <div class="flex items-center justify-end space-x-4 border-t border-line pt-5">
                     <a href="{{ path('admin_products_show', {id: product.id}) }}" class="px-4 py-2 text-fg-muted border border-line-strong rounded-lg hover:bg-subtle">
                         Cancel

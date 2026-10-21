@@ -14,6 +14,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(columns: ['status'], name: 'idx_product_status')]
 class Product
 {
+    use TranslatableTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]

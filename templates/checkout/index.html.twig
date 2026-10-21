@@ -97,7 +97,7 @@
                                 <span class="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-fg text-[0.6875rem] font-semibold text-canvas tabular-nums">{{ item.quantity }}</span>
                             </span>
                             <span class="min-w-0 flex-1">
-                                <span class="block truncate text-sm font-medium">{{ item.variant.product.name }}</span>
+                                <span class="block truncate text-sm font-medium">{{ item.variant.product|tr('name') }}</span>
                                 {% if item.variant.attributes is not empty %}
                                     <span class="block truncate text-xs text-fg-subtle">{{ item.variant.attributes|map((v, k) => k|capitalize ~ ': ' ~ v)|join(' · ') }}</span>
                                 {% endif %}

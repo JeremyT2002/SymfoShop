@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 {% for u in urls %}
+    {%- set alternates = locale_alternates(u.loc) %}
+    {%- for hreflang, loc in alternates|filter((v, k) => k != 'x-default') %}
     <url>
-        <loc>{{ u.loc|e('html') }}</loc>
+        <loc>{{ loc|e('html') }}</loc>
+        {%- for alt_hreflang, alt_loc in alternates %}
+        <xhtml:link rel="alternate" hreflang="{{ alt_hreflang }}" href="{{ alt_loc|e('html') }}"/>
+        {%- endfor %}
         <changefreq>{{ u.changefreq|e('html') }}</changefreq>
         <priority>{{ u.priority|e('html') }}</priority>
     </url>
+    {%- endfor %}
 {% endfor %}
 </urlset>

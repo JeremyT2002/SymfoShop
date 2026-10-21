@@ -43,7 +43,7 @@
                     {%- set active = route == 'catalog_category' and app.request.attributes.get('slug') == category.slug -%}
                     <a href="{{ path('catalog_category', {slug: category.slug}) }}"
                        class="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-subtle {{ active ? 'text-fg' : 'text-fg-muted hover:text-fg' }}"
-                       {% if active %}aria-current="page"{% endif %}>{{ category.name }}</a>
+                       {% if active %}aria-current="page"{% endif %}>{{ category|tr('name') }}</a>
                 {% endfor %}
             {% endif %}
         </nav>
@@ -206,7 +206,7 @@
                     {% else %}
                         <a href="{{ path('catalog_products') }}" class="block rounded-lg px-3 py-2.5 font-medium hover:bg-subtle">{{ 'ui.nav.all_products'|trans }}</a>
                         {% for category in nav_categories(12) %}
-                            <a href="{{ path('catalog_category', {slug: category.slug}) }}" class="block rounded-lg px-3 py-2.5 font-medium hover:bg-subtle">{{ category.name }}</a>
+                            <a href="{{ path('catalog_category', {slug: category.slug}) }}" class="block rounded-lg px-3 py-2.5 font-medium hover:bg-subtle">{{ category|tr('name') }}</a>
                         {% endfor %}
                     {% endif %}
                 </nav>

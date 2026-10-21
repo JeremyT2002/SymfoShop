@@ -1,5 +1,5 @@
 <h2>{{ 'email.stock_notification.available_title'|trans }}</h2>
-<p>{{ 'email.stock_notification.available_intro'|trans({'%product%': product.name}) }}</p>
+<p>{{ 'email.stock_notification.available_intro'|trans({'%product%': product|tr('name')}) }}</p>
 <p>
     <a href="{{ url('catalog_product', {slug: product.slug}) }}">{{ 'email.stock_notification.available_cta'|trans }}</a>
 </p>

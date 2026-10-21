@@ -51,6 +51,9 @@ class CategoryController extends AbstractController
             $category->setSeoDescription($seoDescription !== '' ? $seoDescription : null);
 
             $category->setSeoNoIndex($request->request->getBoolean('seo_noindex'));
+            if ($request->request->has('translations')) {
+                $category->setTranslations($request->request->all('translations'));
+            }
             
             $parentId = $request->request->get('parent');
             if ($parentId) {
@@ -110,6 +113,9 @@ class CategoryController extends AbstractController
             $category->setSeoDescription($seoDescription !== '' ? $seoDescription : null);
 
             $category->setSeoNoIndex($request->request->getBoolean('seo_noindex'));
+            if ($request->request->has('translations')) {
+                $category->setTranslations($request->request->all('translations'));
+            }
             
             $parentId = $request->request->get('parent');
             if ($parentId && $parentId != $category->getId()) {

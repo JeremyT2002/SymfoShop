@@ -22,7 +22,7 @@
                         {{ ux_icon('lucide:layout-grid', {class: 'size-5'}) }}
                     </span>
                     <span>
-                        <span class="block text-base font-semibold sm:text-lg">{{ category.name }}</span>
+                        <span class="block text-base font-semibold sm:text-lg">{{ category|tr('name') }}</span>
                         <span class="mt-1 flex items-center gap-1 text-sm text-fg-muted">
                             {% if children > 0 %}
                                 {{ children }} {{ children == 1 ? 'category.subcategory'|trans : 'category.subcategories'|trans }}

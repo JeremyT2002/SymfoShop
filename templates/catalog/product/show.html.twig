@@ -1,8 +1,8 @@
 {% extends 'base.html.twig' %}
 
-{%- set seo_title = product.seoTitle|default(product.name) -%}
-{%- set seo_description = product.seoDescription|default(product.description|default(product.name))|striptags|slice(0, 160) -%}
-{%- set images = product.media|map(m => {src: m.path, alt: m.alt|default(product.name)}) -%}
+{%- set seo_title = product|tr('seoTitle')|default(product|tr('name')) -%}
+{%- set seo_description = product|tr('seoDescription')|default(product|tr('description')|default(product|tr('name')))|striptags|slice(0, 160) -%}
+{%- set images = product.media|map(m => {src: m.path, alt: m.alt|default(product|tr('name'))}) -%}
 {#- Image indexes per variant (key "v<id>" keeps Twig from renumbering) -#}
 {%- set media_by_variant = {} -%}
 {%- for m in product.media -%}
@@ -52,7 +52,7 @@
         {{- {
             '@context': 'https://schema.org',
             '@type': 'Product',
-            name: product.name,
+            name: product|tr('name'),
             description: seo_description,
             image: images|map(i => absolute_url(i.src)),
             sku: defaultVariant ? defaultVariant.sku : null,
@@ -77,9 +77,9 @@
 
     {%- set crumbs = [{label: 'nav.home'|trans, url: path('catalog_home')}] -%}
     {%- if product.category -%}
-        {%- set crumbs = crumbs|merge([{label: product.category.name, url: path('catalog_category', {slug: product.category.slug})}]) -%}
+        {%- set crumbs = crumbs|merge([{label: product.category|tr('name'), url: path('catalog_category', {slug: product.category.slug})}]) -%}
     {%- endif -%}
-    {% include 'components/breadcrumbs.html.twig' with {items: crumbs|merge([{label: product.name, url: null}])} only %}
+    {% include 'components/breadcrumbs.html.twig' with {items: crumbs|merge([{label: product|tr('name'), url: null}])} only %}
 
     <div class="grid gap-8 lg:grid-cols-12 lg:gap-12">
         {# Gallery #}
@@ -126,7 +126,7 @@
         <div class="lg:col-span-5">
             <div class="lg:sticky lg:top-28">
                 <div class="flex items-start justify-between gap-4">
-                    <h1 class="text-2xl font-semibold sm:text-3xl">{{ product.name }}</h1>
+                    <h1 class="text-2xl font-semibold sm:text-3xl">{{ product|tr('name') }}</h1>
                     {% if app.user %}
                         {%- set wished = in_wishlist(product.id) -%}
                         <button type="button" data-wishlist-toggle data-product-id="{{ product.id }}" aria-pressed="{{ wished ? 'true' : 'false' }}"
@@ -215,7 +215,7 @@
 
                 {# Details accordion #}
                 <div class="mt-8 divide-y divide-line border-b border-line">
-                    {% if product.description %}
+                    {% if product|tr('description') %}
                         <div x-data="{ open: true }">
                             <h2>
                                 <button type="button" class="flex w-full items-center justify-between py-4 text-left font-semibold" @click="open = !open" :aria-expanded="open">
@@ -224,7 +224,7 @@
                                 </button>
                             </h2>
                             <div x-show="open" x-collapse>
-                                <div class="pb-6 text-sm leading-7 text-fg-muted">{{ product.description|nl2br }}</div>
+                                <div class="pb-6 text-sm leading-7 text-fg-muted">{{ product|tr('description')|nl2br }}</div>
                             </div>
                         </div>
                     {% endif %}
@@ -245,7 +245,7 @@
                                     {% endfor %}
                                     {% if product.category %}
                                         <dt class="text-fg-subtle">{{ 'ui.product.category'|trans }}</dt>
-                                        <dd><a href="{{ path('catalog_category', {slug: product.category.slug}) }}" class="link">{{ product.category.name }}</a></dd>
+                                        <dd><a href="{{ path('catalog_category', {slug: product.category.slug}) }}" class="link">{{ product.category|tr('name') }}</a></dd>
                                     {% endif %}
                                 </dl>
                             </div>

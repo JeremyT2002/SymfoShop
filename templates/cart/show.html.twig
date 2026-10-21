@@ -39,7 +39,7 @@
                         <li class="flex gap-4 py-6 transition-opacity aria-busy:opacity-60 sm:gap-6" data-cart-line="{{ variant.id }}">
                             <a href="{{ path('catalog_product', {slug: product.slug}) }}" class="size-24 shrink-0 overflow-hidden rounded-xl bg-subtle sm:size-32">
                                 {% if image %}
-                                    <img src="{{ image_url(image.path, 320) }}" alt="{{ image.alt|default(product.name) }}" loading="lazy" class="size-full object-cover">
+                                    <img src="{{ image_url(image.path, 320) }}" alt="{{ image.alt|default(product|tr('name')) }}" loading="lazy" class="size-full object-cover">
                                 {% else %}
                                     <span class="flex size-full items-center justify-center text-fg-subtle">{{ ux_icon('lucide:image', {class: 'size-8 opacity-50'}) }}</span>
                                 {% endif %}
@@ -49,7 +49,7 @@
                                 <div class="flex justify-between gap-4">
                                     <div class="min-w-0">
                                         <h3 class="font-medium">
-                                            <a href="{{ path('catalog_product', {slug: product.slug}) }}" class="hover:underline">{{ product.name }}</a>
+                                            <a href="{{ path('catalog_product', {slug: product.slug}) }}" class="hover:underline">{{ product|tr('name') }}</a>
                                         </h3>
                                         {% if variant.attributes is not empty %}
                                             <p class="mt-1 text-sm text-fg-muted">{{ variant.attributes|map((v, k) => k|capitalize ~ ': ' ~ v)|join(' · ') }}</p>
@@ -62,14 +62,14 @@
                                 <div class="mt-auto flex items-center justify-between gap-4 pt-4">
                                     <div class="flex items-center rounded-lg border border-line-strong">
                                         <button type="button" class="btn btn-ghost btn-icon h-9 rounded-r-none" data-quantity-step="-1" aria-label="{{ 'ui.quantity.decrease'|trans }}">{{ ux_icon('lucide:minus', {class: 'size-3.5'}) }}</button>
-                                        <label for="qty-{{ variant.id }}" class="sr-only">{{ 'cart.quantity'|trans }}: {{ product.name }}</label>
+                                        <label for="qty-{{ variant.id }}" class="sr-only">{{ 'cart.quantity'|trans }}: {{ product|tr('name') }}</label>
                                         <input id="qty-{{ variant.id }}" type="number" min="1" {% if available > 0 %}max="{{ available }}"{% endif %} value="{{ item.quantity }}" data-quantity-input
                                                class="h-9 w-10 border-0 bg-transparent p-0 text-center text-sm font-semibold tabular-nums focus:ring-0 focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
                                         <button type="button" class="btn btn-ghost btn-icon h-9 rounded-l-none" data-quantity-step="1" aria-label="{{ 'ui.quantity.increase'|trans }}">{{ ux_icon('lucide:plus', {class: 'size-3.5'}) }}</button>
                                     </div>
                                     <button type="button" class="btn btn-ghost btn-sm text-fg-muted" data-remove-line>
                                         {{ ux_icon('lucide:trash-2', {class: 'size-4'}) }}<span class="hidden sm:inline">{{ 'cart.remove'|trans }}</span>
-                                        <span class="sr-only sm:hidden">{{ 'cart.remove'|trans }}: {{ product.name }}</span>
+                                        <span class="sr-only sm:hidden">{{ 'cart.remove'|trans }}: {{ product|tr('name') }}</span>
                                     </button>
                                 </div>
                                 {% if available < item.quantity %}

@@ -37,7 +37,7 @@
         {% if app.user %}
             {%- set wished = in_wishlist(product.id) -%}
             <button type="button" data-wishlist-toggle data-product-id="{{ product.id }}" aria-pressed="{{ wished ? 'true' : 'false' }}"
-                    aria-label="{{ 'wishlist.toggle'|trans }}: {{ product.name }}"
+                    aria-label="{{ 'wishlist.toggle'|trans }}: {{ product|tr('name') }}"
                     class="group/wish absolute top-3 right-3 z-10 flex size-9 items-center justify-center rounded-full bg-panel/90 text-fg shadow-sm backdrop-blur transition hover:scale-105 aria-pressed:text-red-500">
                 {{ ux_icon('lucide:heart', {class: 'size-[1.125rem] transition group-aria-pressed/wish:fill-current'}) }}
             </button>
@@ -59,7 +59,7 @@
 
     <div class="mt-3 flex flex-1 flex-col">
         <h3 class="text-sm font-medium text-fg">
-            <a href="{{ url }}" class="line-clamp-2 after:absolute after:inset-0 after:content-[''] focus:outline-none">{{ product.name }}</a>
+            <a href="{{ url }}" class="line-clamp-2 after:absolute after:inset-0 after:content-[''] focus:outline-none">{{ product|tr('name') }}</a>
         </h3>
         {% if product.averageRating is defined and product.averageRating %}
             <p class="mt-1 flex items-center gap-1 text-xs text-fg-muted">

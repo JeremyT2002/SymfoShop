@@ -89,6 +89,9 @@ class ProductController extends AbstractController
             $product->setSeoDescription($seoDescription !== '' ? $seoDescription : null);
 
             $product->setSeoNoIndex($request->request->getBoolean('seo_noindex'));
+            if ($request->request->has('translations')) {
+                $product->setTranslations($request->request->all('translations'));
+            }
             
             // Set category if provided
             $categoryId = $request->request->get('category_id');
@@ -318,6 +321,9 @@ class ProductController extends AbstractController
             $product->setSeoDescription($seoDescription !== '' ? $seoDescription : null);
 
             $product->setSeoNoIndex($request->request->getBoolean('seo_noindex'));
+            if ($request->request->has('translations')) {
+                $product->setTranslations($request->request->all('translations'));
+            }
 
             $product->setUpdatedAt(new \DateTimeImmutable());
             

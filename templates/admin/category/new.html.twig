@@ -71,6 +71,8 @@
                 </section>
             </div>
 
+            {% include 'admin/components/_translations.html.twig' with {entity: category|default(null)} only %}
+
             <div class="flex items-center justify-end gap-3 border-t border-line pt-5">
                 <a href="{{ path('admin_categories_index') }}" class="rounded-lg border border-line-strong px-4 py-2 text-sm font-medium text-fg-muted hover:bg-subtle">Cancel</a>
                 <button type="submit" class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">Create Category</button>

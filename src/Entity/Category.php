@@ -14,6 +14,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(columns: ['parent_id'], name: 'idx_category_parent')]
 class Category
 {
+    use TranslatableTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]

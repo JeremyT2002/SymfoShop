@@ -1,0 +1,48 @@
+{#
+    Translation fields for a product or category: inputs named translations[<locale>][<field>].
+    Params: entity (may be null on "new"), with_description (bool)
+#}
+{%- set languages = {de: 'Deutsch', fr: 'Français'} -%}
+<section class="admin-form-section" x-data="{ tab: 'de' }">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h3 class="admin-form-label mb-0">Translations</h3>
+            <p class="mt-1 text-xs text-fg-subtle">Empty fields fall back to the English text above.</p>
+        </div>
+        <div class="flex gap-1 rounded-lg bg-subtle p-1" role="tablist">
+            {% for code, label in languages %}
+                <button type="button" role="tab" class="rounded-md px-3 py-1 text-sm font-medium"
+                        :class="tab === '{{ code }}' ? 'bg-panel text-fg shadow-sm' : 'text-fg-muted hover:text-fg'"
+                        :aria-selected="tab === '{{ code }}'"
+                        @click="tab = '{{ code }}'">{{ label }}</button>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% for code, label in languages %}
+        <div class="mt-4 space-y-4" x-show="tab === '{{ code }}'" {% if not loop.first %}x-cloak{% endif %} lang="{{ code }}">
+            <div>
+                <label for="tr_{{ code }}_name" class="admin-form-label">Name ({{ label }})</label>
+                <input type="text" id="tr_{{ code }}_name" name="translations[{{ code }}][name]" class="admin-form-input"
+                       value="{{ entity ? entity.translationOf(code, 'name') : '' }}">
+            </div>
+            {% if with_description|default(false) %}
+                <div>
+                    <label for="tr_{{ code }}_description" class="admin-form-label">Description ({{ label }})</label>
+                    <textarea id="tr_{{ code }}_description" name="translations[{{ code }}][description]" rows="5"
+                              class="admin-form-input resize-y">{{ entity ? entity.translationOf(code, 'description') : '' }}</textarea>
+                </div>
+            {% endif %}
+            <div>
+                <label for="tr_{{ code }}_seo_title" class="admin-form-label">SEO Title ({{ label }})</label>
+                <input type="text" id="tr_{{ code }}_seo_title" name="translations[{{ code }}][seoTitle]" class="admin-form-input"
+                       value="{{ entity ? entity.translationOf(code, 'seoTitle') : '' }}">
+            </div>
+            <div>
+                <label for="tr_{{ code }}_seo_description" class="admin-form-label">SEO Description ({{ label }})</label>
+                <textarea id="tr_{{ code }}_seo_description" name="translations[{{ code }}][seoDescription]" rows="3"
+                          class="admin-form-input resize-y">{{ entity ? entity.translationOf(code, 'seoDescription') : '' }}</textarea>
+            </div>
+        </div>
+    {% endfor %}
+</section>
