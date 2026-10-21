@@ -1320,3 +1320,9 @@ ui:
     open_full_page: Open full page
   order:
     shipping_address: Shipping address
+  shipping:
+    free_above_label: "Free shipping from (cents, optional)"
+    free_above_hint: "Gross goods value after discounts from which this method is free. Empty = never free."
+    remaining: "Add %amount% more for free shipping"
+    reached: "You get free shipping!"
+    progress_aria: "Progress towards free shipping"

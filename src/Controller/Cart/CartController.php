@@ -4,6 +4,7 @@ namespace App\Controller\Cart;
 
 use App\Entity\ProductStatus;
 use App\Repository\ProductVariantRepository;
+use App\Repository\ShippingMethodRepository;
 use App\Service\Cart\CartService;
 use App\Service\Cart\CouponService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,6 +21,7 @@ class CartController extends AbstractController
         private readonly CouponService $couponService,
         private readonly ProductVariantRepository $variantRepository,
         private readonly TranslatorInterface $translator,
+        private readonly ShippingMethodRepository $shippingMethodRepository,
     ) {
     }
 
@@ -172,7 +174,24 @@ class CartController extends AbstractController
             }
         }
 
+        $totals['freeShipping'] = $this->freeShippingProgress($totals['subtotal'] - $totals['discount']);
+
         return [$totals, $coupon];
+    }
+
+    /**
+     * Progress towards free shipping with the default shipping method, or null if it has no threshold.
+     *
+     * @return array{threshold: int, remaining: int}|null
+     */
+    private function freeShippingProgress(int $goodsValue): ?array
+    {
+        $threshold = $this->shippingMethodRepository->findFirstActive()?->getFreeAboveCents();
+        if ($threshold === null) {
+            return null;
+        }
+
+        return ['threshold' => $threshold, 'remaining' => max(0, $threshold - $goodsValue)];
     }
 
     private function success(string $messageKey): JsonResponse

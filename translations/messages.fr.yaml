@@ -1320,3 +1320,9 @@ ui:
     open_full_page: Ouvrir en pleine page
   order:
     shipping_address: Adresse de livraison
+  shipping:
+    free_above_label: "Gratuite à partir de (centimes, optionnel)"
+    free_above_hint: "Valeur TTC des articles après remises à partir de laquelle ce mode est gratuit. Vide = jamais gratuit."
+    remaining: "Plus que %amount% pour la livraison gratuite"
+    reached: "La livraison est offerte !"
+    progress_aria: "Progression vers la livraison gratuite"

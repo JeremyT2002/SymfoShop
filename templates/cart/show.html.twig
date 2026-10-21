@@ -92,6 +92,20 @@
             <section class="card card-body lg:sticky lg:top-28 lg:col-span-5 xl:col-span-4" aria-labelledby="summary-heading">
                 <h2 id="summary-heading" class="text-lg font-semibold">{{ 'cart.order_summary'|trans }}</h2>
 
+                {% if totals.freeShipping %}
+                    {%- set progress = ((totals.freeShipping.threshold - totals.freeShipping.remaining) * 100 / totals.freeShipping.threshold)|round -%}
+                    <div class="mt-5 rounded-xl bg-subtle p-4" data-free-shipping data-threshold="{{ totals.freeShipping.threshold }}"
+                         data-label-remaining="{{ 'ui.shipping.remaining'|trans({'%amount%': '__AMOUNT__'}) }}" data-label-reached="{{ 'ui.shipping.reached'|trans }}">
+                        <p class="flex items-center gap-2 text-sm font-medium" data-free-shipping-label>
+                            {{ ux_icon('lucide:truck', {class: 'size-4 shrink-0'}) }}
+                            <span>{{ totals.freeShipping.remaining > 0 ? 'ui.shipping.remaining'|trans({'%amount%': totals.freeShipping.remaining|money(totals.currency)}) : 'ui.shipping.reached'|trans }}</span>
+                        </p>
+                        <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ progress }}" aria-label="{{ 'ui.shipping.progress_aria'|trans }}">
+                            <div class="h-full rounded-full bg-emerald-500 transition-[width] duration-500" style="width: {{ progress }}%" data-free-shipping-bar></div>
+                        </div>
+                    </div>
+                {% endif %}
+
                 <dl class="mt-6 space-y-3 text-sm">
                     <div class="flex justify-between">
                         <dt class="text-fg-muted">{{ 'cart.subtotal'|trans }} (<span data-cart-total-quantity>{{ totals.totalQuantity }}</span>)</dt>

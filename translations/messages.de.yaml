@@ -1320,3 +1320,9 @@ ui:
     open_full_page: Ganze Seite öffnen
   order:
     shipping_address: Lieferadresse
+  shipping:
+    free_above_label: "Kostenlos ab (Cent, optional)"
+    free_above_hint: "Warenwert brutto nach Rabatten, ab dem diese Versandart kostenlos ist. Leer = nie kostenlos."
+    remaining: "Noch %amount% bis zum kostenlosen Versand"
+    reached: "Ihre Bestellung wird kostenlos versendet!"
+    progress_aria: "Fortschritt bis zum kostenlosen Versand"

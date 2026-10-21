@@ -16,6 +16,12 @@
                    class="admin-form-input" required/>
         </div>
         <div>
+            <label class="admin-form-label" for="freeAboveCents">{{ 'ui.shipping.free_above_label'|trans }}</label>
+            <input type="number" id="freeAboveCents" name="freeAboveCents" value="{{ method.freeAboveCents|default('') }}" min="0" step="1"
+                   class="admin-form-input" placeholder="5000"/>
+            <p class="mt-1 text-xs text-fg-subtle">{{ 'ui.shipping.free_above_hint'|trans }}</p>
+        </div>
+        <div>
             <label class="admin-form-label" for="sortOrder">{{ 'admin.shipping_methods.form.sort'|trans }}</label>
             <input type="number" id="sortOrder" name="sortOrder" value="{{ method.sortOrder|default(0) }}" class="admin-form-input"/>
         </div>

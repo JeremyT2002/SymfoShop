@@ -220,7 +220,7 @@ class CheckoutService
      */
     private function shippingPrice(ShippingMethod $method, int $goodsValue): int
     {
-        return $method->getAmountCents();
+        return $method->priceFor($goodsValue);
     }
 
     /**
