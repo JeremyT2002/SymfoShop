@@ -20,11 +20,11 @@
             <input type="number" id="sortOrder" name="sortOrder" value="{{ method.sortOrder|default(0) }}" class="admin-form-input"/>
         </div>
         <div class="flex items-center gap-2 pt-6">
-            <input type="checkbox" id="isActive" name="isActive" value="1" {% if method.isActive|default(true) %}checked{% endif %} class="rounded border-gray-300"/>
-            <label for="isActive" class="text-sm text-gray-700">{{ 'admin.shipping_methods.form.active'|trans }}</label>
+            <input type="checkbox" id="isActive" name="isActive" value="1" {% if method.isActive|default(true) %}checked{% endif %} class="rounded border-line-strong"/>
+            <label for="isActive" class="text-sm text-fg-muted">{{ 'admin.shipping_methods.form.active'|trans }}</label>
         </div>
     </div>
     <div>
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">{{ submitLabel }}</button>
+        <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700">{{ submitLabel }}</button>
     </div>
 </form>

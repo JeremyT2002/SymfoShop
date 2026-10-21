@@ -8,7 +8,7 @@
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
             <h2 class="text-2xl font-bold">{{ 'admin.products.heading'|trans }}</h2>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ 'admin.products.subtitle'|trans }}</p>
+            <p class="mt-1 text-sm text-fg-subtle">{{ 'admin.products.subtitle'|trans }}</p>
         </div>
         <a href="{{ path('admin_products_new') }}" class="focus-ring inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-700">
             {{ icon('plus', 'h-4 w-4') }}
@@ -45,57 +45,57 @@
         toggle(id) { this.isSelected(id) ? this.selectedIds = this.selectedIds.filter(item => item !== id) : this.selectedIds.push(id); },
         clearSelection() { this.selectedIds = []; }
     }" class="space-y-4">
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-admin dark:border-slate-800 dark:bg-slate-900">
-            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
-                <thead class="bg-slate-50 dark:bg-slate-950/60">
+        <div class="overflow-hidden rounded-2xl border border-line bg-panel shadow-xs">
+            <table class="min-w-full divide-y divide-line">
+                <thead class="bg-subtle">
                 <tr>
-                    <th class="px-4 py-3"><input type="checkbox" @change="toggleAll($event)" class="h-4 w-4 rounded border-slate-300"></th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.products.table.id'|trans }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.products.table.name'|trans }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.products.table.category'|trans }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.products.table.status'|trans }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.products.table.stock'|trans }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.products.table.created'|trans }}</th>
-                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">{{ 'admin.products.table.actions'|trans }}</th>
+                    <th class="px-4 py-3"><input type="checkbox" @change="toggleAll($event)" class="h-4 w-4 rounded border-line-strong"></th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-fg-subtle">{{ 'admin.products.table.id'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-fg-subtle">{{ 'admin.products.table.name'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-fg-subtle">{{ 'admin.products.table.category'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-fg-subtle">{{ 'admin.products.table.status'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-fg-subtle">{{ 'admin.products.table.stock'|trans }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-fg-subtle">{{ 'admin.products.table.created'|trans }}</th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-fg-subtle">{{ 'admin.products.table.actions'|trans }}</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900">
+            <tbody class="divide-y divide-line bg-panel">
                 {% if products|length > 0 %}
                     {% for product in products %}
-                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/70">
+                        <tr class="hover:bg-subtle">
                             <td class="px-4 py-4">
-                                <input type="checkbox" :checked="isSelected({{ product.id }})" @change="toggle({{ product.id }})" class="h-4 w-4 rounded border-slate-300">
+                                <input type="checkbox" :checked="isSelected({{ product.id }})" @change="toggle({{ product.id }})" class="h-4 w-4 rounded border-line-strong">
                             </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-fg-subtle">
                                 #{{ product.id }}
                             </td>
                             <td class="whitespace-nowrap px-6 py-4">
-                                <div class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ product.name }}</div>
-                                <div class="text-xs text-slate-500">{{ product.slug }}</div>
+                                <div class="text-sm font-medium text-fg">{{ product.name }}</div>
+                                <div class="text-xs text-fg-subtle">{{ product.slug }}</div>
                             </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-fg-subtle">
                                 {% if product.category %}
                                     {{ product.category.name }}
                                 {% else %}
-                                    <span class="italic text-slate-400">{{ 'admin.products.no_category'|trans }}</span>
+                                    <span class="italic text-fg-subtle">{{ 'admin.products.no_category'|trans }}</span>
                                 {% endif %}
                             </td>
                             <td class="whitespace-nowrap px-6 py-4">
                                 <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold
                                     {% if product.status.value == 'active' %}bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300
                                     {% elseif product.status.value == 'draft' %}bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300
-                                    {% else %}bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300{% endif %}">
+                                    {% else %}bg-slate-100 text-fg-muted dark:text-slate-300{% endif %}">
                                     {{ ('admin.products.status_' ~ product.status.value)|trans }}
                                 </span>
                             </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-fg-subtle">
                                 {% set availableStock = product.stockAvailable %}
                                 <span class="font-medium {% if availableStock > 0 %}text-green-700 dark:text-green-400{% else %}text-red-600 dark:text-red-400{% endif %}">
                                     {{ availableStock }}
                                 </span>
-                                <span class="text-slate-400">/ {{ product.stockOnHand }}</span>
+                                <span class="text-fg-subtle">/ {{ product.stockOnHand }}</span>
                             </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-fg-subtle">
                                 {{ product.createdAt|date('Y-m-d') }}
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
@@ -107,7 +107,7 @@
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="8" class="px-6 py-10 text-center text-slate-500">
+                        <td colspan="8" class="px-6 py-10 text-center text-fg-subtle">
                             <p class="text-lg font-medium">{{ 'admin.products.empty'|trans }}</p>
                             <p class="mt-1 text-sm">{{ 'admin.products.empty_hint'|trans }}</p>
                             <a href="{{ path('admin_products_new') }}" class="mt-4 inline-flex rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">
@@ -125,13 +125,13 @@
                 <form method="post" action="{{ path('admin_products_bulk_status') }}" class="flex items-center gap-2">
                     <input type="hidden" name="_token" value="{{ csrf_token('bulk_products_status') }}">
                     <input type="hidden" name="ids" :value="selectedIds.join(',')">
-                    <select name="status" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800">
+                    <select name="status" class="rounded-xl border border-line-strong bg-panel px-3 py-2 text-xs font-semibold">
                         <option value="active">{{ 'admin.products.status_active'|trans }}</option>
                         <option value="draft">{{ 'admin.products.status_draft'|trans }}</option>
                         <option value="archived">{{ 'admin.products.status_archived'|trans }}</option>
                     </select>
-                    <button type="submit" class="rounded-xl bg-white px-3 py-2 text-xs font-semibold dark:bg-slate-800">{{ 'admin.table.bulk_apply'|trans }}</button>
-                    <button type="button" @click="clearSelection()" class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold dark:border-slate-700">{{ 'admin.table.clear_selection'|trans }}</button>
+                    <button type="submit" class="rounded-xl bg-panel px-3 py-2 text-xs font-semibold">{{ 'admin.table.bulk_apply'|trans }}</button>
+                    <button type="button" @click="clearSelection()" class="rounded-xl border border-line-strong px-3 py-2 text-xs font-semibold">{{ 'admin.table.clear_selection'|trans }}</button>
                 </form>
             </div>
         </div>
@@ -139,19 +139,19 @@
 
     {% if totalPages > 1 %}
         <div class="mt-6 flex items-center justify-between text-sm">
-            <div class="text-slate-600 dark:text-slate-400">
+            <div class="text-fg-muted">
                 {{ 'admin.products.pagination_showing'|trans({'%page%': currentPage, '%total%': totalPages}) }}
             </div>
             <div class="flex space-x-2">
                 {% if currentPage > 1 %}
                     <a href="{{ path('admin_products_index', baseQuery|merge({page: currentPage - 1, sortBy: sortBy, sortDir: sortDir})) }}"
-                       class="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">
+                       class="rounded-xl border border-line-strong px-4 py-2 hover:bg-subtle">
                         {{ 'common.previous'|trans }}
                     </a>
                 {% endif %}
                 {% if currentPage < totalPages %}
                     <a href="{{ path('admin_products_index', baseQuery|merge({page: currentPage + 1, sortBy: sortBy, sortDir: sortDir})) }}"
-                       class="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">
+                       class="rounded-xl border border-line-strong px-4 py-2 hover:bg-subtle">
                         {{ 'common.next'|trans }}
                     </a>
                 {% endif %}

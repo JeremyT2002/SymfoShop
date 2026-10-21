@@ -1,22 +1,22 @@
 <div class="max-w-2xl space-y-6">
     <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
         <p class="text-sm text-amber-800 flex items-start gap-2">
-            <i class="fas fa-exclamation-triangle mt-0.5 flex-shrink-0"></i>
+            {{ ux_icon('lucide:triangle-alert', {class: 'size-4 mt-0.5 flex-shrink-0'}) }}
             <span>Custom CSS is scoped under <code class="bg-amber-100 px-1 rounded">.shop-theme</code>. Max 50KB. No <code class="bg-amber-100 px-1 rounded">@import</code>, <code class="bg-amber-100 px-1 rounded">url()</code>, <code class="bg-amber-100 px-1 rounded">expression()</code>, or <code class="bg-amber-100 px-1 rounded">javascript:</code>.</span>
         </p>
     </div>
 
-    <section class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h3 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <i class="fas fa-code text-gray-500"></i>
+    <section class="bg-panel rounded-xl border border-line shadow-sm overflow-hidden">
+        <div class="px-6 py-4 bg-subtle border-b border-line">
+            <h3 class="text-sm font-semibold text-fg flex items-center gap-2">
+                {{ ux_icon('lucide:code', {class: 'size-4 text-fg-subtle'}) }}
                 Custom CSS
             </h3>
-            <p class="text-xs text-gray-500 mt-0.5">Override styles for your storefront</p>
+            <p class="text-xs text-fg-subtle mt-0.5">Override styles for your storefront</p>
         </div>
         <div class="p-6">
             <textarea data-theme-key="customCss" rows="18"
-                      class="block w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors bg-gray-50"
+                      class="block w-full rounded-lg border border-line-strong px-3 py-2.5 font-mono text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-colors bg-subtle"
                       placeholder=".shop-theme .my-class { color: var(--color-primary-600); }">{{ config.customCss|default('') }}</textarea>
         </div>
     </section>

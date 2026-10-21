@@ -1310,3 +1310,4 @@ ui:
   api:
     title: API-Dokumentation
     intro: Interaktive Referenz der SymfoShop-REST-API. Authentifizieren Sie sich über „Authorize“ mit Ihrem API-Schlüssel.
+    open_full_page: Ganze Seite öffnen

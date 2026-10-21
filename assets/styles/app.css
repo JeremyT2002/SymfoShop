@@ -58,6 +58,11 @@
     --color-primary-950: #172554;
     --color-accent: #16a34a;
 
+    /* Status colours used by the admin */
+    --color-success: #16a34a;
+    --color-warning: #d97706;
+    --color-danger: #dc2626;
+
     --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
     --animate-fade-in: fade-in 0.25s var(--ease-out-soft) both;
@@ -160,6 +165,12 @@ html.dark {
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
 }
 
+/* Minimum touch target (WCAG 2.5.5) */
+@utility touch-target {
+    min-height: 44px;
+    min-width: 44px;
+}
+
 @utility icon {
     @apply inline-block size-[1.15em] shrink-0;
 }
@@ -197,7 +208,8 @@ html.dark {
     }
 
     /* Forms */
-    .label {
+    .label,
+    .admin-form-label {
         @apply mb-1.5 block text-sm font-medium text-fg;
     }
     .hint {
@@ -205,7 +217,8 @@ html.dark {
     }
     .input,
     .select,
-    .textarea {
+    .textarea,
+    .admin-form-input {
         @apply block w-full rounded-lg border border-line-strong bg-panel px-3.5 py-2.5 text-sm text-fg shadow-xs
             transition-colors placeholder:text-fg-subtle
             hover:border-fg-subtle

@@ -25,24 +25,24 @@
                 <label class="flex items-start gap-3">
                     <input type="checkbox" name="isActive" value="1" class="mt-1" {% if method.isActive|default(true) %}checked{% endif %}>
                     <span>
-                        <span class="block text-sm font-medium text-gray-900">{{ 'admin.payment_methods.form.active'|trans }}</span>
-                        <span class="block text-xs text-gray-500">{{ 'admin.payment_methods.form.active_help'|trans }}</span>
+                        <span class="block text-sm font-medium text-fg">{{ 'admin.payment_methods.form.active'|trans }}</span>
+                        <span class="block text-xs text-fg-subtle">{{ 'admin.payment_methods.form.active_help'|trans }}</span>
                     </span>
                 </label>
 
                 <label class="flex items-start gap-3">
                     <input type="checkbox" name="isDefault" value="1" class="mt-1" {% if method.isDefault|default(false) %}checked{% endif %}>
                     <span>
-                        <span class="block text-sm font-medium text-gray-900">{{ 'admin.payment_methods.form.default'|trans }}</span>
-                        <span class="block text-xs text-gray-500">{{ 'admin.payment_methods.form.default_help'|trans }}</span>
+                        <span class="block text-sm font-medium text-fg">{{ 'admin.payment_methods.form.default'|trans }}</span>
+                        <span class="block text-xs text-fg-subtle">{{ 'admin.payment_methods.form.default_help'|trans }}</span>
                     </span>
                 </label>
             </section>
         </div>
 
-        <div class="flex justify-end gap-3 border-t border-gray-200 pt-5">
-            <a href="{{ path('admin_payment_methods_index') }}" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ 'common.cancel'|trans }}</a>
-            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">{{ submitLabel }}</button>
+        <div class="flex justify-end gap-3 border-t border-line pt-5">
+            <a href="{{ path('admin_payment_methods_index') }}" class="rounded-lg border border-line-strong px-4 py-2 text-sm font-medium text-fg-muted hover:bg-subtle">{{ 'common.cancel'|trans }}</a>
+            <button type="submit" class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">{{ submitLabel }}</button>
         </div>
     </form>
 </div>

@@ -5,7 +5,7 @@
     const statusData = {{ data|default([])|json_encode|raw }};
     const el = document.currentScript.previousElementSibling;
     if (statusData.length === 0) {
-        el.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center h-full min-h-[220px]">' + el.dataset.empty + '</p>';
+        el.innerHTML = '<p class="text-sm text-fg-subtle flex items-center justify-center h-full min-h-[220px]">' + el.dataset.empty + '</p>';
         return;
     }
     const options = {

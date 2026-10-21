@@ -38,7 +38,7 @@ final class StorefrontSmokeTest extends WebTestCase
             '/category/' . $category->getSlug() . '?min_price=100&in_stock=1&sort=price-asc',
             '/product/' . $product->getSlug(), '/product/' . $soldOut->getSlug(),
             '/login', '/register', '/reset-password', '/contact', '/support/return-request',
-            '/legal/terms', '/legal/privacy', '/legal/cookies', '/legal/returns', '/legal/imprint', '/legal/faq',
+            '/legal/terms', '/legal/privacy', '/legal/cookies', '/legal/returns', '/legal/imprint', '/legal/faq', '/api/v1/docs',
         ] as $url) {
             $this->client->request('GET', $url);
             self::assertResponseIsSuccessful(sprintf('GET %s failed', $url));

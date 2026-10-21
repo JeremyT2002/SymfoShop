@@ -16,6 +16,10 @@ return [
         'path' => './assets/app.js',
         'entrypoint' => true,
     ],
+    'admin' => [
+        'path' => './assets/admin.js',
+        'entrypoint' => true,
+    ],
     'alpinejs' => [
         'version' => '3.17.4',
     ],
@@ -24,5 +28,11 @@ return [
     ],
     '@alpinejs/collapse' => [
         'version' => '3.17.4',
+    ],
+    'chart.js' => [
+        'version' => '4.5.1',
+    ],
+    '@kurkle/color' => [
+        'version' => '0.3.4',
     ],
 ];

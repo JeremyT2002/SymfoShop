@@ -1310,3 +1310,4 @@ ui:
   api:
     title: API documentation
     intro: Interactive reference for the SymfoShop REST API. Authenticate with your API key via the Authorize button.
+    open_full_page: Open full page
