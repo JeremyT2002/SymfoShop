@@ -66,6 +66,7 @@
             <p><strong>{{ 'email.order_confirmation.invoice_number'|trans }}:</strong> {{ invoice.invoiceNumber }}</p>
             <p><strong>{{ 'email.order_confirmation.order_date'|trans }}:</strong> {{ order.createdAt|date('Y-m-d') }}</p>
             <p><strong>{{ 'email.order_confirmation.email_label'|trans }}:</strong> {{ order.email }}</p>
+            {% if order.shippingStreet %}<p><strong>{{ 'ui.order.shipping_address'|trans }}:</strong><br>{% include 'components/_address.html.twig' with {order: order} only %}</p>{% endif %}
         </div>
 
         <h3>{{ 'email.order_confirmation.items_heading'|trans }}</h3>
@@ -92,8 +93,11 @@
 
         <div class="order-info">
             <p><strong>{{ 'email.order_confirmation.subtotal'|trans }}:</strong> {{ (order.subtotal / 100)|number_format(2) }} {{ order.currency }}</p>
-            <p><strong>{{ 'email.order_confirmation.tax'|trans }}:</strong> {{ (order.taxTotal / 100)|number_format(2) }} {{ order.currency }}</p>
-            <p><strong>{{ 'email.order_confirmation.grand_total'|trans }}:</strong> {{ (order.grandTotal / 100)|number_format(2) }} {{ order.currency }}</p>
+            {% if order.discountTotal > 0 %}<p><strong>{{ 'invoice_pdf.discount'|trans }}:</strong> &minus;{{ order.discountTotal|money(order.currency, order.locale) }}</p>{% endif %}
+            {% if order.shippingAmount > 0 %}<p><strong>{{ 'invoice_pdf.shipping'|trans }}:</strong> {{ order.shippingAmount|money(order.currency, order.locale) }}</p>{% endif %}
+            {% if not order.pricesIncludeTax %}<p><strong>{{ 'invoice_pdf.tax_added'|trans }}:</strong> {{ order.taxTotal|money(order.currency, order.locale) }}</p>{% endif %}
+            <p><strong>{{ 'email.order_confirmation.grand_total'|trans }}:</strong> {{ order.grandTotal|money(order.currency, order.locale) }}</p>
+            {% if order.pricesIncludeTax %}<p>{{ order.taxTotal > 0 ? 'invoice_pdf.tax_included'|trans : 'invoice_pdf.tax_export'|trans }}: {{ order.taxTotal|money(order.currency, order.locale) }}</p>{% endif %}
         </div>
 
         <p>{{ 'email.order_confirmation.invoice_attached'|trans }}</p>

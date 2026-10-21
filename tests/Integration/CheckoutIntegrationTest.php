@@ -74,11 +74,11 @@ class CheckoutIntegrationTest extends KernelTestCase
         );
 
         $shippingAddress = new AddressDTO(
-            '123 Main Street',
-            'New York',
-            '10001',
-            'US',
-            'NY'
+            'Hauptstraße 1',
+            'Berlin',
+            '10115',
+            'DE',
+            null
         );
 
         // Create order
@@ -94,9 +94,11 @@ class CheckoutIntegrationTest extends KernelTestCase
         $this->assertEquals('new', $order->getStatus());
 
         // US: 0% VAT; subtotal 3 * 1999 = 5997; standard shipping 0
+        // Gross prices: the customer pays 59.97, which contains 19 % VAT
         $this->assertEquals(5997, $order->getSubtotal());
-        $this->assertEquals(0, $order->getTaxTotal());
+        $this->assertEquals(958, $order->getTaxTotal());
         $this->assertEquals(5997, $order->getGrandTotal());
+        $this->assertTrue($order->isPricesIncludeTax());
 
         // Verify order items
         $orderItems = $order->getItems();
@@ -107,7 +109,7 @@ class CheckoutIntegrationTest extends KernelTestCase
         $this->assertEquals($product->getName(), $orderItem->getNameSnapshot());
         $this->assertEquals(3, $orderItem->getQuantity());
         $this->assertEquals(1999, $orderItem->getUnitPriceAmount()); // Frozen price
-        $this->assertEquals('0.0000', $orderItem->getTaxRate());
+        $this->assertEquals('0.1900', $orderItem->getTaxRate());
         $this->assertEquals(5997, $orderItem->getTotalAmount()); // Frozen total
 
         // Verify cart was cleared
@@ -143,7 +145,7 @@ class CheckoutIntegrationTest extends KernelTestCase
 
         // Create order
         $customerInfo = new CustomerInfoDTO('test@example.com', 'Jane', 'Smith');
-        $shippingAddress = new AddressDTO('456 Oak Ave', 'Los Angeles', '90001', 'US');
+        $shippingAddress = new AddressDTO('Marktplatz 2', 'Köln', '50667', 'DE');
 
         $order = $this->checkoutService->createOrder($customerInfo, $shippingAddress);
 
@@ -152,7 +154,7 @@ class CheckoutIntegrationTest extends KernelTestCase
 
         // US: 0% VAT; subtotal (2 * 1000) + (1 * 2000) = 4000
         $this->assertEquals(4000, $order->getSubtotal());
-        $this->assertEquals(0, $order->getTaxTotal());
+        $this->assertEquals(639, $order->getTaxTotal());
         $this->assertEquals(4000, $order->getGrandTotal());
     }
 
@@ -170,7 +172,7 @@ class CheckoutIntegrationTest extends KernelTestCase
         $this->cartService->add($variant->getId(), 1);
 
         $customerInfo = new CustomerInfoDTO('test@example.com', 'Test', 'User');
-        $shippingAddress = new AddressDTO('123 St', 'City', '12345', 'US');
+        $shippingAddress = new AddressDTO('Ring 3', 'München', '80331', 'DE');
 
         $order = $this->checkoutService->createOrder($customerInfo, $shippingAddress);
 

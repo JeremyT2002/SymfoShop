@@ -1001,6 +1001,9 @@ invoice_pdf:
   subtotal: Zwischensumme
   shipping: Versand
   tax_included: inkl. MwSt.
+  discount: Rabatt
+  tax_added: zzgl. MwSt.
+  tax_export: Steuerfreie Ausfuhrlieferung
   grand_total: Gesamtbetrag
   thank_you_strong: Vielen Dank für Ihren Einkauf bei %shop%.
   thank_you_text: Bitte bewahren Sie diese Rechnung für Ihre Unterlagen auf. Bei Fragen zur Bestellung wenden Sie sich an unseren Support.
@@ -1223,12 +1226,12 @@ ui:
     no_results: 'Keine Produkte für „%query%“ gefunden'
     no_results_hint: Prüfen Sie die Schreibweise oder versuchen Sie einen allgemeineren Begriff.
   footer:
-    prices_excl_vat: Alle Preise zzgl. MwSt. und Versand. Die MwSt. wird im Checkout ausgewiesen.
+    prices_incl_vat: Alle Preise inkl. MwSt., zzgl. Versandkosten.
   product:
     from: ab
     sold_out: Ausverkauft
     choose_options: Optionen wählen
-    price_note: zzgl. MwSt. und Versand
+    price_note: inkl. MwSt., zzgl. Versand
     only_n_left: 'Nur noch %count% verfügbar'
     shipping_note: Versand mit Sendungsverfolgung
     returns_note: Einfache Rücksendung — zu unseren Rückgabebedingungen
@@ -1252,7 +1255,7 @@ ui:
     added: Hinzugefügt
     view_cart: Zum Warenkorb
     calculated_at_checkout: Wird im Checkout berechnet
-    tax_note: MwSt. und Versand werden im Checkout berechnet.
+    tax_note: inkl. MwSt. · Versand wird im Checkout berechnet.
     invalid_request: Die Anfrage konnte nicht verarbeitet werden.
     product_unavailable: Dieses Produkt ist nicht mehr verfügbar.
     out_of_stock: Dieser Artikel ist ausverkauft.
@@ -1273,6 +1276,8 @@ ui:
     place_order_binding: Zahlungspflichtig bestellen
     placing_order: Bestellung wird aufgegeben…
     view_orders: Meine Bestellungen
+    vat_included: inkl. %rate% % MwSt.
+    vat_export: Steuerfreie Ausfuhr (keine MwSt.)
   payment:
     processing: Zahlung wird verarbeitet…
     failed: Die Zahlung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.
@@ -1311,3 +1316,5 @@ ui:
     title: API-Dokumentation
     intro: Interaktive Referenz der SymfoShop-REST-API. Authentifizieren Sie sich über „Authorize“ mit Ihrem API-Schlüssel.
     open_full_page: Ganze Seite öffnen
+  order:
+    shipping_address: Lieferadresse

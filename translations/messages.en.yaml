@@ -1001,6 +1001,9 @@ invoice_pdf:
   subtotal: Subtotal
   shipping: Shipping
   tax_included: incl. VAT
+  discount: Discount
+  tax_added: plus VAT
+  tax_export: Tax-free export delivery
   grand_total: Grand total
   thank_you_strong: Thank you for shopping at %shop%.
   thank_you_text: Please keep this invoice for your records. If you have questions about your order, contact our support.
@@ -1223,12 +1226,12 @@ ui:
     no_results: 'No products found for “%query%”'
     no_results_hint: Check the spelling or try a more general term.
   footer:
-    prices_excl_vat: All prices excl. VAT, plus shipping. VAT is added at checkout.
+    prices_incl_vat: All prices incl. VAT, plus shipping.
   product:
     from: from
     sold_out: Sold out
     choose_options: Choose options
-    price_note: Excl. VAT, plus shipping
+    price_note: Incl. VAT, plus shipping
     only_n_left: 'Only %count% left'
     shipping_note: Tracked shipping on every order
     returns_note: Easy returns — see our return policy
@@ -1252,7 +1255,7 @@ ui:
     added: Added
     view_cart: View cart
     calculated_at_checkout: Calculated at checkout
-    tax_note: VAT and shipping are calculated at checkout.
+    tax_note: Incl. VAT · Shipping is calculated at checkout.
     invalid_request: This request could not be processed.
     product_unavailable: This product is no longer available.
     out_of_stock: This item is out of stock.
@@ -1273,6 +1276,8 @@ ui:
     place_order_binding: Place order with obligation to pay
     placing_order: Placing order…
     view_orders: View my orders
+    vat_included: Incl. %rate% % VAT
+    vat_export: Tax-free export (no VAT)
   payment:
     processing: Processing payment…
     failed: The payment could not be completed. Please try again.
@@ -1311,3 +1316,5 @@ ui:
     title: API documentation
     intro: Interactive reference for the SymfoShop REST API. Authenticate with your API key via the Authorize button.
     open_full_page: Open full page
+  order:
+    shipping_address: Shipping address

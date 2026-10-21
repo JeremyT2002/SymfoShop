@@ -10,6 +10,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\WishlistRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Intl\Countries;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -41,6 +42,7 @@ final class StorefrontExtension extends AbstractExtension
         return [
             new TwigFilter('money', $this->formatMoney(...)),
             new TwigFilter('public_name', $this->publicName(...)),
+            new TwigFilter('country_name', $this->countryName(...)),
         ];
     }
 
@@ -70,6 +72,19 @@ final class StorefrontExtension extends AbstractExtension
         }
 
         return number_format($amount, 2, '.', ',') . ' ' . $currency;
+    }
+
+    /**
+     * "DE" → "Deutschland" in the current locale (falls back to the code).
+     */
+    public function countryName(?string $code): string
+    {
+        if ($code === null || $code === '') {
+            return '';
+        }
+        $locale = $this->requestStack->getCurrentRequest()?->getLocale() ?? 'en';
+
+        return Countries::exists($code) ? Countries::getName($code, $locale) : $code;
     }
 
     /**

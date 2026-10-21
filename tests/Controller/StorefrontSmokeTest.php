@@ -70,10 +70,21 @@ final class StorefrontSmokeTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('form[data-checkout-form] input[name="customer_info[email]"]');
 
+        // Gross prices: the total is what the customer sees, VAT is contained in it (home rate without OSS)
         $this->client->request('GET', '/checkout/totals?country=FR');
         self::assertResponseIsSuccessful();
         $totals = json_decode((string) $this->client->getResponse()->getContent(), true)['totals'];
-        self::assertSame((int) round(($totals['subtotal'] + $totals['shippingAmount']) * 0.2), $totals['taxTotal']);
+        self::assertSame($totals['subtotal'] + $totals['shippingAmount'], $totals['grandTotal']);
+        self::assertSame(5198, $totals['subtotal']);
+        $gross = $totals['grandTotal'];
+        self::assertSame((int) round($gross - $gross / 1.19), $totals['taxTotal']);
+
+        // Export: home VAT removed, nothing charged on top
+        $this->client->request('GET', '/checkout/totals?country=US');
+        $export = json_decode((string) $this->client->getResponse()->getContent(), true)['totals'];
+        self::assertSame(0, $export['taxTotal']);
+        self::assertFalse($export['pricesIncludeTax']);
+        self::assertSame((int) round(5198 / 1.19), $export['subtotal']);
     }
 
     public function testAccountPagesRender(): void

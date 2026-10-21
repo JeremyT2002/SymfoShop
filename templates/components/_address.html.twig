@@ -1,0 +1,13 @@
+{#
+  Postal address of an order (plain markup: also used in the invoice PDF and e-mails).
+  Params: order
+#}
+{%- if order.shippingStreet -%}
+    {{ order.customerName }}<br>
+    {{ order.shippingStreet }}<br>
+    {{ order.shippingPostalCode }} {{ order.shippingCity }}{% if order.shippingState %}, {{ order.shippingState }}{% endif %}<br>
+    {{ order.shippingCountry|country_name }}
+    {%- if order.phone %}<br>{{ order.phone }}{% endif -%}
+{%- else -%}
+    {{ order.customerName ?: '—' }}
+{%- endif -%}

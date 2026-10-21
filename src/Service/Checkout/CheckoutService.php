@@ -14,6 +14,7 @@ use App\Repository\ShippingMethodRepository;
 use App\Service\Cart\CartService;
 use App\Service\Cart\CouponService;
 use App\Service\Inventory\InventoryService;
+use App\Service\Tax\TaxCalculator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -31,6 +32,7 @@ class CheckoutService
         private readonly InventoryService $inventoryService,
         private readonly ShippingMethodRepository $shippingMethodRepository,
         private readonly RequestStack $requestStack,
+        private readonly TaxCalculator $taxCalculator,
         #[Autowire('%kernel.default_locale%')]
         private readonly string $defaultLocale,
     ) {
@@ -111,6 +113,9 @@ class CheckoutService
     }
 
     /**
+     * Order totals for the current cart. Product and shipping prices are gross: inside the EU the
+     * customer pays them unchanged and the contained VAT is reported; exports are charged net.
+     *
      * @return array{
      *   subtotal: int,
      *   discount: int,
@@ -118,6 +123,8 @@ class CheckoutService
      *   shippingMethodCode: ?string,
      *   shippingMethodLabel: ?string,
      *   taxTotal: int,
+     *   taxBreakdown: list<array{rate: float, amount: int}>,
+     *   pricesIncludeTax: bool,
      *   grandTotal: int,
      *   currency: string,
      *   couponCode: ?string
@@ -127,6 +134,7 @@ class CheckoutService
     {
         $items = $this->cartService->getDetailedItems();
         $totals = $this->cartService->getTotals();
+        $export = $this->taxCalculator->isExport($countryCode);
 
         if (empty($items)) {
             return [
@@ -136,16 +144,26 @@ class CheckoutService
                 'shippingMethodCode' => null,
                 'shippingMethodLabel' => null,
                 'taxTotal' => 0,
+                'taxBreakdown' => [],
+                'pricesIncludeTax' => !$export,
                 'grandTotal' => 0,
                 'currency' => 'EUR',
                 'couponCode' => null,
             ];
         }
 
-        $subtotal = $totals['subtotal'];
+        // Charged amount per line, grouped by the VAT rate that applies to it
+        $lines = [];
+        $subtotal = 0;
+        foreach ($items as $item) {
+            $taxClass = $item['variant']->getProduct()->getTaxClass();
+            $amount = $this->taxCalculator->chargeableAmount($item['itemTotal'], $taxClass, $countryCode);
+            $lines[] = ['amount' => $amount, 'rate' => $this->taxCalculator->rateFor($taxClass, $countryCode)];
+            $subtotal += $amount;
+        }
+
         $discount = 0;
         $couponCode = $totals['couponCode'] ?? null;
-
         if ($couponCode) {
             $validation = $this->couponService->validate($couponCode, $user, $subtotal);
             if ($validation['valid'] && $validation['coupon']) {
@@ -156,28 +174,53 @@ class CheckoutService
             }
         }
 
-        $subtotalAfterDiscount = $subtotal - $discount;
         $shipping = $this->resolveShippingMethod($shippingMethodCode);
-        $shippingAmount = $shipping?->getAmountCents() ?? 0;
-        $shippingCode = $shipping?->getCode();
-        $shippingLabel = $shipping?->getName();
+        $shippingAmount = $shipping !== null
+            ? $this->taxCalculator->chargeableAmount($this->shippingPrice($shipping, $subtotal - $discount), 'standard', $countryCode)
+            : 0;
 
-        $taxRate = $this->resolveTaxRateForCountry($countryCode);
-        $taxableBase = $subtotalAfterDiscount + $shippingAmount;
-        $taxTotal = (int) round($taxableBase * $taxRate);
-        $grandTotal = $taxableBase + $taxTotal;
+        // The discount reduces every line proportionally; shipping is taxed at the standard rate.
+        $buckets = [];
+        foreach ($lines as $line) {
+            $share = $subtotal > 0 ? $line['amount'] / $subtotal : 0;
+            $key = (string) $line['rate'];
+            $buckets[$key] = ($buckets[$key] ?? 0) + $line['amount'] - $discount * $share;
+        }
+        $shippingRateKey = (string) $this->taxCalculator->rateFor('standard', $countryCode);
+        $buckets[$shippingRateKey] = ($buckets[$shippingRateKey] ?? 0) + $shippingAmount;
+
+        $breakdown = [];
+        $taxTotal = 0;
+        foreach ($buckets as $rate => $gross) {
+            $tax = $this->taxCalculator->includedTax((int) round($gross), (float) $rate);
+            if ($tax > 0) {
+                $breakdown[] = ['rate' => (float) $rate, 'amount' => $tax];
+                $taxTotal += $tax;
+            }
+        }
+        usort($breakdown, static fn (array $a, array $b): int => $b['rate'] <=> $a['rate']);
 
         return [
             'subtotal' => $subtotal,
             'discount' => $discount,
             'shippingAmount' => $shippingAmount,
-            'shippingMethodCode' => $shippingCode,
-            'shippingMethodLabel' => $shippingLabel,
+            'shippingMethodCode' => $shipping?->getCode(),
+            'shippingMethodLabel' => $shipping?->getName(),
             'taxTotal' => $taxTotal,
-            'grandTotal' => $grandTotal,
+            'taxBreakdown' => $breakdown,
+            'pricesIncludeTax' => !$export,
+            'grandTotal' => $subtotal - $discount + $shippingAmount,
             'currency' => $totals['currency'],
             'couponCode' => $couponCode,
         ];
+    }
+
+    /**
+     * Gross shipping price for the given (discounted) goods value.
+     */
+    private function shippingPrice(ShippingMethod $method, int $goodsValue): int
+    {
+        return $method->getAmountCents();
     }
 
     /**
@@ -198,11 +241,18 @@ class CheckoutService
         $items = $this->cartService->getDetailedItems();
         $countryForTax = trim($shippingAddress->country) !== '' ? trim($shippingAddress->country) : null;
         $totals = $this->calculateTotals($shippingMethodCode, $countryForTax, $user);
-        $taxRateStr = $this->formatTaxRate($this->resolveTaxRateForCountry($countryForTax));
 
         $order = new Order();
         $order->setOrderNumber($this->generateOrderNumber());
         $order->setEmail($customerInfo->email);
+        $order->setFirstName($customerInfo->firstName);
+        $order->setLastName($customerInfo->lastName);
+        $order->setPhone($customerInfo->phone);
+        $order->setShippingStreet($shippingAddress->street);
+        $order->setShippingPostalCode($shippingAddress->postalCode);
+        $order->setShippingCity($shippingAddress->city);
+        $order->setShippingState($shippingAddress->state);
+        $order->setShippingCountry($countryForTax !== null ? strtoupper($countryForTax) : null);
         $request = $this->requestStack->getMainRequest();
         $locale = $request?->getLocale() ?? $this->defaultLocale;
         if (!\in_array($locale, self::ENABLED_LOCALES, true)) {
@@ -215,6 +265,8 @@ class CheckoutService
         $order->setDiscountTotal($totals['discount']);
         $order->setCouponCode($totals['couponCode']);
         $order->setTaxTotal($totals['taxTotal']);
+        // New orders: grand total = subtotal - discount + shipping; taxTotal is the VAT contained (0 for exports)
+        $order->setPricesIncludeTax(true);
         $order->setGrandTotal($totals['grandTotal']);
         $order->setShippingAmount($totals['shippingAmount']);
         $order->setShippingMethodCode($totals['shippingMethodCode']);
@@ -232,9 +284,10 @@ class CheckoutService
             $orderItem->setProductVariant($variant);
             $orderItem->setNameSnapshot($variant->getProduct()->getName());
             $orderItem->setQuantity($quantity);
-            $orderItem->setUnitPriceAmount($variant->getPriceAmount());
-            $orderItem->setTaxRate($taxRateStr);
-            $orderItem->setTotalAmount($item['itemTotal']);
+            $taxClass = $variant->getProduct()->getTaxClass();
+            $orderItem->setUnitPriceAmount($this->taxCalculator->chargeableAmount($variant->getPriceAmount(), $taxClass, $countryForTax));
+            $orderItem->setTaxRate($this->formatTaxRate($this->taxCalculator->rateFor($taxClass, $countryForTax)));
+            $orderItem->setTotalAmount($this->taxCalculator->chargeableAmount($item['itemTotal'], $taxClass, $countryForTax));
 
             $order->addItem($orderItem);
         }
@@ -269,21 +322,6 @@ class CheckoutService
         }
 
         return $this->shippingMethodRepository->findFirstActive();
-    }
-
-    private function resolveTaxRateForCountry(?string $countryCode): float
-    {
-        $cc = $countryCode !== null ? strtoupper(trim($countryCode)) : '';
-        if ($cc === '') {
-            return 0.19;
-        }
-
-        return match ($cc) {
-            'DE' => 0.19,
-            'FR' => 0.20,
-            'US' => 0.0,
-            default => 0.19,
-        };
     }
 
     private function formatTaxRate(float $rate): string

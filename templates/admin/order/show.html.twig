@@ -88,6 +88,10 @@
                         <dd class="mt-1 text-sm text-fg">{{ order.email }}</dd>
                     </div>
                     <div>
+                        <dt class="text-sm font-medium text-fg-subtle">{{ 'ui.order.shipping_address'|trans }}</dt>
+                        <dd class="mt-1 text-sm leading-6 text-fg">{% include 'components/_address.html.twig' with {order: order} only %}</dd>
+                    </div>
+                    <div>
                         <dt class="text-sm font-medium text-fg-subtle">{{ 'admin.orders.show.status_label'|trans }}</dt>
                         <dd class="mt-1">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full

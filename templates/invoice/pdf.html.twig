@@ -232,6 +232,7 @@
                 <td>
                     <div class="panel">
                         <p class="panel-title">{{ 'invoice_pdf.recipient'|trans }}</p>
+                        {% if order.shippingStreet %}<p>{% include 'components/_address.html.twig' with {order: order} only %}</p>{% endif %}
                         <p><strong>{{ 'invoice_pdf.email'|trans }}</strong><br>{{ order.email }}</p>
                         <p><strong>{{ 'invoice_pdf.order_number'|trans }}</strong><br>{{ order.orderNumber }}</p>
                     </div>
@@ -286,20 +287,35 @@
                             <td>{{ 'invoice_pdf.subtotal'|trans }}</td>
                             <td class="text-right">{{ (order.subtotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
                         </tr>
+                        {% if order.discountTotal > 0 %}
+                        <tr>
+                            <td>{{ 'invoice_pdf.discount'|trans }}{% if order.couponCode %} ({{ order.couponCode|upper }}){% endif %}</td>
+                            <td class="text-right">&minus;{{ (order.discountTotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
+                        </tr>
+                        {% endif %}
                         {% if order.shippingAmount > 0 or order.shippingMethodLabel %}
                         <tr>
                             <td>{{ 'invoice_pdf.shipping'|trans }}{% if order.shippingMethodLabel %} ({{ order.shippingMethodLabel }}){% endif %}</td>
                             <td class="text-right">{{ (order.shippingAmount / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
                         </tr>
                         {% endif %}
+                        {% if not order.pricesIncludeTax %}
+                        {# Orders before gross pricing: VAT was added on top #}
                         <tr>
-                            <td>{{ 'invoice_pdf.tax_included'|trans }}</td>
+                            <td>{{ 'invoice_pdf.tax_added'|trans }}</td>
                             <td class="text-right">{{ (order.taxTotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
                         </tr>
+                        {% endif %}
                         <tr class="grand">
                             <td>{{ 'invoice_pdf.grand_total'|trans }}</td>
                             <td class="text-right">{{ (order.grandTotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
                         </tr>
+                        {% if order.pricesIncludeTax %}
+                        <tr>
+                            <td>{{ order.taxTotal > 0 ? 'invoice_pdf.tax_included'|trans : 'invoice_pdf.tax_export'|trans }}</td>
+                            <td class="text-right">{{ (order.taxTotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
+                        </tr>
+                        {% endif %}
                     </table>
                 </td>
             </tr>

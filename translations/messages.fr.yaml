@@ -1001,6 +1001,9 @@ invoice_pdf:
   subtotal: Sous-total
   shipping: Livraison
   tax_included: TVA incluse
+  discount: Remise
+  tax_added: TVA en sus
+  tax_export: Livraison à l'exportation exonérée
   grand_total: Total
   thank_you_strong: Merci pour votre achat chez %shop%.
   thank_you_text: Veuillez conserver cette facture pour vos archives. Si vous avez des questions concernant votre commande, contactez notre support.
@@ -1223,12 +1226,12 @@ ui:
     no_results: 'Aucun produit trouvé pour « %query% »'
     no_results_hint: Vérifiez l'orthographe ou essayez un terme plus général.
   footer:
-    prices_excl_vat: Tous les prix hors TVA, frais de port en sus. La TVA est ajoutée lors du paiement.
+    prices_incl_vat: Tous les prix TTC, frais de port en sus.
   product:
     from: à partir de
     sold_out: Épuisé
     choose_options: Choisir les options
-    price_note: HT, frais de port en sus
+    price_note: TTC, frais de port en sus
     only_n_left: 'Plus que %count% en stock'
     shipping_note: Livraison avec suivi pour chaque commande
     returns_note: Retours faciles — voir notre politique de retour
@@ -1252,7 +1255,7 @@ ui:
     added: Ajouté
     view_cart: Voir le panier
     calculated_at_checkout: Calculé lors du paiement
-    tax_note: La TVA et les frais de port sont calculés lors du paiement.
+    tax_note: TTC · Les frais de port sont calculés lors du paiement.
     invalid_request: La demande n'a pas pu être traitée.
     product_unavailable: Ce produit n'est plus disponible.
     out_of_stock: Cet article est épuisé.
@@ -1273,6 +1276,8 @@ ui:
     place_order_binding: Commander avec obligation de paiement
     placing_order: Commande en cours…
     view_orders: Voir mes commandes
+    vat_included: dont TVA %rate% %
+    vat_export: Exportation exonérée (sans TVA)
   payment:
     processing: Paiement en cours…
     failed: Le paiement n'a pas pu aboutir. Veuillez réessayer.
@@ -1311,3 +1316,5 @@ ui:
     title: Documentation de l'API
     intro: Référence interactive de l'API REST SymfoShop. Authentifiez-vous avec votre clé API via le bouton « Authorize ».
     open_full_page: Ouvrir en pleine page
+  order:
+    shipping_address: Adresse de livraison
