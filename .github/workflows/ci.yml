@@ -76,6 +76,16 @@ jobs:
       - name: Lint DI container (test env)
         run: php bin/console lint:container --env=test --no-debug
 
+      # Pages render the compiled stylesheet; without it AssetMapper tries to resolve @import "tailwindcss" as a file.
+      - name: Cache Tailwind CLI
+        uses: actions/cache@v4
+        with:
+          path: var/tailwind
+          key: ${{ runner.os }}-tailwind-${{ hashFiles('config/packages/symfonycasts_tailwind.yaml') }}
+
+      - name: Build Tailwind CSS
+        run: php -d memory_limit=512M bin/console tailwind:build
+
       - name: Run PHPUnit (with coverage)
         run: |
           mkdir -p var/coverage
