@@ -146,7 +146,11 @@
         </div>
     </div>
 
-    {# Mobile menu drawer #}
+    {#
+      Mobile menu drawer. Teleported to <body>: the header uses backdrop-filter, which makes it the
+      containing block for position:fixed descendants — inside it the drawer would only cover the header.
+    #}
+    <template x-teleport="body">
     <div x-cloak x-show="menuOpen" class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="{{ 'ui.nav.menu'|trans }}" id="mobile-menu">
         <div x-show="menuOpen" x-transition.opacity class="absolute inset-0 bg-black/40" @click="menuOpen = false"></div>
         <div x-show="menuOpen" x-trap.inert.noscroll="menuOpen"
@@ -219,4 +223,5 @@
             </div>
         </div>
     </div>
+    </template>
 </header>
