@@ -64,6 +64,8 @@ common:
   info: Info
   yes: Oui
   no: Non
+  close: Fermer
+  view: Voir
   
 cart:
   title: Panier
@@ -221,6 +223,8 @@ checkout:
   simulate_success: Simuler succès
   simulate_failure: Simuler échec
   simulate_pending: Laisser en attente
+  dev_simulated_failure: Le paiement a été simulé comme échoué.
+  dev_simulated_pending: Le paiement reste en attente.
   skip_payment_dev_notice: "Remarque : CHECKOUT_SKIP_PAYMENT est activé — le paiement a été marqué comme réussi uniquement pour les tests locaux."
   payment_page_title: Paiement
   payment_meta_description: Finalisez votre paiement
@@ -235,6 +239,9 @@ checkout:
     shipping_method_unavailable: L'option de livraison sélectionnée n'est pas disponible.
     payment_method_unavailable: Le mode de paiement sélectionné n'est pas disponible.
     order_not_pending: La commande n'est pas en attente de paiement.
+    out_of_stock: Certains articles de votre panier ne sont plus disponibles dans la quantité demandée. Veuillez vérifier votre panier.
+    order_failed: Votre commande n'a pas pu être passée. Veuillez réessayer.
+    payment_start_failed: Le paiement n'a pas pu être lancé. Veuillez réessayer ou choisir un autre moyen de paiement.
   not_found:
     order: Commande introuvable
     payment: Paiement introuvable
@@ -355,6 +362,7 @@ security:
     forgot_password: Mot de passe oublié ?
   register:
     rate_limited: Trop de tentatives d'inscription depuis votre réseau. Veuillez réessayer plus tard.
+    flash_success: Votre compte a été créé. Vous pouvez maintenant vous connecter.
     title: Créez votre compte
     already_have_account: Vous avez déjà un compte ?
     sign_in: Se connecter
@@ -373,11 +381,11 @@ home:
     view_featured: Produits vedettes
   benefits:
     fast_shipping: Livraison rapide
-    fast_shipping_desc: Livraison gratuite pour les commandes de plus de 50€
+    fast_shipping_desc: Livraison avec suivi
     secure_payment: Paiement sécurisé
     secure_payment_desc: Paiement 100% sécurisé
     easy_returns: Retours faciles
-    easy_returns_desc: Politique de retour de 30 jours
+    easy_returns_desc: Demande de retour en ligne en quelques clics
     support: Support 24/7
     support_desc: Nous sommes là pour vous aider
   featured:
@@ -496,6 +504,7 @@ account:
       profile_updated: Vos informations de profil ont été mises à jour.
   marketing:
     opt_out_success: Vous êtes désinscrit des rappels de panier abandonné.
+    opt_out_invalid_link: Ce lien de désinscription n'est pas valide. Veuillez utiliser le lien de votre dernier e-mail.
 
 admin:
   brand:
@@ -1193,3 +1202,112 @@ review:
     invalid_payload: Veuillez renseigner la note, le titre et le texte.
     submitted: Avis envoyé et en attente de modération.
 
+ui:
+  a11y:
+    skip_to_content: Aller au contenu
+    breadcrumb: Fil d'Ariane
+    pagination: Pagination
+  nav:
+    main: Navigation principale
+    menu: Menu
+    open_menu: Ouvrir le menu
+    home_aria: 'Accueil %shop%'
+    all_products: Tous les produits
+    account_menu: Compte
+    my_account: Mon compte
+    toggle_theme: Basculer le mode sombre
+  search:
+    label: Recherche
+    placeholder: Rechercher des produits…
+    results_for: 'Résultats pour « %query% »'
+    no_results: 'Aucun produit trouvé pour « %query% »'
+    no_results_hint: Vérifiez l'orthographe ou essayez un terme plus général.
+  footer:
+    prices_excl_vat: Tous les prix hors TVA, frais de port en sus. La TVA est ajoutée lors du paiement.
+  product:
+    from: à partir de
+    sold_out: Épuisé
+    choose_options: Choisir les options
+    price_note: HT, frais de port en sus
+    only_n_left: 'Plus que %count% en stock'
+    shipping_note: Livraison avec suivi pour chaque commande
+    returns_note: Retours faciles — voir notre politique de retour
+    payment_note: Paiement sécurisé et chiffré
+    category: Catégorie
+  quantity:
+    decrease: Diminuer la quantité
+    increase: Augmenter la quantité
+  gallery:
+    previous: Image précédente
+    next: Image suivante
+    zoom: Agrandir l'image
+    thumbnails: Images du produit
+  reviews:
+    count: '{0} Aucun avis|{1} 1 avis|]1,Inf[ %count% avis'
+    rating_aria: '%rating% étoiles sur 5'
+    anonymous: Client
+  stock:
+    notify_account: 'Nous écrirons à %email% dès que cette variante sera de nouveau disponible.'
+  cart:
+    added: Ajouté
+    view_cart: Voir le panier
+    calculated_at_checkout: Calculé lors du paiement
+    tax_note: La TVA et les frais de port sont calculés lors du paiement.
+    invalid_request: La demande n'a pas pu être traitée.
+    product_unavailable: Ce produit n'est plus disponible.
+    out_of_stock: Cet article est épuisé.
+    only_n_available: 'Plus que %count% disponibles.'
+    item_not_found: Cet article n'est plus dans votre panier.
+  coupon:
+    have_code: Vous avez un code de réduction ?
+    code_required: Veuillez saisir un code de réduction.
+    invalid: Ce code de réduction n'est pas valable pour votre panier.
+    applied: Code de réduction appliqué.
+    removed: Code de réduction retiré.
+    remove: Retirer le code de réduction
+  checkout:
+    back_to_cart: Retour au panier
+    have_account: Vous avez déjà un compte ?
+    no_payment_methods: Aucun moyen de paiement n'est disponible pour le moment. Veuillez nous contacter.
+    payment_next_step: Vous finaliserez le paiement à l'étape suivante.
+    place_order_binding: Commander avec obligation de paiement
+    placing_order: Commande en cours…
+    view_orders: Voir mes commandes
+  payment:
+    processing: Paiement en cours…
+    failed: Le paiement n'a pas pu aboutir. Veuillez réessayer.
+    secure_note: Les paiements sont traités en toute sécurité par notre prestataire.
+  account:
+    items_count: '{1} 1 article|]1,Inf[ %count% articles'
+  auth:
+    show_password: Afficher le mot de passe
+    register_benefits: Suivez vos commandes, enregistrez votre liste de souhaits et commandez plus vite.
+    password_hint: Au moins 6 caractères.
+    agree_terms: 'J''accepte les <a href="%terms%" class="link" target="_blank">conditions générales</a> et j''ai lu la <a href="%privacy%" class="link" target="_blank">politique de confidentialité</a>.'
+    reset_title: Réinitialiser le mot de passe
+    reset_request_intro: Saisissez votre adresse e-mail et nous vous enverrons un lien pour choisir un nouveau mot de passe.
+    reset_request_submit: Envoyer le lien
+    reset_intro: Choisissez un nouveau mot de passe pour votre compte.
+    new_password: Nouveau mot de passe
+    reset_submit: Enregistrer le mot de passe
+    back_to_login: Retour à la connexion
+  category:
+    meta_description: '%category% — découvrez tous les produits de cette catégorie.'
+  filters:
+    remove: Retirer le filtre
+  signup:
+    title: Profitez de votre compte
+    text: Suivez vos commandes, enregistrez vos favoris et commandez plus rapidement la prochaine fois.
+  testimonials:
+    title: Ce que disent nos clients
+  faq:
+    more_questions: D'autres questions ?
+  contact:
+    faq_hint: Réponses aux questions les plus fréquentes
+    returns_hint: Demander un retour pour une commande
+  support:
+    attach: Joindre des fichiers
+  api:
+    title: Documentation de l'API
+    intro: Référence interactive de l'API REST SymfoShop. Authentifiez-vous avec votre clé API via le bouton « Authorize ».
+    open_full_page: Ouvrir en pleine page

@@ -1,629 +1,92 @@
+{%- set site_name = theme_config().brand.siteName|default('SymfoShop') -%}
 <!DOCTYPE html>
 <html lang="{{ app.request.locale|default('en') }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#f9fafb" id="meta-theme-color">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#fafafa">
     <script>
+        {# Apply the colour scheme before first paint (no flash). Mirrors assets/js/components/color-scheme.js. #}
         (function () {
             try {
-                var k = 'symfoshop-color-scheme';
-                var r = document.documentElement;
-                var v = localStorage.getItem(k);
-                if (v === 'dark') { r.classList.add('dark'); }
-                else if (v === 'light') { r.classList.remove('dark'); }
-                else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) { r.classList.add('dark'); }
-                else { r.classList.remove('dark'); }
-                var m = document.getElementById('meta-theme-color');
-                if (m) { m.setAttribute('content', r.classList.contains('dark') ? '#030712' : '#f9fafb'); }
+                var stored = localStorage.getItem('symfoshop-color-scheme');
+                var dark = stored === 'dark' || (stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                document.documentElement.classList.toggle('dark', dark);
             } catch (e) {}
         })();
     </script>
-    <title>{% block title %}{{ theme_config().brand.siteName|default('SymfoShop') }}{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}{{ theme_config().brand.siteName|default('SymfoShop') }} - Your online shopping destination{% endblock %}">
 
-    {# Canonical URL (current path, no query string) #}
-    <link rel="canonical" href="{{ app.request.getSchemeAndHttpHost() }}{{ app.request.getPathInfo() }}">
+    {#- block() returns already-escaped template output, hence |raw -#}
+    {%- set page_title = block('page_title') is defined ? block('page_title')|trim : '' %}
+    <title>{% block title %}{% if page_title %}{{ page_title|raw }} · {% endif %}{{ site_name }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{{ theme_config().brand.tagline|default(site_name) }}{% endblock %}">
+    <link rel="canonical" href="{{ app.request.schemeAndHttpHost ~ app.request.pathInfo }}">
 
     {% block robots_meta %}
-        {# robots meta = global SEO default AND per-page override (seo_noindex) #}
-        {% set globalNoIndex = theme_config().seo.defaultNoIndex|default(false) %}
-        {% set pageNoIndex = seo_noindex|default(false) %}
-        {% set noIndex = globalNoIndex or pageNoIndex %}
+        {%- set noIndex = theme_config().seo.defaultNoIndex|default(false) or seo_noindex|default(false) -%}
         <meta name="robots" content="{{ noIndex ? 'noindex,nofollow' : 'index,follow' }}">
     {% endblock %}
 
+    <meta property="og:site_name" content="{{ site_name }}">
     {% block meta_tags %}{% endblock %}
 
-    {% if theme_config().brand.faviconUrl is defined and theme_config().brand.faviconUrl %}
-    <link rel="icon" href="{{ theme_config().brand.faviconUrl }}">
+    {% if theme_config().brand.faviconUrl|default(false) %}
+        <link rel="icon" href="{{ theme_config().brand.faviconUrl }}">
     {% endif %}
-    
-    <!-- Theme tokens (CSS variables) -->
+
+    {% block importmap %}{{ importmap('app') }}{% endblock %}
+
+    {# Theme editor tokens after the stylesheet: unlayered :root vars override the defaults #}
     {% include 'theme/_tokens.css.twig' %}
-    {% if theme_config().customCss is defined and theme_config().customCss %}
-    <style id="theme-custom-css">{{ theme_config().customCss|raw }}</style>
+    {% if theme_config().customCss|default(false) %}
+        <style id="theme-custom-css">{{ theme_config().customCss|raw }}</style>
     {% endif %}
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{{ asset('css/storefront-dark.css') }}">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
-    <!-- Inter Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: 'var(--color-primary-50)',
-                            100: 'var(--color-primary-100)',
-                            200: 'var(--color-primary-200)',
-                            300: 'var(--color-primary-300)',
-                            400: 'var(--color-primary-400)',
-                            500: 'var(--color-primary-500)',
-                            600: 'var(--color-primary-600)',
-                            700: 'var(--color-primary-700)',
-                            800: 'var(--color-primary-800)',
-                            900: 'var(--color-primary-900)',
-                        },
-                        surface: 'var(--color-surface, #ffffff)',
-                        accent: 'var(--color-accent, #22c55e)',
-                    },
-                    fontFamily: {
-                        sans: ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
-                    },
-                    borderRadius: {
-                        'theme-sm': 'var(--radius-sm)',
-                        'theme-md': 'var(--radius-md)',
-                        'theme-lg': 'var(--radius-lg)',
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.3s ease-in-out',
-                        'slide-up': 'slideUp 0.3s ease-out',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' },
-                        },
-                        slideUp: {
-                            '0%': { transform: 'translateY(20px)', opacity: '0' },
-                            '100%': { transform: 'translateY(0)', opacity: '1' },
-                        },
-                    },
-                },
-            },
-        }
-    </script>
-    
+
     {% block stylesheets %}{% endblock %}
 </head>
-<body class="bg-gray-50 antialiased smooth-scroll flex flex-col min-h-screen" 
-      data-js-page="{% block js_page %}{% endblock %}"
+<body class="flex min-h-screen flex-col"
+      data-page="{% block js_page %}{% endblock %}"
+      data-cart-url="{{ path('cart_show') }}"
       data-cart-add-url="{{ path('cart_add') }}"
-      data-wishlist-toggle-url="{{ path('account_wishlist_toggle') }}"
-      data-wishlist-check-url="{{ path('account_wishlist_check') }}"
-      data-msg-loading="{{ 'common.loading'|trans|e('html_attr') }}"
-      data-msg-error="{{ 'common.error'|trans|e('html_attr') }}"
-      data-msg-cart-added="{{ 'cart.item_added'|trans|e('html_attr') }}"
-      data-msg-cart-add-error="{{ 'product.error_adding'|trans|e('html_attr') }}"
-      data-msg-wishlist-added="{{ 'wishlist.added'|trans|e('html_attr') }}"
-      data-msg-wishlist-removed="{{ 'wishlist.removed'|trans|e('html_attr') }}"
-      data-msg-wishlist-error="{{ 'wishlist.error'|trans|e('html_attr') }}">
-    <!-- Navigation -->
-    <nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm sticky top-0 z-50 transition-colors duration-200" role="navigation" aria-label="Main navigation">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16 lg:h-20">
-                <!-- Logo & Desktop Navigation -->
-                <div class="flex items-center space-x-8 lg:space-x-12">
-                    <!-- Logo -->
-                    <a href="{{ path('catalog_home') }}" 
-                       class="storefront-brand-link flex items-center space-x-2.5 group focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-lg p-1 -ml-1"
-                       aria-label="{{ theme_config().brand.siteName|default('SymfoShop') }} Home">
-                        {% if theme_config().brand.logoUrl is defined and theme_config().brand.logoUrl %}
-                        <img src="{{ theme_config().brand.logoUrl }}" alt="" class="h-9 lg:h-10 w-auto storefront-logo-image">
-                        {% else %}
-                        <svg class="w-9 h-9 lg:w-10 lg:h-10 text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-                            <line x1="3" y1="6" x2="21" y2="6"/>
-                            <path d="M16 10a4 4 0 0 1-8 0"/>
-                        </svg>
-                        {% endif %}
-                        <span class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                            {{ theme_config().brand.siteName|default('SymfoShop') }}
-                        </span>
-                    </a>
-                    
-                    <!-- Desktop Navigation Links -->
-                    <div class="hidden lg:flex items-center space-x-1">
-                        <a href="{{ path('catalog_home') }}" 
-                           class="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-all duration-200 {% if app.request.attributes.get('_route') == 'catalog_home' %}text-primary-600 bg-primary-50{% endif %}">
-                            <i class="fas fa-home text-sm"></i>
-                            <span>{{ 'nav.home'|trans }}</span>
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- Right Side Actions -->
-                <div class="flex items-center space-x-2 lg:space-x-4">
-                    <!-- Cart Icon -->
-                    {% if theme_config().header.showCart|default(true) %}
-                    <a href="{{ path('cart_show') }}" 
-                       class="relative flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                       aria-label="{{ 'nav.cart'|trans }}">
-                        <i class="fas fa-shopping-cart text-lg"></i>
-                        {% set cartCount = cart_items_count() %}
-                        {% if cartCount > 0 %}
-                            <span class="cart-badge absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg animate-pulse">
-                                {{ cartCount > 99 ? '99+' : cartCount }}
-                            </span>
-                        {% endif %}
-                    </a>
-                    {% endif %}
-                    
-                    <!-- Language Switcher (Desktop) -->
-                    <button type="button"
-                            data-color-scheme-toggle
-                            data-label-light="{{ 'nav.theme_enable_dark'|trans|e('html_attr') }}"
-                            data-label-dark="{{ 'nav.theme_enable_light'|trans|e('html_attr') }}"
-                            class="hidden lg:inline-flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-                            aria-pressed="false">
-                        <i class="fas fa-moon text-lg dark:hidden" aria-hidden="true"></i>
-                        <i class="fas fa-sun text-lg hidden dark:inline" aria-hidden="true"></i>
-                    </button>
-                    {% if theme_config().header.showLanguageSwitcher|default(true) %}
-                    <div class="hidden lg:block relative">
-                        <select id="language-switcher" 
-                                class="appearance-none bg-gray-50 border border-gray-300 text-gray-700 rounded-lg px-3 py-2 pr-8 text-sm font-medium hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors cursor-pointer"
-                                aria-label="{{ 'nav.language'|trans }}">
-                            <option value="en" {% if app.request.locale == 'en' %}selected{% endif %}>🇬🇧 EN</option>
-                            <option value="de" {% if app.request.locale == 'de' %}selected{% endif %}>🇩🇪 DE</option>
-                            <option value="fr" {% if app.request.locale == 'fr' %}selected{% endif %}>🇫🇷 FR</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                            <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
-                        </div>
-                    </div>
-                    {% endif %}
-                    
-                    {% if app.user %}
-                        <!-- User Menu Dropdown (Desktop) -->
-                        <div class="hidden lg:block relative" x-data="{ open: false }" @click.away="open = false" @keydown.escape="open = false">
-                            <button @click="open = !open"
-                                    class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                                    aria-expanded="false"
-                                    :aria-expanded="open"
-                                    aria-haspopup="true"
-                                    aria-label="User menu">
-                                <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shadow-sm">
-                                    <i class="fas fa-user text-white text-xs"></i>
-                                </div>
-                                <span class="hidden xl:block max-w-[120px] truncate">{{ app.user.fullName }}</span>
-                                <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
-                            </button>
-                            
-                            <!-- Dropdown Menu -->
-                            <div x-show="open"
-                                 x-transition:enter="transition ease-out duration-100"
-                                 x-transition:enter-start="transform opacity-0 scale-95"
-                                 x-transition:enter-end="transform opacity-100 scale-100"
-                                 x-transition:leave="transition ease-in duration-75"
-                                 x-transition:leave-start="transform opacity-100 scale-100"
-                                 x-transition:leave-end="transform opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-56 rounded-xl shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black/5 dark:ring-white/10 focus:outline-none z-50"
-                                 style="display: none;">
-                                <div class="py-2">
-                                    <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                                        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ app.user.email }}</p>
-                                        {% if app.user.firstName or app.user.lastName %}
-                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ app.user.fullName }}</p>
-                                        {% endif %}
-                                    </div>
-                                    <a href="{{ path('account_dashboard') }}" 
-                                       class="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">
-                                        <i class="fas fa-user-circle w-5 text-center"></i>
-                                        <span>{{ 'nav.dashboard'|trans }}</span>
-                                    </a>
-                                    {% if (theme_config().support.provider|default('selfcoded')) == 'selfcoded' %}
-                                        <a href="{{ path('account_support_index') }}"
-                                           class="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">
-                                            <i class="fas fa-headset w-5 text-center"></i>
-                                            <span>{{ 'footer.support'|trans }}</span>
-                                        </a>
-                                    {% endif %}
-                                    {% if is_granted('ROLE_ADMIN') %}
-                                    <a href="{{ path('admin') }}" 
-                                       class="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">
-                                        <i class="fas fa-cog w-5 text-center"></i>
-                                        <span>{{ 'nav.admin'|trans }}</span>
-                                    </a>
-                                    {% endif %}
-                                    <div class="border-t border-gray-100 my-1"></div>
-                                    <a href="{{ path('logout') }}" 
-                                       class="flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                        <i class="fas fa-sign-out-alt w-5 text-center"></i>
-                                        <span>{{ 'nav.logout'|trans }}</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    {% else %}
-                        <!-- Login/Register Buttons (Desktop) -->
-                        <div class="hidden lg:flex items-center space-x-3">
-                            <a href="{{ path('login') }}" 
-                               class="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-all duration-200">
-                                {{ 'nav.login'|trans }}
-                            </a>
-                            <a href="{{ path('register') }}" 
-                               class="px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 shadow-md hover:shadow-lg transition-all duration-200">
-                                {{ 'nav.register'|trans }}
-                            </a>
-                        </div>
-                    {% endif %}
-                    
-                    <!-- Mobile Menu Button -->
-                    <button type="button"
-                            class="lg:hidden p-2 rounded-lg text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                            aria-expanded="false"
-                            aria-label="Open menu"
-                            data-js="mobile-menu-toggle"
-                            id="mobile-menu-button">
-                        <i class="fas fa-bars text-xl" id="mobile-menu-icon"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="lg:hidden hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-lg">
-            <div class="px-4 py-4 space-y-1">
-                <a href="{{ path('catalog_home') }}" 
-                   class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors {% if app.request.attributes.get('_route') == 'catalog_home' %}text-primary-600 bg-primary-50{% endif %}">
-                    <i class="fas fa-home w-5 text-center"></i>
-                    <span>{{ 'nav.home'|trans }}</span>
-                </a>
-                
-                {% if app.user %}
-                    <a href="{{ path('account_dashboard') }}" 
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors {% if app.request.attributes.get('_route') starts with 'account_' and app.request.attributes.get('_route') != 'account_wishlist_show' %}text-primary-600 bg-primary-50{% endif %}">
-                        <i class="fas fa-user-circle w-5 text-center"></i>
-                        <span>{{ 'nav.dashboard'|trans }}</span>
-                    </a>
-                    {% if (theme_config().support.provider|default('selfcoded')) == 'selfcoded' %}
-                        <a href="{{ path('account_support_index') }}"
-                           class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors {% if app.request.attributes.get('_route') starts with 'account_support_' %}text-primary-600 bg-primary-50{% endif %}">
-                            <i class="fas fa-headset w-5 text-center"></i>
-                            <span>{{ 'footer.support'|trans }}</span>
-                        </a>
-                    {% endif %}
-                    <a href="{{ path('cart_show') }}" 
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors">
-                        <i class="fas fa-shopping-cart w-5 text-center"></i>
-                        <span>{{ 'nav.cart'|trans }}</span>
-                        {% set cartCount = cart_items_count() %}
-                        {% if cartCount > 0 %}
-                            <span class="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                                {{ cartCount > 99 ? '99+' : cartCount }}
-                            </span>
-                        {% endif %}
-                    </a>
-                    {% if is_granted('ROLE_ADMIN') %}
-                    <a href="{{ path('admin') }}" 
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors">
-                        <i class="fas fa-cog w-5 text-center"></i>
-                        <span>{{ 'nav.admin'|trans }}</span>
-                    </a>
-                    {% endif %}
-                    <div class="border-t border-gray-200 my-2"></div>
-                    <div class="px-4 py-2">
-                        <p class="text-sm font-semibold text-gray-900">{{ app.user.email }}</p>
-                        {% if app.user.firstName or app.user.lastName %}
-                            <p class="text-xs text-gray-500 mt-0.5">{{ app.user.fullName }}</p>
-                        {% endif %}
-                    </div>
-                    <a href="{{ path('logout') }}" 
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-red-600 hover:bg-red-50 transition-colors">
-                        <i class="fas fa-sign-out-alt w-5 text-center"></i>
-                        <span>{{ 'nav.logout'|trans }}</span>
-                    </a>
-                {% else %}
-                    <a href="{{ path('cart_show') }}" 
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors">
-                        <i class="fas fa-shopping-cart w-5 text-center"></i>
-                        <span>{{ 'nav.cart'|trans }}</span>
-                        {% set cartCount = cart_items_count() %}
-                        {% if cartCount > 0 %}
-                            <span class="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                                {{ cartCount > 99 ? '99+' : cartCount }}
-                            </span>
-                        {% endif %}
-                    </a>
-                    <div class="border-t border-gray-200 my-2"></div>
-                    <a href="{{ path('login') }}" 
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors">
-                        <i class="fas fa-sign-in-alt w-5 text-center"></i>
-                        <span>{{ 'nav.login'|trans }}</span>
-                    </a>
-                    <a href="{{ path('register') }}" 
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-white bg-primary-600 hover:bg-primary-700 transition-colors mx-4">
-                        <i class="fas fa-user-plus w-5 text-center"></i>
-                        <span>{{ 'nav.register'|trans }}</span>
-                    </a>
-                {% endif %}
-                
-                <div class="border-t border-gray-200 dark:border-gray-800 pt-4 mt-2 px-4">
-                    <button type="button"
-                            data-color-scheme-toggle
-                            data-label-light="{{ 'nav.theme_enable_dark'|trans|e('html_attr') }}"
-                            data-label-dark="{{ 'nav.theme_enable_light'|trans|e('html_attr') }}"
-                            class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border border-gray-200 dark:border-gray-700"
-                            aria-pressed="false">
-                        <i class="fas fa-moon w-5 text-center dark:hidden" aria-hidden="true"></i>
-                        <i class="fas fa-sun w-5 text-center hidden dark:inline" aria-hidden="true"></i>
-                        <span class="dark:hidden">{{ 'nav.theme_enable_dark'|trans }}</span>
-                        <span class="hidden dark:inline">{{ 'nav.theme_enable_light'|trans }}</span>
-                    </button>
-                </div>
-                <!-- Mobile Language Switcher -->
-                <div class="border-t border-gray-200 dark:border-gray-800 pt-4 mt-2">
-                    <label for="mobile-language-switcher" class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-4 mb-2">
-                        {{ 'nav.language'|trans }}
-                    </label>
-                    <select id="mobile-language-switcher" 
-                            class="w-full mx-4 bg-gray-50 border border-gray-300 text-gray-700 rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        <option value="en" {% if app.request.locale == 'en' %}selected{% endif %}>🇬🇧 English</option>
-                        <option value="de" {% if app.request.locale == 'de' %}selected{% endif %}>🇩🇪 Deutsch</option>
-                        <option value="fr" {% if app.request.locale == 'fr' %}selected{% endif %}>🇫🇷 Français</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </nav>
-    
-    <!-- Flash Messages -->
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-                <div class="p-4 rounded-lg {% if label == 'success' %}bg-green-50 text-green-800 border border-green-200{% elseif label == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
-                    <div class="flex items-center space-x-2">
-                        <i class="fas {% if label == 'success' %}fa-check-circle{% elseif label == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
-                        <span>{{ message|trans }}</span>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    {% endfor %}
-    
-    <!-- Main Content -->
-    <main class="flex-grow flex flex-col">
+      data-wishlist-toggle-url="{{ path('account_wishlist_toggle') }}">
+    <a href="#main" class="sr-only z-[100] rounded-lg bg-panel px-4 py-2 font-medium focus:not-sr-only focus:fixed focus:top-3 focus:left-3">
+        {{ 'ui.a11y.skip_to_content'|trans }}
+    </a>
+
+    {% include 'partials/_header.html.twig' %}
+    {% include 'partials/_flashes.html.twig' %}
+
+    <main id="main" class="flex flex-1 flex-col">
         {% block body %}{% endblock %}
     </main>
 
-    {% set supportProvider = theme_config().support.provider|default('selfcoded') %}
-    {% if app.user and supportProvider == 'selfcoded' %}
-        <a href="{{ path('account_support_index') }}"
-           class="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full bg-primary-600 hover:bg-primary-700 text-white px-4 py-3 shadow-xl shadow-primary-600/30 transition-colors"
-           aria-label="Open support chat">
-            <i class="fas fa-comments"></i>
-            <span class="hidden sm:inline text-sm font-semibold">{{ 'footer.support'|trans }}</span>
-        </a>
-    {% endif %}
+    {% include 'partials/_footer.html.twig' %}
+    {% include 'partials/_support_widgets.html.twig' %}
+    {% include 'partials/_cookie_banner.html.twig' %}
 
-    {% if supportProvider in ['tawkto', 'tawk_charla'] %}
-        {% set tawkEmbedPath = theme_config().support.tawkEmbedPath|default('') %}
-        {% if not tawkEmbedPath and theme_config().support.tawkPropertyId|default('') %}
-            {% set tawkEmbedPath = theme_config().support.tawkPropertyId ~ (theme_config().support.tawkWidgetId|default('') ? '/' ~ theme_config().support.tawkWidgetId : '') %}
-        {% endif %}
-    {% endif %}
-    {% if supportProvider in ['tawkto', 'tawk_charla'] and tawkEmbedPath %}
-        <script type="text/javascript">
-            var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
-            (function () {
-                var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
-                s1.async = true;
-                s1.src = "https://embed.tawk.to/{{ tawkEmbedPath|e('js') }}";
-                s1.charset = "UTF-8";
-                s1.setAttribute("crossorigin", "*");
-                s0.parentNode.insertBefore(s1, s0);
-            })();
-        </script>
-    {% endif %}
-    {% if supportProvider in ['charla', 'tawk_charla'] %}
-        {% set charlaProjectId = theme_config().support.charlaProjectId|default(theme_config().support.charlaWebsiteId|default('')) %}
-    {% endif %}
-    {% if supportProvider in ['charla', 'tawk_charla'] and charlaProjectId %}
-        <script type="text/javascript" charset="utf-8">
-            window.addEventListener('load', function () {
-                const widgetElement = document.createElement('charla-widget');
-                widgetElement.setAttribute('p', '{{ charlaProjectId|e('js') }}');
-                document.body.appendChild(widgetElement);
-                const widgetCode = document.createElement('script');
-                widgetCode.src = 'https://app.charla.com/widget/widget.js';
-                document.body.appendChild(widgetCode);
-            });
-        </script>
-    {% endif %}
+    <div id="toast-region" aria-live="polite" role="status"></div>
 
-    <div id="cookie-consent-banner"
-         class="hidden fixed bottom-0 left-0 right-0 z-[60] border-t border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-[0_-4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.4)]"
-         role="region"
-         aria-label="{{ 'cookie_banner.aria_label'|trans|e('html_attr') }}">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div class="text-sm text-gray-700 dark:text-gray-300 max-w-3xl">
-                <p class="font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ 'cookie_banner.title'|trans }}</p>
-                <p>{{ 'cookie_banner.text'|trans }}</p>
-                <p class="mt-2">
-                    <a href="{{ path('legal_cookies') }}" class="text-primary-600 dark:text-primary-400 hover:underline font-medium">{{ 'cookie_banner.learn_more'|trans }}</a>
-                </p>
-            </div>
-            <div class="flex flex-wrap gap-2 shrink-0">
-                <button type="button"
-                        data-cookie-essential-only
-                        class="px-4 py-2.5 rounded-lg text-sm font-medium border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                    {{ 'cookie_banner.essential_only'|trans }}
-                </button>
-                <button type="button"
-                        data-cookie-accept-all
-                        class="px-4 py-2.5 rounded-lg text-sm font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
-                    {{ 'cookie_banner.accept_all'|trans }}
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white mt-auto">
-        {% set footerCols = theme_config().footer.columns|default([]) %}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-14">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
-                <div class="lg:col-span-4">
-                    <div class="flex items-center space-x-2.5 mb-4">
-                        <span class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-                            <i class="fas fa-shopping-bag text-lg"></i>
-                        </span>
-                        <span class="text-xl font-bold">{{ theme_config().brand.siteName|default('SymfoShop') }}</span>
-                    </div>
-                    <p class="text-sm leading-6 text-gray-300 max-w-md">{{ 'footer.description'|trans }}</p>
-
-                    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                        <div class="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-gray-200">
-                            <i class="fas fa-shield-alt mr-1.5 text-emerald-300"></i>{{ 'footer.rights'|trans }}
-                        </div>
-                        <div class="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-gray-200">
-                            <i class="fas fa-truck mr-1.5 text-sky-300"></i>{{ 'footer.shipping'|trans }}
-                        </div>
-                        <div class="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-gray-200">
-                            <i class="fas fa-headset mr-1.5 text-violet-300"></i>{{ 'footer.support'|trans }}
-                        </div>
-                    </div>
-
-                    {% if theme_config().footer.socialLinks is defined and theme_config().footer.socialLinks|length > 0 %}
-                        <div class="flex flex-wrap gap-2.5 mt-6">
-                            {% for link in theme_config().footer.socialLinks %}
-                                <a href="{{ link.url }}"
-                                   target="_blank"
-                                   rel="noopener noreferrer"
-                                   class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
-                                   aria-label="{{ link.platform|default('Social') }}">
-                                    <i class="fab fa-{{ link.platform }} text-sm"></i>
-                                </a>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="lg:col-span-8">
-                    {% if footerCols|length > 0 %}
-                        {% set footerGridClass = footerCols|length == 1
-                            ? 'grid-cols-1'
-                            : (footerCols|length == 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3')
-                        %}
-                        <div class="grid {{ footerGridClass }} gap-8">
-                            {% for col in footerCols %}
-                                <div>
-                                    <h3 class="font-semibold text-white mb-3">{{ col.title|default('Links') }}</h3>
-                                    <ul class="space-y-2.5 text-sm">
-                                        {% for link in col.links|default([]) %}
-                                            <li>
-                                                <a href="{{ link.url }}"
-                                                   {% if link.external|default(false) %}target="_blank" rel="noopener noreferrer"{% endif %}
-                                                   class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2">
-                                                    <span class="w-1 h-1 rounded-full bg-white/40"></span>
-                                                    <span>{{ link.label }}</span>
-                                                </a>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8">
-                            <div>
-                                <h3 class="font-semibold text-white mb-3">{{ 'footer.shop'|trans }}</h3>
-                                <ul class="space-y-2.5 text-sm">
-                                    <li><a href="{{ path('catalog_home') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.categories'|trans }}</a></li>
-                                    <li><a href="{{ path('cart_show') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.cart'|trans }}</a></li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-white mb-3">{{ 'footer.account'|trans }}</h3>
-                                <ul class="space-y-2.5 text-sm">
-                                    <li><a href="{{ path('login') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.login'|trans }}</a></li>
-                                    <li><a href="{{ path('register') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.register'|trans }}</a></li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-white mb-3">{{ 'footer.support'|trans }}</h3>
-                                <ul class="space-y-2.5 text-sm">
-                                    <li><a href="{{ path('contact') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.contact'|trans }}</a></li>
-                                    <li><a href="{{ path('legal_faq') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.faq'|trans }}</a></li>
-                                    <li><a href="{{ path('legal_returns') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.returns'|trans }}</a></li>
-                                    <li><a href="{{ path('return_request') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.return_request'|trans }}</a></li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-white mb-3">{{ 'footer.legal_column'|trans }}</h3>
-                                <ul class="space-y-2.5 text-sm">
-                                    <li><a href="{{ path('legal_privacy') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.privacy'|trans }}</a></li>
-                                    <li><a href="{{ path('legal_cookies') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.cookies'|trans }}</a></li>
-                                    <li><a href="#" data-open-cookie-preferences class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.cookie_settings'|trans }}</a></li>
-                                    <li><a href="{{ path('legal_terms') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.terms'|trans }}</a></li>
-                                    <li><a href="{{ path('legal_imprint') }}" class="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-white/40"></span>{{ 'footer.imprint'|trans }}</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="border-t border-gray-800/80 mt-10 pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm text-gray-400">
-                <p>
-                    &copy; <span id="js-footer-year">{{ 'now'|date('Y') }}</span> {{ theme_config().brand.siteName|default('SymfoShop') }}. {{ 'footer.rights'|trans }}
-                </p>
-                <p class="text-xs text-gray-500">Built with Symfony</p>
-            </div>
-        </div>
-    </footer>
-    
-    {% block javascripts %}
-    <!-- Application JavaScript -->
-    <script type="module" src="{{ asset('js/app.js') }}"></script>
-    <style>
-        @keyframes slide-in-right {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        .animate-slide-in-right {
-            animation: slide-in-right 0.3s ease-out;
-        }
-    </style>
-    <script>
-        (function () {
-            var y = document.getElementById('js-footer-year');
-            if (y) {
-                y.textContent = String(new Date().getFullYear());
-            }
-        })();
+    <script type="application/json" id="app-i18n">
+        {{- {
+            'common.loading': 'common.loading'|trans,
+            'cart.item_added': 'cart.item_added'|trans,
+            'cart.error_occurred': 'cart.error_occurred'|trans,
+            'cart.clear_cart_confirm': 'cart.clear_cart_confirm'|trans,
+            'product.error_adding': 'product.error_adding'|trans,
+            'wishlist.added': 'wishlist.added'|trans,
+            'wishlist.removed': 'wishlist.removed'|trans,
+            'wishlist.error': 'wishlist.error'|trans,
+            'checkout.shipping_free': 'checkout.shipping_free'|trans,
+            'support.sender.you': 'support.sender.you'|trans,
+            'support.sender.support': 'support.sender.support'|trans,
+            'ui.cart.view_cart': 'ui.cart.view_cart'|trans,
+            'ui.cart.added': 'ui.cart.added'|trans,
+            'ui.checkout.placing_order': 'ui.checkout.placing_order'|trans,
+            'ui.payment.processing': 'ui.payment.processing'|trans,
+            'ui.payment.failed': 'ui.payment.failed'|trans,
+        }|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP') b-or constant('JSON_UNESCAPED_UNICODE'))|raw -}}
     </script>
-    {% endblock %}
+
+    {% block javascripts %}{% endblock %}
 </body>
 </html>

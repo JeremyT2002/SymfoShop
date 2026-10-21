@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Order;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -72,11 +73,17 @@ class OrderRepository extends ServiceEntityRepository
     /**
      * @return list<Order>
      */
-    public function findByCustomerEmail(string $email, int $limit = 20): array
+    /**
+     * Orders placed by this account. Deliberately not matched by e-mail: addresses are not
+     * verified, so an e-mail match would expose guest orders to whoever registers that address.
+     *
+     * @return list<Order>
+     */
+    public function findByUser(User $user, int $limit = 20): array
     {
         return $this->createQueryBuilder('o')
-            ->where('o.email = :email')
-            ->setParameter('email', $email)
+            ->where('o.user = :user')
+            ->setParameter('user', $user)
             ->orderBy('o.createdAt', 'DESC')
             ->setMaxResults($limit)
             ->getQuery()

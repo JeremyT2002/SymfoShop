@@ -3,16 +3,12 @@
 namespace App\Controller\Dev;
 
 use App\Repository\PaymentRepository;
-use App\Service\Inventory\InventoryService;
-use App\Service\Invoice\InvoiceService;
+use App\Service\Payment\OrderPaymentFinalizer;
 use App\Service\Payment\Provider\PaymentResolution;
 use App\Service\Payment\PaymentService;
-use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Workflow\WorkflowInterface;
 
 /**
  * Development-only controller to simulate payment outcomes (success/failure/pending).
@@ -24,11 +20,7 @@ class DevPaymentSimulatorController extends AbstractController
     public function __construct(
         private readonly PaymentService $paymentService,
         private readonly PaymentRepository $paymentRepository,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly WorkflowInterface $orderWorkflow,
-        private readonly InventoryService $inventoryService,
-        private readonly InvoiceService $invoiceService,
-        private readonly LoggerInterface $logger,
+        private readonly OrderPaymentFinalizer $paymentFinalizer,
         private readonly string $kernelEnvironment
     ) {
     }
@@ -57,38 +49,19 @@ class DevPaymentSimulatorController extends AbstractController
         $this->paymentService->applyResolution($resolution);
 
         if ($outcome === 'success') {
-            try {
-                $this->inventoryService->commit($order);
-            } catch (\Exception $e) {
-                $this->logger->error('Dev simulator: failed to commit inventory', ['error' => $e->getMessage()]);
-            }
-            if ($this->orderWorkflow->can($order, 'confirm_payment')) {
-                $this->orderWorkflow->apply($order, 'confirm_payment');
-                $this->entityManager->flush();
-            }
-            try {
-                $this->invoiceService->createInvoiceForOrder($order);
-            } catch (\Exception $e) {
-                $this->logger->error('Dev simulator: failed to create invoice', ['error' => $e->getMessage()]);
-            }
+            $this->paymentFinalizer->markPaid($order, 'dev_simulator');
+
             return $this->redirectToRoute('checkout_success', ['orderNumber' => $order->getOrderNumber()]);
         }
 
         if ($outcome === 'failure') {
-            try {
-                $this->inventoryService->release($order);
-            } catch (\Exception $e) {
-                $this->logger->error('Dev simulator: failed to release inventory', ['error' => $e->getMessage()]);
-            }
-            if ($this->orderWorkflow->can($order, 'cancel')) {
-                $this->orderWorkflow->apply($order, 'cancel');
-                $this->entityManager->flush();
-            }
-            $this->addFlash('error', 'Payment was simulated as failed.');
+            $this->paymentFinalizer->cancelUnpaid($order, 'dev_simulator');
+            $this->addFlash('error', 'checkout.dev_simulated_failure');
+
             return $this->redirectToRoute('cart_show');
         }
 
-        $this->addFlash('info', 'Payment left as pending.');
+        $this->addFlash('info', 'checkout.dev_simulated_pending');
         return $this->redirectToRoute('checkout_payment', [
             'orderId' => $order->getId(),
             'paymentIntentId' => $referenceId,

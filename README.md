@@ -3,8 +3,8 @@
 ![Symfony](https://img.shields.io/badge/Symfony-7.4-000000?style=flat-square&logo=symfony)
 ![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat-square&logo=php&logoColor=white)
 ![License](https://img.shields.io/badge/License-Proprietary-red?style=flat-square)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.0-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)
-![Alpine.js](https://img.shields.io/badge/Alpine.js-3.13-8BC0D0?style=flat-square&logo=alpine.js&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)
+![Alpine.js](https://img.shields.io/badge/Alpine.js-3.17-8BC0D0?style=flat-square&logo=alpine.js&logoColor=white)
 
 Production-oriented e-commerce on **Symfony 7.4** and **PHP 8.2+**: catalog, cart, checkout, payments (Stripe & PayPal), shipping/VAT, invoices, admin, API docs, EN/DE/FR.
 
@@ -51,7 +51,7 @@ make docker-up && make docker-db-setup && make docker-admin-user   # optional: m
 git clone <repository-url> && cd SymfoShop
 composer install
 cp .env.example .env    # then set APP_SECRET, DATABASE_URL, etc.
-make db-seed && make admin-user && make dev
+make db-seed && make admin-user && make assets && make dev
 ```
 
 ---
@@ -65,7 +65,7 @@ make db-seed && make admin-user && make dev
 | **Back office** | Products, categories, orders, users, API keys, payment/shipping methods, return requests, theme editor |
 | **Account** | Register/login/reset, dashboard (profile, orders, localized invoice PDFs) |
 | **API** | REST + OpenAPI/Swagger at `/api/v1/docs` (Bearer API keys) |
-| **Tech** | Doctrine, Messenger (async mail), DomPDF invoices, Tailwind + Alpine, modular ES modules under `public/js/` |
+| **Tech** | Doctrine, Messenger (async mail), DomPDF invoices, Tailwind CSS v4 (compiled, no Node.js) + Alpine.js via AssetMapper, ES modules under `assets/js/`, Lucide icons |
 
 ---
 
@@ -126,8 +126,11 @@ composer install
 cp .env.example .env
 make db-seed
 make admin-user
+make assets        # builds the CSS (first run downloads the Tailwind CLI)
 make dev
 ```
+
+While working on templates, keep the CSS in sync with `make assets-watch` (`symfony serve` starts this watcher automatically via `.symfony.local.yaml`).
 
 ---
 
@@ -141,6 +144,8 @@ make dev
 | `make db-create` / `make db-migrate` / `make db-reset` | Database lifecycle |
 | `make db-fixtures` | Load fixtures only |
 | `make dev` | Symfony dev server |
+| `make assets` | Build CSS (Tailwind) and compile assets for production |
+| `make assets-watch` | Rebuild CSS on template changes |
 | `make test` | PHPUnit (see [Testing & CI](#testing--ci)) |
 | `make lint` | Lint |
 | `make cache-clear` | Clear cache |
@@ -224,7 +229,8 @@ make test-coverage
 - **Layers:** domain logic in services; thin controllers; Doctrine entities/repositories.
 - **Order states (Workflow):** `new` → `payment_pending` → `paid` → `processing` → `shipped` → `completed` (or `cancelled`).
 - **Inventory:** `onHand` / `reserved`, expiring reservations, optimistic locking.
-- **Stack:** Messenger, Nelmio OpenAPI, Stripe SDK, DomPDF, Tailwind, Alpine.js.
+- **Stack:** Messenger, Nelmio OpenAPI, Stripe SDK, DomPDF, Tailwind CSS v4, Alpine.js, Symfony AssetMapper & UX Icons.
+- **Frontend:** design tokens and component classes in `assets/styles/app.css` (theme-editor colours override the defaults at runtime); storefront entry `assets/app.js`, admin entry `assets/admin.js`; global form theme `templates/form/theme.html.twig`. New icons: use `ux_icon('lucide:name')` and run `php bin/console ux:icons:lock`.
 
 ### Repository layout
 
@@ -233,7 +239,8 @@ SymfoShop/
 ├── config/           Symfony config
 ├── docker/           Docker Compose & Dockerfile
 ├── migrations/
-├── public/           Web root, JS modules
+├── assets/           CSS (Tailwind), JS modules, fonts, icons
+├── public/           Web root
 ├── src/
 │   ├── Command/
 │   ├── Controller/
@@ -268,6 +275,7 @@ Password hashing, CSRF on forms, roles, secure reset tokens, webhook signature c
 ```bash
 make db-reset
 make cache-clear
+make assets            # unstyled pages? the CSS has not been built yet
 php bin/console doctrine:migrations:status
 php bin/console doctrine:migrations:sync-metadata-storage
 ```

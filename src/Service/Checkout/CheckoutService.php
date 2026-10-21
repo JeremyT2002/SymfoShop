@@ -123,7 +123,7 @@ class CheckoutService
      *   couponCode: ?string
      * }
      */
-    public function calculateTotals(?string $shippingMethodCode = null, ?string $countryCode = null): array
+    public function calculateTotals(?string $shippingMethodCode = null, ?string $countryCode = null, ?User $user = null): array
     {
         $items = $this->cartService->getDetailedItems();
         $totals = $this->cartService->getTotals();
@@ -147,7 +147,6 @@ class CheckoutService
         $couponCode = $totals['couponCode'] ?? null;
 
         if ($couponCode) {
-            $user = null;
             $validation = $this->couponService->validate($couponCode, $user, $subtotal);
             if ($validation['valid'] && $validation['coupon']) {
                 $discount = $this->couponService->calculateDiscount($validation['coupon'], $subtotal);
@@ -198,7 +197,7 @@ class CheckoutService
 
         $items = $this->cartService->getDetailedItems();
         $countryForTax = trim($shippingAddress->country) !== '' ? trim($shippingAddress->country) : null;
-        $totals = $this->calculateTotals($shippingMethodCode, $countryForTax);
+        $totals = $this->calculateTotals($shippingMethodCode, $countryForTax, $user);
         $taxRateStr = $this->formatTaxRate($this->resolveTaxRateForCountry($countryForTax));
 
         $order = new Order();
@@ -213,6 +212,8 @@ class CheckoutService
         $order->setCurrency($totals['currency']);
         $order->setStatus('new');
         $order->setSubtotal($totals['subtotal']);
+        $order->setDiscountTotal($totals['discount']);
+        $order->setCouponCode($totals['couponCode']);
         $order->setTaxTotal($totals['taxTotal']);
         $order->setGrandTotal($totals['grandTotal']);
         $order->setShippingAmount($totals['shippingAmount']);

@@ -10,4 +10,6 @@ return [
     Symfony\Bundle\TwigBundle\TwigBundle::class => ['all' => true],
     Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
     Sentry\SentryBundle\SentryBundle::class => ['prod' => true],
+    Symfony\UX\Icons\UXIconsBundle::class => ['all' => true],
+    Symfonycasts\TailwindBundle\SymfonycastsTailwindBundle::class => ['all' => true],
 ];

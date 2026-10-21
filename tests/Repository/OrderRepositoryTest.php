@@ -3,6 +3,7 @@
 namespace App\Tests\Repository;
 
 use App\Entity\Order;
+use App\Entity\User;
 use App\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -20,36 +21,38 @@ final class OrderRepositoryTest extends KernelTestCase
         $this->orderRepository = $container->get(OrderRepository::class);
     }
 
-    public function testFindByCustomerEmailOrdersByCreatedAtDesc(): void
+    public function testFindByUserOrdersByCreatedAtDesc(): void
     {
-        $email = 'repo-order-' . uniqid('', true) . '@example.com';
+        $user = $this->createUser();
+        $email = (string) $user->getEmail();
 
-        $older = $this->makeOrder($email, 'ORD-OLD-' . uniqid());
+        $older = $this->makeOrder($email, 'ORD-OLD-' . uniqid(), $user);
         $older->setCreatedAt(new \DateTimeImmutable('-2 hours'));
         $this->entityManager->persist($older);
         $this->entityManager->flush();
 
-        $newer = $this->makeOrder($email, 'ORD-NEW-' . uniqid());
+        $newer = $this->makeOrder($email, 'ORD-NEW-' . uniqid(), $user);
         $newer->setCreatedAt(new \DateTimeImmutable('-1 hour'));
         $this->entityManager->persist($newer);
         $this->entityManager->flush();
 
-        $list = $this->orderRepository->findByCustomerEmail($email, 20);
+        $list = $this->orderRepository->findByUser($user, 20);
 
         $this->assertCount(2, $list);
         $this->assertSame($newer->getId(), $list[0]->getId());
         $this->assertSame($older->getId(), $list[1]->getId());
     }
 
-    public function testFindByCustomerEmailRespectsLimit(): void
+    public function testFindByUserRespectsLimit(): void
     {
-        $email = 'repo-limit-' . uniqid('', true) . '@example.com';
+        $user = $this->createUser();
+        $email = (string) $user->getEmail();
         for ($i = 0; $i < 3; ++$i) {
-            $this->entityManager->persist($this->makeOrder($email, 'ORD-LIM-' . $i . '-' . uniqid()));
+            $this->entityManager->persist($this->makeOrder($email, 'ORD-LIM-' . $i . '-' . uniqid(), $user));
         }
         $this->entityManager->flush();
 
-        $list = $this->orderRepository->findByCustomerEmail($email, 2);
+        $list = $this->orderRepository->findByUser($user, 2);
         $this->assertCount(2, $list);
     }
 
@@ -92,11 +95,12 @@ final class OrderRepositoryTest extends KernelTestCase
         $this->assertGreaterThanOrEqual(2, $newRow['count']);
     }
 
-    private function makeOrder(string $email, string $orderNumber): Order
+    private function makeOrder(string $email, string $orderNumber, ?User $user = null): Order
     {
         $order = new Order();
         $order->setOrderNumber($orderNumber);
         $order->setEmail($email);
+        $order->setUser($user);
         $order->setCurrency('EUR');
         $order->setStatus('new');
         $order->setSubtotal(100);
@@ -104,6 +108,17 @@ final class OrderRepositoryTest extends KernelTestCase
         $order->setGrandTotal(120);
 
         return $order;
+    }
+
+    private function createUser(): User
+    {
+        $user = new User();
+        $user->setEmail('repo-order-' . uniqid('', true) . '@example.com');
+        $user->setPassword('password');
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        return $user;
     }
 
     protected function tearDown(): void

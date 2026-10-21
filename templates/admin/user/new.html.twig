@@ -4,17 +4,17 @@
 
 {% block body %}
     <div class="mb-6">
-        <a href="{{ path('admin_users_index') }}" class="text-gray-600 hover:text-gray-900 mb-2 inline-block">
-            <i class="fas fa-arrow-left"></i> Back to Users
+        <a href="{{ path('admin_users_index') }}" class="text-fg-muted hover:text-fg mb-2 inline-block">
+            {{ ux_icon('lucide:arrow-left', {class: 'size-4'}) }} Back to Users
         </a>
-        <h2 class="text-2xl font-bold text-gray-900">Create New User</h2>
+        <h2 class="text-2xl font-bold text-fg">Create New User</h2>
     </div>
     
     <div class="admin-card admin-form-shell p-6">
         <form method="post" class="space-y-6">
-            <div class="rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-5">
-                <h3 class="text-base font-semibold text-gray-900">Account profile</h3>
-                <p class="mt-1 text-sm text-gray-600">Create login credentials, choose roles, and activate the account.</p>
+            <div class="rounded-xl border border-line bg-gradient-to-br from-gray-50 to-white p-5">
+                <h3 class="text-base font-semibold text-fg">Account profile</h3>
+                <p class="mt-1 text-sm text-fg-muted">Create login credentials, choose roles, and activate the account.</p>
             </div>
 
             <div class="admin-form-grid">
@@ -22,26 +22,27 @@
                 <div>
                     <label for="email" class="admin-form-label">Email address *</label>
                     <input type="email" id="email" name="email" required autocomplete="email" placeholder="user@example.com" class="admin-form-input" value="{{ user.email|default('') }}">
-                    <p class="mt-1 text-xs text-gray-500">This will be used for login and account communication</p>
+                    <p class="mt-1 text-xs text-fg-subtle">This will be used for login and account communication</p>
                 </div>
                 
                 <div>
                     <label for="password" class="admin-form-label">Password *</label>
-                    <div class="relative">
-                        <input type="password" id="password" name="password" required minlength="6"
+                    <div class="relative" x-data="{ show: false }">
+                        <input type="password" id="password" :type="show ? 'text' : 'password'" name="password" required minlength="6"
                                autocomplete="new-password"
                                placeholder="Enter a secure password"
                                class="admin-form-input pr-10">
-                        <button type="button" data-js="password-toggle" data-target-field-id="password" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                            <i class="fas fa-eye text-gray-400 hover:text-gray-600" id="password-toggle-icon"></i>
+                        <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center" @click="show = !show" :aria-pressed="show" aria-label="{{ 'ui.auth.show_password'|trans }}">
+                            <span x-show="!show">{{ ux_icon('lucide:eye', {class: 'size-4 text-fg-subtle hover:text-fg'}) }}</span>
+                            <span x-show="show" x-cloak>{{ ux_icon('lucide:eye-off', {class: 'size-4 text-fg-subtle hover:text-fg'}) }}</span>
                         </button>
                     </div>
                     <div class="mt-2">
-                        <div class="flex items-center text-xs text-gray-500 mb-1">
-                            <i class="fas fa-info-circle mr-1"></i>
+                        <div class="flex items-center text-xs text-fg-subtle mb-1">
+                            {{ ux_icon('lucide:info', {class: 'size-4 mr-1'}) }}
                             <span>Password requirements:</span>
                         </div>
-                        <ul class="text-xs text-gray-500 ml-5 list-disc">
+                        <ul class="text-xs text-fg-subtle ml-5 list-disc">
                             <li>Minimum 6 characters</li>
                             <li>Use a mix of letters and numbers for better security</li>
                         </ul>
@@ -51,21 +52,21 @@
                 
                 <section class="admin-form-section">
                     <label class="admin-form-label">User roles</label>
-                    <div class="space-y-3 rounded-lg border border-gray-200 bg-white p-4">
+                    <div class="space-y-3 rounded-lg border border-line bg-panel p-4">
                         <label class="flex items-start cursor-pointer group">
                             <input type="checkbox" name="roles[]" value="ROLE_USER" checked
-                                   class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                   class="mt-1 rounded border-line-strong text-primary-600 focus:ring-primary-500">
                             <div class="ml-3 flex-1">
-                                <span class="text-sm font-medium text-gray-900">ROLE_USER</span>
-                                <p class="text-xs text-gray-500 mt-0.5">Standard user access - can browse and purchase products</p>
+                                <span class="text-sm font-medium text-fg">ROLE_USER</span>
+                                <p class="text-xs text-fg-subtle mt-0.5">Standard user access - can browse and purchase products</p>
                             </div>
                         </label>
                         <label class="flex items-start cursor-pointer group">
                             <input type="checkbox" name="roles[]" value="ROLE_ADMIN"
-                                   class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                   class="mt-1 rounded border-line-strong text-primary-600 focus:ring-primary-500">
                             <div class="ml-3 flex-1">
-                                <span class="text-sm font-medium text-gray-900">ROLE_ADMIN</span>
-                                <p class="text-xs text-gray-500 mt-0.5">Administrator access - full access to admin panel and system management</p>
+                                <span class="text-sm font-medium text-fg">ROLE_ADMIN</span>
+                                <p class="text-xs text-fg-subtle mt-0.5">Administrator access - full access to admin panel and system management</p>
                             </div>
                         </label>
                     </div>
@@ -74,10 +75,10 @@
                 <div class="mt-4">
                     <label class="flex items-center cursor-pointer group">
                         <input type="checkbox" name="isActive" value="1" checked
-                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5">
+                               class="rounded border-line-strong text-primary-600 focus:ring-primary-500 w-5 h-5">
                         <div class="ml-3 flex-1">
-                            <span class="text-sm font-medium text-gray-900">Account Status: Active</span>
-                            <p class="text-xs text-gray-500 mt-0.5">Uncheck to disable this user account</p>
+                            <span class="text-sm font-medium text-fg">Account Status: Active</span>
+                            <p class="text-xs text-fg-subtle mt-0.5">Uncheck to disable this user account</p>
                         </div>
                     </label>
                 </div>
@@ -85,11 +86,11 @@
             </div>
                 
                 
-                <div class="flex items-center justify-end space-x-4 border-t border-gray-200 pt-5">
-                    <a href="{{ path('admin_users_index') }}" class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <div class="flex items-center justify-end space-x-4 border-t border-line pt-5">
+                    <a href="{{ path('admin_users_index') }}" class="px-4 py-2 text-fg-muted border border-line-strong rounded-lg hover:bg-subtle">
                         Cancel
                     </a>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
                         Create User
                     </button>
                 </div>

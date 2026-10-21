@@ -1,180 +1,145 @@
-{% extends 'catalog/base.html.twig' %}
+{% extends 'base.html.twig' %}
+
+{%- set seo_title = category.seoTitle|default(category.name) -%}
+{%- set seo_description = category.seoDescription|default('ui.category.meta_description'|trans({'%category%': category.name}))|slice(0, 160) -%}
+
+{% block page_title %}{{ seo_title }}{% endblock %}
+{% block meta_description %}{{ seo_description }}{% endblock %}
 
 {% block robots_meta %}
-    {% set globalNoIndex = theme_config().seo.defaultNoIndex|default(false) %}
-    {% set pageNoIndex = category.seoNoIndex|default(false) %}
-    {% set noIndex = globalNoIndex or pageNoIndex %}
-    <meta name="robots" content="{{ noIndex ? 'noindex,nofollow' : 'index,follow' }}">
+    {%- set noIndex = theme_config().seo.defaultNoIndex|default(false) or category.seoNoIndex|default(false) -%}
+    {# Filtered listings are near-duplicates: keep them out of the index but let crawlers follow product links #}
+    <meta name="robots" content="{{ noIndex ? 'noindex,nofollow' : (filters.hasAnyFilter ? 'noindex,follow' : 'index,follow') }}">
 {% endblock %}
-
-{% block page_title %}{{ category.seoTitle|default(category.name)|escape }} - SymfoShop{% endblock %}
-{% block page_meta_description %}{{ category.seoDescription|default('Browse products in ' ~ category.name)|escape|slice(0, 160) }}{% endblock %}
-{% block js_page %}category-filters{% endblock %}
 
 {% block meta_tags %}
-    {% set seoTitle = category.seoTitle|default(category.name) %}
-    {% set seoDescription = category.seoDescription|default('Browse products in ' ~ category.name)|slice(0, 160) %}
-
-    <meta property="og:title" content="{{ seoTitle|escape }} - SymfoShop">
-    <meta property="og:description" content="{{ seoDescription|escape }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ seo_title }}">
+    <meta property="og:description" content="{{ seo_description }}">
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="{{ seoTitle|escape }} - SymfoShop">
-    <meta name="twitter:description" content="{{ seoDescription|escape }}">
+    <meta name="twitter:title" content="{{ seo_title }}">
+    <meta name="twitter:description" content="{{ seo_description }}">
 {% endblock %}
 
-{% block catalog_body %}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-js-page="category-filters"
-         data-category-url="{{ path('catalog_category', {slug: category.slug}) }}">
-        {# Breadcrumbs #}
-        {% include 'components/breadcrumbs.html.twig' with {
-            items: [
-                {label: 'nav.home'|trans, url: path('catalog_home')},
-                {label: category.name|escape, url: null}
-            ]
-        } %}
+{% block body %}
+<div class="container-page py-8 lg:py-12" x-data="{ filtersOpen: false }" @keydown.escape.window="filtersOpen = false">
+    {%- set crumbs = [{label: 'nav.home'|trans, url: path('catalog_home')}] -%}
+    {%- if category.parent -%}
+        {%- set crumbs = crumbs|merge([{label: category.parent.name, url: path('catalog_category', {slug: category.parent.slug})}]) -%}
+    {%- endif -%}
+    {% include 'components/breadcrumbs.html.twig' with {items: crumbs|merge([{label: category.name, url: null}])} %}
 
-        {# Category Header #}
-        <div class="mb-6">
-            <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ category.name|escape }}</h1>
-            {% if category.parent %}
-                <div class="inline-flex items-center px-4 py-2 bg-primary-50 border border-primary-200 rounded-xl text-sm text-primary-700 mb-4">
-                    <i class="fas fa-arrow-up mr-2"></i>
-                    <span>{{ 'category.parent_category'|trans }}:</span>
-                    <a href="{{ path('catalog_category', {slug: category.parent.slug}) }}" class="ml-2 font-semibold hover:text-primary-800 transition-colors">
-                        {{ category.parent.name|escape }}
-                    </a>
-                </div>
-            {% endif %}
-            {% if category.children|length > 0 %}
-                <div class="mt-4">
-                    <h2 class="text-sm font-semibold text-gray-700 mb-2">{{ 'category.subcategories'|trans }}</h2>
-                    <div class="flex flex-wrap gap-2">
-                        {% for child in category.children %}
-                            <a href="{{ path('catalog_category', {slug: child.slug}) }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-primary-50 hover:border-primary-300 hover:text-primary-700 transition-colors">
-                                {{ child.name|escape }}
-                            </a>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
+    <header class="flex flex-col gap-6 border-b border-line pb-8">
+        <div>
+            <h1 class="text-3xl font-semibold sm:text-4xl">{{ category.name }}</h1>
+            <p class="mt-2 text-sm text-fg-muted">
+                {{ totalProducts }} {{ totalProducts == 1 ? 'category.product'|trans : 'category.products'|trans }}
+            </p>
         </div>
 
-        {# Active filter badges + Filters/Sort bar #}
-        <div class="mb-6 space-y-3">
+        {% if category.children is not empty %}
+            <nav class="-mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0" aria-label="{{ 'category.subcategories'|trans }}">
+                {% for child in category.children %}
+                    <a href="{{ path('catalog_category', {slug: child.slug}) }}"
+                       class="shrink-0 rounded-full border border-line-strong px-4 py-1.5 text-sm font-medium text-fg-muted transition hover:border-fg hover:text-fg">{{ child.name }}</a>
+                {% endfor %}
+            </nav>
+        {% endif %}
+    </header>
+
+    {# Toolbar #}
+    <div class="flex flex-wrap items-center justify-between gap-3 py-5">
+        <div class="flex flex-wrap items-center gap-2">
+            <button type="button" class="btn btn-secondary btn-sm lg:hidden" @click="filtersOpen = true">
+                {{ ux_icon('lucide:sliders-horizontal', {class: 'size-4'}) }}{{ 'category.filters.title'|trans }}
+            </button>
+
+            {# Active filters #}
+            {% if filters.minPrice is not null or filters.maxPrice is not null %}
+                <a href="{{ path('catalog_category', routeParams|merge({min_price: null, max_price: null, page: null})) }}" class="badge badge-neutral py-1 hover:ring-line-strong">
+                    {{ (filters.minPrice ?? filterOptions.price_min)|money }} – {{ (filters.maxPrice ?? filterOptions.price_max)|money }}
+                    {{ ux_icon('lucide:x', {class: 'size-3'}) }}<span class="sr-only">{{ 'ui.filters.remove'|trans }}</span>
+                </a>
+            {% endif %}
+            {% if filters.inStockOnly %}
+                <a href="{{ path('catalog_category', routeParams|merge({in_stock: null, page: null})) }}" class="badge badge-neutral py-1 hover:ring-line-strong">
+                    {{ 'category.filters.in_stock'|trans }}{{ ux_icon('lucide:x', {class: 'size-3'}) }}<span class="sr-only">{{ 'ui.filters.remove'|trans }}</span>
+                </a>
+            {% endif %}
+            {% for badge in attributeBadges %}
+                <a href="{{ badge.removeUrl }}" class="badge badge-neutral py-1 hover:ring-line-strong">
+                    {{ badge.label }}{{ ux_icon('lucide:x', {class: 'size-3'}) }}<span class="sr-only">{{ 'ui.filters.remove'|trans }}</span>
+                </a>
+            {% endfor %}
             {% if filters.hasAnyFilter %}
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="text-sm text-gray-600">{{ 'category.filters.active'|trans }}:</span>
-                    {% if filters.minPrice is not null or filters.maxPrice is not null %}
-                        <a href="{{ path('catalog_category', routeParams|merge({min_price: null, max_price: null, page: null})) }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm bg-primary-100 text-primary-800 hover:bg-primary-200">
-                            {{ (filters.minPrice ?? filterOptions.price_min) / 100 }} - {{ (filters.maxPrice ?? filterOptions.price_max) / 100 }} {{ 'category.filters.price'|trans }} <i class="fas fa-times text-xs"></i>
-                        </a>
-                    {% endif %}
-                    {% if filters.inStockOnly %}
-                        <a href="{{ path('catalog_category', routeParams|merge({in_stock: null, page: null})) }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm bg-primary-100 text-primary-800 hover:bg-primary-200">
-                            {{ 'category.filters.in_stock'|trans }} <i class="fas fa-times text-xs"></i>
-                        </a>
-                    {% endif %}
-                    {% for badge in attributeBadges %}
-                        <a href="{{ badge.removeUrl }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm bg-primary-100 text-primary-800 hover:bg-primary-200">
-                            {{ badge.label|escape }} <i class="fas fa-times text-xs"></i>
-                        </a>
-                    {% endfor %}
-                    <a href="{{ path('catalog_category', {slug: category.slug}) }}" class="text-sm text-gray-500 hover:text-gray-700 underline">{{ 'category.filters.clear_all'|trans }}</a>
-                </div>
+                <a href="{{ path('catalog_category', {slug: category.slug}) }}" class="text-sm font-medium text-fg-muted underline-offset-4 hover:text-fg hover:underline">{{ 'category.filters.clear_all'|trans }}</a>
             {% endif %}
-
-            <div class="bg-white rounded-xl shadow-md p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div class="flex items-center gap-3 flex-wrap">
-                    <span class="text-sm font-medium text-gray-700">{{ 'category.showing'|trans }} {{ products|length }} {{ 'category.of'|trans }} {{ totalProducts }} {{ totalProducts != 1 ? 'category.products'|trans : 'category.product'|trans }}</span>
-                    {# Mobile: open filter drawer #}
-                    <button type="button" data-js="filter-drawer-open" class="lg:hidden inline-flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-white hover:bg-gray-50">
-                        <i class="fas fa-filter"></i> {{ 'category.filters.title'|trans }}
-                    </button>
-                </div>
-                {# Sort: form to preserve other params #}
-                <form method="get" action="{{ path('catalog_category', {slug: category.slug}) }}" class="flex items-center gap-2" data-js="filter-sort-form">
-                    {% for key, value in routeParams %}
-                        {% if key != 'slug' and key != 'sort' and value is not null and value is not same as('') %}
-                            {% if value is iterable and value is not mapping %}
-                                {% for v in value %}
-                                    <input type="hidden" name="{{ key }}[]" value="{{ v|e('html_attr') }}">
-                                {% endfor %}
-                            {% else %}
-                                <input type="hidden" name="{{ key }}" value="{{ value|e('html_attr') }}">
-                            {% endif %}
-                        {% endif %}
-                    {% endfor %}
-                    <label for="sort-select" class="text-sm text-gray-600">{{ 'category.sort_by'|trans }}:</label>
-                    <select name="sort" id="sort-select" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white">
-                        <option value="default" {{ filters.sort == 'default' ? 'selected' : '' }}>{{ 'category.sort.default'|trans }}</option>
-                        <option value="price-asc" {{ filters.sort == 'price-asc' ? 'selected' : '' }}>{{ 'category.sort.price_low'|trans }}</option>
-                        <option value="price-desc" {{ filters.sort == 'price-desc' ? 'selected' : '' }}>{{ 'category.sort.price_high'|trans }}</option>
-                        <option value="name-asc" {{ filters.sort == 'name-asc' ? 'selected' : '' }}>{{ 'category.sort.name_az'|trans }}</option>
-                        <option value="name-desc" {{ filters.sort == 'name-desc' ? 'selected' : '' }}>{{ 'category.sort.name_za'|trans }}</option>
-                    </select>
-                </form>
-            </div>
         </div>
 
-        <div class="flex gap-6">
-            {# Desktop filter sidebar #}
-            <aside class="hidden lg:block w-64 flex-shrink-0" aria-label="{{ 'category.filters.title'|trans }}">
-                {% include 'catalog/category/_filter_form.html.twig' with {
-                    category: category,
-                    filters: filters,
-                    filterOptions: filterOptions,
-                    routeParams: routeParams
-                } %}
-            </aside>
-
-            {# Main: products or empty #}
-            <div class="flex-1 min-w-0">
-                {% if products|length > 0 %}
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-                        {% for product in products %}
-                            {% include 'components/product_card.html.twig' with { product: product, variant: product.variants|first } %}
-                        {% endfor %}
-                    </div>
-                    {% if totalPages > 1 %}
-                        {% include 'components/pagination.html.twig' with {
-                            currentPage: currentPage,
-                            totalPages: totalPages,
-                            route: 'catalog_category',
-                            routeParams: routeParams
-                        } %}
+        <form method="get" action="{{ path('catalog_category', {slug: category.slug}) }}" class="flex items-center gap-2">
+            {% for key, value in routeParams %}
+                {% if key not in ['slug', 'sort', 'page'] and value is not null and value is not same as('') %}
+                    {% if value is iterable %}
+                        {% for v in value %}<input type="hidden" name="{{ key }}[]" value="{{ v }}">{% endfor %}
+                    {% else %}
+                        <input type="hidden" name="{{ key }}" value="{{ value }}">
                     {% endif %}
-                {% else %}
-                    <div class="bg-white rounded-2xl shadow-lg p-16 text-center">
-                        <div class="max-w-md mx-auto">
-                            <i class="fas fa-search text-8xl text-gray-300 mb-6"></i>
-                            <h2 class="text-2xl font-bold text-gray-900 mb-3">{{ 'category.no_products_match'|trans }}</h2>
-                            <p class="text-gray-600 mb-6">{{ 'category.try_adjust_filters'|trans }}</p>
-                            <a href="{{ path('catalog_category', {slug: category.slug}) }}" class="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-colors">
-                                <i class="fas fa-times mr-2"></i> {{ 'category.filters.clear_all'|trans }}
-                            </a>
-                        </div>
-                    </div>
                 {% endif %}
-            </div>
-        </div>
-
-        {# Mobile filter drawer overlay #}
-        <div id="filter-drawer-overlay" data-js="filter-drawer-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden" aria-hidden="true"></div>
-        <div id="filter-drawer" data-js="filter-drawer" class="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-xl z-50 transform translate-x-full transition-transform duration-300 overflow-y-auto lg:hidden" role="dialog" aria-label="{{ 'category.filters.title'|trans }}">
-            <div class="p-4 flex items-center justify-between border-b border-gray-200 sticky top-0 bg-white">
-                <h2 class="text-lg font-semibold text-gray-900">{{ 'category.filters.title'|trans }}</h2>
-                <button type="button" data-js="filter-drawer-close" class="p-2 text-gray-500 hover:text-gray-700" aria-label="{{ 'common.close'|trans }}">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            <div class="p-4">
-                {% include 'catalog/category/_filter_form.html.twig' with {
-                    category: category,
-                    filters: filters,
-                    filterOptions: filterOptions,
-                    routeParams: routeParams
+            {% endfor %}
+            <label for="sort-select" class="text-sm text-fg-muted">{{ 'category.sort_by'|trans }}</label>
+            <select name="sort" id="sort-select" class="select w-auto py-2" onchange="this.form.requestSubmit()">
+                {% for value, label in {
+                    'default': 'category.sort.default', 'price-asc': 'category.sort.price_low', 'price-desc': 'category.sort.price_high',
+                    'name-asc': 'category.sort.name_az', 'name-desc': 'category.sort.name_za'
                 } %}
+                    <option value="{{ value }}" {{ filters.sort == value ? 'selected' }}>{{ label|trans }}</option>
+                {% endfor %}
+            </select>
+            <noscript><button class="btn btn-secondary btn-sm">{{ 'category.filters.apply'|trans }}</button></noscript>
+        </form>
+    </div>
+
+    <div class="grid gap-10 lg:grid-cols-[15rem_1fr]">
+        <aside class="hidden lg:block" aria-label="{{ 'category.filters.title'|trans }}">
+            <div class="sticky top-28">
+                {% include 'catalog/category/_filter_form.html.twig' with {id_prefix: 'sidebar'} %}
+            </div>
+        </aside>
+
+        <div>
+            {% if products is not empty %}
+                <div class="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 xl:grid-cols-3">
+                    {% for product in products %}
+                        {% include 'components/product_card.html.twig' with {product: product, eager: loop.index <= 3} only %}
+                    {% endfor %}
+                </div>
+                {% include 'components/pagination.html.twig' with {currentPage: currentPage, totalPages: totalPages, route: 'catalog_category', routeParams: routeParams} only %}
+            {% else %}
+                {% include 'components/empty_state.html.twig' with {
+                    icon: 'lucide:search-x',
+                    title: 'category.no_products_match'|trans,
+                    text: 'category.try_adjust_filters'|trans,
+                    action: filters.hasAnyFilter ? {label: 'category.filters.clear_all'|trans, url: path('catalog_category', {slug: category.slug})} : false,
+                } only %}
+            {% endif %}
+        </div>
+    </div>
+
+    {# Mobile filter drawer #}
+    <div x-cloak x-show="filtersOpen" class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-labelledby="filter-drawer-title">
+        <div x-show="filtersOpen" x-transition.opacity class="absolute inset-0 bg-black/40" @click="filtersOpen = false"></div>
+        <div x-show="filtersOpen" x-trap.inert.noscroll="filtersOpen"
+             x-transition:enter="transition duration-200 ease-out" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+             x-transition:leave="transition duration-150 ease-in" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
+             class="absolute inset-y-0 right-0 flex w-[90%] max-w-sm flex-col bg-panel shadow-xl">
+            <div class="flex h-16 items-center justify-between border-b border-line px-5">
+                <h2 id="filter-drawer-title" class="font-semibold">{{ 'category.filters.title'|trans }}</h2>
+                <button type="button" class="btn btn-ghost btn-icon -mr-2" @click="filtersOpen = false" aria-label="{{ 'common.close'|trans }}">{{ ux_icon('lucide:x', {class: 'size-5'}) }}</button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-5">
+                {% include 'catalog/category/_filter_form.html.twig' with {id_prefix: 'drawer'} %}
             </div>
         </div>
     </div>
+</div>
 {% endblock %}

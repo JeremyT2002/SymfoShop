@@ -64,13 +64,8 @@ services:
             $kernelEnvironment: '%kernel.environment%'
             $paypalClientId: '%env(default:app.paypal_client_id_fallback:PAYPAL_CLIENT_ID)%'
 
-    App\Controller\Payment\PayPalReturnController:
-        arguments:
-            $orderWorkflow: '@state_machine.order'
-
     App\Controller\Dev\DevPaymentSimulatorController:
         arguments:
-            $orderWorkflow: '@state_machine.order'
             $kernelEnvironment: '%kernel.environment%'
 
     # Theme resolver (use app cache pool)

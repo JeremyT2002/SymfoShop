@@ -25,7 +25,8 @@ final class AppUpdateService
     public function checkForUpdates(): array
     {
         return $this->cache->get('admin_app_update_check', function (ItemInterface $item): array {
-            $item->expiresAfter(30);
+            // git fetch hits the network: check at most every 15 minutes (the dashboard renders this on every visit)
+            $item->expiresAfter(900);
 
             $fetch = $this->runCommand(['git', 'fetch', 'origin', 'dev'], 20);
             if ($fetch['exit_code'] !== 0) {

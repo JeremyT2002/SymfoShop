@@ -1,13 +1,42 @@
-{% extends 'catalog/base.html.twig' %}
+{#
+  Layout for legal and help pages. Children fill legal_heading and legal_content (plain h2/p/ul markup —
+  typography comes from the prose classes here).
+#}
+{% extends 'base.html.twig' %}
 
-{% block catalog_body %}
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
-        <article class="max-w-none">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">{% block legal_heading %}{% endblock %}</h1>
-            <p class="text-sm text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-3 mb-8">
-                {{ 'legal.disclaimer'|trans }}
-            </p>
-            {% block legal_content %}{% endblock %}
+{% block body %}
+{%- set legal_pages = [
+    {route: 'legal_terms', label: 'footer.terms'},
+    {route: 'legal_privacy', label: 'footer.privacy'},
+    {route: 'legal_cookies', label: 'footer.cookies'},
+    {route: 'legal_returns', label: 'footer.returns'},
+    {route: 'legal_imprint', label: 'footer.imprint'},
+    {route: 'legal_faq', label: 'footer.faq'},
+] -%}
+{%- set current = app.request.attributes.get('_route') -%}
+<div class="container-page py-10 lg:py-16">
+    <div class="grid gap-10 lg:grid-cols-[13rem_1fr] lg:gap-16">
+        <nav aria-label="{{ 'footer.legal_column'|trans }}" class="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+            <ul class="flex gap-1 lg:sticky lg:top-28 lg:flex-col" role="list">
+                {% for page in legal_pages %}
+                    <li>
+                        <a href="{{ path(page.route) }}" {% if current == page.route %}aria-current="page"{% endif %}
+                           class="block rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap {{ current == page.route ? 'bg-subtle text-fg' : 'text-fg-muted hover:bg-subtle hover:text-fg' }}">{{ page.label|trans }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </nav>
+
+        <article class="min-w-0 max-w-3xl">
+            <h1 class="text-3xl font-semibold sm:text-4xl">{% block legal_heading %}{% endblock %}</h1>
+            <div class="alert alert-warning mt-6">
+                {{ ux_icon('lucide:info', {class: 'mt-0.5 size-4'}) }}
+                <p>{{ 'legal.disclaimer'|trans }}</p>
+            </div>
+            <div class="prose prose-zinc mt-8 max-w-none dark:prose-invert prose-headings:font-semibold prose-h2:mt-10 prose-h2:text-xl prose-a:text-primary-600 dark:prose-a:text-primary-400">
+                {% block legal_content %}{% endblock %}
+            </div>
         </article>
     </div>
+</div>
 {% endblock %}

@@ -7,8 +7,7 @@ namespace App\Controller\Webhook;
 use App\Entity\ProcessedWebhookEvent;
 use App\Repository\PaymentRepository;
 use App\Repository\ProcessedWebhookEventRepository;
-use App\Service\Inventory\InventoryService;
-use App\Service\Invoice\InvoiceService;
+use App\Service\Payment\OrderPaymentFinalizer;
 use App\Service\Payment\Provider\PayPalPaymentProvider;
 use App\Service\Payment\Provider\PaymentResolution;
 use App\Service\Payment\PaymentService;
@@ -19,36 +18,18 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Workflow\WorkflowInterface;
-use Symfony\Contracts\Service\ServiceSubscriberInterface;
-use Symfony\Contracts\Service\ServiceSubscriberTrait;
 
-final class PayPalWebhookController extends AbstractController implements ServiceSubscriberInterface
+final class PayPalWebhookController extends AbstractController
 {
-    use ServiceSubscriberTrait;
-
     public function __construct(
         private readonly PaymentService $paymentService,
         private readonly PaymentRepository $paymentRepository,
         private readonly ProcessedWebhookEventRepository $webhookEventRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly LoggerInterface $logger,
-        private readonly InventoryService $inventoryService,
-        private readonly InvoiceService $invoiceService,
+        private readonly OrderPaymentFinalizer $paymentFinalizer,
         private readonly PayPalPaymentProvider $payPalPaymentProvider,
     ) {
-    }
-
-    public static function getSubscribedServices(): array
-    {
-        return [
-            'state_machine.order' => '?'.WorkflowInterface::class,
-        ];
-    }
-
-    private function getOrderWorkflow(): WorkflowInterface
-    {
-        return $this->container->get('state_machine.order');
     }
 
     #[Route('/webhook/paypal', name: 'webhook_paypal', methods: ['POST'])]
@@ -120,33 +101,9 @@ final class PayPalWebhookController extends AbstractController implements Servic
             $this->paymentService->applyResolution($resolution);
 
             if ($resolution->status === PaymentResolution::STATUS_SUCCEEDED) {
-                try {
-                    $this->inventoryService->commit($order);
-                } catch (\Exception $e) {
-                    $this->logger->error('PayPal webhook: inventory commit failed', ['error' => $e->getMessage()]);
-                }
-
-                if ($this->getOrderWorkflow()->can($order, 'confirm_payment')) {
-                    $this->getOrderWorkflow()->apply($order, 'confirm_payment');
-                    $this->entityManager->flush();
-                }
-
-                try {
-                    $this->invoiceService->createInvoiceForOrder($order);
-                } catch (\Exception $e) {
-                    $this->logger->error('PayPal webhook: invoice failed', ['error' => $e->getMessage()]);
-                }
+                $this->paymentFinalizer->markPaid($order, 'paypal_webhook');
             } elseif ($resolution->status === PaymentResolution::STATUS_FAILED) {
-                try {
-                    $this->inventoryService->release($order);
-                } catch (\Exception $e) {
-                    $this->logger->error('PayPal webhook: inventory release failed', ['error' => $e->getMessage()]);
-                }
-
-                if ($this->getOrderWorkflow()->can($order, 'cancel')) {
-                    $this->getOrderWorkflow()->apply($order, 'cancel');
-                    $this->entityManager->flush();
-                }
+                $this->paymentFinalizer->cancelUnpaid($order, 'paypal_webhook');
             }
 
             $claim->setStatus(ProcessedWebhookEvent::STATUS_COMPLETED);

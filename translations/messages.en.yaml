@@ -64,6 +64,8 @@ common:
   info: Info
   yes: Yes
   no: No
+  close: Close
+  view: View
   
 cart:
   title: Shopping Cart
@@ -221,6 +223,8 @@ checkout:
   simulate_success: Simulate success
   simulate_failure: Simulate failure
   simulate_pending: Leave pending
+  dev_simulated_failure: Payment was simulated as failed.
+  dev_simulated_pending: Payment left as pending.
   skip_payment_dev_notice: "Note: CHECKOUT_SKIP_PAYMENT is enabled — payment was auto-completed for local testing only."
   payment_page_title: Payment
   payment_meta_description: Complete your payment
@@ -235,6 +239,9 @@ checkout:
     shipping_method_unavailable: Selected shipping option is not available.
     payment_method_unavailable: Selected payment method is not available.
     order_not_pending: Order is not in payment pending status.
+    out_of_stock: Some items in your cart are no longer available in the requested quantity. Please review your cart.
+    order_failed: We could not place your order. Please try again.
+    payment_start_failed: The payment could not be started. Please try again or choose another payment method.
   not_found:
     order: Order not found
     payment: Payment not found
@@ -355,6 +362,7 @@ security:
     forgot_password: Forgot your password?
   register:
     rate_limited: Too many registration attempts from your network. Please try again later.
+    flash_success: Your account has been created. You can now sign in.
     title: Create your account
     already_have_account: Already have an account?
     sign_in: Sign in
@@ -373,11 +381,11 @@ home:
     view_featured: Featured Products
   benefits:
     fast_shipping: Fast Shipping
-    fast_shipping_desc: Free shipping on orders over $50
+    fast_shipping_desc: Tracked delivery to your door
     secure_payment: Secure Payment
     secure_payment_desc: 100% secure checkout
     easy_returns: Easy Returns
-    easy_returns_desc: 30-day return policy
+    easy_returns_desc: Request returns online in a few clicks
     support: 24/7 Support
     support_desc: We're here to help
   featured:
@@ -496,6 +504,7 @@ account:
       profile_updated: Your profile data has been updated.
   marketing:
     opt_out_success: You have been unsubscribed from abandoned cart reminders.
+    opt_out_invalid_link: This unsubscribe link is invalid. Please use the link from your most recent e-mail.
 
 admin:
   brand:
@@ -1193,3 +1202,112 @@ review:
     invalid_payload: Please provide rating, title and review text.
     submitted: Review submitted and awaiting moderation.
 
+ui:
+  a11y:
+    skip_to_content: Skip to content
+    breadcrumb: Breadcrumb
+    pagination: Pagination
+  nav:
+    main: Main navigation
+    menu: Menu
+    open_menu: Open menu
+    home_aria: '%shop% home'
+    all_products: All products
+    account_menu: Account
+    my_account: My account
+    toggle_theme: Toggle dark mode
+  search:
+    label: Search
+    placeholder: Search products…
+    results_for: 'Results for “%query%”'
+    no_results: 'No products found for “%query%”'
+    no_results_hint: Check the spelling or try a more general term.
+  footer:
+    prices_excl_vat: All prices excl. VAT, plus shipping. VAT is added at checkout.
+  product:
+    from: from
+    sold_out: Sold out
+    choose_options: Choose options
+    price_note: Excl. VAT, plus shipping
+    only_n_left: 'Only %count% left'
+    shipping_note: Tracked shipping on every order
+    returns_note: Easy returns — see our return policy
+    payment_note: Secure payment with encrypted checkout
+    category: Category
+  quantity:
+    decrease: Decrease quantity
+    increase: Increase quantity
+  gallery:
+    previous: Previous image
+    next: Next image
+    zoom: Enlarge image
+    thumbnails: Product images
+  reviews:
+    count: '{0} No reviews|{1} 1 review|]1,Inf[ %count% reviews'
+    rating_aria: '%rating% out of 5 stars'
+    anonymous: Customer
+  stock:
+    notify_account: 'We will e-mail %email% as soon as this variant is back in stock.'
+  cart:
+    added: Added
+    view_cart: View cart
+    calculated_at_checkout: Calculated at checkout
+    tax_note: VAT and shipping are calculated at checkout.
+    invalid_request: This request could not be processed.
+    product_unavailable: This product is no longer available.
+    out_of_stock: This item is out of stock.
+    only_n_available: 'Only %count% more available.'
+    item_not_found: This item is no longer in your cart.
+  coupon:
+    have_code: Have a discount code?
+    code_required: Please enter a discount code.
+    invalid: This discount code is not valid for your cart.
+    applied: Discount code applied.
+    removed: Discount code removed.
+    remove: Remove discount code
+  checkout:
+    back_to_cart: Back to cart
+    have_account: Already have an account?
+    no_payment_methods: No payment method is available at the moment. Please contact us.
+    payment_next_step: You will complete the payment in the next step.
+    place_order_binding: Place order with obligation to pay
+    placing_order: Placing order…
+    view_orders: View my orders
+  payment:
+    processing: Processing payment…
+    failed: The payment could not be completed. Please try again.
+    secure_note: Payments are processed securely by our payment provider.
+  account:
+    items_count: '{1} 1 item|]1,Inf[ %count% items'
+  auth:
+    show_password: Show password
+    register_benefits: Track orders, save your wishlist and check out faster.
+    password_hint: At least 6 characters.
+    agree_terms: 'I accept the <a href="%terms%" class="link" target="_blank">terms and conditions</a> and have read the <a href="%privacy%" class="link" target="_blank">privacy policy</a>.'
+    reset_title: Reset your password
+    reset_request_intro: Enter your e-mail address and we will send you a link to choose a new password.
+    reset_request_submit: Send reset link
+    reset_intro: Choose a new password for your account.
+    new_password: New password
+    reset_submit: Save new password
+    back_to_login: Back to sign in
+  category:
+    meta_description: 'Shop %category% — browse all products in this category.'
+  filters:
+    remove: Remove filter
+  signup:
+    title: Get more from your account
+    text: Track your orders, save favourites to your wishlist and check out faster next time.
+  testimonials:
+    title: What our customers say
+  faq:
+    more_questions: Still have questions?
+  contact:
+    faq_hint: Answers to the most common questions
+    returns_hint: Start a return for an order
+  support:
+    attach: Attach files
+  api:
+    title: API documentation
+    intro: Interactive reference for the SymfoShop REST API. Authenticate with your API key via the Authorize button.
+    open_full_page: Open full page

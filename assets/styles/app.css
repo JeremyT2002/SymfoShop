@@ -1,0 +1,312 @@
+/*
+ * SymfoShop design system — compiled by the Tailwind standalone CLI (php bin/console tailwind:build).
+ *
+ * Colour model
+ * - Brand colours (primary-*, accent) come from the theme editor: templates/theme/_tokens.css.twig
+ *   prints them as unlayered :root variables, which override the defaults declared in @theme below.
+ * - Surfaces and text use semantic tokens (canvas, panel, fg, line …) that switch for dark mode,
+ *   so templates rarely need dark: variants.
+ */
+@import "tailwindcss" source(none);
+
+@source "../../templates";
+@source "../js";
+
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------ fonts */
+
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../fonts/inter-latin-wght-normal.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+        U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../fonts/inter-latin-ext-wght-normal.woff2") format("woff2");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+        U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ------------------------------------------------------------------ theme */
+
+@theme {
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-heading: var(--font-sans);
+
+    /* Defaults — the theme editor overrides these per shop */
+    --color-primary-50: #eff6ff;
+    --color-primary-100: #dbeafe;
+    --color-primary-200: #bfdbfe;
+    --color-primary-300: #93c5fd;
+    --color-primary-400: #60a5fa;
+    --color-primary-500: #3b82f6;
+    --color-primary-600: #2563eb;
+    --color-primary-700: #1d4ed8;
+    --color-primary-800: #1e40af;
+    --color-primary-900: #1e3a8a;
+    --color-primary-950: #172554;
+    --color-accent: #16a34a;
+
+    /* Status colours used by the admin */
+    --color-success: #16a34a;
+    --color-warning: #d97706;
+    --color-danger: #dc2626;
+
+    --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+    --animate-fade-in: fade-in 0.25s var(--ease-out-soft) both;
+    --animate-rise: rise 0.35s var(--ease-out-soft) both;
+
+    @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes rise {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+}
+
+/* Semantic tokens, mapped onto the theme-editor variables where those exist */
+@theme inline {
+    --color-canvas: var(--color-background);
+    --color-panel: var(--color-surface);
+    --color-subtle: var(--ui-subtle);
+    --color-fg: var(--color-text-primary);
+    --color-fg-muted: var(--color-text-secondary);
+    --color-fg-subtle: var(--color-text-muted);
+    --color-line: var(--ui-line);
+    --color-line-strong: var(--ui-line-strong);
+}
+
+@layer base {
+    :root {
+        --color-background: #fafafa;
+        --color-surface: #ffffff;
+        --color-text-primary: #18181b;
+        --color-text-secondary: #52525b;
+        --color-text-muted: #71717a;
+        --ui-subtle: #f4f4f5;
+        --ui-line: #e4e4e7;
+        --ui-line-strong: #d4d4d8;
+        color-scheme: light;
+    }
+}
+
+/*
+ * Dark mode lives outside any layer on purpose: the theme-editor tokens are unlayered :root
+ * rules, and html.dark must beat them (same layer, higher specificity).
+ */
+html.dark {
+    --color-background: #09090b;
+    --color-surface: #131316;
+    --color-text-primary: #fafafa;
+    --color-text-secondary: #a1a1aa;
+    --color-text-muted: #8b8b94;
+    --ui-subtle: #1c1c21;
+    --ui-line: #27272a;
+    --ui-line-strong: #3f3f46;
+    color-scheme: dark;
+}
+
+@layer base {
+    html {
+        -webkit-tap-highlight-color: transparent;
+        text-rendering: optimizeLegibility;
+    }
+
+    body {
+        @apply bg-canvas text-fg font-sans antialiased;
+        font-feature-settings: "cv11", "ss01";
+    }
+
+    h1, h2, h3, h4 {
+        font-family: var(--font-heading);
+        @apply tracking-tight text-balance;
+    }
+
+    ::selection {
+        @apply bg-primary-200 text-primary-950;
+    }
+
+    :focus-visible {
+        @apply outline-2 outline-offset-2 outline-primary-500;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}
+
+/* -------------------------------------------------------------- utilities */
+
+@utility container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+/* Minimum touch target (WCAG 2.5.5) */
+@utility touch-target {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+@utility icon {
+    @apply inline-block size-[1.15em] shrink-0;
+}
+
+/* ------------------------------------------------------------- components */
+
+@layer components {
+    /* Buttons */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold whitespace-nowrap
+            transition-[background-color,border-color,color,box-shadow,opacity] duration-150 select-none
+            disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50;
+    }
+    .btn-sm { @apply px-3 py-1.5 text-xs; }
+    .btn-lg { @apply px-6 py-3.5 text-base; }
+    .btn-icon { @apply p-2.5; }
+
+    .btn-primary {
+        @apply bg-primary-600 text-white shadow-xs hover:bg-primary-700 active:bg-primary-800;
+    }
+    .btn-secondary {
+        @apply border border-line-strong bg-panel text-fg shadow-xs hover:border-fg-subtle hover:bg-subtle;
+    }
+    .btn-ghost {
+        @apply text-fg-muted hover:bg-subtle hover:text-fg;
+    }
+    .btn-danger {
+        @apply bg-red-600 text-white shadow-xs hover:bg-red-700;
+    }
+    .btn-danger-ghost {
+        @apply text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10;
+    }
+    .btn-inverse {
+        @apply bg-white text-zinc-900 hover:bg-zinc-100;
+    }
+
+    /* Forms */
+    .label,
+    .admin-form-label {
+        @apply mb-1.5 block text-sm font-medium text-fg;
+    }
+    .hint {
+        @apply mt-1.5 text-xs text-fg-subtle;
+    }
+    .input,
+    .select,
+    .textarea,
+    .admin-form-input {
+        @apply block w-full rounded-lg border border-line-strong bg-panel px-3.5 py-2.5 text-sm text-fg shadow-xs
+            transition-colors placeholder:text-fg-subtle
+            hover:border-fg-subtle
+            focus:border-primary-500 focus:outline-none focus:ring-3 focus:ring-primary-500/20
+            disabled:cursor-not-allowed disabled:bg-subtle disabled:text-fg-subtle
+            aria-invalid:border-red-500 aria-invalid:focus:ring-red-500/20;
+    }
+    .select {
+        @apply appearance-none bg-no-repeat pr-10;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-position: right 0.75rem center;
+        background-size: 1rem;
+    }
+    .textarea {
+        @apply min-h-24 resize-y;
+    }
+    .checkbox,
+    .radio {
+        @apply size-4 shrink-0 cursor-pointer border-line-strong bg-panel accent-primary-600;
+    }
+    .checkbox { @apply rounded; }
+
+    /* Symfony form_errors() output */
+    .form-error,
+    .form-errors ul {
+        @apply mt-1.5 text-sm text-red-600 dark:text-red-400;
+    }
+
+    /* Surfaces */
+    .card {
+        @apply rounded-2xl border border-line bg-panel;
+    }
+    .card-body {
+        @apply p-5 sm:p-6;
+    }
+    .divider {
+        @apply border-t border-line;
+    }
+
+    /* Badges */
+    .badge {
+        @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset;
+    }
+    .badge-neutral { @apply bg-subtle text-fg-muted ring-line; }
+    .badge-primary { @apply bg-primary-50 text-primary-700 ring-primary-600/20 dark:bg-primary-500/10 dark:text-primary-300 dark:ring-primary-400/30; }
+    .badge-success { @apply bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-400/30; }
+    .badge-warning { @apply bg-amber-50 text-amber-800 ring-amber-600/20 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-400/30; }
+    .badge-danger  { @apply bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-500/10 dark:text-red-300 dark:ring-red-400/30; }
+    .badge-info    { @apply bg-sky-50 text-sky-700 ring-sky-600/20 dark:bg-sky-500/10 dark:text-sky-300 dark:ring-sky-400/30; }
+
+    /* Alerts (flash messages, inline notices) */
+    .alert {
+        @apply flex items-start gap-3 rounded-xl border px-4 py-3 text-sm;
+    }
+    .alert-success { @apply border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200; }
+    .alert-error   { @apply border-red-200 bg-red-50 text-red-900 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200; }
+    .alert-warning { @apply border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200; }
+    .alert-info    { @apply border-sky-200 bg-sky-50 text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200; }
+
+    /* Text links inside copy */
+    .link {
+        @apply font-medium text-primary-600 underline-offset-4 hover:underline dark:text-primary-400;
+    }
+
+    /* Section headings */
+    .eyebrow {
+        @apply text-xs font-semibold tracking-widest text-fg-subtle uppercase;
+    }
+
+    /* Tables (admin + account) */
+    .table {
+        @apply w-full text-left text-sm;
+    }
+    .table thead th {
+        @apply border-b border-line px-4 py-3 text-xs font-medium tracking-wide text-fg-subtle uppercase;
+    }
+    .table tbody td {
+        @apply border-b border-line px-4 py-3 align-middle;
+    }
+    .table tbody tr:last-child td {
+        @apply border-b-0;
+    }
+    .table tbody tr {
+        @apply transition-colors hover:bg-subtle/60;
+    }
+
+    /* Skeleton / spinner */
+    .spinner {
+        @apply inline-block size-4 animate-spin rounded-full border-2 border-current border-r-transparent;
+    }
+}

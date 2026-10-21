@@ -105,19 +105,7 @@ class ProductRepository extends ServiceEntityRepository
             return [];
         }
 
-        /** @var list<Product> $products */
-        $products = $this->createQueryBuilder('p')
-            ->leftJoin('p.variants', 'v')
-            ->addSelect('v')
-            ->leftJoin('p.media', 'm')
-            ->addSelect('m')
-            ->where('p.id IN (:ids)')
-            ->setParameter('ids', array_map('intval', $ids))
-            ->orderBy('p.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
-
-        return $products;
+        return $this->hydrateForCards($ids);
     }
 
     /**
@@ -125,12 +113,15 @@ class ProductRepository extends ServiceEntityRepository
      *
      * @return list<Product>
      */
-    public function findActiveProductsForListing(int $offset = 0, int $limit = 12): array
+    public function findActiveProductsForListing(int $offset = 0, int $limit = 12, ?string $search = null): array
     {
-        $ids = $this->createQueryBuilder('p')
+        $idQuery = $this->createQueryBuilder('p')
             ->select('p.id')
             ->where('p.status = :status')
-            ->setParameter('status', ProductStatus::ACTIVE)
+            ->setParameter('status', ProductStatus::ACTIVE);
+        $this->applySearch($idQuery, $search);
+
+        $ids = $idQuery
             ->orderBy('p.createdAt', 'DESC')
             ->setFirstResult($offset)
             ->setMaxResults($limit)
@@ -141,29 +132,34 @@ class ProductRepository extends ServiceEntityRepository
             return [];
         }
 
-        /** @var list<Product> $products */
-        $products = $this->createQueryBuilder('p')
-            ->leftJoin('p.variants', 'v')
-            ->addSelect('v')
-            ->leftJoin('p.media', 'm')
-            ->addSelect('m')
-            ->where('p.id IN (:ids)')
-            ->setParameter('ids', array_map('intval', $ids))
-            ->orderBy('p.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
-
-        return $products;
+        return $this->hydrateForCards($ids);
     }
 
-    public function countActiveProducts(): int
+    public function countActiveProducts(?string $search = null): int
     {
-        return (int) $this->createQueryBuilder('p')
+        $qb = $this->createQueryBuilder('p')
             ->select('COUNT(p.id)')
             ->where('p.status = :status')
-            ->setParameter('status', ProductStatus::ACTIVE)
-            ->getQuery()
-            ->getSingleScalarResult();
+            ->setParameter('status', ProductStatus::ACTIVE);
+        $this->applySearch($qb, $search);
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * Storefront search: every word must appear in the name or description (case-insensitive).
+     */
+    private function applySearch(QueryBuilder $qb, ?string $search): void
+    {
+        $words = preg_split('/\s+/', mb_strtolower(trim((string) $search)), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        // Wildcards are dropped rather than escaped: LIKE escaping differs between SQLite and MySQL.
+        $words = array_values(array_filter(array_map(static fn (string $w): string => str_replace(['%', '_'], '', $w), $words)));
+
+        foreach (\array_slice($words, 0, 5) as $i => $word) {
+            $qb->andWhere(sprintf('(LOWER(p.name) LIKE :q%1$d OR LOWER(p.description) LIKE :q%1$d)', $i))
+                ->setParameter('q' . $i, '%' . $word . '%');
+        }
     }
 
     /**
@@ -176,7 +172,43 @@ class ProductRepository extends ServiceEntityRepository
         $qb = $this->createFilteredByCategoryQueryBuilder($category, $filters);
         $this->applySort($qb, $filters->sort);
         $qb->setFirstResult($offset)->setMaxResults($limit);
-        return $qb->getQuery()->getResult();
+
+        $ids = array_map(static fn (Product $p): ?int => $p->getId(), $qb->getQuery()->getResult());
+
+        return $this->hydrateForCards($ids);
+    }
+
+    /**
+     * Loads products with everything a product card needs (variants, stock, media) in one query,
+     * keeping the order of $ids. Avoids one stock query per variant (inverse one-to-one).
+     *
+     * @param list<int|string|null> $ids
+     * @return list<Product>
+     */
+    private function hydrateForCards(array $ids): array
+    {
+        $ids = array_values(array_filter(array_map('intval', $ids)));
+        if ($ids === []) {
+            return [];
+        }
+
+        /** @var list<Product> $products */
+        $products = $this->createQueryBuilder('p')
+            ->leftJoin('p.variants', 'v')
+            ->addSelect('v')
+            ->leftJoin('v.stockItem', 'si')
+            ->addSelect('si')
+            ->leftJoin('p.media', 'm')
+            ->addSelect('m')
+            ->where('p.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getResult();
+
+        $position = array_flip($ids);
+        usort($products, static fn (Product $a, Product $b): int => $position[$a->getId()] <=> $position[$b->getId()]);
+
+        return $products;
     }
 
     public function countFilteredByCategory(Category $category, CatalogFilters $filters): int

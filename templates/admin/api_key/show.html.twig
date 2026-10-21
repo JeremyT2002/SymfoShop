@@ -5,7 +5,7 @@
 {% block body %}
     <div class="mb-6 flex items-center justify-between gap-3">
         <div>
-            <a href="{{ path('admin_api_keys_index') }}" class="mb-2 inline-flex items-center text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">
+            <a href="{{ path('admin_api_keys_index') }}" class="mb-2 inline-flex items-center text-sm text-fg-subtle hover:text-slate-800">
                 <span class="mr-1">←</span> Back to API Keys
             </a>
             <h2 class="text-2xl font-bold">{{ apiKey.name }}</h2>
@@ -31,19 +31,19 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Info -->
         <div class="lg:col-span-2 space-y-6">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+            <div class="rounded-2xl border border-line bg-panel p-6 shadow-xs">
                 <h3 class="text-lg font-semibold mb-4">API Key Information</h3>
                 <dl class="grid grid-cols-1 gap-4">
                     <div>
-                        <dt class="text-sm font-medium text-slate-500">Name</dt>
+                        <dt class="text-sm font-medium text-fg-subtle">Name</dt>
                         <dd class="mt-1 text-sm">{{ apiKey.name }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-slate-500">User</dt>
+                        <dt class="text-sm font-medium text-fg-subtle">User</dt>
                         <dd class="mt-1 text-sm">{{ apiKey.user.email }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-slate-500">Status</dt>
+                        <dt class="text-sm font-medium text-fg-subtle">Status</dt>
                         <dd class="mt-1">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                 {% if apiKey.isActive %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
@@ -53,11 +53,11 @@
                     </div>
                     {% if apiKey.scopes %}
                         <div>
-                            <dt class="text-sm font-medium text-slate-500">Scopes</dt>
+                            <dt class="text-sm font-medium text-fg-subtle">Scopes</dt>
                             <dd class="mt-1">
                                 <div class="flex flex-wrap gap-2">
                                     {% for scope in apiKey.scopes %}
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-primary-100 text-primary-800">
                                             {{ scope }}
                                         </span>
                                     {% endfor %}
@@ -67,7 +67,7 @@
                     {% endif %}
                     {% if apiKey.expiresAt %}
                         <div>
-                            <dt class="text-sm font-medium text-slate-500">Expires At</dt>
+                            <dt class="text-sm font-medium text-fg-subtle">Expires At</dt>
                             <dd class="mt-1 text-sm">{{ apiKey.expiresAt|date('Y-m-d H:i') }}</dd>
                         </div>
                     {% endif %}
@@ -82,7 +82,7 @@
                     <p class="text-sm text-amber-800 dark:text-amber-300 mb-4">
                         This is the only time you will see the API key. Make sure to copy it now!
                     </p>
-                    <div class="rounded-xl border border-amber-300 bg-white p-4 dark:border-amber-900/60 dark:bg-slate-900">
+                    <div class="rounded-xl border border-amber-300 bg-panel p-4 dark:border-amber-900/60">
                         <code id="plain-api-key" class="text-sm font-mono break-all">{{ plainKey }}</code>
                     </div>
                     <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('plain-api-key').innerText)" class="mt-4 rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700">
@@ -94,19 +94,19 @@
         
         <!-- Sidebar -->
         <div class="space-y-6">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-admin dark:border-slate-800 dark:bg-slate-900">
+            <div class="rounded-2xl border border-line bg-panel p-6 shadow-xs">
                 <h3 class="text-lg font-semibold mb-4">Metadata</h3>
                 <dl class="space-y-3">
                     <div>
-                        <dt class="text-sm font-medium text-slate-500">ID</dt>
+                        <dt class="text-sm font-medium text-fg-subtle">ID</dt>
                         <dd class="mt-1 text-sm">#{{ apiKey.id }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-slate-500">Created</dt>
+                        <dt class="text-sm font-medium text-fg-subtle">Created</dt>
                         <dd class="mt-1 text-sm">{{ apiKey.createdAt|date('Y-m-d H:i') }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-slate-500">Last Used</dt>
+                        <dt class="text-sm font-medium text-fg-subtle">Last Used</dt>
                         <dd class="mt-1 text-sm">{{ apiKey.lastUsedAt ? apiKey.lastUsedAt|date('Y-m-d H:i') : 'Never' }}</dd>
                     </div>
                 </dl>

@@ -1,0 +1,4 @@
+# symfony serve: rebuild Tailwind CSS while the dev server runs
+workers:
+    tailwind:
+        cmd: ['symfony', 'console', 'tailwind:build', '--watch']

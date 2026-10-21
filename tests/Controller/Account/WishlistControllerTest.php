@@ -38,7 +38,7 @@ class WishlistControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/account/wishlist');
 
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorTextContains('h1', 'My Wishlist');
+        $this->assertSelectorTextContains('h2', 'My Wishlist');
     }
 
     public function testToggleAddsProductToWishlist(): void

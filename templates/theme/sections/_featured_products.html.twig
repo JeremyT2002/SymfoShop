@@ -1,31 +1,25 @@
-{# Featured products - settings: limit, title. Context: featuredProducts #}
-{% if featuredProducts is defined and featuredProducts|length > 0 %}
-<section id="featured" class="bg-gray-50 py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                {{ settings.title|default('home.featured.title'|trans)|default('Featured Products') }}
-            </h2>
-            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                {{ 'home.featured.subtitle'|trans|default('Discover our handpicked selection of best-selling products') }}
-            </p>
-        </div>
-        {% set limit = settings.limit|default(8) %}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {% for product in featuredProducts|slice(0, limit) %}
-                {% include 'components/product_card.html.twig' with {
-                    product: product,
-                    variant: product.variants|first
-                } %}
-            {% endfor %}
-        </div>
-        <div class="text-center">
-            <a href="{{ path('catalog_products') }}"
-               class="inline-flex items-center px-8 py-4 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                {{ 'home.featured.view_all'|trans|default('View All Products') }}
-                <i class="fas fa-arrow-right ml-2"></i>
+{# Featured products. Settings: title, limit. Context: featuredProducts #}
+{%- set products = (featuredProducts|default([]))|slice(0, settings.limit|default(8)) -%}
+{% if products is not empty %}
+    <section id="featured" class="container-page scroll-mt-24 py-16 sm:py-20">
+        <div class="flex items-end justify-between gap-4">
+            <div>
+                <h2 class="text-2xl font-semibold sm:text-3xl">{{ settings.title|default('home.featured.title'|trans) }}</h2>
+                <p class="mt-2 text-fg-muted">{{ 'home.featured.subtitle'|trans }}</p>
+            </div>
+            <a href="{{ path('catalog_products') }}" class="hidden shrink-0 items-center gap-1 text-sm font-semibold text-fg hover:text-primary-600 sm:inline-flex">
+                {{ 'home.featured.view_all'|trans }}{{ ux_icon('lucide:arrow-right', {class: 'size-4'}) }}
             </a>
         </div>
-    </div>
-</section>
+
+        <div class="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 lg:grid-cols-4">
+            {% for product in products %}
+                {% include 'components/product_card.html.twig' with {product: product, eager: loop.index <= 4} only %}
+            {% endfor %}
+        </div>
+
+        <div class="mt-10 text-center sm:hidden">
+            <a href="{{ path('catalog_products') }}" class="btn btn-secondary">{{ 'home.featured.view_all'|trans }}</a>
+        </div>
+    </section>
 {% endif %}

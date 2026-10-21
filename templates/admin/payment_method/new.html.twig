@@ -4,10 +4,10 @@
 
 {% block body %}
     <div class="mb-6">
-        <a href="{{ path('admin_payment_methods_index') }}" class="text-gray-600 hover:text-gray-900 mb-2 inline-block">
-            <i class="fas fa-arrow-left"></i> {{ 'admin.payment_methods.back'|trans }}
+        <a href="{{ path('admin_payment_methods_index') }}" class="text-fg-muted hover:text-fg mb-2 inline-block">
+            {{ ux_icon('lucide:arrow-left', {class: 'size-4'}) }} {{ 'admin.payment_methods.back'|trans }}
         </a>
-        <h2 class="text-2xl font-bold text-gray-900">{{ 'admin.payment_methods.new_title'|trans }}</h2>
+        <h2 class="text-2xl font-bold text-fg">{{ 'admin.payment_methods.new_title'|trans }}</h2>
     </div>
 
     {% include 'admin/payment_method/_form.html.twig' with {

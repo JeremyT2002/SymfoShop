@@ -1,0 +1,5 @@
+symfonycasts_tailwind:
+    # Standalone Tailwind CLI — no Node.js needed. Downloaded to var/tailwind on first build.
+    binary_version: 'v4.3.3'
+    input_css:
+        - '%kernel.project_dir%/assets/styles/app.css'

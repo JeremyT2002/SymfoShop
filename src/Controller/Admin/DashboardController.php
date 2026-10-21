@@ -36,6 +36,8 @@ class DashboardController extends AbstractController
     public function apiDocs(): Response
     {
         $openApiSpec = $this->renderOpenApi->render(RenderOpenApi::JSON, 'default');
+        // Embedded in a <script> tag: escape "<" and ">" so the spec cannot close it.
+        $openApiSpec = json_encode(json_decode($openApiSpec), \JSON_HEX_TAG | \JSON_HEX_AMP | \JSON_UNESCAPED_SLASHES);
 
         return $this->render('admin/api_docs.html.twig', [
             'openApiSpec' => $openApiSpec,

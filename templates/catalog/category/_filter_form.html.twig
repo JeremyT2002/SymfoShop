@@ -1,62 +1,68 @@
 {#
-  Filter form for category listing. GET form; all params preserved for SEO-friendly URLs.
-  Include in sidebar (desktop) and drawer (mobile).
+  Category filters (GET form, used in the desktop sidebar and the mobile drawer).
+  Prices are entered in currency units and submitted in cents (min_price/max_price), which the backend expects.
 #}
-<form method="get" action="{{ path('catalog_category', {slug: category.slug}) }}" class="space-y-6" data-js="category-filter-form">
-    <input type="hidden" name="sort" value="{{ filters.sort|e('html_attr') }}">
+{%- set min_cents = filters.minPrice ?? null -%}
+{%- set max_cents = filters.maxPrice ?? null -%}
+<form method="get" action="{{ path('catalog_category', {slug: category.slug}) }}" class="space-y-8"
+      x-data="{
+          min: '{{ min_cents is not null ? (min_cents / 100)|round : '' }}',
+          max: '{{ max_cents is not null ? (max_cents / 100)|round : '' }}',
+          cents(v) { return v === '' || v === null ? '' : Math.round(parseFloat(String(v).replace(',', '.')) * 100) }
+      }">
+    {% if filters.sort != 'default' %}
+        <input type="hidden" name="sort" value="{{ filters.sort }}">
+    {% endif %}
 
-    {# Price range #}
-    <div>
-        <h3 class="text-sm font-semibold text-gray-900 mb-2">{{ 'category.filters.price_range'|trans }}</h3>
-        <div class="flex items-center gap-2">
-            <label for="filter-min-price" class="sr-only">{{ 'category.filters.min_price'|trans }}</label>
-            <input type="number" id="filter-min-price" name="min_price" min="0" step="100"
-                   value="{{ filters.minPrice ?? filterOptions.price_min }}"
-                   placeholder="{{ filterOptions.price_min }}"
-                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-            <span class="text-gray-500">–</span>
-            <label for="filter-max-price" class="sr-only">{{ 'category.filters.max_price'|trans }}</label>
-            <input type="number" id="filter-max-price" name="max_price" min="0" step="100"
-                   value="{{ filters.maxPrice ?? filterOptions.price_max }}"
-                   placeholder="{{ filterOptions.price_max }}"
-                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+    <fieldset>
+        <legend class="text-sm font-semibold">{{ 'category.filters.price_range'|trans }}</legend>
+        <div class="mt-3 flex items-center gap-2">
+            <label class="sr-only" for="{{ id_prefix }}-min-price">{{ 'category.filters.min_price'|trans }}</label>
+            <input id="{{ id_prefix }}-min-price" type="number" min="0" step="1" inputmode="numeric" x-model="min"
+                   placeholder="{{ (filterOptions.price_min / 100)|round(0, 'floor') }}" class="input">
+            <span class="text-fg-subtle">–</span>
+            <label class="sr-only" for="{{ id_prefix }}-max-price">{{ 'category.filters.max_price'|trans }}</label>
+            <input id="{{ id_prefix }}-max-price" type="number" min="0" step="1" inputmode="numeric" x-model="max"
+                   placeholder="{{ (filterOptions.price_max / 100)|round(0, 'ceil') }}" class="input">
         </div>
-        <p class="mt-1 text-xs text-gray-500">{{ 'category.filters.price_unit'|trans }}</p>
-    </div>
+        <input type="hidden" name="min_price" :value="cents(min)" :disabled="min === ''">
+        <input type="hidden" name="max_price" :value="cents(max)" :disabled="max === ''">
+    </fieldset>
 
-    {# In stock #}
-    <div>
-        <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" name="in_stock" value="1" {{ filters.inStockOnly ? 'checked' : '' }} class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-            <span class="text-sm text-gray-700">{{ 'category.filters.in_stock_only'|trans }}</span>
+    <fieldset>
+        <legend class="sr-only">{{ 'category.filters.in_stock'|trans }}</legend>
+        <label class="flex cursor-pointer items-center justify-between gap-3 text-sm font-semibold">
+            {{ 'category.filters.in_stock_only'|trans }}
+            <input type="checkbox" name="in_stock" value="1" class="peer sr-only" {{ filters.inStockOnly ? 'checked' }}>
+            <span class="relative h-6 w-10 rounded-full bg-line-strong transition peer-checked:bg-primary-600 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary-500 after:absolute after:top-0.5 after:left-0.5 after:size-5 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-4"></span>
         </label>
-    </div>
+    </fieldset>
 
-    {# Dynamic attributes (size, color, brand, etc.) #}
     {% for attrKey, valueCounts in filterOptions.attributes %}
-        {% set currentValues = filters.attributeFilters[attrKey] ?? [] %}
-        <div>
-            <h3 class="text-sm font-semibold text-gray-900 mb-2">{{ attrKey|capitalize }}</h3>
-            <div class="space-y-1.5 max-h-48 overflow-y-auto">
+        {%- set current = filters.attributeFilters[attrKey] ?? [] -%}
+        <fieldset x-data="{ open: {{ current is not empty or loop.index <= 3 ? 'true' : 'false' }} }" class="border-t border-line pt-6">
+            <legend class="w-full">
+                <button type="button" class="flex w-full items-center justify-between text-sm font-semibold" @click="open = !open" :aria-expanded="open">
+                    {{ attrKey|capitalize }}
+                    <span class="inline-flex shrink-0 transition" :class="open && 'rotate-180'">{{ ux_icon('lucide:chevron-down', {class: 'size-4 transition'}) }}</span>
+                </button>
+            </legend>
+            <div x-show="open" x-collapse class="mt-3 max-h-56 space-y-2.5 overflow-y-auto">
                 {% for value, count in valueCounts|sort %}
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" name="attr_{{ attrKey }}[]" value="{{ value|e('html_attr') }}"
-                               {{ value in currentValues ? 'checked' : '' }}
-                               class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                        <span class="text-sm text-gray-700">{{ value|escape }}</span>
-                        <span class="text-xs text-gray-500">({{ count }})</span>
+                    <label class="flex cursor-pointer items-center gap-3 text-sm">
+                        <input type="checkbox" name="attr_{{ attrKey }}[]" value="{{ value }}" class="checkbox" {{ value in current ? 'checked' }}>
+                        <span class="flex-1 text-fg-muted">{{ value }}</span>
+                        <span class="text-xs text-fg-subtle tabular-nums">{{ count }}</span>
                     </label>
                 {% endfor %}
             </div>
-        </div>
+        </fieldset>
     {% endfor %}
 
-    <div class="flex gap-2 pt-2">
-        <button type="submit" class="flex-1 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
-            {{ 'category.filters.apply'|trans }}
-        </button>
-        <a href="{{ path('catalog_category', {slug: category.slug}) }}" class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-            {{ 'category.filters.clear_all'|trans }}
-        </a>
+    <div class="flex gap-2 border-t border-line pt-6">
+        <button type="submit" class="btn btn-primary flex-1">{{ 'category.filters.apply'|trans }}</button>
+        {% if filters.hasAnyFilter %}
+            <a href="{{ path('catalog_category', {slug: category.slug}) }}" class="btn btn-ghost">{{ 'category.filters.clear_all'|trans }}</a>
+        {% endif %}
     </div>
 </form>

@@ -8,7 +8,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\HttpFoundation\UriSigner;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
@@ -21,6 +23,8 @@ class SendAbandonedCartReminderMessageHandler
         private readonly MailerInterface $mailer,
         private readonly Environment $twig,
         private readonly TranslatorInterface $translator,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly UriSigner $uriSigner,
         #[Autowire('%env(default:app.default_mailer_from:MAILER_FROM)%')]
         private readonly string $mailerFrom
     ) {
@@ -41,6 +45,11 @@ class SendAbandonedCartReminderMessageHandler
                 ->html($this->twig->render('emails/abandoned_cart/reminder.html.twig', [
                     'cart' => $cart,
                     'user' => $cart->getUser(),
+                    'optOutUrl' => $this->uriSigner->sign($this->urlGenerator->generate(
+                        'account_marketing_opt_out',
+                        ['id' => $cart->getUser()->getId()],
+                        UrlGeneratorInterface::ABSOLUTE_URL
+                    )),
                 ]))
         );
 
