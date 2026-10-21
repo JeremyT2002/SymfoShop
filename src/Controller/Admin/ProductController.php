@@ -447,6 +447,30 @@ class ProductController extends AbstractController
         return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
     }
 
+    #[Route('/{id}/media/{mediaId}/variant', name: 'media_variant', methods: ['POST'], requirements: ['id' => '\d+', 'mediaId' => '\d+'])]
+    public function assignMediaVariant(int $id, int $mediaId, Request $request): Response
+    {
+        $product = $this->findProductOr404($id);
+        $media = $product->getMedia()->filter(static fn (ProductMedia $m): bool => $m->getId() === $mediaId)->first();
+        if (!$media instanceof ProductMedia) {
+            throw $this->createNotFoundException('Media not found');
+        }
+        if (!$this->isCsrfTokenValid('media_variant_' . $mediaId, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+
+        $variantId = (int) $request->request->get('variant_id', 0);
+        $variant = $variantId > 0 ? $this->findVariantForProductOr404($product, $variantId) : null;
+        $media->setVariant($variant);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Image assignment saved.');
+
+        return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+    }
+
     #[Route('/bulk/status', name: 'bulk_status', methods: ['POST'])]
     public function bulkStatus(Request $request): Response
     {

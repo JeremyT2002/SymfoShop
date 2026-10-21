@@ -97,6 +97,18 @@
                                 <div class="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
                                     #{{ media.sort + 1 }}
                                 </div>
+                                {% if product.variants|length > 1 %}
+                                    <form method="post" action="{{ path('admin_products_media_variant', {id: product.id, mediaId: media.id}) }}" class="mt-2">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('media_variant_' ~ media.id) }}">
+                                        <label class="sr-only" for="media-variant-{{ media.id }}">Variant</label>
+                                        <select id="media-variant-{{ media.id }}" name="variant_id" class="select py-1.5 text-xs" onchange="this.form.requestSubmit()">
+                                            <option value="0">All variants</option>
+                                            {% for variant in product.variants %}
+                                                <option value="{{ variant.id }}" {{ media.variant and media.variant.id == variant.id ? 'selected' }}>{{ variant.attributes ? variant.attributes|join(' / ') : variant.sku }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                {% endif %}
                             </div>
                         {% endfor %}
                     </div>

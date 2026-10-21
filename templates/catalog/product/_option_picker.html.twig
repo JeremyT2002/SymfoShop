@@ -1,0 +1,78 @@
+{#
+  Variant picker of the product page (inside x-data="productPage").
+  Variants with attributes (e.g. {color: "Red", size: "M"}) are offered per option; colour options
+  render as swatches. Variants without attributes fall back to one button per variant.
+#}
+{%- set color_keys = ['color', 'colour', 'farbe', 'couleur'] -%}
+{%- set swatches = {
+    black: '#18181b', schwarz: '#18181b', noir: '#18181b',
+    white: '#ffffff', weiss: '#ffffff', 'weiß': '#ffffff', blanc: '#ffffff',
+    grey: '#9ca3af', gray: '#9ca3af', grau: '#9ca3af', gris: '#9ca3af',
+    red: '#dc2626', rot: '#dc2626', rouge: '#dc2626',
+    blue: '#2563eb', blau: '#2563eb', bleu: '#2563eb', navy: '#1e3a8a',
+    green: '#16a34a', 'grün': '#16a34a', gruen: '#16a34a', vert: '#16a34a',
+    yellow: '#facc15', gelb: '#facc15', jaune: '#facc15',
+    orange: '#f97316', pink: '#ec4899', rosa: '#ec4899', rose: '#ec4899',
+    purple: '#9333ea', lila: '#9333ea', violett: '#9333ea', violet: '#9333ea',
+    brown: '#92400e', braun: '#92400e', marron: '#92400e',
+    beige: '#e7d8c1', silver: '#cbd5e1', silber: '#cbd5e1', argent: '#cbd5e1', gold: '#d4a017', or: '#d4a017',
+} -%}
+{%- set with_attributes = variants|filter(v => v.attributes is not empty)|length == variants|length -%}
+
+{% if with_attributes %}
+    {%- set option_keys = [] -%}
+    {%- for v in variants -%}
+        {%- for key in v.attributes|keys -%}
+            {%- if key not in option_keys -%}{%- set option_keys = option_keys|merge([key]) -%}{%- endif -%}
+        {%- endfor -%}
+    {%- endfor -%}
+
+    {% for key in option_keys %}
+        {%- set values = [] -%}
+        {%- for v in variants -%}
+            {%- if v.attributes[key] is defined and v.attributes[key] not in values -%}{%- set values = values|merge([v.attributes[key]]) -%}{%- endif -%}
+        {%- endfor -%}
+        {%- set is_color = key|lower in color_keys -%}
+        <fieldset class="mt-8">
+            <legend class="text-sm font-semibold">
+                {{ key|capitalize }}<span class="font-normal text-fg-muted" x-text="selected[{{ key|json_encode }}] ? ': ' + selected[{{ key|json_encode }}] : ''">{{ defaultVariant.attributes[key] is defined ? ': ' ~ defaultVariant.attributes[key] }}</span>
+            </legend>
+            <div class="mt-3 flex flex-wrap gap-2">
+                {% for value in values %}
+                    {%- set initially = defaultVariant.attributes[key] is defined and defaultVariant.attributes[key] == value -%}
+                    {%- set swatch = swatches[value|lower]|default(value starts with '#' ? value : null) -%}
+                    {% if is_color and swatch %}
+                        <button type="button" @click="selectOption({{ key|json_encode }}, {{ value|json_encode }})"
+                                aria-pressed="{{ initially ? 'true' : 'false' }}" :aria-pressed="isSelected({{ key|json_encode }}, {{ value|json_encode }})"
+                                :class="isAvailable({{ key|json_encode }}, {{ value|json_encode }}) ? '' : 'opacity-40'"
+                                class="relative size-10 rounded-full ring-1 ring-line-strong ring-offset-2 ring-offset-canvas transition aria-pressed:ring-2 aria-pressed:ring-fg"
+                                style="background-color: {{ swatch }}" title="{{ value }}">
+                            <span class="sr-only">{{ value }}</span>
+                        </button>
+                    {% else %}
+                        <button type="button" @click="selectOption({{ key|json_encode }}, {{ value|json_encode }})"
+                                aria-pressed="{{ initially ? 'true' : 'false' }}" :aria-pressed="isSelected({{ key|json_encode }}, {{ value|json_encode }})"
+                                :class="isAvailable({{ key|json_encode }}, {{ value|json_encode }}) ? '' : 'text-fg-subtle line-through decoration-1'"
+                                class="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line-strong px-4 py-2 text-sm font-medium transition hover:border-fg aria-pressed:border-fg aria-pressed:ring-1 aria-pressed:ring-fg">
+                            {{ value }}
+                        </button>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </fieldset>
+    {% endfor %}
+{% else %}
+    <fieldset class="mt-8">
+        <legend class="text-sm font-semibold">{{ 'product.select_variant'|trans }}</legend>
+        <div class="mt-3 flex flex-wrap gap-2">
+            {% for v in variant_data %}
+                <label class="relative cursor-pointer">
+                    <input type="radio" name="variant" value="{{ v.id }}" class="peer sr-only" @change="select({{ v.id }})" {{ defaultVariant.id == v.id ? 'checked' }}>
+                    <span class="flex min-h-11 items-center rounded-lg border border-line-strong px-4 py-2 text-sm font-medium transition peer-checked:border-fg peer-checked:ring-1 peer-checked:ring-fg peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary-500 hover:border-fg {{ v.available == 0 ? 'text-fg-subtle line-through decoration-1' }}">
+                        {{ v.label }}
+                    </span>
+                </label>
+            {% endfor %}
+        </div>
+    </fieldset>
+{% endif %}

@@ -1,14 +1,18 @@
 /**
- * Alpine component for the product page: variant picker, price/stock display and image gallery.
+ * Alpine component for the product page: option picker (e.g. colour + size), price/stock display
+ * and image gallery.
  *
- * Usage: x-data="productPage" with the variant list in <script type="application/json" data-variants>.
+ * Usage: x-data="productPage" with the variant list in <script type="application/json" data-variants>
+ * and the images in <script type="application/json" data-images>.
+ * Variant: {id, label, attributes: {color: "Red", size: "M"}, price, compareAt, currency, sku, available, images: [index…]}
  */
 import { formatMoney } from '../core/money.js';
 
 export default () => ({
     variants: [],
-    selectedId: null,
     images: [],
+    selectedId: null,
+    selected: {},
     activeImage: 0,
     zoomOpen: false,
 
@@ -20,7 +24,10 @@ export default () => ({
             this.variants = [];
         }
         const initial = Number(this.$root.dataset.initialVariant);
-        this.selectedId = this.variants.find((v) => v.id === initial)?.id ?? this.variants[0]?.id ?? null;
+        const variant = this.variants.find((v) => v.id === initial) ?? this.variants[0];
+        if (variant) {
+            this.applyVariant(variant, false);
+        }
     },
 
     get variant() {
@@ -44,8 +51,45 @@ export default () => ({
         return available > 0 && available <= 5;
     },
 
+    /** Variant chosen directly (variants without attributes) */
     select(id) {
-        this.selectedId = Number(id);
+        const variant = this.variants.find((v) => v.id === Number(id));
+        if (variant) {
+            this.applyVariant(variant, true);
+        }
+    },
+
+    /** Option button, e.g. selectOption('color', 'Red') */
+    selectOption(key, value) {
+        const wanted = { ...this.selected, [key]: value };
+        // Exact match for all chosen options, otherwise the first variant that has this value
+        const variant = this.variants.find((v) => this.matches(v, wanted))
+            ?? this.variants.find((v) => v.attributes?.[key] === value);
+        if (variant) {
+            this.applyVariant(variant, true);
+        }
+    },
+
+    isSelected(key, value) {
+        return this.selected[key] === value;
+    },
+
+    /** Is there an in-stock variant with this value combined with the other current choices? */
+    isAvailable(key, value) {
+        const wanted = { ...this.selected, [key]: value };
+        return this.variants.some((v) => this.matches(v, wanted) && v.available > 0);
+    },
+
+    matches(variant, wanted) {
+        return Object.entries(wanted).every(([k, val]) => variant.attributes?.[k] === val);
+    },
+
+    applyVariant(variant, moveGallery) {
+        this.selectedId = variant.id;
+        this.selected = { ...(variant.attributes || {}) };
+        if (moveGallery && Array.isArray(variant.images) && variant.images.length > 0) {
+            this.activeImage = variant.images[0];
+        }
     },
 
     show(index) {

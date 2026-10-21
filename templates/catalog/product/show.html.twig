@@ -3,6 +3,13 @@
 {%- set seo_title = product.seoTitle|default(product.name) -%}
 {%- set seo_description = product.seoDescription|default(product.description|default(product.name))|striptags|slice(0, 160) -%}
 {%- set images = product.media|map(m => {src: m.path, alt: m.alt|default(product.name)}) -%}
+{#- Image indexes per variant (key "v<id>" keeps Twig from renumbering) -#}
+{%- set media_by_variant = {} -%}
+{%- for m in product.media -%}
+    {%- if m.variant -%}
+        {%- set media_by_variant = media_by_variant|merge({('v' ~ m.variant.id): (media_by_variant['v' ~ m.variant.id]|default([]))|merge([loop.index0])}) -%}
+    {%- endif -%}
+{%- endfor -%}
 {%- set variant_data = variants|map(v => {
     id: v.id,
     label: v.attributes is not empty ? v.attributes|map((value, key) => key|capitalize ~ ': ' ~ value)|join(' · ') : 'product.default_variant'|trans,
@@ -11,6 +18,8 @@
     discountPercent: v.discountPercent,
     currency: v.currency,
     sku: v.sku,
+    attributes: v.attributes is not empty ? v.attributes : {},
+    images: media_by_variant['v' ~ v.id]|default([]),
     available: max(0, v.stockItem ? v.stockItem.available : 0),
 }) -%}
 {%- set default_available = defaultVariant and defaultVariant.stockItem ? defaultVariant.stockItem.available : 0 -%}
@@ -148,20 +157,7 @@
 
                     {# Variant picker #}
                     {% if variants|length > 1 %}
-                        <fieldset class="mt-8">
-                            <legend class="text-sm font-semibold">{{ 'product.select_variant'|trans }}</legend>
-                            <div class="mt-3 flex flex-wrap gap-2">
-                                {% for v in variant_data %}
-                                    <label class="relative cursor-pointer">
-                                        <input type="radio" name="variant" value="{{ v.id }}" class="peer sr-only" @change="select({{ v.id }})"
-                                               {{ defaultVariant.id == v.id ? 'checked' }}>
-                                        <span class="flex min-h-11 items-center rounded-lg border border-line-strong px-4 py-2 text-sm font-medium transition peer-checked:border-fg peer-checked:ring-1 peer-checked:ring-fg peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary-500 hover:border-fg {{ v.available == 0 ? 'text-fg-subtle line-through decoration-1' }}">
-                                            {{ v.label }}
-                                        </span>
-                                    </label>
-                                {% endfor %}
-                            </div>
-                        </fieldset>
+                        {% include 'catalog/product/_option_picker.html.twig' %}
                     {% endif %}
 
                     {# Stock state #}
