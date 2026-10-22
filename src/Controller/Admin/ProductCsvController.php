@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/products', name: 'admin_products_')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_WAREHOUSE')]
 final class ProductCsvController extends AbstractController
 {
     private const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;

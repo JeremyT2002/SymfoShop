@@ -42,7 +42,7 @@ final class SupportApiController extends AbstractController
 
         $messages = $this->supportChatService->listMessages($conversation, $afterId);
 
-        $isAdmin = $this->isGranted('ROLE_ADMIN');
+        $isAdmin = $this->isGranted('ROLE_SUPPORT');
         if ($isAdmin) {
             $this->supportChatService->markConversationReadForSupport($conversation);
         } else {
@@ -67,7 +67,7 @@ final class SupportApiController extends AbstractController
             return $this->json(['error' => 'Unauthenticated'], 401);
         }
 
-        if ($this->isGranted('ROLE_ADMIN')) {
+        if ($this->isGranted('ROLE_SUPPORT')) {
             $conversations = $this->conversationRepository->findForAdminInbox(500);
             $unread = 0;
             foreach ($conversations as $conversation) {
@@ -88,7 +88,7 @@ final class SupportApiController extends AbstractController
 
     private function denyConversationAccess(SupportConversation $conversation): void
     {
-        if ($this->isGranted('ROLE_ADMIN')) {
+        if ($this->isGranted('ROLE_SUPPORT')) {
             return;
         }
 

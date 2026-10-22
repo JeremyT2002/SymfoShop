@@ -68,7 +68,7 @@ class UserController extends AbstractController
         if ($request->isMethod('POST')) {
             $email = $request->request->get('email');
             $password = $request->request->get('password');
-            $roles = $request->request->get('roles', []);
+            $roles = $this->assignableRoles($request->request->all('roles'));
             $isActive = $request->request->get('isActive') === '1';
             
             // Check if email already exists
@@ -123,7 +123,7 @@ class UserController extends AbstractController
         if ($request->isMethod('POST')) {
             $email = $request->request->get('email');
             $password = $request->request->get('password');
-            $roles = $request->request->get('roles', []);
+            $roles = $this->assignableRoles($request->request->all('roles'));
             $isActive = $request->request->get('isActive') === '1';
             
             // Check if email is changed and already exists
@@ -138,7 +138,10 @@ class UserController extends AbstractController
             if ($password) {
                 $user->setPassword($this->passwordHasher->hashPassword($user, $password));
             }
-            $user->setRoles($roles);
+            if ($user === $this->getUser() && \in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+                $roles[] = 'ROLE_ADMIN';
+            }
+            $user->setRoles(array_values(array_unique($roles)));
             $user->setIsActive($isActive);
             
             $this->entityManager->flush();
@@ -265,6 +268,30 @@ class UserController extends AbstractController
         $parts = array_filter(array_map('trim', explode(',', $raw)), static fn (string $value): bool => $value !== '');
 
         return array_values(array_map('intval', $parts));
+    }
+
+    #[Route('/{id}/reset-two-factor', name: 'reset_two_factor', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function resetTwoFactor(int $id, Request $request): Response
+    {
+        $user = $this->userRepository->find($id) ?? throw $this->createNotFoundException('User not found');
+
+        if ($this->isCsrfTokenValid('reset_two_factor_' . $user->getId(), (string) $request->request->get('_token'))) {
+            $user->setTotpSecret(null);
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Two-factor login was turned off for this user.');
+        }
+
+        return $this->redirectToRoute('admin_users_show', ['id' => $user->getId()]);
+    }
+
+    /**
+     * @param array<mixed> $submitted
+     *
+     * @return list<string>
+     */
+    private function assignableRoles(array $submitted): array
+    {
+        return array_values(array_intersect(User::STAFF_ROLES, array_map('strval', $submitted)));
     }
 }
 

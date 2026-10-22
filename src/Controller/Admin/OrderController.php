@@ -17,6 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/admin/orders', name: 'admin_orders_')]
@@ -212,6 +213,7 @@ class OrderController extends AbstractController
     }
 
     #[Route('/{id}/refund', name: 'refund', methods: ['POST'], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_SUPPORT')]
     public function refund(int $id, Request $request): Response
     {
         $order = $this->orderRepository->find($id);

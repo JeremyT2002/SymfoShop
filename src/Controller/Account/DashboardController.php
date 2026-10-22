@@ -129,7 +129,7 @@ class DashboardController extends AbstractController
         }
 
         $invoice = $this->invoiceRepository->findOneForUserByInvoiceNumber($invoiceNumber, $user);
-        if (!$invoice && $this->isGranted('ROLE_ADMIN')) {
+        if (!$invoice && $this->isGranted('ROLE_STAFF')) {
             $invoice = $this->invoiceRepository->findOneByInvoiceNumber($invoiceNumber);
         }
 
@@ -172,7 +172,7 @@ class DashboardController extends AbstractController
         }
 
         $refund = $this->refundRepository->findOneForUserByCreditNoteNumber($number, $user);
-        if (!$refund && $this->isGranted('ROLE_ADMIN')) {
+        if (!$refund && $this->isGranted('ROLE_STAFF')) {
             $refund = $this->refundRepository->findOneByCreditNoteNumber($number);
         }
         if (!$refund) {

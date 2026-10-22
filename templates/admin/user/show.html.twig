@@ -75,6 +75,23 @@
             </div>
 
             <div class="rounded-2xl border border-line bg-panel p-6 shadow-xs">
+                <h3 class="mb-4 text-lg font-semibold">{{ 'ui.two_factor.title'|trans }}</h3>
+                {% if user.totpAuthenticationEnabled %}
+                    <span class="badge badge-success">{{ 'ui.two_factor.status_on'|trans }}</span>
+                    {% if user.id != app.user.id %}
+                        <form method="post" action="{{ path('admin_users_reset_two_factor', {id: user.id}) }}" class="mt-4"
+                              onsubmit="return confirm({{ 'ui.two_factor.reset_confirm'|trans|json_encode }})">
+                            <input type="hidden" name="_token" value="{{ csrf_token('reset_two_factor_' ~ user.id) }}">
+                            <button type="submit" class="btn btn-secondary w-full">{{ 'ui.two_factor.reset'|trans }}</button>
+                            <p class="mt-2 text-xs text-fg-subtle">{{ 'ui.two_factor.reset_hint'|trans }}</p>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <span class="badge badge-neutral">{{ 'ui.two_factor.status_off'|trans }}</span>
+                {% endif %}
+            </div>
+
+            <div class="rounded-2xl border border-line bg-panel p-6 shadow-xs">
                 <h3 class="mb-4 text-lg font-semibold">Metadata</h3>
                 <dl class="space-y-3">
                     <div>

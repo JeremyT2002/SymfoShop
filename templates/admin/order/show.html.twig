@@ -169,7 +169,7 @@
                     </ul>
                 {% endif %}
 
-                {% if refundable > 0 %}
+                {% if refundable > 0 and is_granted('ROLE_SUPPORT') %}
                     <form method="post" action="{{ path('admin_orders_refund', {id: order.id}) }}" class="space-y-3"
                           onsubmit="return confirm({{ 'ui.refund.confirm'|trans|json_encode }})">
                         <input type="hidden" name="_token" value="{{ csrf_token('refund_' ~ order.id) }}">

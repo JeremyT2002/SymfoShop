@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/reviews', name: 'admin_reviews_')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_SUPPORT')]
 class ReviewController extends AbstractController
 {
     public function __construct(
