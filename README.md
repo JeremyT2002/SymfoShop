@@ -10,9 +10,9 @@ Production-oriented e-commerce on **Symfony 7.4** and **PHP 8.2+**: catalog, car
 
 ## 🌐 Live demo
 
-**Public demo:** [symfoshop-demo.kittyware.io](https://symfoshop-demo.kittyware.io/) Currently offline!!!!
+**Public demo:** [symfoshop.jeremy-thelen.de](https://symfoshop.jeremy-thelen.de/)
 
-**Admin:** `admin@symfoshop.com` / `admin123`
+On the [login page](https://symfoshop.jeremy-thelen.de/login) you can sign in with one click as **admin** or **customer** – no password needed. All demo data is reset every hour.
 
 ## Contents
 
@@ -97,6 +97,7 @@ Load order (later wins): `.env` → `.env.local` → `.env.<APP_ENV>` → `.env.
 | `PAYPAL_*` | `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_WEBHOOK_ID` for PayPal |
 | `CHECKOUT_SKIP_PAYMENT` | Dev-only shortcut; use `0` in staging/production |
 | `SENTRY_DSN` | Optional; used when `APP_ENV=prod` (Sentry bundle) |
+| `DEMO_MODE` | `1` only on a **public demo**: one-click “sign in as admin / customer” buttons on the login page (accounts in `app.demo_accounts`, see [Cron jobs](#cron-jobs)). Never enable it on a real shop. |
 
 **Production logging:** with `APP_ENV=prod`, Monolog emits **JSON on stderr** (`config/packages/monolog.yaml`) — suitable for containers. Do not log payment payloads or tokens.
 
@@ -208,6 +209,7 @@ php bin/console app:security:cleanup-expired-reset-tokens
 
 - Run `make remind-abandoned-carts` every hour to enqueue abandoned-cart reminder emails.
 - Keep a Messenger worker running (`php bin/console messenger:consume async`) to process reminder mails.
+- Public demo (`DEMO_MODE=1`): run `php bin/console app:demo:accounts` every few minutes so the demo accounts stay usable (roles, 2FA off), and reset the demo data regularly (e.g. restore a database snapshot every hour).
 
 ---
 

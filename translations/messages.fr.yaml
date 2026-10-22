@@ -360,6 +360,11 @@ security:
     dont_have_account: Vous n'avez pas de compte ?
     register_here: Inscrivez-vous ici
     forgot_password: Mot de passe oublié ?
+    demo:
+      title: 'Accès démo'
+      hint: 'Un clic suffit – toutes les données sont réinitialisées toutes les heures.'
+      admin: 'Se connecter en tant qu’admin'
+      customer: 'Se connecter en tant que client'
   register:
     rate_limited: Trop de tentatives d'inscription depuis votre réseau. Veuillez réessayer plus tard.
     flash_success: Votre compte a été créé. Vous pouvez maintenant vous connecter.

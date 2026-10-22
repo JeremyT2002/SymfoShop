@@ -360,6 +360,11 @@ security:
     dont_have_account: Don't have an account?
     register_here: Register here
     forgot_password: Forgot your password?
+    demo:
+      title: 'Demo access'
+      hint: 'One click is all it takes – all data is reset every hour.'
+      admin: 'Sign in as admin'
+      customer: 'Sign in as customer'
   register:
     rate_limited: Too many registration attempts from your network. Please try again later.
     flash_success: Your account has been created. You can now sign in.
