@@ -98,15 +98,16 @@
                 <div class="relative hidden sm:block" x-data="{ open: false }" @click.outside="open = false" @keydown.escape="open = false">
                     <button type="button" class="btn btn-ghost h-10 gap-1.5 px-2.5 uppercase" @click="open = !open" :aria-expanded="open" aria-haspopup="true"
                             aria-label="{{ 'nav.language'|trans }}">
-                        {{ ux_icon('lucide:globe', {class: 'size-4'}) }}
+                        {% include 'components/_flag.html.twig' with {code: app.request.locale} only %}
                         <span class="text-xs">{{ app.request.locale }}</span>
                     </button>
                     <div x-cloak x-show="open" x-transition.origin.top.right
                          class="absolute right-0 mt-2 w-40 overflow-hidden rounded-xl border border-line bg-panel p-1 shadow-lg shadow-black/5">
                         {% for code, label in locales %}
                             <a href="{{ path('locale_switch', {locale: code}) }}" lang="{{ code }}" hreflang="{{ code }}"
-                               class="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-subtle {{ app.request.locale == code ? 'font-semibold text-fg' : 'text-fg-muted' }}">
-                                {{ label }}
+                               class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm hover:bg-subtle {{ app.request.locale == code ? 'font-semibold text-fg' : 'text-fg-muted' }}">
+                                {% include 'components/_flag.html.twig' with {code: code} only %}
+                                <span class="flex-1">{{ label }}</span>
                                 {% if app.request.locale == code %}{{ ux_icon('lucide:check', {class: 'size-4'}) }}{% endif %}
                             </a>
                         {% endfor %}
@@ -231,12 +232,12 @@
                 </nav>
             </div>
 
-            <div class="flex items-center justify-between gap-3 border-t border-line px-4 py-3">
+            <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-line px-4 py-3">
                 {% if header.showLanguageSwitcher|default(true) %}
                     <div class="flex gap-1" role="group" aria-label="{{ 'nav.language'|trans }}">
                         {% for code, label in locales %}
                             <a href="{{ path('locale_switch', {locale: code}) }}" lang="{{ code }}" title="{{ label }}"
-                               class="rounded-lg px-2.5 py-1.5 text-xs font-semibold uppercase {{ app.request.locale == code ? 'bg-fg text-canvas' : 'text-fg-muted hover:bg-subtle' }}">{{ code }}</a>
+                               class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold uppercase {{ app.request.locale == code ? 'bg-fg text-canvas' : 'text-fg-muted hover:bg-subtle' }}">{% include 'components/_flag.html.twig' with {code: code} only %}{{ code }}</a>
                         {% endfor %}
                     </div>
                 {% endif %}
