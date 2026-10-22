@@ -1,0 +1,5 @@
+{#- Flag for a shop locale (SVGs in assets/icons/flag/, added with `ux:icons:import flag:de-4x3 …`). Params: code, class -#}
+{%- set country = {en: 'gb', de: 'de', fr: 'fr'}[code]|default(null) -%}
+{%- if country -%}
+    {{ ux_icon('flag:' ~ country ~ '-4x3', {class: 'h-3 w-4 shrink-0 overflow-hidden rounded-[2px] ring-1 ring-black/10 dark:ring-white/15 ' ~ class|default('')}) }}
+{%- endif -%}
