@@ -89,6 +89,7 @@ services:
     App\Controller\Dev\DevPaymentSimulatorController:
         arguments:
             $kernelEnvironment: '%kernel.environment%'
+            $demoMode: '%app.demo_mode%'
 
     # Theme resolver (use app cache pool)
     App\Theme\ThemeResolver:
