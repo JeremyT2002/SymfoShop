@@ -1,4 +1,4 @@
-.PHONY: help install update assets assets-watch setup test clean cache-clear db-create db-migrate db-reset fixtures admin-user server-start server-stop lint format check docker-up docker-down docker-build docker-logs docker-exec docker-db-setup docker-db-drop docker-db-reset docker-load-fixture docker-admin-user app-update
+.PHONY: help install update assets assets-watch setup test test-e2e clean cache-clear db-create db-migrate db-reset fixtures admin-user server-start server-stop lint format check docker-up docker-down docker-build docker-logs docker-exec docker-db-setup docker-db-drop docker-db-reset docker-load-fixture docker-admin-user app-update
 
 # Default target
 .DEFAULT_GOAL := help
@@ -265,6 +265,10 @@ test-integration: ## Run integration tests only
 	@echo "$(BLUE)Running integration tests...$(NC)"
 	php bin/console doctrine:migrations:migrate --env=test --no-interaction
 	php bin/phpunit --testsuite=Integration
+
+test-e2e: ## Run the browser tests (Playwright; first run installs Chromium)
+	@echo "$(BLUE)Running browser tests...$(NC)"
+	cd e2e && npm install --no-audit --no-fund && npx playwright install chromium && npx playwright test
 
 test-coverage: ## Generate test coverage report (Xdebug 3: needs XDEBUG_MODE=coverage before php; use scripts/phpunit-coverage.ps1 in PowerShell)
 	@echo "$(BLUE)Generating test coverage...$(NC)"

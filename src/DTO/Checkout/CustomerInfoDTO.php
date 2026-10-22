@@ -2,7 +2,10 @@
 
 namespace App\DTO\Checkout;
 
-readonly class CustomerInfoDTO
+/**
+ * Checkout customer data. Mutable on purpose: the checkout form writes the submitted values into it.
+ */
+class CustomerInfoDTO
 {
     public function __construct(
         public string $email,

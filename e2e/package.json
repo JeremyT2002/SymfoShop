@@ -1,0 +1,14 @@
+{
+    "name": "symfoshop-e2e",
+    "private": true,
+    "description": "Browser tests (Playwright) for SymfoShop",
+    "type": "module",
+    "scripts": {
+        "test": "playwright test",
+        "test:ui": "playwright test --ui",
+        "report": "playwright show-report"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.64.1"
+    }
+}
