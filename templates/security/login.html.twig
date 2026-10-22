@@ -40,6 +40,28 @@
             <span x-show="busy" x-cloak class="spinner"></span>{{ 'security.login.submit'|trans }}
         </button>
     </form>
+
+    {# Public demo only (DEMO_MODE=1): one-click sign-in without a password #}
+    {% set demo_accounts = demo_accounts() %}
+    {% if demo_accounts is not empty %}
+        <section class="mt-8 rounded-lg border border-dashed border-line-strong p-4" aria-labelledby="demo-login-title" data-testid="demo-login">
+            <h2 id="demo-login-title" class="flex items-center gap-2 text-sm font-semibold">
+                {{ ux_icon('lucide:key-round', {class: 'size-4'}) }}{{ 'security.login.demo.title'|trans }}
+            </h2>
+            <p class="mt-1 text-sm text-fg-muted">{{ 'security.login.demo.hint'|trans }}</p>
+            <div class="mt-4 grid gap-2 sm:grid-cols-2">
+                {% for account in demo_accounts %}
+                    <form method="post" action="{{ path('demo_login', {account: account}) }}">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('demo-login') }}">
+                        <button type="submit" class="btn btn-secondary w-full">
+                            {{ ux_icon(account == 'admin' ? 'lucide:shield-check' : 'lucide:user-round', {class: 'size-4 shrink-0'}) }}
+                            {{ ('security.login.demo.' ~ account)|trans }}
+                        </button>
+                    </form>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
 {% endblock %}
 
 {% block auth_footer %}
