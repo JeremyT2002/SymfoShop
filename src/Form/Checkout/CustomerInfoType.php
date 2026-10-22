@@ -18,6 +18,7 @@ class CustomerInfoType extends AbstractType
     {
         $builder
             ->add('email', EmailType::class, [
+                'empty_data' => '',
                 'constraints' => [
                     new NotBlank(['message' => 'Email is required']),
                     new Email(['message' => 'Please enter a valid email address']),
@@ -27,6 +28,7 @@ class CustomerInfoType extends AbstractType
                 ],
             ])
             ->add('firstName', TextType::class, [
+                'empty_data' => '',
                 'constraints' => [
                     new NotBlank(['message' => 'First name is required']),
                 ],
@@ -35,6 +37,7 @@ class CustomerInfoType extends AbstractType
                 ],
             ])
             ->add('lastName', TextType::class, [
+                'empty_data' => '',
                 'constraints' => [
                     new NotBlank(['message' => 'Last name is required']),
                 ],

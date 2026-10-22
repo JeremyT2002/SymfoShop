@@ -16,6 +16,7 @@ class AddressType extends AbstractType
     {
         $builder
             ->add('street', TextType::class, [
+                'empty_data' => '',
                 'constraints' => [
                     new NotBlank(['message' => 'Street address is required']),
                 ],
@@ -24,6 +25,7 @@ class AddressType extends AbstractType
                 ],
             ])
             ->add('city', TextType::class, [
+                'empty_data' => '',
                 'constraints' => [
                     new NotBlank(['message' => 'City is required']),
                 ],
@@ -32,6 +34,7 @@ class AddressType extends AbstractType
                 ],
             ])
             ->add('postalCode', TextType::class, [
+                'empty_data' => '',
                 'constraints' => [
                     new NotBlank(['message' => 'Postal code is required']),
                 ],
@@ -40,6 +43,7 @@ class AddressType extends AbstractType
                 ],
             ])
             ->add('country', CountryType::class, [
+                'empty_data' => '',
                 'constraints' => [
                     new NotBlank(['message' => 'Country is required']),
                 ],

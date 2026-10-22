@@ -97,6 +97,37 @@ final class StorefrontSmokeTest extends WebTestCase
         self::assertSame((int) round(5198 / 1.19), $export['subtotal']);
     }
 
+    /**
+     * Regression: the readonly checkout DTOs made every submitted checkout fail.
+     */
+    public function testSubmittingTheCheckoutFormPlacesAnOrder(): void
+    {
+        [, , $variant] = $this->createCatalog();
+        $this->client->request('POST', '/cart/add', ['variantId' => $variant->getId(), 'quantity' => 1]);
+
+        $crawler = $this->client->request('GET', '/checkout');
+        $form = $crawler->filter('form[data-checkout-form]')->form();
+        $email = 'checkout-' . uniqid() . '@example.com';
+        foreach ([
+            '[email]' => $email, '[firstName]' => 'Erika', '[lastName]' => 'Muster',
+            '[street]' => 'Musterweg 1', '[postalCode]' => '12345', '[city]' => 'Berlin', '[country]' => 'DE',
+        ] as $suffix => $value) {
+            foreach ($form->all() as $name => $field) {
+                if (str_ends_with($name, $suffix)) {
+                    $field->setValue($value);
+                }
+            }
+        }
+        $form['payment_method']->select('testbank');
+        $this->client->submit($form);
+
+        self::assertResponseRedirects();
+        self::assertStringContainsString('/checkout/payment/', (string) $this->client->getResponse()->headers->get('Location'));
+        $order = $this->em->getRepository(\App\Entity\Order::class)->findOneBy(['email' => $email]);
+        self::assertNotNull($order);
+        self::assertSame('Musterweg 1', $order->getShippingStreet());
+    }
+
     public function testOptionPickerWithSwatchesAndVariantImages(): void
     {
         [$category] = $this->createCatalog();

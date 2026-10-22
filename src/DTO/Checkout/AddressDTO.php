@@ -2,7 +2,10 @@
 
 namespace App\DTO\Checkout;
 
-readonly class AddressDTO
+/**
+ * Shipping address in the checkout. Mutable on purpose: the checkout form writes the submitted values into it.
+ */
+class AddressDTO
 {
     public function __construct(
         public string $street,
