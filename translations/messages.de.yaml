@@ -360,6 +360,11 @@ security:
     dont_have_account: Haben Sie noch kein Konto?
     register_here: Hier registrieren
     forgot_password: Passwort vergessen?
+    demo:
+      title: 'Demo-Zugang'
+      hint: 'Ein Klick genügt – alle Daten werden stündlich zurückgesetzt.'
+      admin: 'Als Admin anmelden'
+      customer: 'Als Kunde anmelden'
   register:
     rate_limited: Zu viele Registrierungsversuche von Ihrem Netzwerk. Bitte versuchen Sie es später erneut.
     flash_success: Ihr Konto wurde erstellt. Sie können sich jetzt anmelden.
