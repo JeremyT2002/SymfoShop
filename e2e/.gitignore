@@ -2,3 +2,6 @@
 /test-results/
 /playwright-report/
 /blob-report/
+
+# Lockfile pins the Playwright version for CI (npm ci)
+!/package-lock.json
