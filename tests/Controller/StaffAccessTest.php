@@ -110,7 +110,7 @@ final class StaffAccessTest extends WebTestCase
         self::assertStringEndsWith('/2fa', (string) $this->client->getResponse()->headers->get('Location'));
 
         $crawler = $this->client->request('GET', '/2fa');
-        $this->client->submit($crawler->filter('form')->form(['_auth_code' => TOTP::createFromSecret($secret)->now()]));
+        $this->client->submit($crawler->filter('form[action$="/2fa_check"]')->form(['_auth_code' => TOTP::createFromSecret($secret)->now()]));
         $this->client->request('GET', '/admin/orders');
         self::assertResponseIsSuccessful();
     }
