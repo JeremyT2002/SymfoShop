@@ -11,8 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * Development-only controller to simulate payment outcomes (success/failure/pending).
- * Only available when APP_ENV=dev or test.
+ * Simulates payment outcomes (success/failure/pending) for the dev, PayPal-stub and TestBank providers.
+ * Only available when APP_ENV=dev or test, or on a public demo instance (DEMO_MODE=1) where no real money is involved.
  */
 #[Route('/_dev/payment', name: 'dev_payment_', methods: ['GET'])]
 class DevPaymentSimulatorController extends AbstractController
@@ -21,14 +21,15 @@ class DevPaymentSimulatorController extends AbstractController
         private readonly PaymentService $paymentService,
         private readonly PaymentRepository $paymentRepository,
         private readonly OrderPaymentFinalizer $paymentFinalizer,
-        private readonly string $kernelEnvironment
+        private readonly string $kernelEnvironment,
+        private readonly bool $demoMode = false,
     ) {
     }
 
     #[Route('/simulate/{referenceId}/{outcome}', name: 'simulate', requirements: ['referenceId' => '(dev|paypal|testbank)_[a-f0-9]+', 'outcome' => 'success|failure|pending'])]
     public function simulate(string $referenceId, string $outcome): Response
     {
-        if (!in_array($this->kernelEnvironment, ['dev', 'test'], true)) {
+        if (!$this->demoMode && !in_array($this->kernelEnvironment, ['dev', 'test'], true)) {
             throw $this->createNotFoundException();
         }
 
