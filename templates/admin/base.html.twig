@@ -124,13 +124,13 @@
             <div class="ml-auto flex items-center gap-1">
                 {# Language #}
                 <div class="relative" x-data="{ open: false }" @click.outside="open = false" @keydown.escape="open = false">
-                    <button type="button" class="btn btn-ghost h-10 px-2.5 text-xs uppercase" @click="open = !open" :aria-expanded="open" aria-haspopup="true" aria-label="{{ 'nav.language'|trans }}">
-                        {{ ux_icon('lucide:globe', {class: 'size-4'}) }}{{ app.request.locale }}
+                    <button type="button" class="btn btn-ghost h-10 gap-1.5 px-2.5 text-xs uppercase" @click="open = !open" :aria-expanded="open" aria-haspopup="true" aria-label="{{ 'nav.language'|trans }}">
+                        {% include 'components/_flag.html.twig' with {code: app.request.locale} only %}{{ app.request.locale }}
                     </button>
                     <div x-cloak x-show="open" x-transition.origin.top.right class="absolute right-0 mt-2 w-36 rounded-xl border border-line bg-panel p-1 shadow-lg shadow-black/5">
                         {% for code, label in {en: 'English', de: 'Deutsch', fr: 'Français'} %}
                             <a href="{{ path('locale_switch', {locale: code}) }}" lang="{{ code }}"
-                               class="block rounded-lg px-3 py-2 text-sm hover:bg-subtle {{ app.request.locale == code ? 'font-semibold text-fg' : 'text-fg-muted' }}">{{ label }}</a>
+                               class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm hover:bg-subtle {{ app.request.locale == code ? 'font-semibold text-fg' : 'text-fg-muted' }}">{% include 'components/_flag.html.twig' with {code: code} only %}{{ label }}</a>
                         {% endfor %}
                     </div>
                 </div>
