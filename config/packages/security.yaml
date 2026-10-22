@@ -11,6 +11,12 @@ security:
                 class: App\Entity\User
                 property: email
 
+    # Staff roles: ROLE_ADMIN can do everything; support and warehouse staff only see their sections.
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_USER, ROLE_STAFF, ROLE_SUPPORT, ROLE_WAREHOUSE]
+        ROLE_SUPPORT: [ROLE_USER, ROLE_STAFF]
+        ROLE_WAREHOUSE: [ROLE_USER, ROLE_STAFF]
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -47,6 +53,11 @@ security:
             logout:
                 path: logout
                 target: login
+            two_factor:
+                auth_form_path: 2fa_login
+                check_path: 2fa_login_check
+                enable_csrf: true
+                default_target_path: catalog_home
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
@@ -56,6 +67,13 @@ security:
         - { path: ^/api, roles: PUBLIC_ACCESS }  # API handles auth internally
         - { path: ^/webhook/paypal, roles: PUBLIC_ACCESS }
         - { path: ^/payment/paypal, roles: PUBLIC_ACCESS }
+        - { path: ^/logout, roles: PUBLIC_ACCESS }
+        - { path: ^/2fa, roles: IS_AUTHENTICATED_2FA_IN_PROGRESS }
+        # Admin area: the dashboard, notifications and the own 2FA settings for all staff, sections by role
+        - { path: "^/admin($|/two-factor(/|$)|/notifications/)", roles: ROLE_STAFF }
+        - { path: ^/admin/orders(/|$), roles: [ROLE_SUPPORT, ROLE_WAREHOUSE] }
+        - { path: ^/admin/(products|categories)(/|$), roles: ROLE_WAREHOUSE }
+        - { path: ^/admin/(support|return-requests|reviews)(/|$), roles: ROLE_SUPPORT }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/account/support, roles: ROLE_USER }
         - { path: ^/support/api, roles: ROLE_USER }

@@ -97,6 +97,18 @@
                                 <div class="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
                                     #{{ media.sort + 1 }}
                                 </div>
+                                {% if product.variants|length > 1 %}
+                                    <form method="post" action="{{ path('admin_products_media_variant', {id: product.id, mediaId: media.id}) }}" class="mt-2">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('media_variant_' ~ media.id) }}">
+                                        <label class="sr-only" for="media-variant-{{ media.id }}">Variant</label>
+                                        <select id="media-variant-{{ media.id }}" name="variant_id" class="select py-1.5 text-xs" onchange="this.form.requestSubmit()">
+                                            <option value="0">All variants</option>
+                                            {% for variant in product.variants %}
+                                                <option value="{{ variant.id }}" {{ media.variant and media.variant.id == variant.id ? 'selected' }}>{{ variant.attributes ? variant.attributes|join(' / ') : variant.sku }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                {% endif %}
                             </div>
                         {% endfor %}
                     </div>
@@ -116,8 +128,12 @@
                         <input type="text" name="sku" required class="w-full px-3 py-2 border border-line-strong rounded-lg text-sm" placeholder="e.g. TSHIRT-BLACK-M">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-fg-muted mb-1">Price (minor units) *</label>
+                        <label class="block text-xs font-medium text-fg-muted mb-1">Gross price incl. VAT, in cents *</label>
                         <input type="number" name="price_amount" min="0" required class="w-full px-3 py-2 border border-line-strong rounded-lg text-sm" placeholder="1999">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-fg-muted mb-1">Compare-at price (struck through, optional)</label>
+                        <input type="number" name="compare_at_price_amount" min="0" class="w-full px-3 py-2 border border-line-strong rounded-lg text-sm" placeholder="2499">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-fg-muted mb-1">Currency *</label>
@@ -165,6 +181,7 @@
                                                 <input form="variant-edit-{{ variant.id }}" type="number" name="price_amount" min="0" value="{{ variant.priceAmount }}" required class="w-full px-3 py-2 border border-line-strong rounded-lg text-sm">
                                                 <input form="variant-edit-{{ variant.id }}" type="text" name="currency" maxlength="3" value="{{ variant.currency }}" required class="w-full px-3 py-2 border border-line-strong rounded-lg text-sm">
                                             </div>
+                                            <input form="variant-edit-{{ variant.id }}" type="number" name="compare_at_price_amount" min="0" value="{{ variant.compareAtPriceAmount }}" placeholder="Compare-at" title="Compare-at price (struck through)" class="mt-2 w-full px-3 py-2 border border-line-strong rounded-lg text-sm">
                                         </td>
                                         <td class="px-4 py-3 align-top">
                                             <div class="grid grid-cols-2 gap-2">

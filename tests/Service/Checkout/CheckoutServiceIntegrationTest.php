@@ -201,6 +201,11 @@ final class CheckoutServiceIntegrationTest extends KernelTestCase
 
         $this->assertNotNull($order->getId());
         $this->assertSame('buyer@example.com', $order->getEmail());
+        $this->assertSame('Bo Buyer', $order->getCustomerName());
+        $this->assertSame('Hauptstr. 1', $order->getShippingStreet());
+        $this->assertSame('10115', $order->getShippingPostalCode());
+        $this->assertSame('Berlin', $order->getShippingCity());
+        $this->assertSame('DE', $order->getShippingCountry());
         $this->assertCount(1, $order->getItems());
         $this->assertSame([], $this->cartService->getDetailedItems());
     }

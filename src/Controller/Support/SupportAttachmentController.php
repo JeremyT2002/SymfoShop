@@ -32,7 +32,7 @@ final class SupportAttachmentController extends AbstractController
 
         $conversation = $attachment->getMessage()?->getConversation();
         $user = $this->getUser();
-        if (!$this->isGranted('ROLE_ADMIN')) {
+        if (!$this->isGranted('ROLE_SUPPORT')) {
             if (!$user instanceof User || $conversation?->getCustomer()?->getId() !== $user->getId()) {
                 throw $this->createAccessDeniedException('You cannot access this attachment.');
             }

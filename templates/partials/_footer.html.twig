@@ -15,6 +15,7 @@
         ]},
         {title: 'footer.support'|trans, links: [
             {label: 'footer.contact'|trans, url: path('contact')},
+            {label: 'ui.order_status.title'|trans, url: path('order_status_lookup')},
             {label: 'footer.faq'|trans, url: path('legal_faq')},
             {label: 'footer.returns'|trans, url: path('legal_returns')},
             {label: 'footer.return_request'|trans, url: path('return_request')},
@@ -56,6 +57,11 @@
             </a>
             <p class="mt-4 max-w-sm text-sm leading-6 text-fg-muted">{{ theme_config().brand.tagline|default('footer.description'|trans) }}</p>
 
+            <div class="mt-6 max-w-sm">
+                <p class="mb-2 text-sm font-semibold">{{ 'ui.newsletter.title'|trans }}</p>
+                {% include 'components/newsletter_form.html.twig' with {id_prefix: 'newsletter-footer'} %}
+            </div>
+
             {% if footer.socialLinks|default([]) is not empty %}
                 <div class="mt-6 flex gap-2">
                     {% for link in footer.socialLinks %}
@@ -90,7 +96,7 @@
     <div class="border-t border-line">
         <div class="container-page flex flex-col gap-2 py-6 text-xs text-fg-subtle sm:flex-row sm:items-center sm:justify-between">
             <p>{{ footer.copyright|default('© ' ~ 'now'|date('Y') ~ ' ' ~ site_name ~ '. ' ~ 'footer.rights'|trans) }}</p>
-            <p>{{ 'ui.footer.prices_excl_vat'|trans }}</p>
+            <p>{{ 'ui.footer.prices_incl_vat'|trans }}</p>
         </div>
     </div>
 </footer>

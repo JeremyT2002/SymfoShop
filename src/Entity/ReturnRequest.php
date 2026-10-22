@@ -15,6 +15,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class ReturnRequest
 {
     public const STATUS_PENDING = 'pending';
+    public const STATUS_REFUNDED = 'refunded';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

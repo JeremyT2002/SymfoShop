@@ -30,6 +30,31 @@ class Order
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?User $user = null;
 
+    // Customer and shipping address snapshot taken at checkout
+    #[ORM\Column(name: 'first_name', type: Types::STRING, length: 100, nullable: true)]
+    private ?string $firstName = null;
+
+    #[ORM\Column(name: 'last_name', type: Types::STRING, length: 100, nullable: true)]
+    private ?string $lastName = null;
+
+    #[ORM\Column(name: 'phone', type: Types::STRING, length: 50, nullable: true)]
+    private ?string $phone = null;
+
+    #[ORM\Column(name: 'shipping_street', type: Types::STRING, length: 255, nullable: true)]
+    private ?string $shippingStreet = null;
+
+    #[ORM\Column(name: 'shipping_postal_code', type: Types::STRING, length: 20, nullable: true)]
+    private ?string $shippingPostalCode = null;
+
+    #[ORM\Column(name: 'shipping_city', type: Types::STRING, length: 120, nullable: true)]
+    private ?string $shippingCity = null;
+
+    #[ORM\Column(name: 'shipping_state', type: Types::STRING, length: 120, nullable: true)]
+    private ?string $shippingState = null;
+
+    #[ORM\Column(name: 'shipping_country', type: Types::STRING, length: 2, nullable: true)]
+    private ?string $shippingCountry = null;
+
     /** Request locale at checkout (ISO language, e.g. en, de, fr) for transactional emails */
     #[ORM\Column(type: Types::STRING, length: 10, options: ['default' => 'en'])]
     private string $locale = 'en';
@@ -56,6 +81,13 @@ class Order
     /** Discount in minor units, subtracted from the subtotal before shipping and tax */
     #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
     private int $discountTotal = 0;
+
+    /**
+     * true: amounts are gross and taxTotal is the VAT they contain (orders since gross pricing);
+     * false: legacy orders where taxTotal was added on top of net amounts.
+     */
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $pricesIncludeTax = false;
 
     /** Shipping in minor units (excl. VAT), before tax */
     #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
@@ -128,6 +160,99 @@ class Order
     {
         $this->user = $user;
         return $this;
+    }
+
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(?string $firstName): self
+    {
+        $this->firstName = $firstName !== null && trim($firstName) !== '' ? trim($firstName) : null;
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(?string $lastName): self
+    {
+        $this->lastName = $lastName !== null && trim($lastName) !== '' ? trim($lastName) : null;
+        return $this;
+    }
+
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(?string $phone): self
+    {
+        $this->phone = $phone !== null && trim($phone) !== '' ? trim($phone) : null;
+        return $this;
+    }
+
+    public function getShippingStreet(): ?string
+    {
+        return $this->shippingStreet;
+    }
+
+    public function setShippingStreet(?string $shippingStreet): self
+    {
+        $this->shippingStreet = $shippingStreet !== null && trim($shippingStreet) !== '' ? trim($shippingStreet) : null;
+        return $this;
+    }
+
+    public function getShippingPostalCode(): ?string
+    {
+        return $this->shippingPostalCode;
+    }
+
+    public function setShippingPostalCode(?string $shippingPostalCode): self
+    {
+        $this->shippingPostalCode = $shippingPostalCode !== null && trim($shippingPostalCode) !== '' ? trim($shippingPostalCode) : null;
+        return $this;
+    }
+
+    public function getShippingCity(): ?string
+    {
+        return $this->shippingCity;
+    }
+
+    public function setShippingCity(?string $shippingCity): self
+    {
+        $this->shippingCity = $shippingCity !== null && trim($shippingCity) !== '' ? trim($shippingCity) : null;
+        return $this;
+    }
+
+    public function getShippingState(): ?string
+    {
+        return $this->shippingState;
+    }
+
+    public function setShippingState(?string $shippingState): self
+    {
+        $this->shippingState = $shippingState !== null && trim($shippingState) !== '' ? trim($shippingState) : null;
+        return $this;
+    }
+
+    public function getShippingCountry(): ?string
+    {
+        return $this->shippingCountry;
+    }
+
+    public function setShippingCountry(?string $shippingCountry): self
+    {
+        $this->shippingCountry = $shippingCountry !== null && trim($shippingCountry) !== '' ? trim($shippingCountry) : null;
+        return $this;
+    }
+
+    public function getCustomerName(): string
+    {
+        return trim($this->firstName . ' ' . $this->lastName);
     }
 
     public function getLocale(): string
@@ -204,6 +329,17 @@ class Order
     public function setCouponCode(?string $couponCode): self
     {
         $this->couponCode = $couponCode;
+        return $this;
+    }
+
+    public function isPricesIncludeTax(): bool
+    {
+        return $this->pricesIncludeTax;
+    }
+
+    public function setPricesIncludeTax(bool $pricesIncludeTax): self
+    {
+        $this->pricesIncludeTax = $pricesIncludeTax;
         return $this;
     }
 

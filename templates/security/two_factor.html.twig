@@ -1,0 +1,46 @@
+{% extends 'security/_layout.html.twig' %}
+
+{#- Code entry during login (rendered by SchebTwoFactorBundle, see config/packages/scheb_2fa.yaml) -#}
+{%- set auth_icon = 'lucide:shield-check' -%}
+
+{% block page_title %}{{ 'ui.two_factor.login_title'|trans }}{% endblock %}
+{% block auth_title %}{{ 'ui.two_factor.login_title'|trans }}{% endblock %}
+
+{% block auth_content %}
+    {% if authenticationError %}
+        <div class="alert alert-error mb-6" role="alert">
+            {{ ux_icon('lucide:circle-alert', {class: 'mt-0.5 size-4'}) }}
+            <p>{{ authenticationError|trans(authenticationErrorData, 'SchebTwoFactorBundle') }}</p>
+        </div>
+    {% endif %}
+
+    <p class="mb-5 text-sm text-fg-muted">{{ 'ui.two_factor.login_intro'|trans }}</p>
+
+    <form action="{{ checkPathUrl ? checkPathUrl : path(checkPathRoute) }}" method="post" class="space-y-5" x-data="{ busy: false }" @submit="busy = true">
+        {% if isCsrfProtectionEnabled %}
+            <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrf_token(csrfTokenId) }}">
+        {% endif %}
+
+        <div>
+            <label for="_auth_code" class="label">{{ 'ui.two_factor.code'|trans }}</label>
+            <input id="_auth_code" name="{{ authCodeParameterName }}" type="text" required autofocus
+                   autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+                   class="input text-center font-mono text-lg tracking-[0.4em]">
+        </div>
+
+        {% if displayTrustedOption %}
+            <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="{{ trustedParameterName }}" class="rounded border-line-strong">
+                {{ 'trusted'|trans({}, 'SchebTwoFactorBundle') }}
+            </label>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary btn-lg w-full" :disabled="busy">
+            <span x-show="busy" x-cloak class="spinner"></span>{{ 'ui.two_factor.verify'|trans }}
+        </button>
+    </form>
+{% endblock %}
+
+{% block auth_footer %}
+    <a href="{{ logoutPath }}" class="link">{{ 'ui.two_factor.cancel'|trans }}</a>
+{% endblock %}

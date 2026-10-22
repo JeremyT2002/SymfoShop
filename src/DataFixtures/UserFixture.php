@@ -31,6 +31,7 @@ class UserFixture extends Fixture
         $admin->setState('Bayern');
         $admin->setCountryCode('DE');
         $admin->setIsActive(true);
+        $admin->setIsVerified(true);
         $manager->persist($admin);
         $this->addReference('user_admin', $admin);
 
@@ -106,6 +107,7 @@ class UserFixture extends Fixture
             if (isset($userData['countryCode'])) {
                 $user->setCountryCode($userData['countryCode']);
             }
+            $user->setIsVerified(true);
             $manager->persist($user);
             $this->addReference('user_' . $index, $user);
         }

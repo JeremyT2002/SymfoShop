@@ -1,0 +1,14 @@
+{# Role checkboxes for the user forms. Every account is a customer (ROLE_USER); staff roles open the admin area. #}
+<div class="space-y-3 rounded-lg border border-line bg-panel p-4">
+    <p class="text-xs text-fg-subtle">{{ 'ui.staff.customer_hint'|trans }}</p>
+    {% for role, key in {ROLE_ADMIN: 'admin', ROLE_SUPPORT: 'support', ROLE_WAREHOUSE: 'warehouse'} %}
+        <label class="flex items-start cursor-pointer group">
+            <input type="checkbox" name="roles[]" value="{{ role }}" {% if user and role in user.roles %}checked{% endif %}
+                   class="mt-1 rounded border-line-strong text-primary-600 focus:ring-primary-500">
+            <div class="ml-3 flex-1">
+                <span class="text-sm font-medium text-fg">{{ ('ui.staff.role_' ~ key)|trans }}</span>
+                <p class="text-xs text-fg-subtle mt-0.5">{{ ('ui.staff.role_' ~ key ~ '_hint')|trans }}</p>
+            </div>
+        </label>
+    {% endfor %}
+</div>

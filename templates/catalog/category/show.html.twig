@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
-{%- set seo_title = category.seoTitle|default(category.name) -%}
-{%- set seo_description = category.seoDescription|default('ui.category.meta_description'|trans({'%category%': category.name}))|slice(0, 160) -%}
+{%- set seo_title = category|tr('seoTitle')|default(category|tr('name')) -%}
+{%- set seo_description = category|tr('seoDescription')|default('ui.category.meta_description'|trans({'%category%': category|tr('name')}))|slice(0, 160) -%}
 
 {% block page_title %}{{ seo_title }}{% endblock %}
 {% block meta_description %}{{ seo_description }}{% endblock %}
@@ -25,13 +25,13 @@
 <div class="container-page py-8 lg:py-12" x-data="{ filtersOpen: false }" @keydown.escape.window="filtersOpen = false">
     {%- set crumbs = [{label: 'nav.home'|trans, url: path('catalog_home')}] -%}
     {%- if category.parent -%}
-        {%- set crumbs = crumbs|merge([{label: category.parent.name, url: path('catalog_category', {slug: category.parent.slug})}]) -%}
+        {%- set crumbs = crumbs|merge([{label: category.parent|tr('name'), url: path('catalog_category', {slug: category.parent.slug})}]) -%}
     {%- endif -%}
-    {% include 'components/breadcrumbs.html.twig' with {items: crumbs|merge([{label: category.name, url: null}])} %}
+    {% include 'components/breadcrumbs.html.twig' with {items: crumbs|merge([{label: category|tr('name'), url: null}])} %}
 
     <header class="flex flex-col gap-6 border-b border-line pb-8">
         <div>
-            <h1 class="text-3xl font-semibold sm:text-4xl">{{ category.name }}</h1>
+            <h1 class="text-3xl font-semibold sm:text-4xl">{{ category|tr('name') }}</h1>
             <p class="mt-2 text-sm text-fg-muted">
                 {{ totalProducts }} {{ totalProducts == 1 ? 'category.product'|trans : 'category.products'|trans }}
             </p>
@@ -41,7 +41,7 @@
             <nav class="-mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0" aria-label="{{ 'category.subcategories'|trans }}">
                 {% for child in category.children %}
                     <a href="{{ path('catalog_category', {slug: child.slug}) }}"
-                       class="shrink-0 rounded-full border border-line-strong px-4 py-1.5 text-sm font-medium text-fg-muted transition hover:border-fg hover:text-fg">{{ child.name }}</a>
+                       class="shrink-0 rounded-full border border-line-strong px-4 py-1.5 text-sm font-medium text-fg-muted transition hover:border-fg hover:text-fg">{{ child|tr('name') }}</a>
                 {% endfor %}
             </nav>
         {% endif %}

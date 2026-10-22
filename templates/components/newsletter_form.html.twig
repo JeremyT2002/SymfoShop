@@ -1,0 +1,18 @@
+{#
+  Newsletter sign-up (double opt-in). Params: inverse (bool, light text on dark background), id_prefix
+#}
+{%- set prefix = id_prefix|default('newsletter') -%}
+<form method="post" action="{{ path('newsletter_subscribe') }}" class="space-y-3">
+    <input type="hidden" name="_token" value="{{ csrf_token('newsletter_subscribe') }}">
+    <div class="flex flex-col gap-2 sm:flex-row">
+        <label for="{{ prefix }}-email" class="sr-only">{{ 'checkout.fields.email'|trans }}</label>
+        <input id="{{ prefix }}-email" type="email" name="email" required autocomplete="email"
+               value="{{ app.user ? app.user.email : '' }}" placeholder="{{ 'stock_notification.email_placeholder'|trans }}"
+               class="input {{ inverse|default(false) ? 'border-transparent bg-canvas/10 text-canvas placeholder:text-canvas/50 focus:bg-canvas/15' : '' }}">
+        <button type="submit" class="btn {{ inverse|default(false) ? 'bg-canvas text-fg hover:bg-canvas/90' : 'btn-primary' }} shrink-0">{{ 'ui.newsletter.subscribe'|trans }}</button>
+    </div>
+    <label class="flex items-start gap-2 text-xs {{ inverse|default(false) ? 'text-canvas/70' : 'text-fg-muted' }}">
+        <input type="checkbox" name="consent" value="1" required class="checkbox mt-0.5">
+        <span>{{ 'ui.newsletter.consent'|trans({'%privacy%': path('legal_privacy')})|raw }}</span>
+    </label>
+</form>

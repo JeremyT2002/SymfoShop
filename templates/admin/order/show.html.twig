@@ -88,6 +88,10 @@
                         <dd class="mt-1 text-sm text-fg">{{ order.email }}</dd>
                     </div>
                     <div>
+                        <dt class="text-sm font-medium text-fg-subtle">{{ 'ui.order.shipping_address'|trans }}</dt>
+                        <dd class="mt-1 text-sm leading-6 text-fg">{% include 'components/_address.html.twig' with {order: order} only %}</dd>
+                    </div>
+                    <div>
                         <dt class="text-sm font-medium text-fg-subtle">{{ 'admin.orders.show.status_label'|trans }}</dt>
                         <dd class="mt-1">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
@@ -142,6 +146,65 @@
             </div>
             {% endif %}
 
+            {% if refunds is not empty or refundable > 0 %}
+            <div class="rounded-2xl border border-line bg-panel p-6 shadow-xs">
+                <h3 class="text-lg font-semibold text-fg mb-4">{{ 'ui.refund.title'|trans }}</h3>
+
+                {% if refunds is not empty %}
+                    <ul class="mb-4 divide-y divide-line text-sm">
+                        {% for refund in refunds %}
+                            <li class="flex items-start justify-between gap-3 py-2">
+                                <div class="min-w-0">
+                                    <a href="{{ path('account_credit_note_download', {number: refund.creditNoteNumber}) }}" class="link font-mono">{{ refund.creditNoteNumber }}</a>
+                                    <p class="text-xs text-fg-subtle">
+                                        {{ refund.createdAt|date('Y-m-d H:i') }} · {{ refund.provider == 'manual' ? 'ui.refund.manual'|trans : refund.provider|capitalize }}
+                                        {% if refund.status == 'pending' %} · <span class="badge badge-warning">{{ 'ui.refund.pending'|trans }}</span>{% endif %}
+                                        {% if refund.restocked %} · {{ 'ui.refund.restocked'|trans }}{% endif %}
+                                    </p>
+                                    {% if refund.reason %}<p class="mt-0.5 text-xs text-fg-muted">{{ refund.reason }}</p>{% endif %}
+                                </div>
+                                <span class="shrink-0 font-medium tabular-nums">&minus;{{ refund.amount|money(refund.currency) }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                {% if refundable > 0 and is_granted('ROLE_SUPPORT') %}
+                    <form method="post" action="{{ path('admin_orders_refund', {id: order.id}) }}" class="space-y-3"
+                          onsubmit="return confirm({{ 'ui.refund.confirm'|trans|json_encode }})">
+                        <input type="hidden" name="_token" value="{{ csrf_token('refund_' ~ order.id) }}">
+                        <div>
+                            <label for="refund-amount" class="label">{{ 'ui.refund.amount'|trans }} ({{ order.currency }})</label>
+                            <input type="text" inputmode="decimal" id="refund-amount" name="amount" required class="input"
+                                   value="{{ (refundable / 100)|number_format(2, '.', '') }}" pattern="[0-9]+([.,][0-9]{1,2})?">
+                            <p class="mt-1 text-xs text-fg-subtle">{{ 'ui.refund.max'|trans({'%amount%': refundable|money(order.currency)}) }}</p>
+                        </div>
+                        <div>
+                            <label for="refund-reason" class="label">{{ 'ui.refund.reason'|trans }}</label>
+                            <input type="text" id="refund-reason" name="reason" maxlength="500" class="input">
+                        </div>
+                        {% if returnRequests is not empty %}
+                            <div>
+                                <label for="refund-return" class="label">{{ 'ui.refund.return_request'|trans }}</label>
+                                <select id="refund-return" name="return_request" class="select">
+                                    <option value="">—</option>
+                                    {% for r in returnRequests %}
+                                        <option value="{{ r.id }}" {{ loop.first and r.status != 'refunded' ? 'selected' }}>{{ r.createdAt|date('Y-m-d') }} · {{ r.reason|length > 40 ? r.reason|slice(0, 40) ~ '…' : r.reason }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        {% endif %}
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" name="restock" value="1" class="rounded border-line-strong">
+                            {{ 'ui.refund.restock'|trans }}
+                        </label>
+                        <p class="text-xs text-fg-subtle">{{ (refundsAutomatically ? 'ui.refund.hint_provider' : 'ui.refund.hint_manual')|trans }}</p>
+                        <button type="submit" class="btn btn-danger w-full">{{ ux_icon('lucide:undo-2', {class: 'size-4'}) }}{{ 'ui.refund.submit'|trans }}</button>
+                    </form>
+                {% endif %}
+            </div>
+            {% endif %}
+
             <div class="rounded-2xl border border-line bg-panel p-6 shadow-xs">
                 <h3 class="text-lg font-semibold text-fg mb-4">{{ 'admin.orders.show.update_status_title'|trans }}</h3>
                 {{ form_start(statusForm) }}
@@ -150,6 +213,11 @@
                             class: 'w-full px-4 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent mb-3'
                         }
                     }) }}
+                    <div class="mb-3 space-y-3">
+                        {{ form_row(statusForm.carrier) }}
+                        {{ form_row(statusForm.trackingNumber, {help: 'ui.order_status.tracking_hint'|trans}) }}
+                    </div>
+                    <datalist id="carrier-suggestions"><option value="DHL"><option value="DPD"><option value="UPS"><option value="Hermes"><option value="GLS"><option value="FedEx"></datalist>
                     <button type="submit" class="w-full rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">
                         {{ 'admin.orders.show.update_status_submit'|trans }}
                     </button>

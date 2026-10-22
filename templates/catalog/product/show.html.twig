@@ -1,14 +1,25 @@
 {% extends 'base.html.twig' %}
 
-{%- set seo_title = product.seoTitle|default(product.name) -%}
-{%- set seo_description = product.seoDescription|default(product.description|default(product.name))|striptags|slice(0, 160) -%}
-{%- set images = product.media|map(m => {src: m.path, alt: m.alt|default(product.name)}) -%}
+{%- set seo_title = product|tr('seoTitle')|default(product|tr('name')) -%}
+{%- set seo_description = product|tr('seoDescription')|default(product|tr('description')|default(product|tr('name')))|striptags|slice(0, 160) -%}
+{%- set images = product.media|map(m => {src: m.path, alt: m.alt|default(product|tr('name'))}) -%}
+{#- Image indexes per variant (key "v<id>" keeps Twig from renumbering) -#}
+{%- set media_by_variant = {} -%}
+{%- for m in product.media -%}
+    {%- if m.variant -%}
+        {%- set media_by_variant = media_by_variant|merge({('v' ~ m.variant.id): (media_by_variant['v' ~ m.variant.id]|default([]))|merge([loop.index0])}) -%}
+    {%- endif -%}
+{%- endfor -%}
 {%- set variant_data = variants|map(v => {
     id: v.id,
     label: v.attributes is not empty ? v.attributes|map((value, key) => key|capitalize ~ ': ' ~ value)|join(' · ') : 'product.default_variant'|trans,
     price: v.priceAmount,
+    compareAt: v.onSale ? v.compareAtPriceAmount : null,
+    discountPercent: v.discountPercent,
     currency: v.currency,
     sku: v.sku,
+    attributes: v.attributes is not empty ? v.attributes : {},
+    images: media_by_variant['v' ~ v.id]|default([]),
     available: max(0, v.stockItem ? v.stockItem.available : 0),
 }) -%}
 {%- set default_available = defaultVariant and defaultVariant.stockItem ? defaultVariant.stockItem.available : 0 -%}
@@ -41,7 +52,7 @@
         {{- {
             '@context': 'https://schema.org',
             '@type': 'Product',
-            name: product.name,
+            name: product|tr('name'),
             description: seo_description,
             image: images|map(i => absolute_url(i.src)),
             sku: defaultVariant ? defaultVariant.sku : null,
@@ -66,9 +77,9 @@
 
     {%- set crumbs = [{label: 'nav.home'|trans, url: path('catalog_home')}] -%}
     {%- if product.category -%}
-        {%- set crumbs = crumbs|merge([{label: product.category.name, url: path('catalog_category', {slug: product.category.slug})}]) -%}
+        {%- set crumbs = crumbs|merge([{label: product.category|tr('name'), url: path('catalog_category', {slug: product.category.slug})}]) -%}
     {%- endif -%}
-    {% include 'components/breadcrumbs.html.twig' with {items: crumbs|merge([{label: product.name, url: null}])} only %}
+    {% include 'components/breadcrumbs.html.twig' with {items: crumbs|merge([{label: product|tr('name'), url: null}])} only %}
 
     <div class="grid gap-8 lg:grid-cols-12 lg:gap-12">
         {# Gallery #}
@@ -76,7 +87,8 @@
             <div class="relative aspect-square overflow-hidden rounded-2xl bg-subtle sm:aspect-[4/5] lg:aspect-square">
                 {% if images is not empty %}
                     {% for image in images %}
-                        <img src="{{ image.src }}" alt="{{ image.alt }}"
+                        <img src="{{ image_url(image.src, 960) }}" srcset="{{ image_srcset(image.src, [480, 640, 960, 1280, 1600]) }}"
+                             sizes="(min-width: 1024px) 58vw, 100vw" alt="{{ image.alt }}"
                              x-show="activeImage === {{ loop.index0 }}" {% if not loop.first %}x-cloak loading="lazy"{% else %}fetchpriority="high"{% endif %}
                              class="absolute inset-0 size-full cursor-zoom-in object-cover" @click="zoomOpen = true">
                     {% endfor %}
@@ -103,7 +115,7 @@
                     {% for image in images %}
                         <button type="button" role="tab" @click="show({{ loop.index0 }})" :aria-selected="activeImage === {{ loop.index0 }}"
                                 class="aspect-square overflow-hidden rounded-lg bg-subtle ring-2 ring-transparent ring-offset-2 ring-offset-canvas transition aria-selected:ring-fg">
-                            <img src="{{ image.src }}" alt="" loading="lazy" class="size-full object-cover">
+                            <img src="{{ image_url(image.src, 320) }}" alt="" loading="lazy" class="size-full object-cover">
                         </button>
                     {% endfor %}
                 </div>
@@ -114,7 +126,7 @@
         <div class="lg:col-span-5">
             <div class="lg:sticky lg:top-28">
                 <div class="flex items-start justify-between gap-4">
-                    <h1 class="text-2xl font-semibold sm:text-3xl">{{ product.name }}</h1>
+                    <h1 class="text-2xl font-semibold sm:text-3xl">{{ product|tr('name') }}</h1>
                     {% if app.user %}
                         {%- set wished = in_wishlist(product.id) -%}
                         <button type="button" data-wishlist-toggle data-product-id="{{ product.id }}" aria-pressed="{{ wished ? 'true' : 'false' }}"
@@ -135,25 +147,17 @@
                 {% endif %}
 
                 {% if defaultVariant %}
-                    <p class="mt-5 text-2xl font-semibold tabular-nums" x-text="price">{{ defaultVariant.priceAmount|money(defaultVariant.currency) }}</p>
+                    <p class="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                        <span class="text-2xl font-semibold tabular-nums" :class="variant?.compareAt && 'text-red-600 dark:text-red-400'" x-text="price">{{ defaultVariant.priceAmount|money(defaultVariant.currency) }}</span>
+                        <s class="text-base text-fg-subtle tabular-nums" x-show="variant?.compareAt" x-text="compareAtPrice" {{ defaultVariant.onSale ? '' : 'x-cloak' }} aria-label="{{ 'ui.product.was_price'|trans }}">{{ defaultVariant.onSale ? defaultVariant.compareAtPriceAmount|money(defaultVariant.currency) }}</s>
+                        <span class="badge bg-red-600 font-semibold text-white ring-0" x-show="variant?.compareAt" {{ defaultVariant.onSale ? '' : 'x-cloak' }}
+                              x-text="'{{ 'ui.product.sale_badge'|trans({'%percent%': '__P__'})|e('js') }}'.replace('__P__', variant?.discountPercent)">{{ defaultVariant.onSale ? 'ui.product.sale_badge'|trans({'%percent%': defaultVariant.discountPercent}) }}</span>
+                    </p>
                     <p class="mt-1 text-xs text-fg-subtle">{{ 'ui.product.price_note'|trans }}</p>
 
                     {# Variant picker #}
                     {% if variants|length > 1 %}
-                        <fieldset class="mt-8">
-                            <legend class="text-sm font-semibold">{{ 'product.select_variant'|trans }}</legend>
-                            <div class="mt-3 flex flex-wrap gap-2">
-                                {% for v in variant_data %}
-                                    <label class="relative cursor-pointer">
-                                        <input type="radio" name="variant" value="{{ v.id }}" class="peer sr-only" @change="select({{ v.id }})"
-                                               {{ defaultVariant.id == v.id ? 'checked' }}>
-                                        <span class="flex min-h-11 items-center rounded-lg border border-line-strong px-4 py-2 text-sm font-medium transition peer-checked:border-fg peer-checked:ring-1 peer-checked:ring-fg peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary-500 hover:border-fg {{ v.available == 0 ? 'text-fg-subtle line-through decoration-1' }}">
-                                            {{ v.label }}
-                                        </span>
-                                    </label>
-                                {% endfor %}
-                            </div>
-                        </fieldset>
+                        {% include 'catalog/product/_option_picker.html.twig' %}
                     {% endif %}
 
                     {# Stock state #}
@@ -211,7 +215,7 @@
 
                 {# Details accordion #}
                 <div class="mt-8 divide-y divide-line border-b border-line">
-                    {% if product.description %}
+                    {% if product|tr('description') %}
                         <div x-data="{ open: true }">
                             <h2>
                                 <button type="button" class="flex w-full items-center justify-between py-4 text-left font-semibold" @click="open = !open" :aria-expanded="open">
@@ -220,7 +224,7 @@
                                 </button>
                             </h2>
                             <div x-show="open" x-collapse>
-                                <div class="pb-6 text-sm leading-7 text-fg-muted">{{ product.description|nl2br }}</div>
+                                <div class="pb-6 text-sm leading-7 text-fg-muted">{{ product|tr('description')|nl2br }}</div>
                             </div>
                         </div>
                     {% endif %}
@@ -241,7 +245,7 @@
                                     {% endfor %}
                                     {% if product.category %}
                                         <dt class="text-fg-subtle">{{ 'ui.product.category'|trans }}</dt>
-                                        <dd><a href="{{ path('catalog_category', {slug: product.category.slug}) }}" class="link">{{ product.category.name }}</a></dd>
+                                        <dd><a href="{{ path('catalog_category', {slug: product.category.slug}) }}" class="link">{{ product.category|tr('name') }}</a></dd>
                                     {% endif %}
                                 </dl>
                             </div>
@@ -268,5 +272,6 @@
     {% endif %}
 </div>
 
+{% include 'components/product_row.html.twig' with {id: 'recommendations-heading', title: 'ui.recommendations.product'|trans, products: recommendations|default([])} only %}
 {% include 'components/recently_viewed_products.html.twig' with {recentlyViewedProducts: recentlyViewedProducts|default([])} only %}
 {% endblock %}

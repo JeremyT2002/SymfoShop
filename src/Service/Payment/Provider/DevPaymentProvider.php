@@ -3,6 +3,7 @@
 namespace App\Service\Payment\Provider;
 
 use App\Entity\Order;
+use App\Entity\Payment;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -10,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
  * State is changed via the payment simulator page (success/failure/pending).
  * Payment record is created by PaymentService from the returned result.
  */
-final class DevPaymentProvider implements PaymentProviderInterface
+final class DevPaymentProvider implements PaymentProviderInterface, RefundingProviderInterface
 {
     public const NAME = 'dev';
 
@@ -51,5 +52,11 @@ final class DevPaymentProvider implements PaymentProviderInterface
     public function getClientSecretForReference(string $referenceId): ?string
     {
         return null;
+    }
+
+    /** Simulated: always succeeds immediately. */
+    public function refund(Payment $payment, int $amount): RefundOutcome
+    {
+        return new RefundOutcome('dev_re_' . bin2hex(random_bytes(8)));
     }
 }

@@ -47,6 +47,16 @@ final class StorefrontSmokeTest extends WebTestCase
         $this->client->request('GET', '/product/' . $product->getSlug());
         self::assertSelectorExists('[data-add-to-cart][data-variant-id="' . $variant->getId() . '"]');
         self::assertSelectorExists('script[type="application/ld+json"]');
+        self::assertSelectorTextContains('main', '−26 %', 'sale badge for the compare-at price');
+
+        // Live search suggestions
+        $this->client->request('GET', '/search/suggest?q=' . urlencode($product->getName()));
+        self::assertResponseIsSuccessful();
+        $suggest = json_decode((string) $this->client->getResponse()->getContent(), true);
+        self::assertSame($product->getName(), $suggest['products'][0]['name']);
+        self::assertStringStartsWith('/media/', $suggest['products'][0]['image']);
+        $this->client->request('GET', '/search/suggest?q=' . urlencode($category->getName()));
+        self::assertSame($category->getName(), json_decode((string) $this->client->getResponse()->getContent(), true)['categories'][0]['name']);
 
         $this->client->request('GET', '/cart');
         self::assertSelectorTextContains('main', $this->trans('cart.empty'));
@@ -70,10 +80,49 @@ final class StorefrontSmokeTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('form[data-checkout-form] input[name="customer_info[email]"]');
 
+        // Gross prices: the total is what the customer sees, VAT is contained in it (home rate without OSS)
         $this->client->request('GET', '/checkout/totals?country=FR');
         self::assertResponseIsSuccessful();
         $totals = json_decode((string) $this->client->getResponse()->getContent(), true)['totals'];
-        self::assertSame((int) round(($totals['subtotal'] + $totals['shippingAmount']) * 0.2), $totals['taxTotal']);
+        self::assertSame($totals['subtotal'] + $totals['shippingAmount'], $totals['grandTotal']);
+        self::assertSame(5198, $totals['subtotal']);
+        $gross = $totals['grandTotal'];
+        self::assertSame((int) round($gross - $gross / 1.19), $totals['taxTotal']);
+
+        // Export: home VAT removed, nothing charged on top
+        $this->client->request('GET', '/checkout/totals?country=US');
+        $export = json_decode((string) $this->client->getResponse()->getContent(), true)['totals'];
+        self::assertSame(0, $export['taxTotal']);
+        self::assertFalse($export['pricesIncludeTax']);
+        self::assertSame((int) round(5198 / 1.19), $export['subtotal']);
+    }
+
+    public function testOptionPickerWithSwatchesAndVariantImages(): void
+    {
+        [$category] = $this->createCatalog();
+        $product = $this->createProduct('Swatch Shirt ' . uniqid(), $category, stock: 3, price: 1999);
+        $red = $product->getVariants()->first();
+        $red->setAttributes(['color' => 'Red', 'size' => 'M']);
+
+        $blue = new ProductVariant();
+        $blue->setProduct($product)->setSku('SMOKE-BLUE-' . uniqid())->setPriceAmount(1999)->setCurrency('EUR')->setAttributes(['color' => 'Blau', 'size' => 'L']);
+        $product->addVariant($blue);
+        $this->em->persist($blue);
+
+        $blueImage = (new ProductMedia())->setProduct($product)->setPath('/uploads/products/blue.jpg')->setSort(1)->setVariant($blue);
+        $product->addMedia($blueImage);
+        $this->em->persist($blueImage);
+        $this->em->flush();
+
+        $crawler = $this->client->request('GET', '/product/' . $product->getSlug());
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('button[title="Red"][aria-pressed="true"]');
+        self::assertSelectorExists('button[title="Blau"][aria-pressed="false"]');
+
+        $variants = json_decode($crawler->filter('script[data-variants]')->text(), true);
+        $blueData = array_values(array_filter($variants, static fn (array $v): bool => $v['id'] === $blue->getId()))[0];
+        self::assertSame([1], $blueData['images']);
+        self::assertSame(0, $blueData['available']);
     }
 
     public function testAccountPagesRender(): void
@@ -111,6 +160,7 @@ final class StorefrontSmokeTest extends WebTestCase
         $this->em->persist($category);
 
         $product = $this->createProduct('Smoke Product ' . $suffix, $category, stock: 5, price: 2599);
+        $product->getVariants()->first()->setCompareAtPriceAmount(3499);
         $soldOut = $this->createProduct('Smoke Sold Out ' . $suffix, $category, stock: 0, price: 1000);
 
         $this->em->flush();

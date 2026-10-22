@@ -1,4 +1,4 @@
-{# Rechnung PDF – Farben & Name aus Shop-Theme (pdf_brand), Dompdf-tauglich #}
+{# Rechnung bzw. Gutschrift (credit_note gesetzt) als PDF – Farben & Name aus Shop-Theme (pdf_brand), Dompdf-tauglich #}
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -216,7 +216,7 @@
                     {% endif %}
                 </td>
                 <td style="vertical-align: middle;">
-                    <p class="hero-title">{{ 'invoice_pdf.title'|trans }}</p>
+                    <p class="hero-title">{{ (credit_note ? 'credit_note_pdf.title' : 'invoice_pdf.title')|trans }}</p>
                     <p class="hero-brand">{{ pdf_brand.site_name }}</p>
                     {% if pdf_brand.tagline %}
                         <p class="hero-tagline">{{ pdf_brand.tagline }}</p>
@@ -232,17 +232,25 @@
                 <td>
                     <div class="panel">
                         <p class="panel-title">{{ 'invoice_pdf.recipient'|trans }}</p>
+                        {% if order.shippingStreet %}<p>{% include 'components/_address.html.twig' with {order: order} only %}</p>{% endif %}
                         <p><strong>{{ 'invoice_pdf.email'|trans }}</strong><br>{{ order.email }}</p>
                         <p><strong>{{ 'invoice_pdf.order_number'|trans }}</strong><br>{{ order.orderNumber }}</p>
                     </div>
                 </td>
                 <td>
                     <div class="panel">
-                        <p class="panel-title">{{ 'invoice_pdf.invoice_details'|trans }}</p>
+                        <p class="panel-title">{{ (credit_note ? 'credit_note_pdf.details' : 'invoice_pdf.invoice_details')|trans }}</p>
                         <p>
-                            <span class="invoice-number-badge">{{ invoice.invoiceNumber }}</span>
+                            <span class="invoice-number-badge">{{ credit_note ? credit_note.creditNoteNumber : invoice.invoiceNumber }}</span>
                         </p>
-                        <p><strong>{{ 'invoice_pdf.invoice_date'|trans }}</strong><br>{{ invoice.createdAt|date('d.m.Y') }}</p>
+                        {% if credit_note %}
+                            <p><strong>{{ 'credit_note_pdf.date'|trans }}</strong><br>{{ credit_note.createdAt|date('d.m.Y') }}</p>
+                            {% if invoice %}
+                                <p><strong>{{ 'credit_note_pdf.for_invoice'|trans }}</strong><br>{{ invoice.invoiceNumber }} ({{ invoice.createdAt|date('d.m.Y') }})</p>
+                            {% endif %}
+                        {% else %}
+                            <p><strong>{{ 'invoice_pdf.invoice_date'|trans }}</strong><br>{{ invoice.createdAt|date('d.m.Y') }}</p>
+                        {% endif %}
                         <p><strong>{{ 'invoice_pdf.order_date'|trans }}</strong><br>{{ order.createdAt|date('d.m.Y') }}</p>
                         <p><strong>{{ 'invoice_pdf.currency'|trans }}</strong><br>{{ order.currency }}</p>
                         <p><strong>{{ 'invoice_pdf.payment_method.label'|trans }}</strong><br>{{ paymentMethodLabel }}</p>
@@ -251,6 +259,44 @@
             </tr>
         </table>
 
+        {% if credit_note %}
+        <p class="panel-title" style="margin-bottom: 6px;">{{ 'credit_note_pdf.items'|trans }}</p>
+        <table class="items">
+            <thead>
+            <tr>
+                <th>{{ 'invoice_pdf.table.item'|trans }}</th>
+                <th class="text-right">{{ 'invoice_pdf.table.total'|trans }}</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        {{ 'credit_note_pdf.line'|trans({'%order%': order.orderNumber}) }}
+                        {% if credit_note.reason %}<br>{{ credit_note.reason }}{% endif %}
+                    </td>
+                    <td class="text-right">&minus;{{ (credit_note.amount / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="totals-wrap" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="totals-spacer"></td>
+                <td class="totals-box">
+                    <table class="totals-inner">
+                        <tr class="grand">
+                            <td>{{ 'credit_note_pdf.total'|trans }}</td>
+                            <td class="text-right">&minus;{{ (credit_note.amount / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ credit_note.taxAmount > 0 ? 'invoice_pdf.tax_included'|trans : 'invoice_pdf.tax_export'|trans }}</td>
+                            <td class="text-right">&minus;{{ (credit_note.taxAmount / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        {% else %}
         <p class="panel-title" style="margin-bottom: 6px;">{{ 'invoice_pdf.items'|trans }}</p>
         <table class="items">
             <thead>
@@ -286,29 +332,49 @@
                             <td>{{ 'invoice_pdf.subtotal'|trans }}</td>
                             <td class="text-right">{{ (order.subtotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
                         </tr>
+                        {% if order.discountTotal > 0 %}
+                        <tr>
+                            <td>{{ 'invoice_pdf.discount'|trans }}{% if order.couponCode %} ({{ order.couponCode|upper }}){% endif %}</td>
+                            <td class="text-right">&minus;{{ (order.discountTotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
+                        </tr>
+                        {% endif %}
                         {% if order.shippingAmount > 0 or order.shippingMethodLabel %}
                         <tr>
                             <td>{{ 'invoice_pdf.shipping'|trans }}{% if order.shippingMethodLabel %} ({{ order.shippingMethodLabel }}){% endif %}</td>
                             <td class="text-right">{{ (order.shippingAmount / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
                         </tr>
                         {% endif %}
+                        {% if not order.pricesIncludeTax %}
+                        {# Orders before gross pricing: VAT was added on top #}
                         <tr>
-                            <td>{{ 'invoice_pdf.tax_included'|trans }}</td>
+                            <td>{{ 'invoice_pdf.tax_added'|trans }}</td>
                             <td class="text-right">{{ (order.taxTotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
                         </tr>
+                        {% endif %}
                         <tr class="grand">
                             <td>{{ 'invoice_pdf.grand_total'|trans }}</td>
                             <td class="text-right">{{ (order.grandTotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
                         </tr>
+                        {% if order.pricesIncludeTax %}
+                        <tr>
+                            <td>{{ order.taxTotal > 0 ? 'invoice_pdf.tax_included'|trans : 'invoice_pdf.tax_export'|trans }}</td>
+                            <td class="text-right">{{ (order.taxTotal / 100)|number_format(2, ',', '.') }}&nbsp;{{ order.currency }}</td>
+                        </tr>
+                        {% endif %}
                     </table>
                 </td>
             </tr>
         </table>
+        {% endif %}
     </div>
 
     <div class="thankyou">
+        {% if credit_note %}
+            {{ (credit_note.provider == 'manual' ? 'credit_note_pdf.paid_back_manual' : 'credit_note_pdf.paid_back')|trans({'%method%': paymentMethodLabel}) }}
+        {% else %}
         <strong>{{ 'invoice_pdf.thank_you_strong'|trans({'%shop%': pdf_brand.site_name}) }}</strong>
         {{ 'invoice_pdf.thank_you_text'|trans }}
+        {% endif %}
     </div>
 
     <div class="footer">

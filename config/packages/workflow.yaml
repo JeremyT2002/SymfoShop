@@ -18,6 +18,7 @@ framework:
                 - shipped
                 - completed
                 - cancelled
+                - refunded
             transitions:
                 submit_payment:
                     from: new
@@ -37,3 +38,7 @@ framework:
                 cancel:
                     from: [new, payment_pending, paid]
                     to: cancelled
+                # Applied by RefundService once the full amount has been paid back
+                refund:
+                    from: [paid, processing, shipped, completed]
+                    to: refunded

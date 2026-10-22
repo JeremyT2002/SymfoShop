@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\EventSubscriber\LocaleSubscriber;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,7 +24,10 @@ class LocaleController extends AbstractController
             if (!str_starts_with($path, '/') || str_starts_with($path, '//')) {
                 $path = '/';
             }
-            $query = isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '';
+            // Drop ?lang=…, it would override the language just chosen
+            parse_str($parsedUrl['query'] ?? '', $params);
+            unset($params[LocaleSubscriber::QUERY_PARAMETER]);
+            $query = $params !== [] ? '?' . http_build_query($params) : '';
 
             return $this->redirect($request->getSchemeAndHttpHost() . $path . $query);
         }

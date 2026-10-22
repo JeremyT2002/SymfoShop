@@ -22,6 +22,11 @@ class DashboardController extends AbstractController
     #[Route('/admin', name: 'admin')]
     public function index(Request $request): Response
     {
+        // Support and warehouse staff have no access to shop figures: start with the orders
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            return $this->redirectToRoute('admin_orders_index');
+        }
+
         $period = $request->query->getString('period', '7d');
         $dashboard = $this->dashboardMetricsService->getDashboardData($period);
 

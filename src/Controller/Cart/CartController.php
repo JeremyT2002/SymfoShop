@@ -4,8 +4,10 @@ namespace App\Controller\Cart;
 
 use App\Entity\ProductStatus;
 use App\Repository\ProductVariantRepository;
+use App\Repository\ShippingMethodRepository;
 use App\Service\Cart\CartService;
 use App\Service\Cart\CouponService;
+use App\Service\Catalog\RecommendationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,6 +22,8 @@ class CartController extends AbstractController
         private readonly CouponService $couponService,
         private readonly ProductVariantRepository $variantRepository,
         private readonly TranslatorInterface $translator,
+        private readonly ShippingMethodRepository $shippingMethodRepository,
+        private readonly RecommendationService $recommendationService,
     ) {
     }
 
@@ -31,6 +35,7 @@ class CartController extends AbstractController
 
         return $this->render('cart/show.html.twig', [
             'items' => $items,
+            'recommendations' => $this->recommendationService->forProducts(array_map(static fn (array $item) => $item['variant']->getProduct(), $items), 4),
             'totals' => $totals,
             'coupon' => $coupon,
         ]);
@@ -172,7 +177,24 @@ class CartController extends AbstractController
             }
         }
 
+        $totals['freeShipping'] = $this->freeShippingProgress($totals['subtotal'] - $totals['discount']);
+
         return [$totals, $coupon];
+    }
+
+    /**
+     * Progress towards free shipping with the default shipping method, or null if it has no threshold.
+     *
+     * @return array{threshold: int, remaining: int}|null
+     */
+    private function freeShippingProgress(int $goodsValue): ?array
+    {
+        $threshold = $this->shippingMethodRepository->findFirstActive()?->getFreeAboveCents();
+        if ($threshold === null) {
+            return null;
+        }
+
+        return ['threshold' => $threshold, 'remaining' => max(0, $threshold - $goodsValue)];
     }
 
     private function success(string $messageKey): JsonResponse

@@ -20,7 +20,13 @@
     {%- set page_title = block('page_title') is defined ? block('page_title')|trim : '' %}
     <title>{% block title %}{% if page_title %}{{ page_title|raw }} · {% endif %}{{ site_name }}{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}{{ theme_config().brand.tagline|default(site_name) }}{% endblock %}">
-    <link rel="canonical" href="{{ app.request.schemeAndHttpHost ~ app.request.pathInfo }}">
+    {%- set alternates = locale_alternates() %}
+    <link rel="canonical" href="{{ app.request.query.has('lang') ? alternates[app.request.locale] : alternates['x-default'] }}">
+    {% block hreflang %}
+        {%- for hreflang, href in alternates %}
+        <link rel="alternate" hreflang="{{ hreflang }}" href="{{ href }}">
+        {%- endfor %}
+    {% endblock %}
 
     {% block robots_meta %}
         {%- set noIndex = theme_config().seo.defaultNoIndex|default(false) or seo_noindex|default(false) -%}

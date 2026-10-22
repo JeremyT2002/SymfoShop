@@ -8,6 +8,7 @@ use App\Entity\ProductStatus;
 use App\Entity\ProductVariant;
 use App\Entity\StockItem;
 use App\Repository\CategoryRepository;
+use App\Service\Catalog\ProductBulkEditor;
 use App\Repository\ProductRepository;
 use App\Service\Product\ImageUploadService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -89,6 +90,9 @@ class ProductController extends AbstractController
             $product->setSeoDescription($seoDescription !== '' ? $seoDescription : null);
 
             $product->setSeoNoIndex($request->request->getBoolean('seo_noindex'));
+            if ($request->request->has('translations')) {
+                $product->setTranslations($request->request->all('translations'));
+            }
             
             // Set category if provided
             $categoryId = $request->request->get('category_id');
@@ -155,6 +159,8 @@ class ProductController extends AbstractController
 
             $sku = trim((string) $request->request->get('sku', ''));
             $priceAmount = (int) $request->request->get('price_amount', 0);
+            $compareAtRaw = trim((string) $request->request->get('compare_at_price_amount', ''));
+            $compareAt = $compareAtRaw !== '' ? (int) $compareAtRaw : null;
             $currency = strtoupper(trim((string) $request->request->get('currency', 'EUR')));
             $onHand = max(0, (int) $request->request->get('on_hand', 0));
             $reserved = max(0, (int) $request->request->get('reserved', 0));
@@ -166,6 +172,10 @@ class ProductController extends AbstractController
         }
         if ($priceAmount < 0) {
             $this->addFlash('error', 'Price must be 0 or higher.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+        if ($compareAt !== null && $compareAt <= $priceAmount) {
+            $this->addFlash('error', 'The compare-at price must be higher than the price (or empty).');
             return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
         }
         if (!preg_match('/^[A-Z]{3}$/', $currency)) {
@@ -185,6 +195,7 @@ class ProductController extends AbstractController
             $variant->setProduct($product);
             $variant->setSku($sku);
             $variant->setPriceAmount($priceAmount);
+            $variant->setCompareAtPriceAmount($compareAt);
             $variant->setCurrency($currency);
             $variant->setAttributes($this->parseAttributesInput($attributesRaw));
             $variant->setUpdatedAt(new \DateTimeImmutable());
@@ -216,6 +227,8 @@ class ProductController extends AbstractController
 
         $sku = trim((string) $request->request->get('sku', ''));
         $priceAmount = (int) $request->request->get('price_amount', 0);
+        $compareAtRaw = trim((string) $request->request->get('compare_at_price_amount', ''));
+        $compareAt = $compareAtRaw !== '' ? (int) $compareAtRaw : null;
         $currency = strtoupper(trim((string) $request->request->get('currency', 'EUR')));
         $onHand = max(0, (int) $request->request->get('on_hand', 0));
         $reserved = max(0, (int) $request->request->get('reserved', 0));
@@ -227,6 +240,10 @@ class ProductController extends AbstractController
         }
         if ($priceAmount < 0) {
             $this->addFlash('error', 'Price must be 0 or higher.');
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+        if ($compareAt !== null && $compareAt <= $priceAmount) {
+            $this->addFlash('error', 'The compare-at price must be higher than the price (or empty).');
             return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
         }
         if (!preg_match('/^[A-Z]{3}$/', $currency)) {
@@ -246,6 +263,7 @@ class ProductController extends AbstractController
 
         $variant->setSku($sku);
         $variant->setPriceAmount($priceAmount);
+        $variant->setCompareAtPriceAmount($compareAt);
         $variant->setCurrency($currency);
         $variant->setAttributes($this->parseAttributesInput($attributesRaw));
         $variant->setUpdatedAt(new \DateTimeImmutable());
@@ -304,6 +322,9 @@ class ProductController extends AbstractController
             $product->setSeoDescription($seoDescription !== '' ? $seoDescription : null);
 
             $product->setSeoNoIndex($request->request->getBoolean('seo_noindex'));
+            if ($request->request->has('translations')) {
+                $product->setTranslations($request->request->all('translations'));
+            }
 
             $product->setUpdatedAt(new \DateTimeImmutable());
             
@@ -433,31 +454,56 @@ class ProductController extends AbstractController
         return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
     }
 
-    #[Route('/bulk/status', name: 'bulk_status', methods: ['POST'])]
-    public function bulkStatus(Request $request): Response
+    #[Route('/{id}/media/{mediaId}/variant', name: 'media_variant', methods: ['POST'], requirements: ['id' => '\d+', 'mediaId' => '\d+'])]
+    public function assignMediaVariant(int $id, int $mediaId, Request $request): Response
     {
-        if (!$this->isCsrfTokenValid('bulk_products_status', (string) $request->request->get('_token'))) {
+        $product = $this->findProductOr404($id);
+        $media = $product->getMedia()->filter(static fn (ProductMedia $m): bool => $m->getId() === $mediaId)->first();
+        if (!$media instanceof ProductMedia) {
+            throw $this->createNotFoundException('Media not found');
+        }
+        if (!$this->isCsrfTokenValid('media_variant_' . $mediaId, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+
+            return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+        }
+
+        $variantId = (int) $request->request->get('variant_id', 0);
+        $variant = $variantId > 0 ? $this->findVariantForProductOr404($product, $variantId) : null;
+        $media->setVariant($variant);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Image assignment saved.');
+
+        return $this->redirectToRoute('admin_products_show', ['id' => $product->getId()]);
+    }
+
+    #[Route('/bulk/edit', name: 'bulk_edit', methods: ['POST'])]
+    public function bulkEdit(Request $request, ProductBulkEditor $bulkEditor): Response
+    {
+        if (!$this->isCsrfTokenValid('bulk_products_edit', (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid CSRF token.');
 
             return $this->redirectToRoute('admin_products_index');
         }
 
         $ids = $this->parseBulkIds((string) $request->request->get('ids', ''));
-        $status = ProductStatus::tryFrom((string) $request->request->get('status', ''));
-        if ($ids === [] || $status === null) {
+        if ($ids === []) {
             $this->addFlash('error', 'Invalid bulk action payload.');
 
             return $this->redirectToRoute('admin_products_index');
         }
 
-        $products = $this->productRepository->findBy(['id' => $ids]);
-        foreach ($products as $product) {
-            $product->setStatus($status);
-            $product->setUpdatedAt(new \DateTimeImmutable());
+        try {
+            $count = $bulkEditor->apply(
+                $this->productRepository->findBy(['id' => $ids]),
+                (string) $request->request->get('action'),
+                (string) $request->request->get('value', ''),
+            );
+            $this->addFlash('success', sprintf('Updated %d product(s).', $count));
+        } catch (\InvalidArgumentException $e) {
+            $this->addFlash('error', $e->getMessage());
         }
-        $this->entityManager->flush();
-
-        $this->addFlash('success', sprintf('Updated %d product(s).', count($products)));
 
         return $this->redirectToRoute('admin_products_index');
     }

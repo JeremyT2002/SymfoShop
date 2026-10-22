@@ -893,6 +893,7 @@ admin:
       shipped: Shipped
       completed: Completed
       cancelled: Cancelled
+      refunded: "Refunded"
     show:
       page_title: 'Order: %number%'
       back: Back to orders
@@ -1001,6 +1002,9 @@ invoice_pdf:
   subtotal: Subtotal
   shipping: Shipping
   tax_included: incl. VAT
+  discount: Discount
+  tax_added: plus VAT
+  tax_export: Tax-free export delivery
   grand_total: Grand total
   thank_you_strong: Thank you for shopping at %shop%.
   thank_you_text: Please keep this invoice for your records. If you have questions about your order, contact our support.
@@ -1222,13 +1226,18 @@ ui:
     results_for: 'Results for “%query%”'
     no_results: 'No products found for “%query%”'
     no_results_hint: Check the spelling or try a more general term.
+    suggestions: "Search suggestions"
+    no_suggestions: "No matching products"
+    all_results: "Show all results"
   footer:
-    prices_excl_vat: All prices excl. VAT, plus shipping. VAT is added at checkout.
+    prices_incl_vat: All prices incl. VAT, plus shipping.
   product:
     from: from
     sold_out: Sold out
+    sale_badge: '−%percent% %'
+    was_price: "Original price"
     choose_options: Choose options
-    price_note: Excl. VAT, plus shipping
+    price_note: Incl. VAT, plus shipping
     only_n_left: 'Only %count% left'
     shipping_note: Tracked shipping on every order
     returns_note: Easy returns — see our return policy
@@ -1252,7 +1261,7 @@ ui:
     added: Added
     view_cart: View cart
     calculated_at_checkout: Calculated at checkout
-    tax_note: VAT and shipping are calculated at checkout.
+    tax_note: Incl. VAT · Shipping is calculated at checkout.
     invalid_request: This request could not be processed.
     product_unavailable: This product is no longer available.
     out_of_stock: This item is out of stock.
@@ -1273,6 +1282,8 @@ ui:
     place_order_binding: Place order with obligation to pay
     placing_order: Placing order…
     view_orders: View my orders
+    vat_included: Incl. %rate% % VAT
+    vat_export: Tax-free export (no VAT)
   payment:
     processing: Processing payment…
     failed: The payment could not be completed. Please try again.
@@ -1311,3 +1322,170 @@ ui:
     title: API documentation
     intro: Interactive reference for the SymfoShop REST API. Authenticate with your API key via the Authorize button.
     open_full_page: Open full page
+  order:
+    shipping_address: Shipping address
+  shipping:
+    free_above_label: "Free shipping from (cents, optional)"
+    free_above_hint: "Gross goods value after discounts from which this method is free. Empty = never free."
+    remaining: "Add %amount% more for free shipping"
+    reached: "You get free shipping!"
+    progress_aria: "Progress towards free shipping"
+  verify:
+    mail_subject: "Confirm your e-mail address"
+    mail_heading: "Confirm your e-mail address"
+    mail_text: "Hi %name%, please confirm your e-mail address so we can send you order updates and show all your orders in your account."
+    mail_button: "Confirm e-mail address"
+    mail_footer: "The link is valid for 48 hours. If you did not create an account, you can ignore this e-mail."
+    banner: "Please confirm your e-mail address %email% — we have sent you a link. Earlier guest orders with this address will then appear in your account."
+    resend: "Send link again"
+    flash_registered: "Your account has been created. Please confirm your e-mail address using the link we just sent you."
+    flash_sent: "We have sent you a new confirmation link."
+    flash_verified: "Thank you, your e-mail address is confirmed."
+    flash_invalid: "This confirmation link is invalid or has expired. Log in to request a new one."
+  order_status:
+    title: "Order status"
+    intro: "Enter your order number and the e-mail address used for the order."
+    submit: "Show order status"
+    have_account: "Have an account?"
+    not_found: "No order matches this order number and e-mail address."
+    rate_limited: "Too many attempts. Please try again in a few minutes."
+    placed_on: "Placed on %date%"
+    cancelled: "This order has been cancelled."
+    refunded: "This order has been refunded."
+    progress: "Order progress"
+    step_placed: "Placed"
+    step_paid: "Paid"
+    step_processing: "Being prepared"
+    step_shipped: "Shipped"
+    step_completed: "Delivered"
+    tracking: "Shipment tracking"
+    track_parcel: "Track parcel"
+    questions: "Questions about your order?"
+    view_status: "View order status"
+    carrier: "Carrier"
+    tracking_number_label: "Tracking number"
+    tracking_hint: "Setting the status to \"shipped\" e-mails the customer, including the tracking link."
+  order_mail:
+    shipped_subject: "Your order %number% is on its way"
+    shipped_heading: "Your order is on its way"
+    shipped_text: "Hi %name%, good news: your order %number% has been shipped."
+  recommendations:
+    product: "Customers also bought"
+    cart: "Goes well with your order"
+  newsletter:
+    title: "Newsletter"
+    text: "New products, offers and stories — at most twice a month. Unsubscribe at any time."
+    subscribe: "Subscribe"
+    consent: "I would like to receive the newsletter and have read the <a href=\"%privacy%\" class=\"link\">privacy policy</a>. I can unsubscribe at any time."
+    consent_required: "Please agree to receiving the newsletter."
+    check_inbox: "Almost done! Please confirm your subscription with the link we sent to your e-mail address."
+    confirmed: "Thank you, your newsletter subscription is confirmed."
+    unsubscribed: "You have been unsubscribed from the newsletter."
+    invalid_link: "This link is invalid."
+    mail_subject: "Please confirm your newsletter subscription"
+    mail_heading: "Confirm your subscription"
+    mail_text: "Please click the button to confirm that you want to receive our newsletter."
+    mail_button: "Confirm subscription"
+    mail_footer: "If you did not sign up, you can ignore this e-mail — you will not be subscribed."
+    admin_title: "Newsletter subscribers"
+    admin_summary: "%active% active of %total% sign-ups"
+    admin_empty: "No sign-ups yet."
+    admin_status: "Status"
+    admin_signed_up: "Signed up"
+    status_active: "Active"
+    status_unsubscribed: "Unsubscribed"
+    status_pending: "Not confirmed"
+  refund:
+    title: "Refunds"
+    amount: "Amount"
+    reason: "Reason"
+    max: "At most %amount% can still be refunded."
+    return_request: "Return request"
+    restock: "Put the items back on stock"
+    restocked: "restocked"
+    hint_provider: "The amount is paid back automatically through the payment provider."
+    hint_manual: "This payment method has no automatic refund: transfer the amount yourself, the credit note is created here."
+    submit: "Refund and create credit note"
+    confirm: "Pay the amount back to the customer now? This cannot be undone."
+    manual: "Manual"
+    pending: "pending"
+    flash_done: "Refund recorded, credit note %number% was sent to the customer."
+    flash_failed: "Refund failed: %error%"
+    credit_notes: "Credit notes"
+    credit_note_number: "Credit note no."
+    return_status_pending: "Open"
+    return_status_refunded: "Refunded"
+    mail_subject: "Refund for your order %number%"
+    mail_heading: "We have refunded your money"
+    mail_text: "Hi %name%, we have refunded %amount% for your order %number%. You will find the credit note attached."
+    mail_provider: "The amount goes back to the payment method you used; depending on your bank it can take a few days to show up."
+    mail_manual: "We will transfer the amount to you. If we do not have your bank details yet, simply reply to this e-mail."
+  bulk:
+    action: "Bulk action"
+    status: "Set status"
+    price_percent: "Change prices by %"
+    sale_start: "Start sale (% off)"
+    sale_end: "End sale"
+    stock_set: "Set stock"
+    percent: "Percent"
+    stock: "Stock quantity"
+  product_csv:
+    export: "Export CSV"
+    import: "Import CSV"
+    import_title: "Import products"
+    import_intro: "Create and update products, prices and stock from a CSV file – e.g. an edited export. The file is checked first; nothing is changed unless every row is valid."
+    file: "CSV file"
+    apply: "Apply changes (without: preview only)"
+    submit: "Check file"
+    errors: "The file was not imported:"
+    line: "Line %line%"
+    preview: "Preview – nothing has been changed yet"
+    preview_hint: "Tick \"Apply changes\" and upload the file again to import it."
+    applied: "Import finished"
+    summary: "%products% new products, %created% new and %updated% updated variants."
+    format: "Format"
+    format_intro: "One row per variant, comma or semicolon separated, with this header:"
+    format_rules: "Rows are matched by SKU. Prices are gross (19.99 or 19,99). Empty product columns stay unchanged. attributes: \"size=M; color=Blue\". category: the category slug."
+  two_factor:
+    title: "Two-factor login"
+    intro: "Protect your account with a one-time code from an authenticator app (e.g. Google Authenticator, Microsoft Authenticator, 1Password) in addition to your password."
+    status_on: "Enabled"
+    status_off: "Not enabled"
+    on_hint: "You are asked for a code from your authenticator app every time you log in. To turn it off, enter a current code."
+    step_app: "Install an authenticator app on your phone."
+    step_scan: "Scan the QR code with the app or enter the key manually."
+    step_confirm: "Enter the 6-digit code shown in the app to confirm."
+    qr_alt: "QR code for the authenticator app"
+    manual_key: "Key for manual entry"
+    code: "6-digit code"
+    enable: "Turn on"
+    disable: "Turn off"
+    enabled: "Two-factor login is now on."
+    disabled: "Two-factor login is now off."
+    invalid_code: "The code is not valid. Check the time on your phone and try again."
+    login_title: "Confirm your login"
+    login_intro: "Enter the 6-digit code from your authenticator app."
+    verify: "Confirm"
+    cancel: "Cancel and log out"
+    reset: "Turn off two-factor login"
+    reset_confirm: "Turn off two-factor login for this user? Use this when they lost their phone."
+    reset_hint: "For a lost phone. The user can set it up again afterwards."
+  staff:
+    customer_hint: "Every account can shop. Staff roles additionally open the admin area:"
+    role_admin: "Administrator"
+    role_admin_hint: "Full access, including settings, users and figures."
+    role_support: "Customer service"
+    role_support_hint: "Orders, refunds, return requests, support inbox and reviews."
+    role_warehouse: "Warehouse"
+    role_warehouse_hint: "Orders (status and shipping), products, stock and categories."
+
+credit_note_pdf:
+  title: "Credit note"
+  details: "Credit note details"
+  date: "Credit note date"
+  for_invoice: "For invoice"
+  items: "Refund"
+  line: "Refund for order %order%"
+  total: "Credit total"
+  paid_back: "The amount is paid back via %method%."
+  paid_back_manual: "The amount will be transferred to you."

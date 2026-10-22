@@ -157,7 +157,7 @@ class ProductRepository extends ServiceEntityRepository
         $words = array_values(array_filter(array_map(static fn (string $w): string => str_replace(['%', '_'], '', $w), $words)));
 
         foreach (\array_slice($words, 0, 5) as $i => $word) {
-            $qb->andWhere(sprintf('(LOWER(p.name) LIKE :q%1$d OR LOWER(p.description) LIKE :q%1$d)', $i))
+            $qb->andWhere(sprintf('(LOWER(p.name) LIKE :q%1$d OR LOWER(p.description) LIKE :q%1$d OR LOWER(p.translations) LIKE :q%1$d)', $i))
                 ->setParameter('q' . $i, '%' . $word . '%');
         }
     }
@@ -175,6 +175,17 @@ class ProductRepository extends ServiceEntityRepository
 
         $ids = array_map(static fn (Product $p): ?int => $p->getId(), $qb->getQuery()->getResult());
 
+        return $this->hydrateForCards($ids);
+    }
+
+    /**
+     * Products for cards in the given id order (variants, stock and media loaded).
+     *
+     * @param list<int> $ids
+     * @return list<Product>
+     */
+    public function findForCardsByIds(array $ids): array
+    {
         return $this->hydrateForCards($ids);
     }
 

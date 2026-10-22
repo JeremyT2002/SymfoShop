@@ -2,7 +2,7 @@
 <p>{{ 'email.abandoned_cart.intro'|trans }}</p>
 <ul>
     {% for item in cart.items %}
-        <li>{{ item.productVariant.product.name }} ({{ item.quantity }})</li>
+        <li>{{ item.productVariant.product|tr('name') }} ({{ item.quantity }})</li>
     {% endfor %}
 </ul>
 <p>
