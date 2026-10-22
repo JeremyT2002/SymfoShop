@@ -34,7 +34,11 @@ final class StaffAccessTest extends WebTestCase
         self::assertCount(0, $crawler->filter('aside a[href="/admin/products"]'), 'no products in the navigation');
         self::assertCount(1, $crawler->filter('aside a[href="/admin/support"]'));
 
-        foreach (['/admin/support', '/admin/return-requests', '/admin/reviews', '/admin/two-factor'] as $allowed) {
+        // The inbox redirects to the orders while the support module is switched off
+        $this->client->request('GET', '/admin/support');
+        self::assertTrue($this->client->getResponse()->isSuccessful() || $this->client->getResponse()->isRedirect('/admin/orders'));
+
+        foreach (['/admin/return-requests', '/admin/reviews', '/admin/two-factor'] as $allowed) {
             $this->client->request('GET', $allowed);
             self::assertResponseIsSuccessful($allowed);
         }
