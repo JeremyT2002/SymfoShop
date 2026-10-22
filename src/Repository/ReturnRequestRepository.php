@@ -21,6 +21,14 @@ class ReturnRequestRepository extends ServiceEntityRepository
     /**
      * @return list<ReturnRequest>
      */
+    /**
+     * @return list<ReturnRequest>
+     */
+    public function findByOrderNumber(string $orderNumber): array
+    {
+        return $this->findBy(['orderNumber' => $orderNumber], ['createdAt' => 'DESC']);
+    }
+
     public function findRecent(int $limit = 100): array
     {
         return $this->createQueryBuilder('r')

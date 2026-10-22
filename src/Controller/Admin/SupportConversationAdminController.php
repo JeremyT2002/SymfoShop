@@ -100,7 +100,8 @@ final class SupportConversationAdminController extends AbstractController
         if ($provider !== 'selfcoded') {
             $this->addFlash('warning', 'Support is currently disabled. Switch provider to "Selfcoded" in settings.');
 
-            return $this->redirectToRoute('admin_settings');
+            // Only admins can change the setting; support staff would end up on a 403 page
+            return $this->redirectToRoute($this->isGranted('ROLE_ADMIN') ? 'admin_settings' : 'admin_orders_index');
         }
 
         return null;

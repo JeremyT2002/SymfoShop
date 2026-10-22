@@ -93,11 +93,11 @@
                         {%- set image = item.variant.product.media|first -%}
                         <li class="flex items-center gap-4 py-3">
                             <span class="relative size-14 shrink-0 rounded-lg bg-subtle">
-                                {% if image %}<img src="{{ image.path }}" alt="" class="size-full rounded-lg object-cover">{% endif %}
+                                {% if image %}<img src="{{ image_url(image.path, 320) }}" alt="" loading="lazy" class="size-full rounded-lg object-cover">{% endif %}
                                 <span class="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-fg text-[0.6875rem] font-semibold text-canvas tabular-nums">{{ item.quantity }}</span>
                             </span>
                             <span class="min-w-0 flex-1">
-                                <span class="block truncate text-sm font-medium">{{ item.variant.product.name }}</span>
+                                <span class="block truncate text-sm font-medium">{{ item.variant.product|tr('name') }}</span>
                                 {% if item.variant.attributes is not empty %}
                                     <span class="block truncate text-xs text-fg-subtle">{{ item.variant.attributes|map((v, k) => k|capitalize ~ ': ' ~ v)|join(' · ') }}</span>
                                 {% endif %}
@@ -113,8 +113,17 @@
                         <div class="flex justify-between text-emerald-700 dark:text-emerald-400"><dt>{{ 'coupon.discount'|trans }}{% if totals.couponCode %} ({{ totals.couponCode|upper }}){% endif %}</dt><dd class="tabular-nums" data-checkout-total="discount">−{{ totals.discount|money(totals.currency) }}</dd></div>
                     {% endif %}
                     <div class="flex justify-between"><dt class="text-fg-muted">{{ 'checkout.shipping_amount'|trans }}</dt><dd class="tabular-nums" data-checkout-total="shippingAmount">{{ totals.shippingAmount > 0 ? totals.shippingAmount|money(totals.currency) : 'checkout.shipping_free'|trans }}</dd></div>
-                    <div class="flex justify-between"><dt class="text-fg-muted">{{ 'checkout.tax'|trans }}</dt><dd class="tabular-nums" data-checkout-total="taxTotal">{{ totals.taxTotal|money(totals.currency) }}</dd></div>
                     <div class="flex justify-between border-t border-line pt-4 text-base font-semibold"><dt>{{ 'checkout.total'|trans }}</dt><dd class="tabular-nums" data-checkout-total="grandTotal">{{ totals.grandTotal|money(totals.currency) }}</dd></div>
+                    {# VAT contained in the gross total, one row per rate (re-rendered by checkout.js) #}
+                    <div class="space-y-1 text-xs text-fg-subtle" data-checkout-tax-rows
+                         data-label-included="{{ 'ui.checkout.vat_included'|trans({'%rate%': '__RATE__'}) }}"
+                         data-label-export="{{ 'ui.checkout.vat_export'|trans }}">
+                        {% for row in totals.taxBreakdown %}
+                            <div class="flex justify-between"><dt>{{ 'ui.checkout.vat_included'|trans({'%rate%': (row.rate * 100)|number_format(row.rate * 100 == (row.rate * 100)|round ? 0 : 1, ',', '.')}) }}</dt><dd class="tabular-nums">{{ row.amount|money(totals.currency) }}</dd></div>
+                        {% else %}
+                            {% if not totals.pricesIncludeTax %}<p>{{ 'ui.checkout.vat_export'|trans }}</p>{% endif %}
+                        {% endfor %}
+                    </div>
                 </dl>
 
                 <button type="submit" class="btn btn-primary btn-lg mt-6 w-full" data-place-order {{ paymentMethods is empty ? 'disabled' }}>

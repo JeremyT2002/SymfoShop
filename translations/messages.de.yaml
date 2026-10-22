@@ -893,6 +893,7 @@ admin:
       shipped: Versendet
       completed: Abgeschlossen
       cancelled: Storniert
+      refunded: "Erstattet"
     show:
       page_title: 'Bestellung: %number%'
       back: Zurück zu Bestellungen
@@ -1001,6 +1002,9 @@ invoice_pdf:
   subtotal: Zwischensumme
   shipping: Versand
   tax_included: inkl. MwSt.
+  discount: Rabatt
+  tax_added: zzgl. MwSt.
+  tax_export: Steuerfreie Ausfuhrlieferung
   grand_total: Gesamtbetrag
   thank_you_strong: Vielen Dank für Ihren Einkauf bei %shop%.
   thank_you_text: Bitte bewahren Sie diese Rechnung für Ihre Unterlagen auf. Bei Fragen zur Bestellung wenden Sie sich an unseren Support.
@@ -1222,13 +1226,18 @@ ui:
     results_for: 'Ergebnisse für „%query%“'
     no_results: 'Keine Produkte für „%query%“ gefunden'
     no_results_hint: Prüfen Sie die Schreibweise oder versuchen Sie einen allgemeineren Begriff.
+    suggestions: "Suchvorschläge"
+    no_suggestions: "Keine passenden Produkte"
+    all_results: "Alle Ergebnisse anzeigen"
   footer:
-    prices_excl_vat: Alle Preise zzgl. MwSt. und Versand. Die MwSt. wird im Checkout ausgewiesen.
+    prices_incl_vat: Alle Preise inkl. MwSt., zzgl. Versandkosten.
   product:
     from: ab
     sold_out: Ausverkauft
+    sale_badge: '−%percent% %'
+    was_price: "Ursprünglicher Preis"
     choose_options: Optionen wählen
-    price_note: zzgl. MwSt. und Versand
+    price_note: inkl. MwSt., zzgl. Versand
     only_n_left: 'Nur noch %count% verfügbar'
     shipping_note: Versand mit Sendungsverfolgung
     returns_note: Einfache Rücksendung — zu unseren Rückgabebedingungen
@@ -1252,7 +1261,7 @@ ui:
     added: Hinzugefügt
     view_cart: Zum Warenkorb
     calculated_at_checkout: Wird im Checkout berechnet
-    tax_note: MwSt. und Versand werden im Checkout berechnet.
+    tax_note: inkl. MwSt. · Versand wird im Checkout berechnet.
     invalid_request: Die Anfrage konnte nicht verarbeitet werden.
     product_unavailable: Dieses Produkt ist nicht mehr verfügbar.
     out_of_stock: Dieser Artikel ist ausverkauft.
@@ -1273,6 +1282,8 @@ ui:
     place_order_binding: Zahlungspflichtig bestellen
     placing_order: Bestellung wird aufgegeben…
     view_orders: Meine Bestellungen
+    vat_included: inkl. %rate% % MwSt.
+    vat_export: Steuerfreie Ausfuhr (keine MwSt.)
   payment:
     processing: Zahlung wird verarbeitet…
     failed: Die Zahlung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.
@@ -1311,3 +1322,170 @@ ui:
     title: API-Dokumentation
     intro: Interaktive Referenz der SymfoShop-REST-API. Authentifizieren Sie sich über „Authorize“ mit Ihrem API-Schlüssel.
     open_full_page: Ganze Seite öffnen
+  order:
+    shipping_address: Lieferadresse
+  shipping:
+    free_above_label: "Kostenlos ab (Cent, optional)"
+    free_above_hint: "Warenwert brutto nach Rabatten, ab dem diese Versandart kostenlos ist. Leer = nie kostenlos."
+    remaining: "Noch %amount% bis zum kostenlosen Versand"
+    reached: "Ihre Bestellung wird kostenlos versendet!"
+    progress_aria: "Fortschritt bis zum kostenlosen Versand"
+  verify:
+    mail_subject: "Bitte bestätigen Sie Ihre E-Mail-Adresse"
+    mail_heading: "E-Mail-Adresse bestätigen"
+    mail_text: "Hallo %name%, bitte bestätigen Sie Ihre E-Mail-Adresse, damit wir Ihnen Bestellinformationen senden und alle Ihre Bestellungen im Konto anzeigen können."
+    mail_button: "E-Mail-Adresse bestätigen"
+    mail_footer: "Der Link ist 48 Stunden gültig. Falls Sie kein Konto angelegt haben, können Sie diese E-Mail ignorieren."
+    banner: "Bitte bestätigen Sie Ihre E-Mail-Adresse %email% – wir haben Ihnen einen Link geschickt. Danach erscheinen auch frühere Gastbestellungen mit dieser Adresse in Ihrem Konto."
+    resend: "Link erneut senden"
+    flash_registered: "Ihr Konto wurde erstellt. Bitte bestätigen Sie Ihre E-Mail-Adresse über den Link, den wir Ihnen gerade geschickt haben."
+    flash_sent: "Wir haben Ihnen einen neuen Bestätigungslink geschickt."
+    flash_verified: "Vielen Dank, Ihre E-Mail-Adresse ist bestätigt."
+    flash_invalid: "Dieser Bestätigungslink ist ungültig oder abgelaufen. Melden Sie sich an, um einen neuen anzufordern."
+  order_status:
+    title: "Bestellstatus"
+    intro: "Geben Sie Ihre Bestellnummer und die bei der Bestellung verwendete E-Mail-Adresse ein."
+    submit: "Bestellstatus anzeigen"
+    have_account: "Sie haben ein Konto?"
+    not_found: "Zu dieser Bestellnummer und E-Mail-Adresse wurde keine Bestellung gefunden."
+    rate_limited: "Zu viele Versuche. Bitte versuchen Sie es in einigen Minuten erneut."
+    placed_on: "Bestellt am %date%"
+    cancelled: "Diese Bestellung wurde storniert."
+    refunded: "Diese Bestellung wurde erstattet."
+    progress: "Bestellfortschritt"
+    step_placed: "Bestellt"
+    step_paid: "Bezahlt"
+    step_processing: "In Vorbereitung"
+    step_shipped: "Versendet"
+    step_completed: "Zugestellt"
+    tracking: "Sendungsverfolgung"
+    track_parcel: "Paket verfolgen"
+    questions: "Fragen zu Ihrer Bestellung?"
+    view_status: "Bestellstatus ansehen"
+    carrier: "Versanddienstleister"
+    tracking_number_label: "Sendungsnummer"
+    tracking_hint: "Beim Wechsel auf \"versendet\" erhält der Kunde eine E-Mail mit Sendungsverfolgung."
+  order_mail:
+    shipped_subject: "Ihre Bestellung %number% ist unterwegs"
+    shipped_heading: "Ihre Bestellung ist unterwegs"
+    shipped_text: "Hallo %name%, gute Nachrichten: Ihre Bestellung %number% wurde versendet."
+  recommendations:
+    product: "Kunden kauften auch"
+    cart: "Passt dazu"
+  newsletter:
+    title: "Newsletter"
+    text: "Neue Produkte, Angebote und Geschichten – höchstens zweimal im Monat. Abmeldung jederzeit möglich."
+    subscribe: "Anmelden"
+    consent: "Ich möchte den Newsletter erhalten und habe die <a href=\"%privacy%\" class=\"link\">Datenschutzerklärung</a> gelesen. Die Abmeldung ist jederzeit möglich."
+    consent_required: "Bitte stimmen Sie dem Erhalt des Newsletters zu."
+    check_inbox: "Fast geschafft! Bitte bestätigen Sie Ihre Anmeldung über den Link, den wir an Ihre E-Mail-Adresse geschickt haben."
+    confirmed: "Vielen Dank, Ihre Newsletter-Anmeldung ist bestätigt."
+    unsubscribed: "Sie wurden vom Newsletter abgemeldet."
+    invalid_link: "Dieser Link ist ungültig."
+    mail_subject: "Bitte bestätigen Sie Ihre Newsletter-Anmeldung"
+    mail_heading: "Anmeldung bestätigen"
+    mail_text: "Bitte klicken Sie auf den Button, um zu bestätigen, dass Sie unseren Newsletter erhalten möchten."
+    mail_button: "Anmeldung bestätigen"
+    mail_footer: "Falls Sie sich nicht angemeldet haben, ignorieren Sie diese E-Mail – Sie werden nicht eingetragen."
+    admin_title: "Newsletter-Abonnenten"
+    admin_summary: "%active% aktiv von %total% Anmeldungen"
+    admin_empty: "Noch keine Anmeldungen."
+    admin_status: "Status"
+    admin_signed_up: "Angemeldet am"
+    status_active: "Aktiv"
+    status_unsubscribed: "Abgemeldet"
+    status_pending: "Nicht bestätigt"
+  refund:
+    title: "Erstattungen"
+    amount: "Betrag"
+    reason: "Grund"
+    max: "Es können noch höchstens %amount% erstattet werden."
+    return_request: "Retourenanfrage"
+    restock: "Artikel wieder einlagern"
+    restocked: "wieder eingelagert"
+    hint_provider: "Der Betrag wird automatisch über den Zahlungsanbieter zurückgezahlt."
+    hint_manual: "Diese Zahlungsart erstattet nicht automatisch: Überweisen Sie den Betrag selbst, die Gutschrift wird hier erstellt."
+    submit: "Erstatten und Gutschrift erstellen"
+    confirm: "Den Betrag jetzt an den Kunden zurückzahlen? Das kann nicht rückgängig gemacht werden."
+    manual: "Manuell"
+    pending: "ausstehend"
+    flash_done: "Erstattung erfasst, Gutschrift %number% wurde an den Kunden gesendet."
+    flash_failed: "Erstattung fehlgeschlagen: %error%"
+    credit_notes: "Gutschriften"
+    credit_note_number: "Gutschrift-Nr."
+    return_status_pending: "Offen"
+    return_status_refunded: "Erstattet"
+    mail_subject: "Erstattung zu Ihrer Bestellung %number%"
+    mail_heading: "Wir haben Ihnen Geld erstattet"
+    mail_text: "Hallo %name%, wir haben Ihnen %amount% für Ihre Bestellung %number% erstattet. Die Gutschrift finden Sie im Anhang."
+    mail_provider: "Der Betrag geht an die verwendete Zahlungsart zurück; je nach Bank kann es einige Tage dauern, bis er sichtbar ist."
+    mail_manual: "Wir überweisen Ihnen den Betrag. Falls uns Ihre Bankverbindung noch fehlt, antworten Sie einfach auf diese E-Mail."
+  bulk:
+    action: "Massenaktion"
+    status: "Status setzen"
+    price_percent: "Preise um % ändern"
+    sale_start: "Sale starten (% Rabatt)"
+    sale_end: "Sale beenden"
+    stock_set: "Bestand setzen"
+    percent: "Prozent"
+    stock: "Bestandsmenge"
+  product_csv:
+    export: "CSV exportieren"
+    import: "CSV importieren"
+    import_title: "Produkte importieren"
+    import_intro: "Produkte, Preise und Bestände aus einer CSV-Datei anlegen und aktualisieren – z. B. aus einem bearbeiteten Export. Die Datei wird zuerst geprüft; geändert wird nur, wenn alle Zeilen gültig sind."
+    file: "CSV-Datei"
+    apply: "Änderungen übernehmen (ohne: nur Vorschau)"
+    submit: "Datei prüfen"
+    errors: "Die Datei wurde nicht importiert:"
+    line: "Zeile %line%"
+    preview: "Vorschau – es wurde noch nichts geändert"
+    preview_hint: "Setzen Sie „Änderungen übernehmen“ und laden Sie die Datei erneut hoch, um sie zu importieren."
+    applied: "Import abgeschlossen"
+    summary: "%products% neue Produkte, %created% neue und %updated% aktualisierte Varianten."
+    format: "Format"
+    format_intro: "Eine Zeile pro Variante, Komma oder Semikolon getrennt, mit dieser Kopfzeile:"
+    format_rules: "Zeilen werden über die SKU zugeordnet. Preise sind brutto (19.99 oder 19,99). Leere Produktspalten bleiben unverändert. attributes: „size=M; color=Blue“. category: der Slug der Kategorie."
+  two_factor:
+    title: "Zwei-Faktor-Anmeldung"
+    intro: "Schützen Sie Ihr Konto zusätzlich zum Passwort mit einem Einmalcode aus einer Authenticator-App (z. B. Google Authenticator, Microsoft Authenticator, 1Password)."
+    status_on: "Aktiviert"
+    status_off: "Nicht aktiviert"
+    on_hint: "Bei jeder Anmeldung wird ein Code aus Ihrer Authenticator-App abgefragt. Zum Ausschalten geben Sie einen aktuellen Code ein."
+    step_app: "Installieren Sie eine Authenticator-App auf Ihrem Smartphone."
+    step_scan: "Scannen Sie den QR-Code mit der App oder geben Sie den Schlüssel manuell ein."
+    step_confirm: "Geben Sie zur Bestätigung den 6-stelligen Code aus der App ein."
+    qr_alt: "QR-Code für die Authenticator-App"
+    manual_key: "Schlüssel zur manuellen Eingabe"
+    code: "6-stelliger Code"
+    enable: "Einschalten"
+    disable: "Ausschalten"
+    enabled: "Die Zwei-Faktor-Anmeldung ist jetzt eingeschaltet."
+    disabled: "Die Zwei-Faktor-Anmeldung ist jetzt ausgeschaltet."
+    invalid_code: "Der Code ist ungültig. Prüfen Sie die Uhrzeit Ihres Smartphones und versuchen Sie es erneut."
+    login_title: "Anmeldung bestätigen"
+    login_intro: "Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein."
+    verify: "Bestätigen"
+    cancel: "Abbrechen und abmelden"
+    reset: "Zwei-Faktor-Anmeldung ausschalten"
+    reset_confirm: "Zwei-Faktor-Anmeldung für diesen Benutzer ausschalten? Nutzen Sie das, wenn das Smartphone verloren ging."
+    reset_hint: "Bei verlorenem Smartphone. Der Benutzer kann sie danach neu einrichten."
+  staff:
+    customer_hint: "Jedes Konto kann einkaufen. Mitarbeiterrollen öffnen zusätzlich den Adminbereich:"
+    role_admin: "Administrator"
+    role_admin_hint: "Voller Zugriff inklusive Einstellungen, Benutzern und Kennzahlen."
+    role_support: "Kundenservice"
+    role_support_hint: "Bestellungen, Erstattungen, Retouren, Support-Postfach und Bewertungen."
+    role_warehouse: "Lager"
+    role_warehouse_hint: "Bestellungen (Status und Versand), Produkte, Bestände und Kategorien."
+
+credit_note_pdf:
+  title: "Gutschrift"
+  details: "Gutschriftdetails"
+  date: "Gutschriftdatum"
+  for_invoice: "Zur Rechnung"
+  items: "Erstattung"
+  line: "Erstattung zur Bestellung %order%"
+  total: "Gutschriftbetrag"
+  paid_back: "Der Betrag wird über %method% zurückgezahlt."
+  paid_back_manual: "Der Betrag wird Ihnen überwiesen."

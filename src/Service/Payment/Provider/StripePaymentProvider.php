@@ -3,12 +3,14 @@
 namespace App\Service\Payment\Provider;
 
 use App\Entity\Order;
+use App\Entity\Payment;
+use App\Entity\Refund;
 use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;
 use Stripe\Webhook;
 use Symfony\Component\HttpFoundation\Request;
 
-final class StripePaymentProvider implements PaymentProviderInterface
+final class StripePaymentProvider implements PaymentProviderInterface, RefundingProviderInterface
 {
     public const NAME = 'stripe';
 
@@ -94,6 +96,25 @@ final class StripePaymentProvider implements PaymentProviderInterface
         };
         $orderId = isset($obj->metadata['order_id']) ? (int) $obj->metadata['order_id'] : null;
         return new PaymentResolution($paymentIntentId, $status, $orderId);
+    }
+
+    public function refund(Payment $payment, int $amount): RefundOutcome
+    {
+        try {
+            $refund = $this->stripeClient->refunds->create([
+                'payment_intent' => $payment->getPaymentIntentId(),
+                'amount' => $amount,
+                'metadata' => ['order_number' => $payment->getOrder()->getOrderNumber()],
+            ]);
+        } catch (ApiErrorException $e) {
+            throw new \RuntimeException('Stripe refund failed: ' . $e->getMessage(), 0, $e);
+        }
+
+        return match ($refund->status) {
+            'succeeded' => new RefundOutcome($refund->id),
+            'pending', 'requires_action' => new RefundOutcome($refund->id, Refund::STATUS_PENDING),
+            default => throw new \RuntimeException(sprintf('Stripe refund %s: %s', $refund->id, $refund->status)),
+        };
     }
 
     public function getClientSecretForReference(string $referenceId): ?string

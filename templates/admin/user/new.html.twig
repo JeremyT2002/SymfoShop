@@ -52,24 +52,7 @@
                 
                 <section class="admin-form-section">
                     <label class="admin-form-label">User roles</label>
-                    <div class="space-y-3 rounded-lg border border-line bg-panel p-4">
-                        <label class="flex items-start cursor-pointer group">
-                            <input type="checkbox" name="roles[]" value="ROLE_USER" checked
-                                   class="mt-1 rounded border-line-strong text-primary-600 focus:ring-primary-500">
-                            <div class="ml-3 flex-1">
-                                <span class="text-sm font-medium text-fg">ROLE_USER</span>
-                                <p class="text-xs text-fg-subtle mt-0.5">Standard user access - can browse and purchase products</p>
-                            </div>
-                        </label>
-                        <label class="flex items-start cursor-pointer group">
-                            <input type="checkbox" name="roles[]" value="ROLE_ADMIN"
-                                   class="mt-1 rounded border-line-strong text-primary-600 focus:ring-primary-500">
-                            <div class="ml-3 flex-1">
-                                <span class="text-sm font-medium text-fg">ROLE_ADMIN</span>
-                                <p class="text-xs text-fg-subtle mt-0.5">Administrator access - full access to admin panel and system management</p>
-                            </div>
-                        </label>
-                    </div>
+                    {% include 'admin/user/_roles.html.twig' with {user: null} only %}
                 
                 
                 <div class="mt-4">

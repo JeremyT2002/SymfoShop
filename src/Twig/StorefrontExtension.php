@@ -6,10 +6,13 @@ namespace App\Twig;
 
 use App\Entity\Category;
 use App\Entity\User;
+use App\EventSubscriber\LocaleSubscriber;
 use App\Repository\CategoryRepository;
 use App\Repository\WishlistRepository;
+use App\Service\Media\ResponsiveImages;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Intl\Countries;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -33,6 +36,7 @@ final class StorefrontExtension extends AbstractExtension
         private readonly Security $security,
         private readonly WishlistRepository $wishlistRepository,
         private readonly CategoryRepository $categoryRepository,
+        private readonly ResponsiveImages $responsiveImages,
     ) {
     }
 
@@ -41,6 +45,8 @@ final class StorefrontExtension extends AbstractExtension
         return [
             new TwigFilter('money', $this->formatMoney(...)),
             new TwigFilter('public_name', $this->publicName(...)),
+            new TwigFilter('country_name', $this->countryName(...)),
+            new TwigFilter('tr', $this->translate(...)),
         ];
     }
 
@@ -49,6 +55,9 @@ final class StorefrontExtension extends AbstractExtension
         return [
             new TwigFunction('in_wishlist', $this->isInWishlist(...)),
             new TwigFunction('nav_categories', $this->navCategories(...)),
+            new TwigFunction('image_url', $this->responsiveImages->url(...)),
+            new TwigFunction('image_srcset', $this->responsiveImages->srcset(...)),
+            new TwigFunction('locale_alternates', $this->localeAlternates(...)),
         ];
     }
 
@@ -70,6 +79,61 @@ final class StorefrontExtension extends AbstractExtension
         }
 
         return number_format($amount, 2, '.', ',') . ' ' . $currency;
+    }
+
+    /**
+     * Translated product/category text for the current locale: {{ product|tr('name') }}.
+     */
+    public function translate(?object $entity, string $field, ?string $locale = null): ?string
+    {
+        if ($entity === null) {
+            return null;
+        }
+        $locale ??= $this->requestStack->getCurrentRequest()?->getLocale();
+
+        return method_exists($entity, 'translated')
+            ? $entity->translated($field, $locale)
+            : $entity->{'get' . ucfirst($field)}();
+    }
+
+    /**
+     * hreflang => URL of every language version of a page (default: the current page).
+     * The default locale uses the plain URL, the others ?lang=xx; x-default points to the plain URL.
+     *
+     * @return array<string, string>
+     */
+    public function localeAlternates(?string $url = null): array
+    {
+        if ($url === null) {
+            $request = $this->requestStack->getCurrentRequest();
+            if ($request === null) {
+                return [];
+            }
+            $url = $request->getSchemeAndHttpHost() . $request->getPathInfo();
+        }
+
+        $alternates = [];
+        foreach (LocaleSubscriber::SUPPORTED_LOCALES as $locale) {
+            $alternates[$locale] = $locale === LocaleSubscriber::DEFAULT_LOCALE
+                ? $url
+                : $url . '?' . http_build_query([LocaleSubscriber::QUERY_PARAMETER => $locale]);
+        }
+        $alternates['x-default'] = $url;
+
+        return $alternates;
+    }
+
+    /**
+     * "DE" → "Deutschland" in the current locale (falls back to the code).
+     */
+    public function countryName(?string $code): string
+    {
+        if ($code === null || $code === '') {
+            return '';
+        }
+        $locale = $this->requestStack->getCurrentRequest()?->getLocale() ?? 'en';
+
+        return Countries::exists($code) ? Countries::getName($code, $locale) : $code;
     }
 
     /**

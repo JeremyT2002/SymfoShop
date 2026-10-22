@@ -34,19 +34,20 @@
     {%- set currentRoute = app.request.attributes.get('_route')|default('') -%}
     {%- set navGroups = [
         {label: null, items: [
-            {route: 'admin', key: 'admin.nav.dashboard', icon: 'home'},
+            {route: 'admin', key: 'admin.nav.dashboard', icon: 'home', role: 'ROLE_ADMIN'},
         ]},
         {label: 'admin.nav.catalog', items: [
-            {route: 'admin_products_index', key: 'admin.nav.products', icon: 'box'},
-            {route: 'admin_categories_index', key: 'admin.nav.categories', icon: 'tag'},
-            {route: 'admin_reviews_index', key: 'admin.nav.reviews', icon: 'star'},
+            {route: 'admin_products_index', key: 'admin.nav.products', icon: 'box', role: 'ROLE_WAREHOUSE'},
+            {route: 'admin_categories_index', key: 'admin.nav.categories', icon: 'tag', role: 'ROLE_WAREHOUSE'},
+            {route: 'admin_reviews_index', key: 'admin.nav.reviews', icon: 'star', role: 'ROLE_SUPPORT'},
         ]},
         {label: 'admin.nav.sales', items: [
-            {route: 'admin_orders_index', key: 'admin.nav.orders', icon: 'shopping-cart'},
-            {route: 'admin_return_requests_index', key: 'admin.return_requests.page_title', icon: 'undo'},
+            {route: 'admin_orders_index', key: 'admin.nav.orders', icon: 'shopping-cart', role: 'ROLE_STAFF'},
+            {route: 'admin_return_requests_index', key: 'admin.return_requests.page_title', icon: 'undo', role: 'ROLE_SUPPORT'},
             {route: 'admin_coupons_index', key: 'admin.nav.coupons', icon: 'ticket'},
+            {route: 'admin_newsletter_index', key: 'ui.newsletter.admin_title', icon: 'mail'},
             {route: 'admin_users_index', key: 'admin.nav.users', icon: 'users'},
-            {route: 'admin_support_index', key: 'admin.nav.support_inbox', icon: 'life-buoy'},
+            {route: 'admin_support_index', key: 'admin.nav.support_inbox', icon: 'life-buoy', role: 'ROLE_SUPPORT'},
         ]},
         {label: 'admin.nav.system', items: [
             {route: 'admin_settings', key: 'admin.settings.nav', icon: 'settings'},
@@ -77,13 +78,13 @@
         </div>
 
         <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-4">
-            {% for group in navGroups %}
+            {% for group in navGroups|filter(group => group.items|filter(item => is_granted(item.role|default('ROLE_ADMIN'))) is not empty) %}
                 <div>
                     {% if group.label %}
                         <p class="mb-1 px-3 text-[0.6875rem] font-semibold tracking-wider text-fg-subtle uppercase">{{ group.label|trans }}</p>
                     {% endif %}
                     <ul class="space-y-0.5" role="list">
-                        {% for item in group.items %}
+                        {% for item in group.items|filter(item => is_granted(item.role|default('ROLE_ADMIN'))) %}
                             {%- set isActive = currentRoute == item.route or (item.route != 'admin' and currentRoute starts with (item.route|replace({'_index': ''}))) -%}
                             <li>
                                 <a href="{{ path(item.route) }}" {% if isActive %}aria-current="page"{% endif %}
@@ -110,6 +111,7 @@
         <header class="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-panel/85 px-4 backdrop-blur-lg sm:px-6 lg:px-8">
             <button type="button" class="btn btn-ghost btn-icon -ml-2 lg:hidden" @click="sidebarOpen = true" aria-label="{{ 'admin.layout.open_sidebar'|trans }}">{{ icon('bars-3', 'size-5') }}</button>
 
+            {% if is_granted('ROLE_ADMIN') %}
             <form action="{{ path('admin_search') }}" method="get" role="search" class="relative max-w-md flex-1">
                 <label for="admin-search" class="sr-only">{{ 'admin.layout.search_aria'|trans }}</label>
                 <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle">{{ icon('magnifying-glass', 'size-4') }}</span>
@@ -117,6 +119,7 @@
                        placeholder="{{ 'admin.layout.search_placeholder'|trans }}"
                        class="h-10 w-full rounded-lg border border-transparent bg-subtle pr-3 pl-9 text-sm placeholder:text-fg-subtle focus:border-primary-500 focus:bg-panel focus:outline-none">
             </form>
+            {% endif %}
 
             <div class="ml-auto flex items-center gap-1">
                 {# Language #}
@@ -159,7 +162,9 @@
                                         <button type="submit" class="text-xs font-medium text-fg-muted hover:text-fg">{{ 'admin.layout.notifications_mark_read'|trans }}</button>
                                     </form>
                                 {% endif %}
+                                {% if is_granted('ROLE_ADMIN') %}
                                 <a href="{{ path('admin_audit_log') }}" class="text-xs font-medium text-primary-600 hover:underline dark:text-primary-400">{{ 'admin.layout.notifications_view_all'|trans }}</a>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="max-h-80 divide-y divide-line overflow-y-auto">
@@ -190,7 +195,10 @@
                     </button>
                     <div x-cloak x-show="open" x-transition.origin.top.right class="absolute right-0 mt-2 w-56 rounded-xl border border-line bg-panel p-1 shadow-lg shadow-black/5">
                         <p class="truncate border-b border-line px-3 py-2 text-xs text-fg-subtle">{{ app.user ? app.user.email : 'admin.layout.guest'|trans }}</p>
-                        <a href="{{ path('catalog_home') }}" target="_blank" rel="noopener noreferrer" class="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-fg-muted hover:bg-subtle hover:text-fg">
+                        <a href="{{ path('admin_two_factor') }}" class="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-fg-muted hover:bg-subtle hover:text-fg">
+                            {{ ux_icon('lucide:shield-check', {class: 'size-4'}) }}{{ 'ui.two_factor.title'|trans }}
+                        </a>
+                        <a href="{{ path('catalog_home') }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-fg-muted hover:bg-subtle hover:text-fg">
                             {{ icon('arrow-top-right-on-square', 'size-4') }}{{ 'admin.layout.view_storefront'|trans }}
                         </a>
                         <a href="{{ path('logout') }}" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10">

@@ -1,0 +1,17 @@
+{#
+  Horizontal product row (scrolls on small screens, grid from lg).
+  Params: title, products, id (optional, for aria-labelledby), limit (default 4 on desktop)
+#}
+{%- set row_id = id|default('products-' ~ random()) -%}
+{% if products is not empty %}
+    <section class="container-page py-14" aria-labelledby="{{ row_id }}">
+        <h2 id="{{ row_id }}" class="text-xl font-semibold sm:text-2xl">{{ title }}</h2>
+        <div class="-mx-4 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible lg:px-0">
+            {% for product in products|slice(0, 8) %}
+                <div class="w-[44%] shrink-0 snap-start sm:w-[30%] lg:w-auto {{ loop.index > limit|default(4) ? 'lg:hidden' : '' }}">
+                    {% include 'components/product_card.html.twig' with {product: product} only %}
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+{% endif %}

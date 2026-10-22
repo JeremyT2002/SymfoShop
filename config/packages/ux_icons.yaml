@@ -37,6 +37,7 @@ ux_icons:
         credit-card: 'lucide:credit-card'
         key: 'lucide:key-round'
         undo: 'lucide:undo-2'
+        mail: 'lucide:mail'
 
     ignore_not_found: false
 

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Service\Payment\Provider;
 
 use App\Entity\Order;
+use App\Entity\Payment;
+use App\Entity\Refund;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -14,7 +16,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * PayPal Checkout (Orders API v2). Without PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET, runs in stub mode
  * (random reference, simulator UI) for local/testing.
  */
-final class PayPalPaymentProvider implements PaymentProviderInterface
+final class PayPalPaymentProvider implements PaymentProviderInterface, RefundingProviderInterface
 {
     public const NAME = 'paypal';
 
@@ -197,6 +199,39 @@ final class PayPalPaymentProvider implements PaymentProviderInterface
     public function getClientSecretForReference(string $referenceId): ?string
     {
         return null;
+    }
+
+    /**
+     * Refunds the capture of the PayPal order (Payments API v2). Stub mode simulates success.
+     */
+    public function refund(Payment $payment, int $amount): RefundOutcome
+    {
+        if (trim($this->clientId) === '' || trim($this->clientSecret) === '') {
+            return new RefundOutcome('paypal_re_' . bin2hex(random_bytes(8)));
+        }
+
+        $accessToken = $this->fetchAccessToken();
+        $headers = ['Authorization' => 'Bearer ' . $accessToken, 'Content-Type' => 'application/json'];
+
+        $order = $this->httpClient->request('GET', $this->baseUrl . '/v2/checkout/orders/' . rawurlencode($payment->getPaymentIntentId()), [
+            'headers' => $headers,
+        ])->toArray(false);
+        $captureId = $order['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
+        if (!is_string($captureId) || $captureId === '') {
+            throw new \RuntimeException('PayPal: no capture found for this order.');
+        }
+
+        $response = $this->httpClient->request('POST', $this->baseUrl . '/v2/payments/captures/' . rawurlencode($captureId) . '/refund', [
+            'headers' => $headers + ['PayPal-Request-Id' => 'refund-' . $payment->getId() . '-' . bin2hex(random_bytes(6))],
+            'json' => ['amount' => ['value' => $this->formatMoney($amount), 'currency_code' => strtoupper($payment->getCurrency())]],
+        ]);
+        $data = $response->toArray(false);
+        if ($response->getStatusCode() >= 400 || !isset($data['id'])) {
+            $this->logger->error('PayPal refund failed', ['capture_id' => $captureId, 'body' => $data]);
+            throw new \RuntimeException('PayPal refund failed: ' . ($data['message'] ?? $data['name'] ?? 'unknown error'));
+        }
+
+        return new RefundOutcome((string) $data['id'], ($data['status'] ?? '') === 'COMPLETED' ? Refund::STATUS_SUCCEEDED : Refund::STATUS_PENDING);
     }
 
     private function captureAndResolve(string $paypalOrderId): ?PaymentResolution

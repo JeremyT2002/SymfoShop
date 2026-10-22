@@ -181,3 +181,7 @@ $RECYCLE.BIN/
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+###> responsive images (generated, see App\Service\Media\ResponsiveImages) ###
+/public/media/
+###< responsive images ###

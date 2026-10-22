@@ -13,10 +13,12 @@ import { init as initCookieConsent } from './js/components/cookie-consent.js';
 import { init as initAddToCart } from './js/features/add-to-cart.js';
 import { init as initWishlist } from './js/features/wishlist.js';
 import productPage from './js/alpine/product-page.js';
+import searchSuggest from './js/alpine/search-suggest.js';
 
 Alpine.plugin(focus);
 Alpine.plugin(collapse);
 Alpine.data('productPage', productPage);
+Alpine.data('searchSuggest', searchSuggest);
 
 window.Alpine = Alpine;
 Alpine.start();

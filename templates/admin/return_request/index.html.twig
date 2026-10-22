@@ -28,9 +28,9 @@
                     <tr class="align-top">
                         <td class="px-4 py-3"><input type="checkbox" @change="$event.target.checked ? selectedIds.push({{ r.id }}) : selectedIds = selectedIds.filter(id => id !== {{ r.id }})" class="h-4 w-4 rounded border-line-strong"></td>
                         <td class="px-4 py-3 text-fg-muted whitespace-nowrap">{{ r.createdAt|date('Y-m-d H:i') }}</td>
-                        <td class="px-4 py-3 font-mono text-xs">{{ r.orderNumber }}</td>
+                        <td class="px-4 py-3 font-mono text-xs"><a href="{{ path('admin_orders_by_number', {number: r.orderNumber}) }}" class="link">{{ r.orderNumber }}</a></td>
                         <td class="px-4 py-3">{{ r.email }}</td>
-                        <td class="px-4 py-3">{{ r.status }}</td>
+                        <td class="px-4 py-3"><span class="badge {{ r.status == 'refunded' ? 'badge-success' : 'badge-warning' }}">{{ ('ui.refund.return_status_' ~ r.status)|trans }}</span></td>
                         <td class="px-4 py-3 text-fg-muted max-w-md">{{ r.reason|length > 200 ? r.reason|slice(0, 200) ~ '…' : r.reason }}</td>
                     </tr>
                 {% else %}

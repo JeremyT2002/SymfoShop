@@ -88,6 +88,11 @@ class ImageUploadService
         if (file_exists($filePath)) {
             unlink($filePath);
         }
+
+        // Resized WebP copies (see ResponsiveImages), e.g. public/media/640/uploads/products/1/x.jpg.webp
+        foreach (glob(\dirname($this->uploadsDirectory) . '/media/*/' . ltrim($media->getPath(), '/') . '.webp') ?: [] as $variant) {
+            @unlink($variant);
+        }
         
         // Try to remove empty product directory
         $productDir = dirname($filePath);

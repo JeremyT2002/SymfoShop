@@ -37,6 +37,8 @@ class ShippingMethodController extends AbstractController
             $code = mb_strtolower(trim((string) $request->request->get('code', '')));
             $name = trim((string) $request->request->get('name', ''));
             $amountCents = (int) $request->request->get('amountCents', 0);
+            $freeAboveRaw = trim((string) $request->request->get('freeAboveCents', ''));
+            $freeAboveCents = $freeAboveRaw !== '' ? max(0, (int) $freeAboveRaw) : null;
             $sortOrder = (int) $request->request->get('sortOrder', 0);
             $isActive = $request->request->getBoolean('isActive', true);
 
@@ -46,6 +48,7 @@ class ShippingMethodController extends AbstractController
                 $method->setCode($code)
                     ->setName($name)
                     ->setAmountCents($amountCents)
+                    ->setFreeAboveCents($freeAboveCents)
                     ->setSortOrder($sortOrder)
                     ->setIsActive($isActive);
 
@@ -69,6 +72,8 @@ class ShippingMethodController extends AbstractController
             $code = mb_strtolower(trim((string) $request->request->get('code', '')));
             $name = trim((string) $request->request->get('name', ''));
             $amountCents = (int) $request->request->get('amountCents', 0);
+            $freeAboveRaw = trim((string) $request->request->get('freeAboveCents', ''));
+            $freeAboveCents = $freeAboveRaw !== '' ? max(0, (int) $freeAboveRaw) : null;
             $sortOrder = (int) $request->request->get('sortOrder', 0);
             $isActive = $request->request->getBoolean('isActive', false);
 
@@ -78,6 +83,7 @@ class ShippingMethodController extends AbstractController
                 $method->setCode($code)
                     ->setName($name)
                     ->setAmountCents($amountCents)
+                    ->setFreeAboveCents($freeAboveCents)
                     ->setSortOrder($sortOrder)
                     ->setIsActive($isActive);
 

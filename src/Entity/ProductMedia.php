@@ -21,6 +21,11 @@ class ProductMedia
     #[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private Product $product;
 
+    /** Optional: the variant this image shows (e.g. the red version); null = all variants */
+    #[ORM\ManyToOne(targetEntity: ProductVariant::class)]
+    #[ORM\JoinColumn(name: 'variant_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?ProductVariant $variant = null;
+
     #[ORM\Column(type: Types::STRING, length: 500)]
     private string $path;
 
@@ -33,6 +38,17 @@ class ProductMedia
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getVariant(): ?ProductVariant
+    {
+        return $this->variant;
+    }
+
+    public function setVariant(?ProductVariant $variant): self
+    {
+        $this->variant = $variant;
+        return $this;
     }
 
     public function getProduct(): Product

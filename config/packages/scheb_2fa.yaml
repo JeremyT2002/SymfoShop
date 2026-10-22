@@ -1,0 +1,13 @@
+# Two-factor login (TOTP apps such as Google Authenticator, 1Password, Authy).
+# Users enable it themselves under /admin/two-factor; see templates/security/two_factor.html.twig.
+# See the configuration reference at https://symfony.com/bundles/SchebTwoFactorBundle/7.x/configuration.html
+scheb_two_factor:
+    security_tokens:
+        - Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken
+        - Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken
+    totp:
+        enabled: true
+        server_name: '%env(default:app.two_factor_issuer:TWO_FACTOR_ISSUER)%'
+        issuer: '%env(default:app.two_factor_issuer:TWO_FACTOR_ISSUER)%'
+        leeway: 15
+        template: security/two_factor.html.twig

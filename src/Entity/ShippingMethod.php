@@ -28,6 +28,10 @@ class ShippingMethod
     #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
     private int $amountCents = 0;
 
+    /** Gross goods value (after discounts) from which this method is free; null = never */
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private ?int $freeAboveCents = null;
+
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
     private bool $isActive = true;
 
@@ -72,6 +76,23 @@ class ShippingMethod
         $this->name = trim($name);
 
         return $this;
+    }
+
+    public function getFreeAboveCents(): ?int
+    {
+        return $this->freeAboveCents;
+    }
+
+    public function setFreeAboveCents(?int $freeAboveCents): self
+    {
+        $this->freeAboveCents = $freeAboveCents !== null && $freeAboveCents > 0 ? $freeAboveCents : null;
+        return $this;
+    }
+
+    /** Price for an order with the given goods value (0 once the free-shipping threshold is reached) */
+    public function priceFor(int $goodsValue): int
+    {
+        return $this->freeAboveCents !== null && $goodsValue >= $this->freeAboveCents ? 0 : $this->amountCents;
     }
 
     public function getAmountCents(): int

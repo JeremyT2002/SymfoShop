@@ -112,7 +112,7 @@
                             <option value="zero" {% if product.taxClass == 'zero' %}selected{% endif %}>Zero</option>
                             <option value="exempt" {% if product.taxClass == 'exempt' %}selected{% endif %}>Exempt</option>
                         </select>
-                    <p class="mt-1 text-xs text-fg-subtle">Select the tax class for this product</p>
+                    <p class="mt-1 text-xs text-fg-subtle">VAT rate of the product. Prices are entered gross (incl. VAT); rates are configured in config/packages/tax.yaml.</p>
                 </div>
                 </section>
             </div>
@@ -136,6 +136,8 @@
                     <p class="mt-1 text-xs text-fg-subtle">Optional: Upload additional product images.</p>
                 </section>
                 
+                {% include 'admin/components/_translations.html.twig' with {entity: product|default(null), with_description: true} only %}
+
                 <div class="flex items-center justify-end space-x-4 border-t border-line pt-5">
                     <a href="{{ path('admin_products_show', {id: product.id}) }}" class="px-4 py-2 text-fg-muted border border-line-strong rounded-lg hover:bg-subtle">
                         Cancel

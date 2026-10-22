@@ -12,4 +12,5 @@ return [
     Sentry\SentryBundle\SentryBundle::class => ['prod' => true],
     Symfony\UX\Icons\UXIconsBundle::class => ['all' => true],
     Symfonycasts\TailwindBundle\SymfonycastsTailwindBundle::class => ['all' => true],
+    Scheb\TwoFactorBundle\SchebTwoFactorBundle::class => ['all' => true],
 ];

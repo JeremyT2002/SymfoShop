@@ -4,11 +4,14 @@ namespace App\Service\Invoice;
 
 use App\Entity\Invoice;
 use App\Entity\Order;
+use App\Entity\Refund;
 use App\Theme\ShopContextResolver;
 use App\Theme\ThemeResolver;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Contracts\Translation\LocaleAwareInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
 class PdfInvoiceGenerator
@@ -18,6 +21,7 @@ class PdfInvoiceGenerator
         private readonly string $invoiceStoragePath,
         private readonly ShopContextResolver $shopContext,
         private readonly ThemeResolver $themeResolver,
+        private readonly TranslatorInterface $translator,
         #[Autowire('%kernel.project_dir%')]
         private readonly string $projectDir,
     ) {
@@ -30,6 +34,39 @@ class PdfInvoiceGenerator
      */
     public function generate(Invoice $invoice, Order $order): string
     {
+        return $this->render(['invoice' => $invoice, 'order' => $order], 'invoice_' . $invoice->getInvoiceNumber());
+    }
+
+    /**
+     * Credit note (Gutschrift) for a refund, in the given locale (default: current request locale).
+     *
+     * @return string Path to generated PDF file
+     */
+    public function generateCreditNote(Refund $refund, ?Invoice $invoice, ?string $locale = null): string
+    {
+        $previousLocale = $this->translator instanceof LocaleAwareInterface ? $this->translator->getLocale() : null;
+        if ($locale !== null && $this->translator instanceof LocaleAwareInterface) {
+            $this->translator->setLocale($locale);
+        }
+
+        try {
+            return $this->render([
+                'invoice' => $invoice,
+                'order' => $refund->getOrder(),
+                'credit_note' => $refund,
+            ], 'credit_note_' . $refund->getCreditNoteNumber());
+        } finally {
+            if ($previousLocale !== null && $this->translator instanceof LocaleAwareInterface) {
+                $this->translator->setLocale($previousLocale);
+            }
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $context
+     */
+    private function render(array $context, string $basename): string
+    {
         // Ensure storage directory exists
         if (!is_dir($this->invoiceStoragePath)) {
             mkdir($this->invoiceStoragePath, 0755, true);
@@ -39,9 +76,8 @@ class PdfInvoiceGenerator
         $themeConfig = $this->themeResolver->resolveConfig($shop);
 
         // Render HTML template
-        $html = $this->twig->render('invoice/pdf.html.twig', [
-            'invoice' => $invoice,
-            'order' => $order,
+        $html = $this->twig->render('invoice/pdf.html.twig', $context + [
+            'credit_note' => null,
             'theme_config' => $themeConfig,
             'pdf_brand' => $this->buildPdfBrandContext($themeConfig),
         ]);
@@ -59,8 +95,7 @@ class PdfInvoiceGenerator
         $dompdf->render();
 
         // Save PDF to file
-        $filename = 'invoice_' . $invoice->getInvoiceNumber() . '_' . time() . '.pdf';
-        $filepath = $this->invoiceStoragePath . '/' . $filename;
+        $filepath = $this->invoiceStoragePath . '/' . $basename . '_' . time() . '.pdf';
 
         file_put_contents($filepath, $dompdf->output());
 

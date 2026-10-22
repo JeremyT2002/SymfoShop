@@ -3,9 +3,11 @@
 namespace App\Controller\Security;
 
 use App\Entity\User;
+use App\Service\Security\EmailVerifier;
 use App\Form\RegistrationFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,6 +24,7 @@ class RegistrationController extends AbstractController
         EntityManagerInterface $entityManager,
         #[Autowire(service: 'limiter.registration_limiter')]
         RateLimiterFactory $registrationLimiter,
+        EmailVerifier $emailVerifier,
     ): Response {
         if ($this->getUser()) {
             return $this->redirectToRoute('account_dashboard');
@@ -54,8 +57,14 @@ class RegistrationController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
+            try {
+                $emailVerifier->sendVerification($user);
+            } catch (TransportExceptionInterface) {
+                // The account works without verification; the customer can request the link again.
+            }
+
             // do anything else you need here, like send an email
-            $this->addFlash('success', 'security.register.flash_success');
+            $this->addFlash('success', 'ui.verify.flash_registered');
 
             return $this->redirectToRoute('login');
         }

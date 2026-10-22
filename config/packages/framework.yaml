@@ -20,6 +20,14 @@ framework:
             policy: sliding_window
             limit: 5
             interval: '1 hour'
+        order_lookup_limiter:
+            policy: sliding_window
+            limit: 10
+            interval: '15 minutes'
+        newsletter_limiter:
+            policy: sliding_window
+            limit: 5
+            interval: '1 hour'
 
     #esi: true
     #fragments: true
@@ -39,6 +47,14 @@ when@test:
                 limit: 1000
                 interval: '1 minute'
             stock_notification_guest_limiter:
+                policy: sliding_window
+                limit: 1000
+                interval: '1 hour'
+            order_lookup_limiter:
+                policy: sliding_window
+                limit: 1000
+                interval: '15 minutes'
+            newsletter_limiter:
                 policy: sliding_window
                 limit: 1000
                 interval: '1 hour'

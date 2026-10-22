@@ -41,6 +41,10 @@ class ProductVariant
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $updatedAt;
 
+    /** Original ("was") gross price shown struck through; only used when higher than the price */
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private ?int $compareAtPriceAmount = null;
+
     #[ORM\OneToOne(targetEntity: StockItem::class, mappedBy: 'variant', cascade: ['persist', 'remove'])]
     private ?StockItem $stockItem = null;
 
@@ -97,6 +101,32 @@ class ProductVariant
     {
         $this->currency = $currency;
         return $this;
+    }
+
+    public function getCompareAtPriceAmount(): ?int
+    {
+        return $this->compareAtPriceAmount;
+    }
+
+    public function setCompareAtPriceAmount(?int $compareAtPriceAmount): self
+    {
+        $this->compareAtPriceAmount = $compareAtPriceAmount !== null && $compareAtPriceAmount > 0 ? $compareAtPriceAmount : null;
+        return $this;
+    }
+
+    public function isOnSale(): bool
+    {
+        return $this->compareAtPriceAmount !== null && $this->compareAtPriceAmount > $this->priceAmount;
+    }
+
+    /** Saving in whole percent, e.g. 25 for 19.99 instead of 26.99 */
+    public function getDiscountPercent(): int
+    {
+        if (!$this->isOnSale()) {
+            return 0;
+        }
+
+        return (int) round((1 - $this->priceAmount / $this->compareAtPriceAmount) * 100);
     }
 
     public function getAttributes(): array

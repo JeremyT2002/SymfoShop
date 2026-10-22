@@ -893,6 +893,7 @@ admin:
       shipped: Expédié
       completed: Terminé
       cancelled: Annulé
+      refunded: "Remboursée"
     show:
       page_title: 'Commande : %number%'
       back: Retour aux commandes
@@ -1001,6 +1002,9 @@ invoice_pdf:
   subtotal: Sous-total
   shipping: Livraison
   tax_included: TVA incluse
+  discount: Remise
+  tax_added: TVA en sus
+  tax_export: Livraison à l'exportation exonérée
   grand_total: Total
   thank_you_strong: Merci pour votre achat chez %shop%.
   thank_you_text: Veuillez conserver cette facture pour vos archives. Si vous avez des questions concernant votre commande, contactez notre support.
@@ -1222,13 +1226,18 @@ ui:
     results_for: 'Résultats pour « %query% »'
     no_results: 'Aucun produit trouvé pour « %query% »'
     no_results_hint: Vérifiez l'orthographe ou essayez un terme plus général.
+    suggestions: "Suggestions de recherche"
+    no_suggestions: "Aucun produit correspondant"
+    all_results: "Voir tous les résultats"
   footer:
-    prices_excl_vat: Tous les prix hors TVA, frais de port en sus. La TVA est ajoutée lors du paiement.
+    prices_incl_vat: Tous les prix TTC, frais de port en sus.
   product:
     from: à partir de
     sold_out: Épuisé
+    sale_badge: '−%percent% %'
+    was_price: "Prix d'origine"
     choose_options: Choisir les options
-    price_note: HT, frais de port en sus
+    price_note: TTC, frais de port en sus
     only_n_left: 'Plus que %count% en stock'
     shipping_note: Livraison avec suivi pour chaque commande
     returns_note: Retours faciles — voir notre politique de retour
@@ -1252,7 +1261,7 @@ ui:
     added: Ajouté
     view_cart: Voir le panier
     calculated_at_checkout: Calculé lors du paiement
-    tax_note: La TVA et les frais de port sont calculés lors du paiement.
+    tax_note: TTC · Les frais de port sont calculés lors du paiement.
     invalid_request: La demande n'a pas pu être traitée.
     product_unavailable: Ce produit n'est plus disponible.
     out_of_stock: Cet article est épuisé.
@@ -1273,6 +1282,8 @@ ui:
     place_order_binding: Commander avec obligation de paiement
     placing_order: Commande en cours…
     view_orders: Voir mes commandes
+    vat_included: dont TVA %rate% %
+    vat_export: Exportation exonérée (sans TVA)
   payment:
     processing: Paiement en cours…
     failed: Le paiement n'a pas pu aboutir. Veuillez réessayer.
@@ -1311,3 +1322,170 @@ ui:
     title: Documentation de l'API
     intro: Référence interactive de l'API REST SymfoShop. Authentifiez-vous avec votre clé API via le bouton « Authorize ».
     open_full_page: Ouvrir en pleine page
+  order:
+    shipping_address: Adresse de livraison
+  shipping:
+    free_above_label: "Gratuite à partir de (centimes, optionnel)"
+    free_above_hint: "Valeur TTC des articles après remises à partir de laquelle ce mode est gratuit. Vide = jamais gratuit."
+    remaining: "Plus que %amount% pour la livraison gratuite"
+    reached: "La livraison est offerte !"
+    progress_aria: "Progression vers la livraison gratuite"
+  verify:
+    mail_subject: "Confirmez votre adresse e-mail"
+    mail_heading: "Confirmez votre adresse e-mail"
+    mail_text: "Bonjour %name%, veuillez confirmer votre adresse e-mail afin que nous puissions vous envoyer le suivi de vos commandes et les afficher dans votre compte."
+    mail_button: "Confirmer l'adresse e-mail"
+    mail_footer: "Le lien est valable 48 heures. Si vous n'avez pas créé de compte, ignorez cet e-mail."
+    banner: "Veuillez confirmer votre adresse e-mail %email% — nous vous avons envoyé un lien. Vos anciennes commandes invité avec cette adresse apparaîtront ensuite dans votre compte."
+    resend: "Renvoyer le lien"
+    flash_registered: "Votre compte a été créé. Veuillez confirmer votre adresse e-mail grâce au lien que nous venons de vous envoyer."
+    flash_sent: "Nous vous avons envoyé un nouveau lien de confirmation."
+    flash_verified: "Merci, votre adresse e-mail est confirmée."
+    flash_invalid: "Ce lien de confirmation est invalide ou a expiré. Connectez-vous pour en demander un nouveau."
+  order_status:
+    title: "Suivi de commande"
+    intro: "Saisissez votre numéro de commande et l'adresse e-mail utilisée pour la commande."
+    submit: "Afficher le suivi"
+    have_account: "Vous avez un compte ?"
+    not_found: "Aucune commande ne correspond à ce numéro et à cette adresse e-mail."
+    rate_limited: "Trop de tentatives. Veuillez réessayer dans quelques minutes."
+    placed_on: "Commandée le %date%"
+    cancelled: "Cette commande a été annulée."
+    refunded: "Cette commande a été remboursée."
+    progress: "Progression de la commande"
+    step_placed: "Commandée"
+    step_paid: "Payée"
+    step_processing: "En préparation"
+    step_shipped: "Expédiée"
+    step_completed: "Livrée"
+    tracking: "Suivi du colis"
+    track_parcel: "Suivre le colis"
+    questions: "Une question sur votre commande ?"
+    view_status: "Voir le suivi de commande"
+    carrier: "Transporteur"
+    tracking_number_label: "Numéro de suivi"
+    tracking_hint: "Le passage au statut « expédiée » envoie un e-mail au client avec le lien de suivi."
+  order_mail:
+    shipped_subject: "Votre commande %number% est en route"
+    shipped_heading: "Votre commande est en route"
+    shipped_text: "Bonjour %name%, bonne nouvelle : votre commande %number% a été expédiée."
+  recommendations:
+    product: "Les clients ont aussi acheté"
+    cart: "Pour compléter votre commande"
+  newsletter:
+    title: "Newsletter"
+    text: "Nouveautés, offres et histoires – deux fois par mois au maximum. Désinscription possible à tout moment."
+    subscribe: "S'inscrire"
+    consent: "Je souhaite recevoir la newsletter et j'ai lu la <a href=\"%privacy%\" class=\"link\">politique de confidentialité</a>. Je peux me désinscrire à tout moment."
+    consent_required: "Veuillez accepter de recevoir la newsletter."
+    check_inbox: "Presque terminé ! Veuillez confirmer votre inscription grâce au lien envoyé à votre adresse e-mail."
+    confirmed: "Merci, votre inscription à la newsletter est confirmée."
+    unsubscribed: "Vous êtes désinscrit de la newsletter."
+    invalid_link: "Ce lien n'est pas valide."
+    mail_subject: "Veuillez confirmer votre inscription à la newsletter"
+    mail_heading: "Confirmez votre inscription"
+    mail_text: "Cliquez sur le bouton pour confirmer que vous souhaitez recevoir notre newsletter."
+    mail_button: "Confirmer l'inscription"
+    mail_footer: "Si vous ne vous êtes pas inscrit, ignorez cet e-mail – vous ne serez pas inscrit."
+    admin_title: "Abonnés à la newsletter"
+    admin_summary: "%active% actifs sur %total% inscriptions"
+    admin_empty: "Aucune inscription pour le moment."
+    admin_status: "Statut"
+    admin_signed_up: "Inscrit le"
+    status_active: "Actif"
+    status_unsubscribed: "Désinscrit"
+    status_pending: "Non confirmé"
+  refund:
+    title: "Remboursements"
+    amount: "Montant"
+    reason: "Motif"
+    max: "Au maximum %amount% peuvent encore être remboursés."
+    return_request: "Demande de retour"
+    restock: "Remettre les articles en stock"
+    restocked: "remis en stock"
+    hint_provider: "Le montant est remboursé automatiquement via le prestataire de paiement."
+    hint_manual: "Ce moyen de paiement ne rembourse pas automatiquement : effectuez le virement vous-même, l'avoir est créé ici."
+    submit: "Rembourser et créer un avoir"
+    confirm: "Rembourser ce montant au client maintenant ? Cette action est irréversible."
+    manual: "Manuel"
+    pending: "en attente"
+    flash_done: "Remboursement enregistré, l'avoir %number% a été envoyé au client."
+    flash_failed: "Échec du remboursement : %error%"
+    credit_notes: "Avoirs"
+    credit_note_number: "N° d'avoir"
+    return_status_pending: "Ouverte"
+    return_status_refunded: "Remboursée"
+    mail_subject: "Remboursement de votre commande %number%"
+    mail_heading: "Nous vous avons remboursé"
+    mail_text: "Bonjour %name%, nous vous avons remboursé %amount% pour votre commande %number%. Vous trouverez l'avoir en pièce jointe."
+    mail_provider: "Le montant est reversé sur le moyen de paiement utilisé ; selon votre banque, cela peut prendre quelques jours."
+    mail_manual: "Nous vous virerons le montant. Si nous n'avons pas encore vos coordonnées bancaires, répondez simplement à cet e-mail."
+  bulk:
+    action: "Action groupée"
+    status: "Définir le statut"
+    price_percent: "Modifier les prix de %"
+    sale_start: "Lancer des soldes (% de remise)"
+    sale_end: "Terminer les soldes"
+    stock_set: "Définir le stock"
+    percent: "Pourcentage"
+    stock: "Quantité en stock"
+  product_csv:
+    export: "Exporter en CSV"
+    import: "Importer un CSV"
+    import_title: "Importer des produits"
+    import_intro: "Créez et mettez à jour produits, prix et stocks à partir d'un fichier CSV – par ex. un export modifié. Le fichier est d'abord vérifié ; rien n'est modifié tant que toutes les lignes ne sont pas valides."
+    file: "Fichier CSV"
+    apply: "Appliquer les modifications (sinon : aperçu seulement)"
+    submit: "Vérifier le fichier"
+    errors: "Le fichier n'a pas été importé :"
+    line: "Ligne %line%"
+    preview: "Aperçu – rien n'a encore été modifié"
+    preview_hint: "Cochez « Appliquer les modifications » et envoyez à nouveau le fichier pour l'importer."
+    applied: "Import terminé"
+    summary: "%products% nouveaux produits, %created% nouvelles variantes et %updated% mises à jour."
+    format: "Format"
+    format_intro: "Une ligne par variante, séparée par des virgules ou des points-virgules, avec cet en-tête :"
+    format_rules: "Les lignes sont associées par SKU. Prix TTC (19.99 ou 19,99). Les colonnes produit vides restent inchangées. attributes : « size=M; color=Blue ». category : le slug de la catégorie."
+  two_factor:
+    title: "Connexion à deux facteurs"
+    intro: "Protégez votre compte avec un code à usage unique issu d'une application d'authentification (par ex. Google Authenticator, Microsoft Authenticator, 1Password) en plus de votre mot de passe."
+    status_on: "Activée"
+    status_off: "Non activée"
+    on_hint: "Un code de votre application vous est demandé à chaque connexion. Pour la désactiver, saisissez un code actuel."
+    step_app: "Installez une application d'authentification sur votre téléphone."
+    step_scan: "Scannez le QR code avec l'application ou saisissez la clé manuellement."
+    step_confirm: "Saisissez le code à 6 chiffres affiché dans l'application pour confirmer."
+    qr_alt: "QR code pour l'application d'authentification"
+    manual_key: "Clé pour la saisie manuelle"
+    code: "Code à 6 chiffres"
+    enable: "Activer"
+    disable: "Désactiver"
+    enabled: "La connexion à deux facteurs est maintenant activée."
+    disabled: "La connexion à deux facteurs est maintenant désactivée."
+    invalid_code: "Le code n'est pas valide. Vérifiez l'heure de votre téléphone et réessayez."
+    login_title: "Confirmer la connexion"
+    login_intro: "Saisissez le code à 6 chiffres de votre application d'authentification."
+    verify: "Confirmer"
+    cancel: "Annuler et se déconnecter"
+    reset: "Désactiver la connexion à deux facteurs"
+    reset_confirm: "Désactiver la connexion à deux facteurs pour cet utilisateur ? À utiliser en cas de téléphone perdu."
+    reset_hint: "En cas de téléphone perdu. L'utilisateur pourra la reconfigurer ensuite."
+  staff:
+    customer_hint: "Chaque compte peut acheter. Les rôles du personnel ouvrent en plus l'espace d'administration :"
+    role_admin: "Administrateur"
+    role_admin_hint: "Accès complet, y compris paramètres, utilisateurs et chiffres."
+    role_support: "Service client"
+    role_support_hint: "Commandes, remboursements, retours, boîte de support et avis."
+    role_warehouse: "Entrepôt"
+    role_warehouse_hint: "Commandes (statut et expédition), produits, stocks et catégories."
+
+credit_note_pdf:
+  title: "Avoir"
+  details: "Détails de l'avoir"
+  date: "Date de l'avoir"
+  for_invoice: "Pour la facture"
+  items: "Remboursement"
+  line: "Remboursement de la commande %order%"
+  total: "Montant de l'avoir"
+  paid_back: "Le montant est remboursé via %method%."
+  paid_back_manual: "Le montant vous sera viré."

@@ -6,8 +6,10 @@ use App\Entity\User;
 use App\Form\Account\AccountProfileType;
 use App\Repository\InvoiceRepository;
 use App\Repository\OrderRepository;
+use App\Repository\RefundRepository;
 use App\Repository\UserRepository;
 use App\Service\Invoice\PdfInvoiceGenerator;
+use App\Service\Security\EmailVerifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -15,6 +17,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -28,6 +31,8 @@ class DashboardController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly PdfInvoiceGenerator $pdfInvoiceGenerator,
+        private readonly EmailVerifier $emailVerifier,
+        private readonly RefundRepository $refundRepository,
     ) {
     }
 
@@ -45,6 +50,7 @@ class DashboardController extends AbstractController
         return $this->render('account/dashboard.html.twig', [
             'orders' => $orders,
             'invoices' => $invoices,
+            'creditNotes' => $this->refundRepository->findByUser($user),
             'profileForm' => $this->createForm(AccountProfileType::class, $user, [
                 'action' => $this->generateUrl('account_profile_update'),
                 'method' => 'POST',
@@ -60,6 +66,7 @@ class DashboardController extends AbstractController
             throw $this->createAccessDeniedException('Invalid user session.');
         }
 
+        $previousEmail = $user->getEmail();
         $form = $this->createForm(AccountProfileType::class, $user, [
             'action' => $this->generateUrl('account_profile_update'),
             'method' => 'POST',
@@ -93,8 +100,22 @@ class DashboardController extends AbstractController
         $user->setState($user->getState() !== '' ? $user->getState() : null);
         $user->setCountryCode($user->getCountryCode() !== '' ? $user->getCountryCode() : null);
 
+        $emailChanged = mb_strtolower((string) $previousEmail) !== mb_strtolower((string) $user->getEmail());
+        if ($emailChanged) {
+            $user->setIsVerified(false);
+        }
+
         $this->entityManager->flush();
         $this->addFlash('success', 'account.dashboard.flash.profile_updated');
+
+        if ($emailChanged) {
+            try {
+                $this->emailVerifier->sendVerification($user);
+                $this->addFlash('info', 'ui.verify.flash_sent');
+            } catch (TransportExceptionInterface) {
+                // The banner in the account offers to resend the link.
+            }
+        }
 
         return $this->redirectToRoute('account_dashboard');
     }
@@ -108,7 +129,7 @@ class DashboardController extends AbstractController
         }
 
         $invoice = $this->invoiceRepository->findOneForUserByInvoiceNumber($invoiceNumber, $user);
-        if (!$invoice && $this->isGranted('ROLE_ADMIN')) {
+        if (!$invoice && $this->isGranted('ROLE_STAFF')) {
             $invoice = $this->invoiceRepository->findOneByInvoiceNumber($invoiceNumber);
         }
 
@@ -117,7 +138,7 @@ class DashboardController extends AbstractController
         }
 
         $supportedLocales = ['en', 'de', 'fr'];
-        $selectedLocale = (string) $request->query->get('lang', $request->getLocale());
+        $selectedLocale = (string) $request->query->get('language', $request->getLocale());
         if (!in_array($selectedLocale, $supportedLocales, true)) {
             $selectedLocale = $request->getLocale();
         }
@@ -138,6 +159,30 @@ class DashboardController extends AbstractController
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             'invoice_' . $invoice->getInvoiceNumber() . '_' . $selectedLocale . '.pdf'
         );
+
+        return $response;
+    }
+
+    #[Route('/credit-note/{number}/download', name: 'credit_note_download', methods: ['GET'])]
+    public function downloadCreditNote(string $number): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException('Invalid user session.');
+        }
+
+        $refund = $this->refundRepository->findOneForUserByCreditNoteNumber($number, $user);
+        if (!$refund && $this->isGranted('ROLE_STAFF')) {
+            $refund = $this->refundRepository->findOneByCreditNoteNumber($number);
+        }
+        if (!$refund) {
+            throw $this->createNotFoundException('Credit note not found.');
+        }
+
+        $invoice = $this->invoiceRepository->findOneByOrderId((int) $refund->getOrder()->getId());
+        $response = new BinaryFileResponse($this->pdfInvoiceGenerator->generateCreditNote($refund, $invoice));
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, 'credit_note_' . $refund->getCreditNoteNumber() . '.pdf');
+        $response->deleteFileAfterSend();
 
         return $response;
     }

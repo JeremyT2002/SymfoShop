@@ -14,6 +14,20 @@ function url(name) {
     return root.dataset[name];
 }
 
+function renderFreeShipping(totals) {
+    const box = root.querySelector('[data-free-shipping]');
+    const info = totals.freeShipping;
+    if (!box || !info) {
+        return;
+    }
+    const progress = Math.round(((info.threshold - info.remaining) * 100) / info.threshold);
+    box.querySelector('[data-free-shipping-bar]').style.width = `${progress}%`;
+    box.querySelector('[role="progressbar"]').setAttribute('aria-valuenow', String(progress));
+    box.querySelector('[data-free-shipping-label] span').textContent = info.remaining > 0
+        ? box.dataset.labelRemaining.replace('__AMOUNT__', formatMoney(info.remaining, totals.currency))
+        : box.dataset.labelReached;
+}
+
 function renderTotals(totals, lines) {
     const currency = totals.currency || 'EUR';
     setCartCount(totals.totalQuantity);
@@ -29,6 +43,8 @@ function renderTotals(totals, lines) {
     root.querySelectorAll('[data-discount-row]').forEach((el) => {
         el.hidden = !(totals.discount > 0);
     });
+
+    renderFreeShipping(totals);
 
     Object.entries(lines || {}).forEach(([variantId, line]) => {
         const total = root.querySelector(`[data-line-total="${variantId}"]`);
