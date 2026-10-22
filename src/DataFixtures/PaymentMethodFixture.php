@@ -17,6 +17,11 @@ class PaymentMethodFixture extends Fixture
         ];
 
         foreach ($definitions as $item) {
+            // Migrations already create them; keeps `doctrine:fixtures:load --append` working
+            if ($manager->getRepository(PaymentMethod::class)->findOneBy(['code' => $item['code']]) !== null) {
+                continue;
+            }
+
             $method = new PaymentMethod();
             $method->setCode($item['code'])
                 ->setName($item['name'])
